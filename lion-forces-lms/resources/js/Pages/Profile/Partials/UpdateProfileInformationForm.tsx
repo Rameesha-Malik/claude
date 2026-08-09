@@ -15,7 +15,8 @@ export default function UpdateProfileInformation({
     status?: string;
     className?: string;
 }) {
-    const user = usePage().props.auth.user;
+    // Non-null: this page is only ever rendered behind the 'auth' middleware.
+    const user = usePage().props.auth.user!;
 
     const { data, setData, patch, errors, processing, recentlySuccessful } =
         useForm({

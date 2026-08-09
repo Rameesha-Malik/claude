@@ -2,6 +2,9 @@
 
 namespace App\Http\Middleware;
 
+use App\Models\AnnouncementBar;
+use App\Models\NavItem;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 
@@ -34,6 +37,27 @@ class HandleInertiaRequests extends Middleware
             'auth' => [
                 'user' => $request->user(),
             ],
+            // Global site chrome — shared on every request so nav/footer/
+            // announcement bar never repeat a query per page controller.
+            'site' => fn () => [
+                'name' => Setting::get('site_name', 'Lion Forces Academy'),
+                'tagline' => Setting::get('tagline'),
+                'supportEmail' => Setting::get('support_email'),
+                'officeLocation' => Setting::get('office_location'),
+                'officeHours' => Setting::get('office_hours'),
+                'whatsappNumber' => Setting::get('whatsapp_number'),
+                'whatsappEnabled' => Setting::get('whatsapp_enabled', false),
+                'copyrightText' => Setting::get('copyright_text'),
+            ],
+            'nav' => fn () => [
+                'header' => NavItem::whereNull('parent_id')->where('location', 'header')->where('is_visible', true)->orderBy('order')->get(['id', 'label', 'url']),
+                'footer' => NavItem::whereNull('parent_id')->where('location', 'footer')->where('is_visible', true)->with(['children' => fn ($q) => $q->where('is_visible', true)])->orderBy('order')->get(['id', 'label', 'url', 'parent_id']),
+            ],
+            'announcement' => fn () => AnnouncementBar::query()
+                ->where('is_active', true)
+                ->where(fn ($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))
+                ->latest()
+                ->first(['message', 'link_url']),
         ];
     }
 }

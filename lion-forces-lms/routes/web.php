@@ -1,18 +1,18 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
-use Illuminate\Foundation\Application;
+use App\Http\Controllers\PublicSiteController;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
-Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
-});
+Route::get('/', [PublicSiteController::class, 'home'])->name('home');
+Route::get('/courses', [PublicSiteController::class, 'courses'])->name('courses');
+Route::get('/courses/{course:slug}', [PublicSiteController::class, 'courseDetail'])->name('courses.show');
+Route::get('/about', [PublicSiteController::class, 'about'])->name('about');
+Route::get('/contact', [PublicSiteController::class, 'contact'])->name('contact');
+Route::post('/contact', [PublicSiteController::class, 'submitContact'])->name('contact.submit');
+Route::get('/news', [PublicSiteController::class, 'news'])->name('news');
+Route::get('/resources', [PublicSiteController::class, 'resources'])->name('resources');
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
