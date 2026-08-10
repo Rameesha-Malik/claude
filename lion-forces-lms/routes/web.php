@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\HallOfFameController as AdminHallOfFameController
 use App\Http\Controllers\Admin\InstructorController as AdminInstructorController;
 use App\Http\Controllers\Admin\MockExamController as AdminMockExamController;
 use App\Http\Controllers\Admin\NewsController as AdminNewsController;
+use App\Http\Controllers\Admin\NotificationController as AdminNotificationController;
 use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
 use App\Http\Controllers\Admin\PracticeTestController as AdminPracticeTestController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
@@ -23,6 +24,7 @@ use App\Http\Controllers\Student\AttemptController as StudentAttemptController;
 use App\Http\Controllers\Student\CourseController as StudentCourseController;
 use App\Http\Controllers\Student\DashboardController as StudentDashboardController;
 use App\Http\Controllers\Student\MockExamController as StudentMockExamController;
+use App\Http\Controllers\Student\NotificationController as StudentNotificationController;
 use App\Http\Controllers\Student\PracticeTestController as StudentPracticeTestController;
 use App\Http\Controllers\Student\StagedTestController as StudentStagedTestController;
 use Illuminate\Support\Facades\Route;
@@ -76,6 +78,10 @@ Route::middleware(['auth', 'verified', 'user_type:student'])->prefix('portal')->
     Route::post('/staged-tests/{stagedTest}/start', [StudentStagedTestController::class, 'start'])->name('student.staged-tests.start');
     Route::get('/staged-tests/{stagedTest}/attempts/{attempt}/stages/{stage}', [StudentStagedTestController::class, 'showStage'])->name('student.staged-tests.stage');
     Route::post('/staged-tests/{stagedTest}/attempts/{attempt}/stages/{stage}/submit', [StudentStagedTestController::class, 'submitStage'])->name('student.staged-tests.stage.submit');
+
+    Route::get('/notifications', [StudentNotificationController::class, 'index'])->name('student.notifications.index');
+    Route::post('/notifications/{id}/read', [StudentNotificationController::class, 'markRead'])->name('student.notifications.read');
+    Route::post('/notifications/read-all', [StudentNotificationController::class, 'markAllRead'])->name('student.notifications.read-all');
 });
 
 Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -222,6 +228,11 @@ Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->nam
     Route::prefix('reports')->name('reports.')->group(function () {
         Route::get('/', [AdminReportController::class, 'index'])->name('index');
         Route::get('/export/{type}', [AdminReportController::class, 'export'])->name('export');
+    });
+
+    Route::prefix('notifications')->name('notifications.')->group(function () {
+        Route::get('/', [AdminNotificationController::class, 'index'])->name('index');
+        Route::post('/', [AdminNotificationController::class, 'store'])->name('store');
     });
 
     Route::prefix('settings')->name('settings.')->group(function () {

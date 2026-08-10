@@ -23,7 +23,7 @@ const NAV: NavEntry[] = [
 ];
 
 export default function StudentLayout({ children, header }: PropsWithChildren<{ header?: string }>) {
-    const { site, auth } = usePage<PageProps>().props;
+    const { site, auth, unreadNotificationsCount } = usePage<PageProps>().props;
     const { url } = usePage();
     const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -82,6 +82,14 @@ export default function StudentLayout({ children, header }: PropsWithChildren<{ 
                     </button>
                     {header && <h1 className="font-display text-2xl uppercase tracking-wide text-text">{header}</h1>}
                     <div className="ml-auto flex items-center gap-3">
+                        <Link href="/portal/notifications" className="relative text-text-secondary hover:text-primary" aria-label="Notifications">
+                            <Icon d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
+                            {unreadNotificationsCount > 0 && (
+                                <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1 text-[10px] font-bold text-white">
+                                    {unreadNotificationsCount > 9 ? '9+' : unreadNotificationsCount}
+                                </span>
+                            )}
+                        </Link>
                         <span className="text-sm font-medium text-text-secondary">{auth.user?.name}</span>
                         <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-subtle text-sm font-bold text-primary">
                             {auth.user?.name?.charAt(0).toUpperCase()}

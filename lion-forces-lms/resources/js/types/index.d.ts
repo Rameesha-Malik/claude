@@ -43,4 +43,5 @@ export type PageProps<
     site: SiteSettings;
     nav: SiteNav;
     announcement: Announcement | null;
+    unreadNotificationsCount: number;
 };

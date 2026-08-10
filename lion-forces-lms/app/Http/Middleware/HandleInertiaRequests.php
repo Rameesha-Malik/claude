@@ -58,6 +58,9 @@ class HandleInertiaRequests extends Middleware
                 ->where(fn ($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()))
                 ->latest()
                 ->first(['message', 'link_url']),
+            // Shared so the bell badge is correct on every student page
+            // without every controller having to remember to pass it.
+            'unreadNotificationsCount' => fn () => $request->user()?->unreadNotifications()->count() ?? 0,
         ];
     }
 }
