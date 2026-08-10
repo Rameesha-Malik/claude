@@ -9,7 +9,9 @@ use App\Http\Controllers\Admin\HallOfFameController as AdminHallOfFameController
 use App\Http\Controllers\Admin\InstructorController as AdminInstructorController;
 use App\Http\Controllers\Admin\NewsController as AdminNewsController;
 use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
+use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Admin\ResourceController as AdminResourceController;
+use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
 use App\Http\Controllers\Admin\StudentController as AdminStudentController;
 use App\Http\Controllers\Admin\WebsiteController as AdminWebsiteController;
 use App\Http\Controllers\ProfileController;
@@ -161,6 +163,19 @@ Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->nam
     Route::prefix('contact-inbox')->name('contact-inbox.')->group(function () {
         Route::get('/', [AdminContactInboxController::class, 'index'])->name('index');
         Route::post('/{submission}/toggle-handled', [AdminContactInboxController::class, 'toggleHandled'])->name('toggle-handled');
+    });
+
+    Route::prefix('reports')->name('reports.')->group(function () {
+        Route::get('/', [AdminReportController::class, 'index'])->name('index');
+        Route::get('/export/{type}', [AdminReportController::class, 'export'])->name('export');
+    });
+
+    Route::prefix('settings')->name('settings.')->group(function () {
+        Route::get('/', [AdminSettingsController::class, 'index'])->name('index');
+        Route::post('/staff', [AdminSettingsController::class, 'storeStaff'])->name('staff.store');
+        Route::put('/staff/{staff}/role', [AdminSettingsController::class, 'updateStaffRole'])->name('staff.role');
+        Route::post('/staff/{staff}/toggle-active', [AdminSettingsController::class, 'toggleStaffActive'])->name('staff.toggle-active');
+        Route::put('/payment', [AdminSettingsController::class, 'updatePaymentSettings'])->name('payment.update');
     });
 });
 

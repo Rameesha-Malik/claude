@@ -16,6 +16,7 @@ use Spatie\Permission\Traits\HasRoles;
 #[Fillable([
     'user_type', 'name', 'email', 'password', 'phone', 'avatar_path',
     'is_active', 'suspended_at', 'notification_preferences', 'target_exam_name', 'target_exam_date',
+    'email_verified_at',
 ])]
 #[Hidden(['password', 'remember_token'])]
 class User extends Authenticatable
