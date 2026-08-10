@@ -12,6 +12,16 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Railway (and Hostinger, behind its own load balancer) terminate
+        // TLS at the edge and forward plain HTTP to the app, so without
+        // this Laravel never sees the request as secure -- it generates
+        // http:// asset/URL links even though the browser is on https://,
+        // which browsers block as "mixed content" and the page renders
+        // blank (the CSS/JS never loads). Trusting all proxies makes
+        // Laravel read the X-Forwarded-Proto header instead of guessing
+        // from the raw (unencrypted-by-the-time-it-reaches-us) connection.
+        $middleware->trustProxies(at: '*');
+
         $middleware->web(append: [
             \App\Http\Middleware\HandleInertiaRequests::class,
             \Illuminate\Http\Middleware\AddLinkHeadersForPreloadedAssets::class,
