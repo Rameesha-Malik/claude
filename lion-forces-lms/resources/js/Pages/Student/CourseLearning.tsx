@@ -10,9 +10,12 @@ interface PracticeTestSummary {
     id: number; title: string; timer_enabled: boolean; duration_minutes: number | null;
     question_selection_mode: string; auto_question_count: number | null; questions_count: number;
 }
+interface MockExamSummary {
+    id: number; title: string; target_exam_name: string | null; total_duration_minutes: number | null; sections_count: number;
+}
 interface Course {
     id: number; slug: string; title: string; lessons: Lesson[]; shared_notes: Note[];
-    instructor: { name: string } | null; practice_tests: PracticeTestSummary[];
+    instructor: { name: string } | null; practice_tests: PracticeTestSummary[]; mock_exams: MockExamSummary[];
 }
 interface Props {
     course: Course;
@@ -186,29 +189,63 @@ export default function CourseLearning({ course, personalNotes, lessonProgress, 
             )}
 
             {tab === 'Tests' && (
-                <div className="space-y-3">
-                    {course.practice_tests.map((t) => (
-                        <div key={t.id} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-surface p-5">
-                            <div>
-                                <h3 className="font-semibold text-text">{t.title}</h3>
-                                <p className="text-sm text-text-secondary">
-                                    {t.question_selection_mode === 'manual' ? `${t.questions_count} questions` : `${t.auto_question_count ?? 10} questions (random)`}
-                                    {t.timer_enabled && t.duration_minutes ? ` · ${t.duration_minutes} min` : ' · No time limit'}
-                                </p>
-                            </div>
-                            <Link
-                                href={`/portal/practice-tests/${t.id}`}
-                                className="rounded-lg bg-primary px-5 py-2 text-sm font-bold uppercase tracking-wide text-on-primary hover:bg-primary-hover"
-                            >
-                                Start Test
-                            </Link>
+                <div className="space-y-8">
+                    <div>
+                        <h3 className="mb-3 font-bold text-text">Practice Tests</h3>
+                        <div className="space-y-3">
+                            {course.practice_tests.map((t) => (
+                                <div key={t.id} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-surface p-5">
+                                    <div>
+                                        <h4 className="font-semibold text-text">{t.title}</h4>
+                                        <p className="text-sm text-text-secondary">
+                                            {t.question_selection_mode === 'manual' ? `${t.questions_count} questions` : `${t.auto_question_count ?? 10} questions (random)`}
+                                            {t.timer_enabled && t.duration_minutes ? ` · ${t.duration_minutes} min` : ' · No time limit'}
+                                        </p>
+                                    </div>
+                                    <Link
+                                        href={`/portal/practice-tests/${t.id}`}
+                                        className="rounded-lg bg-primary px-5 py-2 text-sm font-bold uppercase tracking-wide text-on-primary hover:bg-primary-hover"
+                                    >
+                                        Start Test
+                                    </Link>
+                                </div>
+                            ))}
+                            {course.practice_tests.length === 0 && (
+                                <div className="rounded-2xl border border-dashed border-border bg-surface p-8 text-center text-text-secondary">
+                                    No practice tests available for this course yet.
+                                </div>
+                            )}
                         </div>
-                    ))}
-                    {course.practice_tests.length === 0 && (
-                        <div className="rounded-2xl border border-dashed border-border bg-surface p-10 text-center text-text-secondary">
-                            No practice tests available for this course yet.
+                    </div>
+
+                    <div>
+                        <h3 className="mb-3 font-bold text-text">Mock Exams</h3>
+                        <div className="space-y-3">
+                            {course.mock_exams.map((e) => (
+                                <div key={e.id} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-surface p-5">
+                                    <div>
+                                        <h4 className="font-semibold text-text">{e.title}</h4>
+                                        <p className="text-sm text-text-secondary">
+                                            {e.sections_count} section{e.sections_count === 1 ? '' : 's'}
+                                            {e.target_exam_name ? ` · ${e.target_exam_name} pattern` : ''}
+                                            {e.total_duration_minutes ? ` · ${e.total_duration_minutes} min` : ''}
+                                        </p>
+                                    </div>
+                                    <Link
+                                        href={`/portal/mock-exams/${e.id}`}
+                                        className="rounded-lg bg-accent px-5 py-2 text-sm font-bold uppercase tracking-wide text-on-accent hover:opacity-90"
+                                    >
+                                        View Exam
+                                    </Link>
+                                </div>
+                            ))}
+                            {course.mock_exams.length === 0 && (
+                                <div className="rounded-2xl border border-dashed border-border bg-surface p-8 text-center text-text-secondary">
+                                    No mock exams available for this course yet.
+                                </div>
+                            )}
                         </div>
-                    )}
+                    </div>
                 </div>
             )}
 

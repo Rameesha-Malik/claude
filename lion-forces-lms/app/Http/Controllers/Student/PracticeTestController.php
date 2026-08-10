@@ -109,21 +109,6 @@ class PracticeTestController extends Controller
         return redirect()->route('student.attempts.show', $attempt);
     }
 
-    public function showResult(Request $request, TestAttempt $attempt): Response
-    {
-        abort_unless($attempt->user_id === $request->user()->id, 403);
-
-        $attempt->load(['answers.question.options', 'answers.selectedOption']);
-        $attemptable = $attempt->attemptable()->first();
-
-        return Inertia::render('Student/PracticeTests/Result', [
-            'attempt' => $attempt,
-            'testTitle' => $attemptable->title ?? 'Test',
-            'isRepeatable' => $attemptable->is_repeatable ?? true,
-            'practiceTestId' => $attempt->attemptable_type === PracticeTest::class ? $attempt->attemptable_id : null,
-        ]);
-    }
-
     private function resolveQuestions(PracticeTest $practiceTest)
     {
         if ($practiceTest->question_selection_mode === 'manual') {

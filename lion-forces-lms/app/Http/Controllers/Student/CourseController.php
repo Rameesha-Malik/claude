@@ -35,6 +35,7 @@ class CourseController extends Controller
             'sharedNotes',
             'instructor',
             'practiceTests' => fn ($q) => $q->where('is_active', true)->withCount('questions'),
+            'mockExams' => fn ($q) => $q->where('is_active', true)->withCount('sections'),
         ]);
 
         // Personal/Guaranteed notes: assigned directly to this student, or

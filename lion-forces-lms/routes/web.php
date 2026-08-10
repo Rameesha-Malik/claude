@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\CourseController as AdminCourseController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\HallOfFameController as AdminHallOfFameController;
 use App\Http\Controllers\Admin\InstructorController as AdminInstructorController;
+use App\Http\Controllers\Admin\MockExamController as AdminMockExamController;
 use App\Http\Controllers\Admin\NewsController as AdminNewsController;
 use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
 use App\Http\Controllers\Admin\PracticeTestController as AdminPracticeTestController;
@@ -17,8 +18,10 @@ use App\Http\Controllers\Admin\StudentController as AdminStudentController;
 use App\Http\Controllers\Admin\WebsiteController as AdminWebsiteController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicSiteController;
+use App\Http\Controllers\Student\AttemptController as StudentAttemptController;
 use App\Http\Controllers\Student\CourseController as StudentCourseController;
 use App\Http\Controllers\Student\DashboardController as StudentDashboardController;
+use App\Http\Controllers\Student\MockExamController as StudentMockExamController;
 use App\Http\Controllers\Student\PracticeTestController as StudentPracticeTestController;
 use Illuminate\Support\Facades\Route;
 
@@ -60,7 +63,12 @@ Route::middleware(['auth', 'verified', 'user_type:student'])->prefix('portal')->
 
     Route::get('/practice-tests/{practiceTest}', [StudentPracticeTestController::class, 'show'])->name('student.practice-tests.show');
     Route::post('/practice-tests/{practiceTest}/submit', [StudentPracticeTestController::class, 'submit'])->name('student.practice-tests.submit');
-    Route::get('/attempts/{attempt}', [StudentPracticeTestController::class, 'showResult'])->name('student.attempts.show');
+    Route::get('/attempts/{attempt}', [StudentAttemptController::class, 'show'])->name('student.attempts.show');
+
+    Route::get('/mock-exams/{mockExam}', [StudentMockExamController::class, 'show'])->name('student.mock-exams.show');
+    Route::post('/mock-exams/{mockExam}/start', [StudentMockExamController::class, 'start'])->name('student.mock-exams.start');
+    Route::get('/mock-exams/{mockExam}/attempts/{attempt}/sections/{section}', [StudentMockExamController::class, 'showSection'])->name('student.mock-exams.section');
+    Route::post('/mock-exams/{mockExam}/attempts/{attempt}/sections/{section}/submit', [StudentMockExamController::class, 'submitSection'])->name('student.mock-exams.section.submit');
 });
 
 Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -127,6 +135,18 @@ Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->nam
             Route::get('/{practiceTest}/edit', [AdminPracticeTestController::class, 'edit'])->name('edit');
             Route::put('/{practiceTest}', [AdminPracticeTestController::class, 'update'])->name('update');
             Route::delete('/{practiceTest}', [AdminPracticeTestController::class, 'destroy'])->name('destroy');
+        });
+
+        Route::prefix('{course}/mock-exams')->name('mock-exams.')->group(function () {
+            Route::get('/', [AdminMockExamController::class, 'index'])->name('index');
+            Route::get('/create', [AdminMockExamController::class, 'create'])->name('create');
+            Route::post('/', [AdminMockExamController::class, 'store'])->name('store');
+            Route::get('/{mockExam}/edit', [AdminMockExamController::class, 'edit'])->name('edit');
+            Route::put('/{mockExam}', [AdminMockExamController::class, 'update'])->name('update');
+            Route::delete('/{mockExam}', [AdminMockExamController::class, 'destroy'])->name('destroy');
+            Route::post('/{mockExam}/sections', [AdminMockExamController::class, 'storeSection'])->name('sections.store');
+            Route::put('/{mockExam}/sections/{section}', [AdminMockExamController::class, 'updateSection'])->name('sections.update');
+            Route::delete('/{mockExam}/sections/{section}', [AdminMockExamController::class, 'destroySection'])->name('sections.destroy');
         });
     });
 

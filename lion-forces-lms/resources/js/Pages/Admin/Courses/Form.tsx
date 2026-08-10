@@ -145,13 +145,21 @@ export default function CourseForm({ course, categories, instructors }: Props) {
                     <div className="space-y-6">
                         <div className="rounded-2xl border border-border bg-surface p-5">
                             <h3 className="mb-3 font-bold text-text">Assessment Engine</h3>
-                            <p className="mb-3 text-sm text-text-secondary">Build practice tests using questions from the Content Library.</p>
-                            <Link
-                                href={`/admin/courses/${course!.id}/practice-tests`}
-                                className="block w-full rounded-lg border border-primary py-2 text-center text-sm font-bold uppercase tracking-wide text-primary hover:bg-primary-subtle"
-                            >
-                                Manage Practice Tests
-                            </Link>
+                            <p className="mb-3 text-sm text-text-secondary">Build tests using questions from the Content Library.</p>
+                            <div className="space-y-2">
+                                <Link
+                                    href={`/admin/courses/${course!.id}/practice-tests`}
+                                    className="block w-full rounded-lg border border-primary py-2 text-center text-sm font-bold uppercase tracking-wide text-primary hover:bg-primary-subtle"
+                                >
+                                    Manage Practice Tests
+                                </Link>
+                                <Link
+                                    href={`/admin/courses/${course!.id}/mock-exams`}
+                                    className="block w-full rounded-lg border border-primary py-2 text-center text-sm font-bold uppercase tracking-wide text-primary hover:bg-primary-subtle"
+                                >
+                                    Manage Mock Exams
+                                </Link>
+                            </div>
                         </div>
                         <PackagesPanel course={course!} />
                         <LessonsPanel course={course!} />
