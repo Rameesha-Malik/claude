@@ -1,9 +1,15 @@
 <?php
 
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
+use App\Http\Controllers\Admin\ContactInboxController as AdminContactInboxController;
 use App\Http\Controllers\Admin\ContentLibraryController as AdminContentLibraryController;
 use App\Http\Controllers\Admin\CourseController as AdminCourseController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\HallOfFameController as AdminHallOfFameController;
+use App\Http\Controllers\Admin\InstructorController as AdminInstructorController;
+use App\Http\Controllers\Admin\NewsController as AdminNewsController;
+use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
+use App\Http\Controllers\Admin\ResourceController as AdminResourceController;
 use App\Http\Controllers\Admin\StudentController as AdminStudentController;
 use App\Http\Controllers\Admin\WebsiteController as AdminWebsiteController;
 use App\Http\Controllers\ProfileController;
@@ -116,6 +122,45 @@ Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->nam
         Route::post('/notes', [AdminContentLibraryController::class, 'storeNote'])->name('notes.store');
         Route::put('/notes/{note}', [AdminContentLibraryController::class, 'updateNote'])->name('notes.update');
         Route::delete('/notes/{note}', [AdminContentLibraryController::class, 'destroyNote'])->name('notes.destroy');
+    });
+
+    Route::prefix('news')->name('news.')->group(function () {
+        Route::get('/', [AdminNewsController::class, 'index'])->name('index');
+        Route::post('/', [AdminNewsController::class, 'store'])->name('store');
+        Route::put('/{news}', [AdminNewsController::class, 'update'])->name('update');
+        Route::delete('/{news}', [AdminNewsController::class, 'destroy'])->name('destroy');
+    });
+
+    Route::prefix('resources')->name('resources.')->group(function () {
+        Route::get('/', [AdminResourceController::class, 'index'])->name('index');
+        Route::post('/', [AdminResourceController::class, 'store'])->name('store');
+        Route::put('/{resource}', [AdminResourceController::class, 'update'])->name('update');
+        Route::delete('/{resource}', [AdminResourceController::class, 'destroy'])->name('destroy');
+    });
+
+    Route::prefix('instructors')->name('instructors.')->group(function () {
+        Route::get('/', [AdminInstructorController::class, 'index'])->name('index');
+        Route::post('/', [AdminInstructorController::class, 'store'])->name('store');
+        Route::put('/{instructor}', [AdminInstructorController::class, 'update'])->name('update');
+        Route::delete('/{instructor}', [AdminInstructorController::class, 'destroy'])->name('destroy');
+    });
+
+    Route::prefix('hall-of-fame')->name('hall-of-fame.')->group(function () {
+        Route::get('/', [AdminHallOfFameController::class, 'index'])->name('index');
+        Route::post('/', [AdminHallOfFameController::class, 'store'])->name('store');
+        Route::put('/{hallOfFame}', [AdminHallOfFameController::class, 'update'])->name('update');
+        Route::delete('/{hallOfFame}', [AdminHallOfFameController::class, 'destroy'])->name('destroy');
+    });
+
+    Route::prefix('payments')->name('payments.')->group(function () {
+        Route::get('/', [AdminPaymentController::class, 'index'])->name('index');
+        Route::post('/{payment}/verify', [AdminPaymentController::class, 'verify'])->name('verify');
+        Route::post('/{payment}/reject', [AdminPaymentController::class, 'reject'])->name('reject');
+    });
+
+    Route::prefix('contact-inbox')->name('contact-inbox.')->group(function () {
+        Route::get('/', [AdminContactInboxController::class, 'index'])->name('index');
+        Route::post('/{submission}/toggle-handled', [AdminContactInboxController::class, 'toggleHandled'])->name('toggle-handled');
     });
 });
 
