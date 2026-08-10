@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
+use App\Http\Controllers\Admin\ContentLibraryController as AdminContentLibraryController;
+use App\Http\Controllers\Admin\CourseController as AdminCourseController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\StudentController as AdminStudentController;
 use App\Http\Controllers\Admin\WebsiteController as AdminWebsiteController;
@@ -78,6 +81,41 @@ Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->nam
         Route::post('/{student}/toggle-suspend', [AdminStudentController::class, 'toggleSuspend'])->name('toggle-suspend');
         Route::post('/{student}/enroll', [AdminStudentController::class, 'enroll'])->name('enroll');
         Route::put('/enrollments/{enrollment}/status', [AdminStudentController::class, 'updateEnrollmentStatus'])->name('enrollments.status');
+    });
+
+    Route::prefix('categories')->name('categories.')->group(function () {
+        Route::get('/', [AdminCategoryController::class, 'index'])->name('index');
+        Route::post('/', [AdminCategoryController::class, 'store'])->name('store');
+        Route::put('/{category}', [AdminCategoryController::class, 'update'])->name('update');
+        Route::delete('/{category}', [AdminCategoryController::class, 'destroy'])->name('destroy');
+    });
+
+    Route::prefix('courses')->name('courses.')->group(function () {
+        Route::get('/', [AdminCourseController::class, 'index'])->name('index');
+        Route::get('/create', [AdminCourseController::class, 'create'])->name('create');
+        Route::post('/', [AdminCourseController::class, 'store'])->name('store');
+        Route::get('/{course}/edit', [AdminCourseController::class, 'edit'])->name('edit');
+        Route::put('/{course}', [AdminCourseController::class, 'update'])->name('update');
+        Route::delete('/{course}', [AdminCourseController::class, 'destroy'])->name('destroy');
+
+        Route::post('/{course}/packages', [AdminCourseController::class, 'storePackage'])->name('packages.store');
+        Route::put('/packages/{package}', [AdminCourseController::class, 'updatePackage'])->name('packages.update');
+        Route::delete('/packages/{package}', [AdminCourseController::class, 'destroyPackage'])->name('packages.destroy');
+
+        Route::post('/{course}/lessons', [AdminCourseController::class, 'storeLesson'])->name('lessons.store');
+        Route::put('/lessons/{lesson}', [AdminCourseController::class, 'updateLesson'])->name('lessons.update');
+        Route::delete('/lessons/{lesson}', [AdminCourseController::class, 'destroyLesson'])->name('lessons.destroy');
+    });
+
+    Route::prefix('content-library')->name('content-library.')->group(function () {
+        Route::get('/', [AdminContentLibraryController::class, 'index'])->name('index');
+        Route::post('/subjects', [AdminContentLibraryController::class, 'storeSubject'])->name('subjects.store');
+        Route::post('/questions', [AdminContentLibraryController::class, 'storeQuestion'])->name('questions.store');
+        Route::put('/questions/{question}', [AdminContentLibraryController::class, 'updateQuestion'])->name('questions.update');
+        Route::delete('/questions/{question}', [AdminContentLibraryController::class, 'destroyQuestion'])->name('questions.destroy');
+        Route::post('/notes', [AdminContentLibraryController::class, 'storeNote'])->name('notes.store');
+        Route::put('/notes/{note}', [AdminContentLibraryController::class, 'updateNote'])->name('notes.update');
+        Route::delete('/notes/{note}', [AdminContentLibraryController::class, 'destroyNote'])->name('notes.destroy');
     });
 });
 

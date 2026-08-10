@@ -17,6 +17,7 @@ const NAV: NavEntry[] = [
     { label: 'Website', href: '/admin/website', icon: <Icon d="M3.75 3v11.25A2.25 2.25 0 006 16.5h12a2.25 2.25 0 002.25-2.25V3m-16.5 0h16.5M3.75 3v0M3 15.75h18" /> },
     { label: 'Students', href: '/admin/students', icon: <Icon d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /> },
     { label: 'Courses', href: '/admin/courses', icon: <Icon d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422A12.083 12.083 0 0112 20.417a12.083 12.083 0 01-6.16-9.839L12 14z" /> },
+    { label: 'Categories', href: '/admin/categories', icon: <Icon d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-5 5a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 9V4a1 1 0 011-1z" /> },
     { label: 'Content Library', href: '/admin/content-library', icon: <Icon d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253M12 6.253C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253" /> },
     { label: 'News', href: '/admin/news', icon: <Icon d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l6 6v8a2 2 0 01-2 2z" /> },
     { label: 'Resources', href: '/admin/resources', icon: <Icon d="M12 4.5v15m7.5-7.5h-15" /> },
