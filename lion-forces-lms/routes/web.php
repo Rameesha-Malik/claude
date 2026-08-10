@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\ContactInboxController as AdminContactInboxContro
 use App\Http\Controllers\Admin\ContentLibraryController as AdminContentLibraryController;
 use App\Http\Controllers\Admin\CourseController as AdminCourseController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\DemoQuizController as AdminDemoQuizController;
 use App\Http\Controllers\Admin\HallOfFameController as AdminHallOfFameController;
 use App\Http\Controllers\Admin\InstructorController as AdminInstructorController;
 use App\Http\Controllers\Admin\MockExamController as AdminMockExamController;
@@ -18,6 +19,7 @@ use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
 use App\Http\Controllers\Admin\StagedTestController as AdminStagedTestController;
 use App\Http\Controllers\Admin\StudentController as AdminStudentController;
 use App\Http\Controllers\Admin\WebsiteController as AdminWebsiteController;
+use App\Http\Controllers\DemoQuizController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicSiteController;
 use App\Http\Controllers\Student\AttemptController as StudentAttemptController;
@@ -38,6 +40,12 @@ Route::post('/contact', [PublicSiteController::class, 'submitContact'])->name('c
 Route::get('/news', [PublicSiteController::class, 'news'])->name('news');
 Route::get('/resources', [PublicSiteController::class, 'resources'])->name('resources');
 Route::get('/how-to-buy', [PublicSiteController::class, 'howToBuy'])->name('how-to-buy');
+
+Route::get('/demo-quiz', [DemoQuizController::class, 'show'])->name('demo-quiz.show');
+Route::post('/demo-quiz/start', [DemoQuizController::class, 'start'])->name('demo-quiz.start');
+Route::get('/demo-quiz/{attempt}', [DemoQuizController::class, 'take'])->name('demo-quiz.take');
+Route::post('/demo-quiz/{attempt}/submit', [DemoQuizController::class, 'submit'])->name('demo-quiz.submit');
+Route::get('/demo-quiz/{attempt}/result', [DemoQuizController::class, 'result'])->name('demo-quiz.result');
 
 // Neutral post-login landing: AuthenticatedSessionController always
 // redirects here regardless of role, so it can't itself be gated to one
@@ -233,6 +241,15 @@ Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->nam
     Route::prefix('notifications')->name('notifications.')->group(function () {
         Route::get('/', [AdminNotificationController::class, 'index'])->name('index');
         Route::post('/', [AdminNotificationController::class, 'store'])->name('store');
+    });
+
+    Route::prefix('demo-quiz')->name('demo-quiz.')->group(function () {
+        Route::get('/', [AdminDemoQuizController::class, 'index'])->name('index');
+        Route::get('/create', [AdminDemoQuizController::class, 'create'])->name('create');
+        Route::post('/', [AdminDemoQuizController::class, 'store'])->name('store');
+        Route::get('/{demoQuiz}/edit', [AdminDemoQuizController::class, 'edit'])->name('edit');
+        Route::put('/{demoQuiz}', [AdminDemoQuizController::class, 'update'])->name('update');
+        Route::delete('/{demoQuiz}', [AdminDemoQuizController::class, 'destroy'])->name('destroy');
     });
 
     Route::prefix('settings')->name('settings.')->group(function () {
