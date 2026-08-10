@@ -32,11 +32,11 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                 style={{ backgroundColor: 'var(--color-surface-translucent)' }}
             >
                 <div className="mx-auto flex h-18 max-w-container items-center justify-between px-4 sm:px-6 lg:px-8">
-                    <Link href="/" className="flex items-center gap-2 text-lg font-bold text-secondary">
-                        <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-on-primary">
+                    <Link href="/" className="flex min-w-0 items-center gap-2 text-lg font-bold text-secondary">
+                        <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-primary text-on-primary">
                             LF
                         </span>
-                        {site.name}
+                        <span className="truncate">{site.name}</span>
                     </Link>
 
                     <nav className="hidden items-center gap-8 md:flex">

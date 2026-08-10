@@ -86,7 +86,7 @@ export default function AdminLayout({ children, header }: PropsWithChildren<{ he
                 </div>
             )}
 
-            <div className="flex flex-1 flex-col">
+            <div className="flex min-w-0 flex-1 flex-col">
                 <header className="flex h-16 items-center justify-between border-b border-border bg-surface px-4 sm:px-6">
                     <button className="text-text lg:hidden" onClick={() => setMobileOpen(true)} aria-label="Open menu">
                         <Icon d="M4 6h16M4 12h16M4 18h16" />
@@ -99,7 +99,7 @@ export default function AdminLayout({ children, header }: PropsWithChildren<{ he
                         </div>
                     </div>
                 </header>
-                <main className="flex-1 p-4 sm:p-6 lg:p-8">{children}</main>
+                <main className="min-w-0 flex-1 overflow-x-hidden p-4 sm:p-6 lg:p-8">{children}</main>
             </div>
         </div>
     );

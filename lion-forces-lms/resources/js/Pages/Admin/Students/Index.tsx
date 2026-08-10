@@ -56,8 +56,8 @@ export default function StudentsIndex({ students, filters }: Props) {
                 </div>
             </div>
 
-            <div className="overflow-hidden rounded-2xl border border-border bg-surface">
-                <table className="w-full text-left text-sm">
+            <div className="overflow-x-auto rounded-2xl border border-border bg-surface">
+                <table className="w-full min-w-[640px] text-left text-sm">
                     <thead className="border-b border-border bg-surface-sunken text-xs uppercase tracking-wide text-text-muted">
                         <tr>
                             <th className="px-5 py-3">Name</th>

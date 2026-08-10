@@ -186,8 +186,19 @@ function PackagesPanel({ course }: { course: Course }) {
     );
 }
 
+const URL_TYPES = ['video_youtube', 'link'];
+const FILE_ACCEPT: Record<string, string> = {
+    pdf: '.pdf',
+    audio: '.mp3,.wav,.m4a',
+    video_upload: '.mp4,.mov,.webm',
+    document: '.pdf,.doc,.docx,.ppt,.pptx',
+};
+
 function LessonsPanel({ course }: { course: Course }) {
-    const addForm = useForm({ title: '', type: 'video_youtube', external_url: '', is_free_preview: false });
+    const addForm = useForm<{ title: string; type: string; external_url: string; is_free_preview: boolean; file: File | null }>({
+        title: '', type: 'video_youtube', external_url: '', is_free_preview: false, file: null,
+    });
+    const isUrlType = URL_TYPES.includes(addForm.data.type);
 
     return (
         <div className="rounded-2xl border border-border bg-surface p-5">
@@ -210,14 +221,33 @@ function LessonsPanel({ course }: { course: Course }) {
             >
                 <input className={inputClass} placeholder="Lesson Title" value={addForm.data.title} onChange={(e) => addForm.setData('title', e.target.value)} />
                 <select className={inputClass} value={addForm.data.type} onChange={(e) => addForm.setData('type', e.target.value)}>
-                    {['pdf', 'audio', 'video_upload', 'video_youtube', 'document', 'link'].map((t) => <option key={t} value={t}>{t.replace('_', ' ')}</option>)}
+                    {['video_youtube', 'video_upload', 'pdf', 'audio', 'document', 'link'].map((t) => <option key={t} value={t}>{t.replace('_', ' ')}</option>)}
                 </select>
-                <input className={inputClass} placeholder="URL (for video/link types)" value={addForm.data.external_url} onChange={(e) => addForm.setData('external_url', e.target.value)} />
+                {isUrlType ? (
+                    <input
+                        className={inputClass}
+                        placeholder={addForm.data.type === 'video_youtube' ? 'YouTube URL' : 'Link URL'}
+                        value={addForm.data.external_url}
+                        onChange={(e) => addForm.setData('external_url', e.target.value)}
+                    />
+                ) : (
+                    <div>
+                        <input
+                            type="file"
+                            accept={FILE_ACCEPT[addForm.data.type]}
+                            onChange={(e) => addForm.setData('file', e.target.files?.[0] ?? null)}
+                            className="w-full text-sm text-text-secondary file:mr-3 file:rounded-lg file:border-0 file:bg-primary file:px-3 file:py-1.5 file:text-xs file:font-bold file:uppercase file:text-on-primary"
+                        />
+                        {addForm.data.type === 'video_upload' && <p className="mt-1 text-xs text-text-muted">MP4/MOV/WEBM, up to 500MB. Prefer YouTube for longer lectures.</p>}
+                    </div>
+                )}
                 <label className="flex items-center gap-2 text-sm text-text">
                     <input type="checkbox" checked={addForm.data.is_free_preview} onChange={(e) => addForm.setData('is_free_preview', e.target.checked)} />
                     Free preview
                 </label>
-                <button type="submit" disabled={addForm.processing} className="w-full rounded-lg bg-primary py-2 text-sm font-bold uppercase text-on-primary hover:bg-primary-hover">Add Lesson</button>
+                <button type="submit" disabled={addForm.processing} className="w-full rounded-lg bg-primary py-2 text-sm font-bold uppercase text-on-primary hover:bg-primary-hover">
+                    {addForm.progress ? `Uploading… ${addForm.progress.percentage}%` : 'Add Lesson'}
+                </button>
                 {Object.values(addForm.errors).map((m, i) => <div key={i} className="text-sm text-danger">{m}</div>)}
             </form>
         </div>

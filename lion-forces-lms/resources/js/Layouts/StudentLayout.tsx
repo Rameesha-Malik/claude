@@ -30,8 +30,8 @@ export default function StudentLayout({ children, header }: PropsWithChildren<{ 
     const sidebar = (
         <div className="flex h-full flex-col bg-secondary text-white">
             <Link href="/" className="flex h-18 items-center gap-2 px-6 text-lg font-bold">
-                <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-accent text-accent-fg">LF</span>
-                {site.name}
+                <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-accent text-accent-fg">LF</span>
+                <span className="truncate">{site.name}</span>
             </Link>
             <nav className="flex-1 space-y-1 px-3 py-4">
                 {NAV.map((item) => {
@@ -75,7 +75,7 @@ export default function StudentLayout({ children, header }: PropsWithChildren<{ 
                 </div>
             )}
 
-            <div className="flex flex-1 flex-col">
+            <div className="flex min-w-0 flex-1 flex-col">
                 <header className="flex h-18 items-center justify-between border-b border-border bg-surface px-4 sm:px-6">
                     <button className="text-text lg:hidden" onClick={() => setMobileOpen(true)} aria-label="Open menu">
                         <Icon d="M4 6h16M4 12h16M4 18h16" />
@@ -88,7 +88,7 @@ export default function StudentLayout({ children, header }: PropsWithChildren<{ 
                         </div>
                     </div>
                 </header>
-                <main className="flex-1 p-4 sm:p-6 lg:p-8">{children}</main>
+                <main className="min-w-0 flex-1 overflow-x-hidden p-4 sm:p-6 lg:p-8">{children}</main>
             </div>
         </div>
     );

@@ -2,7 +2,7 @@ import { Head, router, useForm } from '@inertiajs/react';
 import { useState } from 'react';
 import StudentLayout from '@/Layouts/StudentLayout';
 
-interface Lesson { id: number; title: string; type: string; external_url: string | null; description: string | null }
+interface Lesson { id: number; title: string; type: string; external_url: string | null; file_path: string | null; description: string | null }
 interface Note { id: number; title: string; content: string | null }
 interface Reply { id: number; reply_text: string; admin: { name: string } | null; created_at: string }
 interface Question { id: number; question_text: string; status: string; created_at: string; replies: Reply[] }
@@ -19,6 +19,70 @@ interface Props {
 
 const TABS = ['Lectures', 'Notes', 'Quizzes', 'Flashcards', 'Tests', 'Q&A'] as const;
 type Tab = (typeof TABS)[number];
+
+function youtubeEmbedUrl(url: string): string | null {
+    const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{6,})/);
+    return match ? `https://www.youtube.com/embed/${match[1]}` : null;
+}
+
+function LessonPlayer({ lesson }: { lesson: Lesson }) {
+    const fileUrl = lesson.file_path ? `/storage/${lesson.file_path}` : null;
+
+    switch (lesson.type) {
+        case 'video_youtube': {
+            const embed = lesson.external_url ? youtubeEmbedUrl(lesson.external_url) : null;
+            return embed ? (
+                <div className="aspect-video w-full overflow-hidden rounded-xl bg-black">
+                    <iframe src={embed} className="h-full w-full" allowFullScreen title={lesson.title} />
+                </div>
+            ) : (
+                <p className="rounded-xl bg-surface-sunken p-6 text-sm text-text-muted">Video link not set yet.</p>
+            );
+        }
+        case 'video_upload':
+            return fileUrl ? (
+                // eslint-disable-next-line jsx-a11y/media-has-caption
+                <video controls src={fileUrl} className="w-full rounded-xl bg-black" />
+            ) : (
+                <p className="rounded-xl bg-surface-sunken p-6 text-sm text-text-muted">Video not uploaded yet.</p>
+            );
+        case 'audio':
+            return fileUrl ? (
+                <audio controls src={fileUrl} className="w-full" />
+            ) : (
+                <p className="rounded-xl bg-surface-sunken p-6 text-sm text-text-muted">Audio not uploaded yet.</p>
+            );
+        case 'pdf':
+            return fileUrl ? (
+                <div>
+                    <iframe src={fileUrl} className="h-[32rem] w-full rounded-xl border border-border" title={lesson.title} />
+                    <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="mt-2 inline-block text-sm font-semibold text-primary hover:underline">
+                        Open in new tab &rarr;
+                    </a>
+                </div>
+            ) : (
+                <p className="rounded-xl bg-surface-sunken p-6 text-sm text-text-muted">Document not uploaded yet.</p>
+            );
+        case 'document':
+            return fileUrl ? (
+                <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="inline-block rounded-lg bg-primary px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-on-primary hover:bg-primary-hover">
+                    Download Document
+                </a>
+            ) : (
+                <p className="rounded-xl bg-surface-sunken p-6 text-sm text-text-muted">Document not uploaded yet.</p>
+            );
+        case 'link':
+            return lesson.external_url ? (
+                <a href={lesson.external_url} target="_blank" rel="noopener noreferrer" className="inline-block rounded-lg bg-primary px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-on-primary hover:bg-primary-hover">
+                    Open Link
+                </a>
+            ) : (
+                <p className="rounded-xl bg-surface-sunken p-6 text-sm text-text-muted">Link not set yet.</p>
+            );
+        default:
+            return null;
+    }
+}
 
 export default function CourseLearning({ course, personalNotes, lessonProgress, questions }: Props) {
     const [tab, setTab] = useState<Tab>('Lectures');
@@ -65,8 +129,8 @@ export default function CourseLearning({ course, personalNotes, lessonProgress, 
                             <div className="rounded-2xl border border-border bg-surface p-6">
                                 <h3 className="font-bold text-text">{activeLesson.title}</h3>
                                 <p className="mt-2 text-sm text-text-secondary">{activeLesson.description}</p>
-                                <div className="mt-4 flex h-56 items-center justify-center rounded-xl bg-surface-sunken text-sm uppercase tracking-wide text-text-muted">
-                                    {activeLesson.type.replace('_', ' ')} content
+                                <div className="mt-4">
+                                    <LessonPlayer lesson={activeLesson} />
                                 </div>
                                 <button
                                     onClick={() => router.post(`/portal/lessons/${activeLesson.id}/complete`, {}, { preserveScroll: true })}

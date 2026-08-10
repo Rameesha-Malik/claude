@@ -32,12 +32,13 @@ export default function Dashboard({ stats, recentEnrollments, recentPayments, po
             </div>
 
             <div className="mt-8 grid gap-6 lg:grid-cols-3">
-                <div className="rounded-2xl border border-border bg-surface p-5 lg:col-span-2">
+                <div className="rounded-2xl border border-border bg-surface p-5 lg:col-span-2 min-w-0">
                     <h2 className="mb-4 font-bold text-text">Recent Enrollments</h2>
                     {recentEnrollments.length === 0 ? (
                         <p className="text-sm text-text-secondary">No enrollments yet.</p>
                     ) : (
-                        <table className="w-full text-left text-sm">
+                        <div className="overflow-x-auto">
+                        <table className="w-full min-w-[420px] text-left text-sm">
                             <thead className="text-xs uppercase tracking-wide text-text-muted">
                                 <tr><th className="pb-2">Student</th><th className="pb-2">Course</th><th className="pb-2">Status</th></tr>
                             </thead>
@@ -55,10 +56,11 @@ export default function Dashboard({ stats, recentEnrollments, recentPayments, po
                                 ))}
                             </tbody>
                         </table>
+                        </div>
                     )}
                 </div>
 
-                <div className="rounded-2xl border border-border bg-surface p-5">
+                <div className="rounded-2xl border border-border bg-surface p-5 min-w-0">
                     <h2 className="mb-4 font-bold text-text">Popular Courses</h2>
                     {popularCourses.length === 0 ? (
                         <p className="text-sm text-text-secondary">No data yet.</p>
@@ -80,7 +82,8 @@ export default function Dashboard({ stats, recentEnrollments, recentPayments, po
                 {recentPayments.length === 0 ? (
                     <p className="text-sm text-text-secondary">No payments yet.</p>
                 ) : (
-                    <table className="w-full text-left text-sm">
+                    <div className="overflow-x-auto">
+                    <table className="w-full min-w-[480px] text-left text-sm">
                         <thead className="text-xs uppercase tracking-wide text-text-muted">
                             <tr><th className="pb-2">Student</th><th className="pb-2">Method</th><th className="pb-2">Amount</th><th className="pb-2">Status</th></tr>
                         </thead>
@@ -99,6 +102,7 @@ export default function Dashboard({ stats, recentEnrollments, recentPayments, po
                             ))}
                         </tbody>
                     </table>
+                    </div>
                 )}
             </div>
         </AdminLayout>

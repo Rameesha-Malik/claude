@@ -142,15 +142,17 @@ class CourseController extends Controller
     }
 
     // --- Lessons ---
+    //
+    // Two content paths per type: video_youtube/link take a URL only;
+    // pdf/audio/video_upload/document take an uploaded file. video_upload
+    // is capped at 500MB / MP4-MOV-WEBM — see public/.user.ini for the
+    // matching PHP-level upload_max_filesize/post_max_size raise, since
+    // Laravel's own validation never runs if PHP rejects the upload first.
     public function storeLesson(Request $request, Course $course)
     {
-        $data = $request->validate([
-            'title' => 'required|string|max:255',
-            'type' => 'required|in:pdf,audio,video_upload,video_youtube,document,link',
-            'external_url' => 'nullable|string|max:500',
-            'description' => 'nullable|string|max:1000',
-            'is_free_preview' => 'boolean',
-        ]);
+        $data = collect($request->validate($this->lessonRules($request, required: true)))->except('file')->toArray();
+
+        $data['file_path'] = $this->handleLessonFile($request);
 
         $course->lessons()->create($data + ['order' => $course->lessons()->max('order') + 1]);
 
@@ -159,21 +161,53 @@ class CourseController extends Controller
 
     public function updateLesson(Request $request, Lesson $lesson)
     {
-        $lesson->update($request->validate([
-            'title' => 'required|string|max:255',
-            'type' => 'required|in:pdf,audio,video_upload,video_youtube,document,link',
-            'external_url' => 'nullable|string|max:500',
-            'description' => 'nullable|string|max:1000',
-            'is_free_preview' => 'boolean',
-        ]));
+        $data = collect($request->validate($this->lessonRules($request, required: false)))->except('file')->toArray();
+
+        if ($newPath = $this->handleLessonFile($request)) {
+            if ($lesson->file_path) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($lesson->file_path);
+            }
+            $data['file_path'] = $newPath;
+        }
+
+        $lesson->update($data);
 
         return back()->with('success', 'Lesson updated.');
     }
 
     public function destroyLesson(Lesson $lesson)
     {
+        if ($lesson->file_path) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($lesson->file_path);
+        }
         $lesson->delete();
 
         return back()->with('success', 'Lesson removed.');
+    }
+
+    private function lessonRules(Request $request, bool $required): array
+    {
+        $urlType = in_array($request->input('type'), ['video_youtube', 'link']);
+        $fileRule = $urlType ? 'nullable' : ($required ? 'required' : 'nullable');
+
+        return [
+            'title' => 'required|string|max:255',
+            'type' => 'required|in:pdf,audio,video_upload,video_youtube,document,link',
+            'external_url' => $urlType ? 'required|string|max:500' : 'nullable|string|max:500',
+            'file' => match ($request->input('type')) {
+                'pdf' => "{$fileRule}|file|mimes:pdf|max:20480",
+                'audio' => "{$fileRule}|file|mimes:mp3,wav,m4a|max:102400",
+                'video_upload' => "{$fileRule}|file|mimes:mp4,mov,webm|max:512000",
+                'document' => "{$fileRule}|file|mimes:doc,docx,ppt,pptx,pdf|max:51200",
+                default => 'nullable',
+            },
+            'description' => 'nullable|string|max:1000',
+            'is_free_preview' => 'boolean',
+        ];
+    }
+
+    private function handleLessonFile(Request $request): ?string
+    {
+        return $request->hasFile('file') ? $request->file('file')->store('lessons', 'public') : null;
     }
 }
