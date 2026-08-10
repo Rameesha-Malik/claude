@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\WebsiteController as AdminWebsiteController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicSiteController;
 use App\Http\Controllers\Student\CourseController as StudentCourseController;
@@ -43,11 +45,31 @@ Route::middleware(['auth', 'verified', 'user_type:student'])->prefix('portal')->
     Route::post('/courses/{course:slug}/questions', [StudentCourseController::class, 'askQuestion'])->name('student.questions.store');
 });
 
-Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->group(function () {
-    // Placeholder until the full Admin Panel module is built — keeps the
-    // post-login redirect for admin/staff/owner accounts working now
-    // rather than leaving it dangling mid-build.
-    Route::get('/', fn () => \Inertia\Inertia::render('Admin/Dashboard'))->name('admin.dashboard');
+Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->name('admin.')->group(function () {
+    Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
+
+    Route::prefix('website')->name('website.')->group(function () {
+        Route::get('/', [AdminWebsiteController::class, 'index'])->name('index');
+        Route::put('/settings', [AdminWebsiteController::class, 'updateSettings'])->name('settings.update');
+        Route::put('/announcement', [AdminWebsiteController::class, 'updateAnnouncement'])->name('announcement.update');
+        Route::put('/home-sections/{homeSection}', [AdminWebsiteController::class, 'updateHomeSection'])->name('home-sections.update');
+
+        Route::post('/stats', [AdminWebsiteController::class, 'storeStat'])->name('stats.store');
+        Route::put('/stats/{stat}', [AdminWebsiteController::class, 'updateStat'])->name('stats.update');
+        Route::delete('/stats/{stat}', [AdminWebsiteController::class, 'destroyStat'])->name('stats.destroy');
+
+        Route::post('/services', [AdminWebsiteController::class, 'storeService'])->name('services.store');
+        Route::put('/services/{service}', [AdminWebsiteController::class, 'updateService'])->name('services.update');
+        Route::delete('/services/{service}', [AdminWebsiteController::class, 'destroyService'])->name('services.destroy');
+
+        Route::post('/faqs', [AdminWebsiteController::class, 'storeFaq'])->name('faqs.store');
+        Route::put('/faqs/{faq}', [AdminWebsiteController::class, 'updateFaq'])->name('faqs.update');
+        Route::delete('/faqs/{faq}', [AdminWebsiteController::class, 'destroyFaq'])->name('faqs.destroy');
+
+        Route::post('/testimonials', [AdminWebsiteController::class, 'storeTestimonial'])->name('testimonials.store');
+        Route::put('/testimonials/{testimonial}', [AdminWebsiteController::class, 'updateTestimonial'])->name('testimonials.update');
+        Route::delete('/testimonials/{testimonial}', [AdminWebsiteController::class, 'destroyTestimonial'])->name('testimonials.destroy');
+    });
 });
 
 Route::middleware('auth')->group(function () {
