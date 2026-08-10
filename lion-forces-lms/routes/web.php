@@ -13,6 +13,7 @@ Route::get('/contact', [PublicSiteController::class, 'contact'])->name('contact'
 Route::post('/contact', [PublicSiteController::class, 'submitContact'])->name('contact.submit');
 Route::get('/news', [PublicSiteController::class, 'news'])->name('news');
 Route::get('/resources', [PublicSiteController::class, 'resources'])->name('resources');
+Route::get('/how-to-buy', [PublicSiteController::class, 'howToBuy'])->name('how-to-buy');
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');

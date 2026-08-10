@@ -29,10 +29,10 @@ export default function Courses({ courses, categories, filters }: Props) {
         <PublicLayout>
             <Head title="Courses" />
 
-            <section className="bg-surface-brand py-16">
-                <div className="mx-auto max-w-container px-4 text-center sm:px-6 lg:px-8">
-                    <h1 className="text-4xl font-bold text-secondary">Courses</h1>
-                    <p className="mt-3 text-text-secondary">Structured preparation for every major service entry test.</p>
+            <section className="relative overflow-hidden bg-gradient-to-br from-secondary to-teal-950 py-20">
+                <div className="relative mx-auto max-w-container px-4 text-center sm:px-6 lg:px-8">
+                    <h1 className="font-display text-5xl uppercase tracking-wide text-white">Courses</h1>
+                    <p className="mt-3 text-teal-200">Structured preparation for every major service entry test.</p>
 
                     <form onSubmit={submitSearch} className="mx-auto mt-8 flex max-w-md gap-2">
                         <input
@@ -40,9 +40,9 @@ export default function Courses({ courses, categories, filters }: Props) {
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             placeholder="Search courses..."
-                            className="w-full rounded-lg border border-border px-4 py-3 text-sm focus:border-primary focus:outline-none"
+                            className="w-full rounded-lg border-0 px-4 py-3 text-sm text-text focus:outline-none focus:ring-2 focus:ring-accent"
                         />
-                        <button type="submit" className="rounded-lg bg-primary px-6 py-3 text-sm font-semibold text-on-primary hover:bg-primary-hover">
+                        <button type="submit" className="rounded-lg bg-accent px-6 py-3 text-sm font-bold uppercase tracking-wide text-accent-fg hover:bg-accent-hover">
                             Search
                         </button>
                     </form>
@@ -50,7 +50,7 @@ export default function Courses({ courses, categories, filters }: Props) {
                     <div className="mt-6 flex flex-wrap justify-center gap-2">
                         <button
                             onClick={() => selectCategory(null)}
-                            className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${!filters.category ? 'bg-primary text-on-primary' : 'bg-surface text-text-secondary hover:bg-primary-subtle'}`}
+                            className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${!filters.category ? 'bg-accent text-accent-fg' : 'border border-white/20 bg-white/5 text-teal-200 hover:bg-white/10'}`}
                         >
                             All
                         </button>
@@ -58,7 +58,7 @@ export default function Courses({ courses, categories, filters }: Props) {
                             <button
                                 key={cat.slug}
                                 onClick={() => selectCategory(cat.slug)}
-                                className={`rounded-full px-4 py-1.5 text-sm font-medium transition-colors ${filters.category === cat.slug ? 'bg-primary text-on-primary' : 'bg-surface text-text-secondary hover:bg-primary-subtle'}`}
+                                className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${filters.category === cat.slug ? 'bg-accent text-accent-fg' : 'border border-white/20 bg-white/5 text-teal-200 hover:bg-white/10'}`}
                             >
                                 {cat.name}
                             </button>

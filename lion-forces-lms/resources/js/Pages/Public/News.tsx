@@ -21,9 +21,9 @@ export default function News({ announcements }: Props) {
         <PublicLayout>
             <Head title="News & Announcements" />
 
-            <section className="bg-surface-brand py-16 text-center">
-                <h1 className="text-4xl font-bold text-secondary">News & Announcements</h1>
-                <p className="mt-3 text-text-secondary">Upcoming test dates, admission deadlines, and academy news.</p>
+            <section className="bg-gradient-to-br from-secondary to-teal-950 py-20 text-center">
+                <h1 className="font-display text-5xl uppercase tracking-wide text-white">News & Announcements</h1>
+                <p className="mt-3 text-teal-200">Upcoming test dates, admission deadlines, and academy news.</p>
             </section>
 
             <section className="mx-auto max-w-container px-4 py-16 sm:px-6 lg:px-8">

@@ -11,9 +11,9 @@ export default function Resources({ resources }: Props) {
         <PublicLayout>
             <Head title="Resources" />
 
-            <section className="bg-surface-brand py-16 text-center">
-                <h1 className="text-4xl font-bold text-secondary">Resources</h1>
-                <p className="mx-auto mt-3 max-w-xl text-text-secondary">
+            <section className="bg-gradient-to-br from-secondary to-teal-950 py-20 text-center">
+                <h1 className="font-display text-5xl uppercase tracking-wide text-white">Resources</h1>
+                <p className="mx-auto mt-3 max-w-xl text-teal-200">
                     Free study material: syllabi, past papers, and preparation guides.
                 </p>
             </section>

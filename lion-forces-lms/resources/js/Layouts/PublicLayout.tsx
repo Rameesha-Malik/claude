@@ -27,7 +27,10 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                 </div>
             )}
 
-            <header className="sticky top-0 z-40 border-b border-border bg-surface/85 backdrop-blur-glass">
+            <header
+                className="sticky top-0 z-40 border-b border-border backdrop-blur-glass"
+                style={{ backgroundColor: 'var(--color-surface-translucent)' }}
+            >
                 <div className="mx-auto flex h-18 max-w-container items-center justify-between px-4 sm:px-6 lg:px-8">
                     <Link href="/" className="flex items-center gap-2 text-lg font-bold text-secondary">
                         <span className="flex h-9 w-9 items-center justify-center rounded-lg bg-primary text-on-primary">

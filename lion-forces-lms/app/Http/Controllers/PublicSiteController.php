@@ -112,4 +112,16 @@ class PublicSiteController extends Controller
             'resources' => \App\Models\Resource::where('is_published', true)->orderByDesc('created_at')->paginate(12),
         ]);
     }
+
+    public function howToBuy(): Response
+    {
+        return Inertia::render('Public/HowToBuy', [
+            'packages' => \App\Models\CoursePackage::with('course:id,title')
+                ->where('is_active', true)
+                ->orderBy('price')
+                ->limit(12)
+                ->get(['id', 'course_id', 'name', 'description', 'price', 'validity_days']),
+            'faqs' => Faq::where('page', 'how_to_buy')->where('is_active', true)->orderBy('order')->get(['question', 'answer']),
+        ]);
+    }
 }

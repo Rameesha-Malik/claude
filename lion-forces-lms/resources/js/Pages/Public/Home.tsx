@@ -3,6 +3,7 @@ import { useState } from 'react';
 import AnimatedCounter from '@/Components/AnimatedCounter';
 import GradientMesh from '@/Components/GradientMesh';
 import RevealOnScroll from '@/Components/RevealOnScroll';
+import SectionKicker from '@/Components/SectionKicker';
 import TiltCard from '@/Components/TiltCard';
 import PublicLayout from '@/Layouts/PublicLayout';
 
@@ -44,28 +45,42 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
         <PublicLayout>
             <Head title="Home" />
 
-            {/* ---------------- Hero ---------------- */}
-            <section className="relative overflow-hidden bg-surface-brand">
+            {/* ---------------- Hero — dark, poster-weight, high contrast ---------------- */}
+            <section className="relative overflow-hidden bg-gradient-to-br from-secondary via-teal-900 to-teal-950">
                 <GradientMesh />
-                <div className="relative mx-auto max-w-container px-4 py-24 sm:px-6 sm:py-32 lg:px-8">
-                    <div className="mx-auto max-w-3xl text-center">
+                <div
+                    aria-hidden
+                    className="absolute inset-0 opacity-[0.04]"
+                    style={{
+                        backgroundImage:
+                            'repeating-linear-gradient(135deg, #fff 0px, #fff 1px, transparent 1px, transparent 40px)',
+                    }}
+                />
+                <div className="relative mx-auto max-w-container px-4 py-28 sm:px-6 sm:py-36 lg:px-8">
+                    <div className="mx-auto max-w-4xl text-center">
                         <RevealOnScroll staggerMs={110}>
-                            <h1 className="text-4xl font-bold leading-tight tracking-tight text-secondary sm:text-5xl lg:text-6xl">
-                                {hero.headline}
+                            <SectionKicker dark>
+                                <span className="mx-auto flex items-center gap-2">
+                                    <span className="h-px w-6 bg-gold-400" />
+                                    Since 2021 &middot; Pak Army, Navy &amp; PAF
+                                </span>
+                            </SectionKicker>
+                            <h1 className="font-display text-6xl uppercase leading-[0.95] tracking-wide text-white sm:text-7xl lg:text-8xl">
+                                Train Like You <span className="text-gold-400">Mean</span> to Get Selected
                             </h1>
-                            <p className="mt-6 text-lg leading-relaxed text-text-secondary sm:text-xl">
+                            <p className="mx-auto mt-8 max-w-2xl text-lg leading-relaxed text-teal-200 sm:text-xl">
                                 {hero.subheading}
                             </p>
                             <div className="mt-10 flex flex-wrap items-center justify-center gap-4">
                                 <Link
                                     href={hero.cta_primary_link ?? '/courses'}
-                                    className="rounded-xl bg-primary px-8 py-4 text-base font-semibold text-on-primary shadow-lg transition-all duration-normal ease-spring hover:-translate-y-0.5 hover:bg-primary-hover hover:shadow-xl"
+                                    className="rounded-xl bg-accent px-8 py-4 text-base font-bold uppercase tracking-wide text-accent-fg shadow-lg transition-all duration-normal ease-spring hover:-translate-y-0.5 hover:bg-accent-hover hover:shadow-xl"
                                 >
                                     {hero.cta_primary_text ?? 'Explore Courses'}
                                 </Link>
                                 <Link
                                     href={hero.cta_secondary_link ?? '/demo-quiz'}
-                                    className="rounded-xl border-2 border-border-brand bg-surface px-8 py-4 text-base font-semibold text-secondary shadow-sm transition-all duration-normal hover:-translate-y-0.5 hover:border-primary hover:shadow-md"
+                                    className="rounded-xl border-2 border-teal-600 bg-white/5 px-8 py-4 text-base font-bold uppercase tracking-wide text-white backdrop-blur-glass transition-all duration-normal hover:-translate-y-0.5 hover:border-gold-400 hover:bg-white/10"
                                 >
                                     {hero.cta_secondary_text ?? 'Try Free Demo Quiz'}
                                 </Link>
@@ -73,16 +88,16 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                         </RevealOnScroll>
                     </div>
 
-                    {/* floating stat cards */}
+                    {/* floating stat cards — dark glass on the dark hero */}
                     {stats.length > 0 && (
                         <div className="mx-auto mt-20 grid max-w-4xl grid-cols-2 gap-4 sm:gap-6 md:grid-cols-4">
                             {stats.map((stat, i) => (
                                 <TiltCard key={i} max={8} className="rounded-2xl">
-                                    <div className="rounded-2xl border border-border-brand bg-surface/90 p-6 text-center shadow-lg backdrop-blur-glass">
-                                        <div className="text-2xl font-bold text-primary sm:text-3xl">
+                                    <div className="rounded-2xl border border-white/15 bg-white/[0.07] p-6 text-center shadow-xl backdrop-blur-glass">
+                                        <div className="font-display text-3xl text-gold-400 sm:text-4xl">
                                             <AnimatedCounter value={stat.number} />
                                         </div>
-                                        <div className="mt-1 text-sm text-text-secondary">{stat.label}</div>
+                                        <div className="mt-1 text-sm text-teal-200">{stat.label}</div>
                                     </div>
                                 </TiltCard>
                             ))}
@@ -93,20 +108,24 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
 
             {/* ---------------- Services / Bento grid ---------------- */}
             {services.length > 0 && (
-                <section className="mx-auto max-w-container px-4 py-20 sm:px-6 lg:px-8">
-                    <RevealOnScroll className="mx-auto mb-12 max-w-2xl text-center">
-                        <h2 className="text-3xl font-bold text-text sm:text-4xl">What We Prepare You For</h2>
+                <section className="mx-auto max-w-container px-4 py-24 sm:px-6 lg:px-8">
+                    <RevealOnScroll className="mx-auto mb-14 max-w-2xl text-center">
+                        <SectionKicker>What We Cover</SectionKicker>
+                        <h2 className="font-display text-4xl uppercase tracking-wide text-secondary sm:text-5xl">
+                            What We Prepare You For
+                        </h2>
                         <p className="mt-3 text-text-secondary">Structured training across every major service entry test.</p>
                     </RevealOnScroll>
                     <RevealOnScroll className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
                         {services.map((service, i) => (
                             <TiltCard key={i} className="h-full rounded-2xl">
-                                <div className="flex h-full flex-col rounded-2xl border border-border bg-surface p-6 shadow-sm transition-shadow duration-normal hover:shadow-lg">
-                                    <div className="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary-subtle text-primary">
+                                <div className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-surface p-6 shadow-sm transition-all duration-normal hover:-translate-y-1 hover:border-accent hover:shadow-xl">
+                                    <div className="absolute -right-6 -top-6 h-20 w-20 rounded-full bg-primary-subtle transition-transform duration-slow group-hover:scale-150" />
+                                    <div className="relative mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-on-primary shadow-md">
                                         <ServiceIcon name={service.icon} />
                                     </div>
-                                    <h3 className="text-lg font-semibold text-text">{service.title}</h3>
-                                    <p className="mt-2 flex-1 text-sm text-text-secondary">{service.description}</p>
+                                    <h3 className="relative text-lg font-bold text-text">{service.title}</h3>
+                                    <p className="relative mt-2 flex-1 text-sm text-text-secondary">{service.description}</p>
                                 </div>
                             </TiltCard>
                         ))}
@@ -118,27 +137,33 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
             {featuredCourses.length > 0 && (
                 <section className="bg-surface-sunken py-20">
                     <div className="mx-auto max-w-container px-4 sm:px-6 lg:px-8">
-                        <RevealOnScroll className="mb-12 flex flex-wrap items-end justify-between gap-4">
+                        <RevealOnScroll className="mb-14 flex flex-wrap items-end justify-between gap-4">
                             <div>
-                                <h2 className="text-3xl font-bold text-text sm:text-4xl">Featured Courses</h2>
-                                <p className="mt-2 text-text-secondary">Popular preparation tracks, updated regularly.</p>
+                                <SectionKicker>Popular Tracks</SectionKicker>
+                                <h2 className="font-display text-4xl uppercase tracking-wide text-text sm:text-5xl">Featured Courses</h2>
                             </div>
-                            <Link href="/courses" className="font-semibold text-primary hover:text-primary-hover">
-                                View all courses &rarr;
+                            <Link href="/courses" className="font-bold uppercase tracking-wide text-primary hover:text-primary-hover">
+                                View all &rarr;
                             </Link>
                         </RevealOnScroll>
                         <RevealOnScroll className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
                             {featuredCourses.map((course) => (
                                 <Link key={course.id} href={`/courses/${course.slug}`} className="group">
-                                    <div className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm transition-all duration-normal group-hover:-translate-y-1 group-hover:shadow-xl">
-                                        <div className="flex h-36 items-center justify-center bg-gradient-to-br from-teal-600 to-teal-900 text-sm font-semibold text-white">
-                                            {course.category?.name ?? 'Course'}
+                                    <div className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm transition-all duration-normal group-hover:-translate-y-1 group-hover:border-accent group-hover:shadow-xl">
+                                        <div className="relative flex h-36 items-center justify-center overflow-hidden bg-gradient-to-br from-teal-600 via-teal-800 to-teal-950">
+                                            <span
+                                                className="absolute -right-4 -top-4 h-16 w-16 rotate-12 rounded-lg"
+                                                style={{ backgroundColor: 'rgba(232, 193, 95, 0.2)' }}
+                                            />
+                                            <span className="relative font-display text-2xl uppercase tracking-widest text-white">
+                                                {course.category?.name ?? 'Course'}
+                                            </span>
                                         </div>
                                         <div className="p-5">
-                                            <h3 className="font-semibold text-text group-hover:text-primary">{course.title}</h3>
+                                            <h3 className="font-bold text-text group-hover:text-primary">{course.title}</h3>
                                             <p className="mt-1 line-clamp-2 text-sm text-text-secondary">{course.short_description}</p>
                                             <div className="mt-4 flex items-center justify-between text-sm">
-                                                <span className="font-semibold text-primary">{money(course.base_price)}</span>
+                                                <span className="font-bold text-primary">{money(course.base_price)}</span>
                                                 {course.hours && <span className="text-text-muted">{course.hours}h</span>}
                                             </div>
                                         </div>
@@ -152,20 +177,21 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
 
             {/* ---------------- Why Choose Us ---------------- */}
             {why.items && (
-                <section className="mx-auto max-w-container px-4 py-20 sm:px-6 lg:px-8">
+                <section className="mx-auto max-w-container px-4 py-24 sm:px-6 lg:px-8">
                     <RevealOnScroll className="mx-auto mb-4 max-w-2xl text-center">
-                        <h2 className="text-3xl font-bold text-text sm:text-4xl">Why Choose Us</h2>
+                        <SectionKicker>The Difference</SectionKicker>
+                        <h2 className="font-display text-4xl uppercase tracking-wide text-text sm:text-5xl">Why Choose Us</h2>
                         <p className="mt-3 text-text-secondary">{why.paragraph}</p>
                     </RevealOnScroll>
-                    <RevealOnScroll className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                    <RevealOnScroll className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                         {why.items.map((item: { title: string; description: string }, i: number) => (
-                            <div key={i} className="rounded-2xl border border-border bg-surface p-6 shadow-xs">
-                                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-success-bg text-success">
+                            <div key={i} className="rounded-2xl border border-border bg-surface p-6 shadow-xs transition-shadow duration-normal hover:shadow-md">
+                                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-accent text-accent-fg">
                                     <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
                                     </svg>
                                 </div>
-                                <h3 className="font-semibold text-text">{item.title}</h3>
+                                <h3 className="font-bold text-text">{item.title}</h3>
                                 <p className="mt-1 text-sm text-text-secondary">{item.description}</p>
                             </div>
                         ))}
@@ -175,16 +201,18 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
 
             {/* ---------------- How It Works ---------------- */}
             {howItWorks.steps && (
-                <section className="bg-secondary py-20 text-text-inverse">
-                    <div className="mx-auto max-w-container px-4 sm:px-6 lg:px-8">
-                        <RevealOnScroll className="mx-auto mb-14 max-w-2xl text-center">
-                            <h2 className="text-3xl font-bold sm:text-4xl">How It Works</h2>
+                <section className="relative overflow-hidden bg-gradient-to-br from-secondary to-teal-950 py-24 text-text-inverse">
+                    <GradientMesh className="opacity-60" />
+                    <div className="relative mx-auto max-w-container px-4 sm:px-6 lg:px-8">
+                        <RevealOnScroll className="mx-auto mb-16 max-w-2xl text-center">
+                            <SectionKicker dark>The Process</SectionKicker>
+                            <h2 className="font-display text-4xl uppercase tracking-wide sm:text-5xl">How It Works</h2>
                         </RevealOnScroll>
                         <RevealOnScroll className="grid gap-8 md:grid-cols-3">
                             {howItWorks.steps.map((step: { title: string; description: string }, i: number) => (
-                                <div key={i} className="relative rounded-2xl border border-teal-800 bg-teal-800/40 p-8 backdrop-blur-glass">
-                                    <div className="mb-4 text-4xl font-bold text-teal-400">0{i + 1}</div>
-                                    <h3 className="text-lg font-semibold">{step.title}</h3>
+                                <div key={i} className="relative rounded-2xl border border-white/15 bg-white/[0.06] p-8 backdrop-blur-glass transition-transform duration-normal hover:-translate-y-1">
+                                    <div className="mb-4 font-display text-5xl text-gold-400">0{i + 1}</div>
+                                    <h3 className="text-lg font-bold">{step.title}</h3>
                                     <p className="mt-2 text-sm text-teal-200">{step.description}</p>
                                 </div>
                             ))}
@@ -195,22 +223,25 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
 
             {/* ---------------- Latest News ---------------- */}
             {latestNews.length > 0 && (
-                <section className="mx-auto max-w-container px-4 py-20 sm:px-6 lg:px-8">
-                    <RevealOnScroll className="mb-12 flex flex-wrap items-end justify-between gap-4">
-                        <h2 className="text-3xl font-bold text-text sm:text-4xl">Latest News</h2>
-                        <Link href="/news" className="font-semibold text-primary hover:text-primary-hover">
-                            View all news &rarr;
+                <section className="mx-auto max-w-container px-4 py-24 sm:px-6 lg:px-8">
+                    <RevealOnScroll className="mb-14 flex flex-wrap items-end justify-between gap-4">
+                        <div>
+                            <SectionKicker>Stay Updated</SectionKicker>
+                            <h2 className="font-display text-4xl uppercase tracking-wide text-text sm:text-5xl">Latest News</h2>
+                        </div>
+                        <Link href="/news" className="font-bold uppercase tracking-wide text-primary hover:text-primary-hover">
+                            View all &rarr;
                         </Link>
                     </RevealOnScroll>
                     <RevealOnScroll className="grid gap-6 sm:grid-cols-3">
                         {latestNews.map((item, i) => (
-                            <div key={i} className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
+                            <div key={i} className="rounded-2xl border border-border bg-surface p-6 shadow-sm transition-shadow duration-normal hover:shadow-md">
                                 {item.organization && (
-                                    <span className="mb-3 inline-block rounded-full bg-primary-subtle px-3 py-1 text-xs font-semibold text-primary">
+                                    <span className="mb-3 inline-block rounded-full bg-accent px-3 py-1 text-xs font-bold uppercase tracking-wide text-accent-fg">
                                         {item.organization}
                                     </span>
                                 )}
-                                <h3 className="font-semibold text-text">{item.title}</h3>
+                                <h3 className="font-bold text-text">{item.title}</h3>
                                 <p className="mt-1 line-clamp-2 text-sm text-text-secondary">{item.description}</p>
                             </div>
                         ))}
@@ -221,13 +252,16 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
             {/* ---------------- Demo Quiz Teaser ---------------- */}
             <section className="mx-auto max-w-container px-4 pb-8 sm:px-6 lg:px-8">
                 <RevealOnScroll>
-                    <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-600 to-teal-900 p-10 text-center text-white shadow-xl sm:p-16">
+                    <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-700 via-teal-800 to-teal-950 p-10 text-center text-white shadow-2xl sm:p-16">
                         <GradientMesh />
                         <div className="relative">
-                            <h2 className="text-2xl font-bold sm:text-3xl">{demoTeaser.banner_text}</h2>
+                            <SectionKicker dark>
+                                <span className="mx-auto">No Login Required</span>
+                            </SectionKicker>
+                            <h2 className="font-display text-3xl uppercase tracking-wide sm:text-4xl">{demoTeaser.banner_text}</h2>
                             <Link
                                 href={demoTeaser.button_link ?? '/demo-quiz'}
-                                className="mt-6 inline-block rounded-xl bg-white px-8 py-4 font-semibold text-secondary shadow-lg transition-transform duration-normal ease-spring hover:-translate-y-0.5"
+                                className="mt-8 inline-block rounded-xl bg-accent px-8 py-4 font-bold uppercase tracking-wide text-accent-fg shadow-lg transition-transform duration-normal ease-spring hover:-translate-y-0.5 hover:bg-accent-hover"
                             >
                                 {demoTeaser.button_text ?? 'Start Demo Quiz'}
                             </Link>
@@ -238,9 +272,10 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
 
             {/* ---------------- FAQs ---------------- */}
             {faqs.length > 0 && (
-                <section className="mx-auto max-w-container px-4 py-20 sm:px-6 lg:px-8">
-                    <RevealOnScroll className="mx-auto mb-12 max-w-2xl text-center">
-                        <h2 className="text-3xl font-bold text-text sm:text-4xl">Frequently Asked Questions</h2>
+                <section className="mx-auto max-w-container px-4 py-24 sm:px-6 lg:px-8">
+                    <RevealOnScroll className="mx-auto mb-14 max-w-2xl text-center">
+                        <SectionKicker>Got Questions?</SectionKicker>
+                        <h2 className="font-display text-4xl uppercase tracking-wide text-text sm:text-5xl">Frequently Asked</h2>
                     </RevealOnScroll>
                     <div className="mx-auto max-w-2xl divide-y divide-border rounded-2xl border border-border bg-surface">
                         {faqs.map((faq, i) => (
@@ -252,16 +287,17 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
 
             {/* ---------------- Testimonials ---------------- */}
             {testimonials.length > 0 && (
-                <section className="bg-surface-sunken py-20">
+                <section className="bg-surface-sunken py-24">
                     <div className="mx-auto max-w-container px-4 sm:px-6 lg:px-8">
-                        <RevealOnScroll className="mx-auto mb-12 max-w-2xl text-center">
-                            <h2 className="text-3xl font-bold text-text sm:text-4xl">Success Stories</h2>
+                        <RevealOnScroll className="mx-auto mb-14 max-w-2xl text-center">
+                            <SectionKicker>Real Results</SectionKicker>
+                            <h2 className="font-display text-4xl uppercase tracking-wide text-text sm:text-5xl">Success Stories</h2>
                         </RevealOnScroll>
                         <RevealOnScroll className="grid gap-6 md:grid-cols-3">
                             {testimonials.map((t, i) => (
-                                <div key={i} className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
+                                <div key={i} className="rounded-2xl border border-border bg-surface p-6 shadow-sm transition-shadow duration-normal hover:shadow-md">
                                     {t.rating && (
-                                        <div className="mb-3 flex gap-0.5 text-warning">
+                                        <div className="mb-3 flex gap-0.5 text-gold-500">
                                             {Array.from({ length: 5 }).map((_, s) => (
                                                 <svg key={s} className="h-4 w-4" fill={s < t.rating! ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 20 20">
                                                     <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
@@ -281,12 +317,19 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
             {/* ---------------- CTA Footer Banner ---------------- */}
             <section className="mx-auto max-w-container px-4 pb-24 sm:px-6 lg:px-8">
                 <RevealOnScroll>
-                    <div className="rounded-3xl border border-border-brand bg-surface-brand p-10 text-center sm:p-16">
-                        <h2 className="text-3xl font-bold text-secondary sm:text-4xl">{ctaFooter.heading}</h2>
-                        <p className="mt-3 text-text-secondary">{ctaFooter.subheading}</p>
+                    <div className="relative overflow-hidden rounded-3xl border-2 border-accent bg-surface-brand p-10 text-center sm:p-16">
+                        <div
+                            aria-hidden
+                            className="absolute -right-10 -top-10 h-40 w-40 rotate-12 rounded-3xl"
+                            style={{ backgroundColor: 'rgba(212, 165, 55, 0.1)' }}
+                        />
+                        <h2 className="relative font-display text-4xl uppercase tracking-wide text-secondary sm:text-5xl">
+                            {ctaFooter.heading}
+                        </h2>
+                        <p className="relative mt-3 text-text-secondary">{ctaFooter.subheading}</p>
                         <Link
                             href={ctaFooter.button_link ?? '/register'}
-                            className="mt-8 inline-block rounded-xl bg-primary px-10 py-4 font-semibold text-on-primary shadow-lg transition-all duration-normal ease-spring hover:-translate-y-0.5 hover:bg-primary-hover"
+                            className="relative mt-8 inline-block rounded-xl bg-accent px-10 py-4 font-bold uppercase tracking-wide text-accent-fg shadow-lg transition-all duration-normal ease-spring hover:-translate-y-0.5 hover:bg-accent-hover"
                         >
                             {ctaFooter.button_text ?? 'Register Now'}
                         </Link>

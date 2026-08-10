@@ -170,6 +170,21 @@ class SiteContentSeeder extends Seeder
             'order' => 2,
             'is_active' => true,
         ]);
+        Faq::updateOrCreate(['question' => 'What is your refund policy?', 'page' => 'how_to_buy'], [
+            'answer' => 'Contact support within 3 days of purchase if you have not started the course.', // PLACEHOLDER, confirm wording
+            'order' => 1,
+            'is_active' => true,
+        ]);
+        Faq::updateOrCreate(['question' => 'How long do I have access after payment?', 'page' => 'how_to_buy'], [
+            'answer' => 'Access duration depends on the package you choose — see validity on each package above.', // PLACEHOLDER
+            'order' => 2,
+            'is_active' => true,
+        ]);
+        Faq::updateOrCreate(['question' => 'What happens after I pay?', 'page' => 'how_to_buy'], [
+            'answer' => 'Our team verifies your payment and activates your access, usually within a day.', // PLACEHOLDER
+            'order' => 3,
+            'is_active' => true,
+        ]);
 
         // --- Testimonials — PLACEHOLDER only. Per the client's explicit
         // instruction, real testimonials must be admin-created real

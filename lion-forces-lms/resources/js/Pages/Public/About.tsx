@@ -13,10 +13,10 @@ export default function About({ instructors, section }: Props) {
         <PublicLayout>
             <Head title="About Us" />
 
-            <section className="bg-surface-brand py-20">
-                <div className="mx-auto max-w-container px-4 text-center sm:px-6 lg:px-8">
-                    <h1 className="text-4xl font-bold text-secondary sm:text-5xl">About Lion Forces Academy</h1>
-                    <p className="mx-auto mt-4 max-w-2xl text-text-secondary">
+            <section className="relative overflow-hidden bg-gradient-to-br from-secondary to-teal-950 py-24 text-center">
+                <div className="relative mx-auto max-w-container px-4 sm:px-6 lg:px-8">
+                    <h1 className="font-display text-5xl uppercase tracking-wide text-white sm:text-6xl">About Lion Forces Academy</h1>
+                    <p className="mx-auto mt-4 max-w-2xl text-teal-200">
                         A modern, results-driven learning platform built for Pakistan Armed Forces test preparation. We
                         provide structured training, smart assessments, and performance tracking to help candidates
                         prepare with confidence and clarity.
@@ -27,7 +27,7 @@ export default function About({ instructors, section }: Props) {
             {section?.content.items && (
                 <section className="mx-auto max-w-container px-4 py-20 sm:px-6 lg:px-8">
                     <RevealOnScroll className="mx-auto mb-4 max-w-2xl text-center">
-                        <h2 className="text-3xl font-bold text-text">Our Core Values</h2>
+                        <h2 className="font-display text-4xl uppercase tracking-wide text-text">Our Core Values</h2>
                         <p className="mt-3 text-text-secondary">{section.content.paragraph}</p>
                     </RevealOnScroll>
                     <RevealOnScroll className="mt-10 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
@@ -45,7 +45,7 @@ export default function About({ instructors, section }: Props) {
                 <section className="bg-surface-sunken py-20">
                     <div className="mx-auto max-w-container px-4 sm:px-6 lg:px-8">
                         <RevealOnScroll className="mx-auto mb-12 max-w-2xl text-center">
-                            <h2 className="text-3xl font-bold text-text">Our Instructors</h2>
+                            <h2 className="font-display text-4xl uppercase tracking-wide text-text">Our Instructors</h2>
                         </RevealOnScroll>
                         <RevealOnScroll className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                             {instructors.map((instructor, i) => (

@@ -20,9 +20,9 @@ export default function Contact({ faqs }: { faqs: FaqItem[] }) {
         <PublicLayout>
             <Head title="Contact Us" />
 
-            <section className="bg-surface-brand py-16 text-center">
-                <h1 className="text-4xl font-bold text-secondary">Contact Us</h1>
-                <p className="mx-auto mt-3 max-w-xl text-text-secondary">
+            <section className="bg-gradient-to-br from-secondary to-teal-950 py-20 text-center">
+                <h1 className="font-display text-5xl uppercase tracking-wide text-white">Contact Us</h1>
+                <p className="mx-auto mt-3 max-w-xl text-teal-200">
                     Have a question or feedback? Send us a message and we'll get back to you as soon as possible.
                 </p>
             </section>

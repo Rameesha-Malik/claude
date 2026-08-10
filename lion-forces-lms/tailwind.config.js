@@ -17,6 +17,7 @@ export default {
             fontFamily: {
                 sans: ['Plus Jakarta Sans', ...defaultTheme.fontFamily.sans],
                 urdu: ['Noto Nastaliq Urdu', ...defaultTheme.fontFamily.sans],
+                display: ['Bebas Neue', 'Anton', ...defaultTheme.fontFamily.sans],
             },
             // Every utility below resolves to resources/css/tokens.css.
             // Never hardcode a hex in a component — extend tokens.css instead.
@@ -52,6 +53,15 @@ export default {
                     DEFAULT: 'var(--color-secondary)',
                     hover: 'var(--color-secondary-hover)',
                     fg: 'var(--color-on-secondary)',
+                },
+                accent: {
+                    DEFAULT: 'var(--color-accent)',
+                    hover: 'var(--color-accent-hover)',
+                    fg: 'var(--color-on-accent)',
+                },
+                gold: {
+                    300: 'var(--gold-300)', 400: 'var(--gold-400)', 500: 'var(--gold-500)',
+                    600: 'var(--gold-600)', 700: 'var(--gold-700)',
                 },
                 success: { DEFAULT: 'var(--color-success)', bg: 'var(--color-success-bg)' },
                 warning: { DEFAULT: 'var(--color-warning)', bg: 'var(--color-warning-bg)' },
