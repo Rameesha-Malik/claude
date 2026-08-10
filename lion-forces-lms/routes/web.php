@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
+use App\Http\Controllers\Admin\StudentController as AdminStudentController;
 use App\Http\Controllers\Admin\WebsiteController as AdminWebsiteController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicSiteController;
@@ -69,6 +70,14 @@ Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->nam
         Route::post('/testimonials', [AdminWebsiteController::class, 'storeTestimonial'])->name('testimonials.store');
         Route::put('/testimonials/{testimonial}', [AdminWebsiteController::class, 'updateTestimonial'])->name('testimonials.update');
         Route::delete('/testimonials/{testimonial}', [AdminWebsiteController::class, 'destroyTestimonial'])->name('testimonials.destroy');
+    });
+
+    Route::prefix('students')->name('students.')->group(function () {
+        Route::get('/', [AdminStudentController::class, 'index'])->name('index');
+        Route::get('/{student}', [AdminStudentController::class, 'show'])->name('show');
+        Route::post('/{student}/toggle-suspend', [AdminStudentController::class, 'toggleSuspend'])->name('toggle-suspend');
+        Route::post('/{student}/enroll', [AdminStudentController::class, 'enroll'])->name('enroll');
+        Route::put('/enrollments/{enrollment}/status', [AdminStudentController::class, 'updateEnrollmentStatus'])->name('enrollments.status');
     });
 });
 
