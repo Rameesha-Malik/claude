@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
 use App\Models\Course;
+use App\Models\CourseReview;
 use App\Models\Enrollment;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -61,13 +62,35 @@ class CourseController extends Controller
             ->latest()
             ->get();
 
+        $myReview = CourseReview::where('course_id', $course->id)->where('user_id', $user->id)->first();
+
         return Inertia::render('Student/CourseLearning', [
             'course' => $course,
             'enrollment' => $enrollment,
             'personalNotes' => $personalNotes,
             'lessonProgress' => $lessonProgress,
             'questions' => $questions,
+            'myReview' => $myReview,
         ]);
+    }
+
+    public function submitReview(Request $request, Course $course)
+    {
+        Enrollment::where('user_id', $request->user()->id)->where('course_id', $course->id)->where('status', 'active')->firstOrFail();
+
+        $data = $request->validate([
+            'rating' => 'required|integer|min:1|max:5',
+            'review_text' => 'nullable|string|max:2000',
+        ]);
+
+        // Editing an existing review sends it back to pending -- moderation
+        // applies to the current content, not just the first submission.
+        CourseReview::updateOrCreate(
+            ['course_id' => $course->id, 'user_id' => $request->user()->id],
+            ['rating' => $data['rating'], 'review_text' => $data['review_text'] ?? null, 'status' => 'pending'],
+        );
+
+        return back()->with('success', 'Thanks! Your review will appear once approved.');
     }
 
     public function markLessonComplete(Request $request, \App\Models\Lesson $lesson)

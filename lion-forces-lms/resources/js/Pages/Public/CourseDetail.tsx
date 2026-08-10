@@ -3,6 +3,7 @@ import PublicLayout from '@/Layouts/PublicLayout';
 
 interface Package { id: number; name: string; description: string | null; price: string; validity_days: number | null }
 interface Lesson { id: number; title: string; type: string }
+interface Review { id: number; rating: number; review_text: string | null; user: { name: string } | null }
 interface Course {
     title: string; short_description: string | null; description: string | null; syllabus: string | null;
     base_price: string | null; hours: number | null;
@@ -10,6 +11,11 @@ interface Course {
     instructor: { name: string; photo_path: string | null; qualification: string | null; experience: string | null; bio: string | null } | null;
     packages: Package[];
     lessons: Lesson[];
+    approved_reviews: Review[];
+}
+
+function Stars({ rating }: { rating: number }) {
+    return <span className="text-gold-500">{'★'.repeat(rating)}{'☆'.repeat(5 - rating)}</span>;
 }
 
 export default function CourseDetail({ course }: { course: Course }) {
@@ -59,6 +65,28 @@ export default function CourseDetail({ course }: { course: Course }) {
                             <div className="mt-2 text-lg font-semibold text-primary">{course.instructor.name}</div>
                             <div className="text-sm text-text-secondary">{course.instructor.qualification}</div>
                             <p className="mt-2 text-sm text-text-secondary">{course.instructor.bio}</p>
+                        </div>
+                    )}
+
+                    {course.approved_reviews.length > 0 && (
+                        <div className="mt-10">
+                            <h2 className="text-xl font-semibold text-text">
+                                Student Reviews
+                                <span className="ml-2 text-sm font-normal text-text-secondary">
+                                    ({(course.approved_reviews.reduce((s, r) => s + r.rating, 0) / course.approved_reviews.length).toFixed(1)} avg · {course.approved_reviews.length} review{course.approved_reviews.length === 1 ? '' : 's'})
+                                </span>
+                            </h2>
+                            <div className="mt-3 space-y-3">
+                                {course.approved_reviews.map((r) => (
+                                    <div key={r.id} className="rounded-xl border border-border bg-surface p-4">
+                                        <div className="flex items-center justify-between">
+                                            <Stars rating={r.rating} />
+                                            <span className="text-sm font-semibold text-text">{r.user?.name ?? 'Student'}</span>
+                                        </div>
+                                        {r.review_text && <p className="mt-2 text-sm text-text-secondary">{r.review_text}</p>}
+                                    </div>
+                                ))}
+                            </div>
                         </div>
                     )}
                 </div>

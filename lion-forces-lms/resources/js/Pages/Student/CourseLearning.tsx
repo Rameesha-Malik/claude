@@ -21,11 +21,13 @@ interface Course {
     instructor: { name: string } | null; practice_tests: PracticeTestSummary[]; mock_exams: MockExamSummary[];
     staged_tests: StagedTestSummary[];
 }
+interface Review { id: number; rating: number; review_text: string | null; status: string }
 interface Props {
     course: Course;
     personalNotes: Note[];
     lessonProgress: Record<number, { is_completed: boolean }>;
     questions: Question[];
+    myReview: Review | null;
 }
 
 const TABS = ['Lectures', 'Notes', 'Quizzes', 'Flashcards', 'Tests', 'Q&A'] as const;
@@ -95,7 +97,7 @@ function LessonPlayer({ lesson }: { lesson: Lesson }) {
     }
 }
 
-export default function CourseLearning({ course, personalNotes, lessonProgress, questions }: Props) {
+export default function CourseLearning({ course, personalNotes, lessonProgress, questions, myReview }: Props) {
     const [tab, setTab] = useState<Tab>('Lectures');
     const [activeLesson, setActiveLesson] = useState<Lesson | null>(course.lessons[0] ?? null);
 
@@ -116,6 +118,8 @@ export default function CourseLearning({ course, personalNotes, lessonProgress, 
                     </button>
                 ))}
             </div>
+
+            <ReviewWidget course={course} myReview={myReview} />
 
             {tab === 'Lectures' && (
                 <div className="grid gap-6 lg:grid-cols-3">
@@ -346,5 +350,68 @@ function QaPanel({ course, questions }: { course: Course; questions: Question[] 
                 ))}
             </div>
         </div>
+    );
+}
+
+const STATUS_LABEL: Record<string, string> = {
+    pending: 'Pending review by admin',
+    approved: 'Live on the course page',
+    hidden: 'Hidden by admin',
+};
+
+function ReviewWidget({ course, myReview }: { course: Course; myReview: Review | null }) {
+    const [open, setOpen] = useState(false);
+    const { data, setData, post, processing } = useForm({
+        rating: myReview?.rating ?? 5,
+        review_text: myReview?.review_text ?? '',
+    });
+
+    function submit(e: React.FormEvent) {
+        e.preventDefault();
+        post(`/portal/courses/${course.slug}/review`, { onSuccess: () => setOpen(false), preserveScroll: true });
+    }
+
+    if (!open) {
+        return (
+            <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-surface p-4">
+                <div className="text-sm text-text-secondary">
+                    {myReview ? (
+                        <>Your review: <span className="text-gold-500">{'★'.repeat(myReview.rating)}{'☆'.repeat(5 - myReview.rating)}</span> · {STATUS_LABEL[myReview.status]}</>
+                    ) : (
+                        'Enjoying this course? Leave a rating to help other students.'
+                    )}
+                </div>
+                <button onClick={() => setOpen(true)} className="text-sm font-bold uppercase text-primary hover:underline">
+                    {myReview ? 'Edit Review' : 'Rate This Course'}
+                </button>
+            </div>
+        );
+    }
+
+    return (
+        <form onSubmit={submit} className="mb-6 space-y-3 rounded-2xl border border-primary bg-surface p-5">
+            <div className="flex items-center gap-1">
+                {[1, 2, 3, 4, 5].map((n) => (
+                    <button key={n} type="button" onClick={() => setData('rating', n)} className="text-2xl text-gold-500" aria-label={`${n} stars`}>
+                        {n <= data.rating ? '★' : '☆'}
+                    </button>
+                ))}
+            </div>
+            <textarea
+                rows={3}
+                value={data.review_text}
+                onChange={(e) => setData('review_text', e.target.value)}
+                placeholder="What did you think of this course? (optional)"
+                className="w-full rounded-lg border border-border p-3 text-sm focus:border-primary focus:shadow-glow focus:outline-none"
+            />
+            <div className="flex gap-3">
+                <button type="submit" disabled={processing} className="rounded-lg bg-primary px-5 py-2 text-sm font-bold uppercase tracking-wide text-on-primary hover:bg-primary-hover disabled:opacity-50">
+                    Submit Review
+                </button>
+                <button type="button" onClick={() => setOpen(false)} className="rounded-lg border border-border px-5 py-2 text-sm font-bold uppercase text-text hover:border-primary">
+                    Cancel
+                </button>
+            </div>
+        </form>
     );
 }

@@ -15,6 +15,7 @@ use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
 use App\Http\Controllers\Admin\PracticeTestController as AdminPracticeTestController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Admin\ResourceController as AdminResourceController;
+use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
 use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
 use App\Http\Controllers\Admin\StagedTestController as AdminStagedTestController;
 use App\Http\Controllers\Admin\StudentController as AdminStudentController;
@@ -72,6 +73,7 @@ Route::middleware(['auth', 'verified', 'user_type:student'])->prefix('portal')->
     Route::get('/my-courses/{course:slug}', [StudentCourseController::class, 'show'])->name('student.courses.show');
     Route::post('/lessons/{lesson}/complete', [StudentCourseController::class, 'markLessonComplete'])->name('student.lessons.complete');
     Route::post('/courses/{course:slug}/questions', [StudentCourseController::class, 'askQuestion'])->name('student.questions.store');
+    Route::post('/courses/{course:slug}/review', [StudentCourseController::class, 'submitReview'])->name('student.reviews.store');
 
     Route::get('/practice-tests/{practiceTest}', [StudentPracticeTestController::class, 'show'])->name('student.practice-tests.show');
     Route::post('/practice-tests/{practiceTest}/submit', [StudentPracticeTestController::class, 'submit'])->name('student.practice-tests.submit');
@@ -241,6 +243,13 @@ Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->nam
     Route::prefix('notifications')->name('notifications.')->group(function () {
         Route::get('/', [AdminNotificationController::class, 'index'])->name('index');
         Route::post('/', [AdminNotificationController::class, 'store'])->name('store');
+    });
+
+    Route::prefix('reviews')->name('reviews.')->group(function () {
+        Route::get('/', [AdminReviewController::class, 'index'])->name('index');
+        Route::post('/{review}/approve', [AdminReviewController::class, 'approve'])->name('approve');
+        Route::post('/{review}/hide', [AdminReviewController::class, 'hide'])->name('hide');
+        Route::delete('/{review}', [AdminReviewController::class, 'destroy'])->name('destroy');
     });
 
     Route::prefix('demo-quiz')->name('demo-quiz.')->group(function () {
