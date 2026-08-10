@@ -1,19 +1,25 @@
-import ApplicationLogo from '@/Components/ApplicationLogo';
-import { Link } from '@inertiajs/react';
+import GradientMesh from '@/Components/GradientMesh';
+import { Link, usePage } from '@inertiajs/react';
 import { PropsWithChildren } from 'react';
+import { PageProps } from '@/types';
 
 export default function Guest({ children }: PropsWithChildren) {
-    return (
-        <div className="flex min-h-screen flex-col items-center bg-gray-100 pt-6 sm:justify-center sm:pt-0 dark:bg-gray-900">
-            <div>
-                <Link href="/">
-                    <ApplicationLogo className="h-20 w-20 fill-current text-gray-500" />
-                </Link>
-            </div>
+    const { site } = usePage<PageProps>().props;
 
-            <div className="mt-6 w-full overflow-hidden bg-white px-6 py-4 shadow-md sm:max-w-md sm:rounded-lg dark:bg-gray-800">
+    return (
+        <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden bg-gradient-to-br from-secondary via-teal-900 to-teal-950 px-4 py-12">
+            <GradientMesh />
+
+            <Link href="/" className="relative z-10 mb-8 flex items-center gap-2 text-lg font-bold text-white">
+                <span className="flex h-10 w-10 items-center justify-center rounded-lg bg-accent text-accent-fg">LF</span>
+                {site.name}
+            </Link>
+
+            <div className="relative z-10 w-full overflow-hidden rounded-2xl bg-surface px-6 py-8 shadow-2xl sm:max-w-md sm:px-8">
                 {children}
             </div>
+
+            <p className="relative z-10 mt-6 text-sm text-teal-300">{site.tagline}</p>
         </div>
     );
 }
