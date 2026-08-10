@@ -1,4 +1,4 @@
-import { Head, router, useForm } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
 import { useState } from 'react';
 import AdminLayout from '@/Layouts/AdminLayout';
 
@@ -143,6 +143,16 @@ export default function CourseForm({ course, categories, instructors }: Props) {
 
                 {isEdit && (
                     <div className="space-y-6">
+                        <div className="rounded-2xl border border-border bg-surface p-5">
+                            <h3 className="mb-3 font-bold text-text">Assessment Engine</h3>
+                            <p className="mb-3 text-sm text-text-secondary">Build practice tests using questions from the Content Library.</p>
+                            <Link
+                                href={`/admin/courses/${course!.id}/practice-tests`}
+                                className="block w-full rounded-lg border border-primary py-2 text-center text-sm font-bold uppercase tracking-wide text-primary hover:bg-primary-subtle"
+                            >
+                                Manage Practice Tests
+                            </Link>
+                        </div>
                         <PackagesPanel course={course!} />
                         <LessonsPanel course={course!} />
                     </div>

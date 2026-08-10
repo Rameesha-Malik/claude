@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphTo;
 
-#[Fillable(['user_id', 'status', 'score', 'total_marks', 'percentage', 'passed', 'started_at', 'submitted_at'])]
+#[Fillable(['user_id', 'attemptable_type', 'attemptable_id', 'status', 'score', 'total_marks', 'percentage', 'passed', 'started_at', 'submitted_at'])]
 class TestAttempt extends Model
 {
     use HasFactory;

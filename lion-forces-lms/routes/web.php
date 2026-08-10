@@ -9,6 +9,7 @@ use App\Http\Controllers\Admin\HallOfFameController as AdminHallOfFameController
 use App\Http\Controllers\Admin\InstructorController as AdminInstructorController;
 use App\Http\Controllers\Admin\NewsController as AdminNewsController;
 use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
+use App\Http\Controllers\Admin\PracticeTestController as AdminPracticeTestController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Admin\ResourceController as AdminResourceController;
 use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
@@ -18,6 +19,7 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicSiteController;
 use App\Http\Controllers\Student\CourseController as StudentCourseController;
 use App\Http\Controllers\Student\DashboardController as StudentDashboardController;
+use App\Http\Controllers\Student\PracticeTestController as StudentPracticeTestController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [PublicSiteController::class, 'home'])->name('home');
@@ -55,6 +57,10 @@ Route::middleware(['auth', 'verified', 'user_type:student'])->prefix('portal')->
     Route::get('/my-courses/{course:slug}', [StudentCourseController::class, 'show'])->name('student.courses.show');
     Route::post('/lessons/{lesson}/complete', [StudentCourseController::class, 'markLessonComplete'])->name('student.lessons.complete');
     Route::post('/courses/{course:slug}/questions', [StudentCourseController::class, 'askQuestion'])->name('student.questions.store');
+
+    Route::get('/practice-tests/{practiceTest}', [StudentPracticeTestController::class, 'show'])->name('student.practice-tests.show');
+    Route::post('/practice-tests/{practiceTest}/submit', [StudentPracticeTestController::class, 'submit'])->name('student.practice-tests.submit');
+    Route::get('/attempts/{attempt}', [StudentPracticeTestController::class, 'showResult'])->name('student.attempts.show');
 });
 
 Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -113,6 +119,15 @@ Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->nam
         Route::post('/{course}/lessons', [AdminCourseController::class, 'storeLesson'])->name('lessons.store');
         Route::put('/lessons/{lesson}', [AdminCourseController::class, 'updateLesson'])->name('lessons.update');
         Route::delete('/lessons/{lesson}', [AdminCourseController::class, 'destroyLesson'])->name('lessons.destroy');
+
+        Route::prefix('{course}/practice-tests')->name('practice-tests.')->group(function () {
+            Route::get('/', [AdminPracticeTestController::class, 'index'])->name('index');
+            Route::get('/create', [AdminPracticeTestController::class, 'create'])->name('create');
+            Route::post('/', [AdminPracticeTestController::class, 'store'])->name('store');
+            Route::get('/{practiceTest}/edit', [AdminPracticeTestController::class, 'edit'])->name('edit');
+            Route::put('/{practiceTest}', [AdminPracticeTestController::class, 'update'])->name('update');
+            Route::delete('/{practiceTest}', [AdminPracticeTestController::class, 'destroy'])->name('destroy');
+        });
     });
 
     Route::prefix('content-library')->name('content-library.')->group(function () {

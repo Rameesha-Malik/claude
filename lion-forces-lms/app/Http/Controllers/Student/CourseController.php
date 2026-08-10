@@ -34,6 +34,7 @@ class CourseController extends Controller
             'lessons' => fn ($q) => $q->orderBy('order'),
             'sharedNotes',
             'instructor',
+            'practiceTests' => fn ($q) => $q->where('is_active', true)->withCount('questions'),
         ]);
 
         // Personal/Guaranteed notes: assigned directly to this student, or
