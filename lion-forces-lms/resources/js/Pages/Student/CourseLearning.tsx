@@ -13,9 +13,13 @@ interface PracticeTestSummary {
 interface MockExamSummary {
     id: number; title: string; target_exam_name: string | null; total_duration_minutes: number | null; sections_count: number;
 }
+interface StagedTestSummary {
+    id: number; title: string; target_exam_name: string | null; stages_count: number;
+}
 interface Course {
     id: number; slug: string; title: string; lessons: Lesson[]; shared_notes: Note[];
     instructor: { name: string } | null; practice_tests: PracticeTestSummary[]; mock_exams: MockExamSummary[];
+    staged_tests: StagedTestSummary[];
 }
 interface Props {
     course: Course;
@@ -242,6 +246,34 @@ export default function CourseLearning({ course, personalNotes, lessonProgress, 
                             {course.mock_exams.length === 0 && (
                                 <div className="rounded-2xl border border-dashed border-border bg-surface p-8 text-center text-text-secondary">
                                     No mock exams available for this course yet.
+                                </div>
+                            )}
+                        </div>
+                    </div>
+
+                    <div>
+                        <h3 className="mb-3 font-bold text-text">Staged Tests</h3>
+                        <div className="space-y-3">
+                            {course.staged_tests.map((t) => (
+                                <div key={t.id} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-surface p-5">
+                                    <div>
+                                        <h4 className="font-semibold text-text">{t.title}</h4>
+                                        <p className="text-sm text-text-secondary">
+                                            {t.stages_count} stage{t.stages_count === 1 ? '' : 's'}
+                                            {t.target_exam_name ? ` · ${t.target_exam_name} pattern` : ''}
+                                        </p>
+                                    </div>
+                                    <Link
+                                        href={`/portal/staged-tests/${t.id}`}
+                                        className="rounded-lg bg-accent px-5 py-2 text-sm font-bold uppercase tracking-wide text-on-accent hover:opacity-90"
+                                    >
+                                        View Test
+                                    </Link>
+                                </div>
+                            ))}
+                            {course.staged_tests.length === 0 && (
+                                <div className="rounded-2xl border border-dashed border-border bg-surface p-8 text-center text-text-secondary">
+                                    No staged tests available for this course yet.
                                 </div>
                             )}
                         </div>

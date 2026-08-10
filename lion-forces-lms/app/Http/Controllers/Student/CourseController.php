@@ -36,6 +36,7 @@ class CourseController extends Controller
             'instructor',
             'practiceTests' => fn ($q) => $q->where('is_active', true)->withCount('questions'),
             'mockExams' => fn ($q) => $q->where('is_active', true)->withCount('sections'),
+            'stagedTests' => fn ($q) => $q->where('is_active', true)->withCount('stages'),
         ]);
 
         // Personal/Guaranteed notes: assigned directly to this student, or

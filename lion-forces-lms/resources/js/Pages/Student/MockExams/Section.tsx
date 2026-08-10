@@ -29,6 +29,18 @@ export default function MockExamSectionPage({ mockExam, attemptId, section, sect
     const initialSeconds = (section.duration_minutes ?? 0) * 60;
     const [secondsLeft, setSecondsLeft] = useState(initialSeconds);
 
+    // Inertia reuses this same component instance across section-to-section
+    // navigation (same page component, new props) rather than remounting
+    // it -- without this, `answers`/`submitting`/`secondsLeft` from the
+    // PREVIOUS section would leak into the next one, permanently disabling
+    // the submit button (stuck "Saving...") since `submitting` never reset.
+    useEffect(() => {
+        setAnswers({});
+        setSubmitting(false);
+        setSecondsLeft(initialSeconds);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [section.id]);
+
     useEffect(() => {
         if (mockExam.fullscreen_required && containerRef.current && !document.fullscreenElement) {
             containerRef.current.requestFullscreen?.().catch(() => {

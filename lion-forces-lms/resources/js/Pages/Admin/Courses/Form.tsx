@@ -159,6 +159,12 @@ export default function CourseForm({ course, categories, instructors }: Props) {
                                 >
                                     Manage Mock Exams
                                 </Link>
+                                <Link
+                                    href={`/admin/courses/${course!.id}/staged-tests`}
+                                    className="block w-full rounded-lg border border-primary py-2 text-center text-sm font-bold uppercase tracking-wide text-primary hover:bg-primary-subtle"
+                                >
+                                    Manage Staged Tests
+                                </Link>
                             </div>
                         </div>
                         <PackagesPanel course={course!} />

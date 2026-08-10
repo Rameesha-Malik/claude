@@ -14,6 +14,7 @@ use App\Http\Controllers\Admin\PracticeTestController as AdminPracticeTestContro
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Admin\ResourceController as AdminResourceController;
 use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
+use App\Http\Controllers\Admin\StagedTestController as AdminStagedTestController;
 use App\Http\Controllers\Admin\StudentController as AdminStudentController;
 use App\Http\Controllers\Admin\WebsiteController as AdminWebsiteController;
 use App\Http\Controllers\ProfileController;
@@ -23,6 +24,7 @@ use App\Http\Controllers\Student\CourseController as StudentCourseController;
 use App\Http\Controllers\Student\DashboardController as StudentDashboardController;
 use App\Http\Controllers\Student\MockExamController as StudentMockExamController;
 use App\Http\Controllers\Student\PracticeTestController as StudentPracticeTestController;
+use App\Http\Controllers\Student\StagedTestController as StudentStagedTestController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', [PublicSiteController::class, 'home'])->name('home');
@@ -69,6 +71,11 @@ Route::middleware(['auth', 'verified', 'user_type:student'])->prefix('portal')->
     Route::post('/mock-exams/{mockExam}/start', [StudentMockExamController::class, 'start'])->name('student.mock-exams.start');
     Route::get('/mock-exams/{mockExam}/attempts/{attempt}/sections/{section}', [StudentMockExamController::class, 'showSection'])->name('student.mock-exams.section');
     Route::post('/mock-exams/{mockExam}/attempts/{attempt}/sections/{section}/submit', [StudentMockExamController::class, 'submitSection'])->name('student.mock-exams.section.submit');
+
+    Route::get('/staged-tests/{stagedTest}', [StudentStagedTestController::class, 'show'])->name('student.staged-tests.show');
+    Route::post('/staged-tests/{stagedTest}/start', [StudentStagedTestController::class, 'start'])->name('student.staged-tests.start');
+    Route::get('/staged-tests/{stagedTest}/attempts/{attempt}/stages/{stage}', [StudentStagedTestController::class, 'showStage'])->name('student.staged-tests.stage');
+    Route::post('/staged-tests/{stagedTest}/attempts/{attempt}/stages/{stage}/submit', [StudentStagedTestController::class, 'submitStage'])->name('student.staged-tests.stage.submit');
 });
 
 Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->name('admin.')->group(function () {
@@ -147,6 +154,18 @@ Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->nam
             Route::post('/{mockExam}/sections', [AdminMockExamController::class, 'storeSection'])->name('sections.store');
             Route::put('/{mockExam}/sections/{section}', [AdminMockExamController::class, 'updateSection'])->name('sections.update');
             Route::delete('/{mockExam}/sections/{section}', [AdminMockExamController::class, 'destroySection'])->name('sections.destroy');
+        });
+
+        Route::prefix('{course}/staged-tests')->name('staged-tests.')->group(function () {
+            Route::get('/', [AdminStagedTestController::class, 'index'])->name('index');
+            Route::get('/create', [AdminStagedTestController::class, 'create'])->name('create');
+            Route::post('/', [AdminStagedTestController::class, 'store'])->name('store');
+            Route::get('/{stagedTest}/edit', [AdminStagedTestController::class, 'edit'])->name('edit');
+            Route::put('/{stagedTest}', [AdminStagedTestController::class, 'update'])->name('update');
+            Route::delete('/{stagedTest}', [AdminStagedTestController::class, 'destroy'])->name('destroy');
+            Route::post('/{stagedTest}/stages', [AdminStagedTestController::class, 'storeStage'])->name('stages.store');
+            Route::put('/{stagedTest}/stages/{stage}', [AdminStagedTestController::class, 'updateStage'])->name('stages.update');
+            Route::delete('/{stagedTest}/stages/{stage}', [AdminStagedTestController::class, 'destroyStage'])->name('stages.destroy');
         });
     });
 
