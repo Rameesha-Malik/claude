@@ -59,6 +59,18 @@ export default {
                     hover: 'var(--color-accent-hover)',
                     fg: 'var(--color-on-accent)',
                 },
+                // Top-level alias so `text-on-primary`/`text-on-secondary`/
+                // `text-on-accent` resolve. Without this, those 47+ call
+                // sites across the app compile to no CSS rule at all
+                // (Tailwind only generates `text-primary-fg` etc. from the
+                // nested `fg` keys above) and every button/CTA silently
+                // renders with the default dark text color instead of the
+                // intended light text on a saturated background.
+                on: {
+                    primary: 'var(--color-on-primary)',
+                    secondary: 'var(--color-on-secondary)',
+                    accent: 'var(--color-on-accent)',
+                },
                 gold: {
                     300: 'var(--gold-300)', 400: 'var(--gold-400)', 500: 'var(--gold-500)',
                     600: 'var(--gold-600)', 700: 'var(--gold-700)',
