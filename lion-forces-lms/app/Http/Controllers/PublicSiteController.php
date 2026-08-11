@@ -44,7 +44,8 @@ class PublicSiteController extends Controller
 
     public function courses(Request $request): Response
     {
-        $courses = Course::with('category')
+        $courses = Course::with(['category', 'instructor:id,name'])
+            ->withCount(['lessons', 'enrollments' => fn ($q) => $q->where('status', 'active')])
             ->where('status', 'published')
             ->when($request->category, fn ($q, $cat) => $q->whereHas('category', fn ($q) => $q->where('slug', $cat)))
             ->when($request->search, fn ($q, $s) => $q->where('title', 'like', "%{$s}%"))

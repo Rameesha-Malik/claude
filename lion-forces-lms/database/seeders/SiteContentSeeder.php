@@ -77,19 +77,20 @@ class SiteContentSeeder extends Seeder
         ]);
 
         HomeSection::updateOrCreate(['section_key' => 'why_choose_us'], [
-            'title' => 'Why Choose Us',
+            'title' => 'Why Choose Our Platform?',
             'order' => 5,
             'is_enabled' => true,
             'content' => [
-                // REAL — condensed from the About page's "Our core values"
-                'paragraph' => 'Our system combines expert mentorship, real exam practice, and data-driven insights to ensure every student follows a focused path toward selection.',
+                'paragraph' => 'Smarter preparation. Better performance. Guaranteed direction.',
                 'items' => [
-                    ['title' => 'Structured training', 'description' => 'Courses designed with clear objectives, lectures, and assessments aligned to training standards.'],
-                    ['title' => 'Secure platform', 'description' => 'Secure access and progress tracking for every student.'],
-                    ['title' => 'Excellence in learning', 'description' => 'Quality content and assessments to support real preparation.'],
-                    ['title' => 'Guided preparation', 'description' => 'Focused learning paths help students prepare with clarity, pace, and measurable progress.'],
-                    ['title' => 'Practical assessment', 'description' => 'Practice-driven evaluation reinforces concepts and builds confidence before real exams.'],
-                    ['title' => 'Progress visibility', 'description' => 'Clear tracking and milestones keep learners motivated and aware of their next step.'],
+                    ['icon' => 'medal', 'title' => 'Retired Officers', 'description' => 'Guidance from ex-Army & PAF officers with real selection experience.'],
+                    ['icon' => 'infinity', 'title' => 'Unlimited Practice Tests', 'description' => 'Attempt as many tests as you need with no restrictions.'],
+                    ['icon' => 'chart', 'title' => 'Performance Graph', 'description' => 'Track your progress visually and identify weak areas fast.'],
+                    ['icon' => 'play', 'title' => 'Video Lectures', 'description' => 'Concept-focused video lessons for every topic and subject.'],
+                    ['icon' => 'gift', 'title' => 'Free Demos', 'description' => 'Try before you buy — explore courses with no commitment.'],
+                    ['icon' => 'headset', 'title' => '24/7 Support', 'description' => 'Get help from our team at any time, any day of the week.'],
+                    ['icon' => 'tag', 'title' => 'Reasonable Fee', 'description' => 'Premium preparation at a price every candidate can afford.'],
+                    ['icon' => 'shield-check', 'title' => 'Test Guarantee', 'description' => "Retake key assessments risk-free until you're confident and ready."],
                 ],
             ],
         ]);

@@ -8,6 +8,24 @@ import ShieldMark from '@/Components/ShieldMark';
 import TiltCard from '@/Components/TiltCard';
 import PublicLayout from '@/Layouts/PublicLayout';
 
+function WhyChooseIcon({ name }: { name: string }) {
+    const paths: Record<string, string> = {
+        medal: 'M12 2l2.4 5 5.6.5-4.2 3.7 1.3 5.5L12 13.8 6.9 16.7l1.3-5.5L4 7.5l5.6-.5L12 2zm0 13v7m-3-3l3 3 3-3',
+        infinity: 'M8.5 9a3 3 0 100 6 3 3 0 002.3-1.1L12 12l1.2 1.9A3 3 0 1015.5 9a3 3 0 00-2.3 1.1L12 12l-1.2-1.9A3 3 0 008.5 9z',
+        chart: 'M4 20V10m6.67 10V4M17.33 20v-7',
+        play: 'M12 2a10 10 0 100 20 10 10 0 000-20zm-1.5 6.5l6 3.5-6 3.5v-7z',
+        gift: 'M4 9h16v11H4V9zm0 0V7a2 2 0 012-2h12a2 2 0 012 2v2M12 9v11M8 5a2 2 0 114 0c0 1.5-2 4-2 4s-2-2.5-2-4zm4 0a2 2 0 114 0c0 1.5-2 4-2 4s-2-2.5-2-4z',
+        headset: 'M4 13a8 8 0 1116 0v4a2 2 0 01-2 2h-1v-6h3M4 17v-4h3v6H5a2 2 0 01-2-2z',
+        tag: 'M20.6 12.6L12.6 4.6a2 2 0 00-1.4-.6H5a1 1 0 00-1 1v6.2c0 .5.2 1 .6 1.4l8 8a2 2 0 002.8 0l5.2-5.2a2 2 0 000-2.8zM8 8h.01',
+        'shield-check': 'M12 2l8 4v6c0 5-3.5 8.5-8 10-4.5-1.5-8-5-8-10V6l8-4zm-3.2 9.2l2 2 4.4-4.4',
+    };
+    return (
+        <svg className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d={paths[name] ?? paths['shield-check']} />
+        </svg>
+    );
+}
+
 function ClockIcon() {
     return (
         <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.6} className="h-3.5 w-3.5">
@@ -90,6 +108,7 @@ function money(v: string | null) {
 export default function Home({ sections, stats, services, featuredCourses, faqs, testimonials, latestNews }: Props) {
     const hero = sections.hero?.content ?? {};
     const why = sections.why_choose_us?.content ?? {};
+    const whyTitle = sections.why_choose_us?.title ?? 'Why Choose Our Platform?';
     const howItWorks = sections.how_it_works?.content ?? {};
     const demoTeaser = sections.demo_quiz_teaser?.content ?? {};
     const ctaFooter = sections.cta_footer?.content ?? {};
@@ -333,7 +352,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                         <RevealOnScroll className="grid gap-7 sm:grid-cols-2 lg:grid-cols-4">
                             {featuredCourses.map((course) => (
                                 <TiltCard key={course.id} max={5} className="group h-full rounded-2xl">
-                                    <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-sm transition-all duration-normal group-hover:-translate-y-1.5 group-hover:border-accent group-hover:shadow-2xl">
+                                    <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-sm transition-all duration-normal group-hover:-translate-y-1.5 group-hover:border-primary group-hover:shadow-2xl">
                                         <div className="relative h-40 overflow-hidden bg-gradient-to-br from-teal-600 via-teal-800 to-teal-950">
                                             {course.thumbnail_path ? (
                                                 <img
@@ -345,8 +364,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                                                 <>
                                                     <span
                                                         aria-hidden
-                                                        className="absolute -right-4 -top-4 h-16 w-16 rotate-12 rounded-lg transition-transform duration-slow group-hover:rotate-45"
-                                                        style={{ backgroundColor: 'rgba(232, 193, 95, 0.2)' }}
+                                                        className="absolute -right-4 -top-4 h-16 w-16 rotate-12 rounded-lg bg-white/10 transition-transform duration-slow group-hover:rotate-45"
                                                     />
                                                     <div className="flex h-full items-center justify-center">
                                                         <span className="relative font-display text-2xl uppercase tracking-widest text-white">
@@ -365,7 +383,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                                                     </span>
                                                 )}
                                                 {course.level && (
-                                                    <span className="rounded-full px-2.5 py-1 text-[0.65rem] font-bold uppercase tracking-wide text-secondary shadow-sm" style={{ backgroundColor: 'var(--gold-400)' }}>
+                                                    <span className="rounded-full bg-primary-subtle px-2.5 py-1 text-[0.65rem] font-bold uppercase tracking-wide text-primary shadow-sm">
                                                         {course.level}
                                                     </span>
                                                 )}
@@ -410,27 +428,36 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                 </section>
             )}
 
-            {/* ---------------- Why Choose Us ---------------- */}
+            {/* ---------------- Why Choose Us — grid of 8, teal throughout (no gold) ---------------- */}
             {why.items && (
-                <section className="mx-auto max-w-container px-4 py-24 sm:px-6 lg:px-8">
-                    <RevealOnScroll className="mx-auto mb-4 max-w-2xl text-center">
-                        <SectionKicker>The Difference</SectionKicker>
-                        <h2 className="font-display text-4xl uppercase tracking-wide text-text sm:text-5xl">Why Choose Us</h2>
-                        <p className="mt-3 text-text-secondary">{why.paragraph}</p>
-                    </RevealOnScroll>
-                    <RevealOnScroll className="mt-12 grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                        {why.items.map((item: { title: string; description: string }, i: number) => (
-                            <div key={i} className="rounded-2xl border border-border bg-surface p-6 shadow-xs transition-shadow duration-normal hover:shadow-md">
-                                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-full bg-accent text-accent-fg">
-                                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
-                                    </svg>
+                <section className="bg-surface-sunken py-24">
+                    <div className="mx-auto max-w-container px-4 sm:px-6 lg:px-8">
+                        <RevealOnScroll className="mx-auto mb-14 max-w-2xl text-center">
+                            <SectionKicker>The Difference</SectionKicker>
+                            <h2 className="font-display text-4xl uppercase tracking-wide text-text sm:text-5xl">
+                                {whyTitle.split(' ').slice(0, -1).join(' ')}{' '}
+                                <span className="relative inline-block rounded-lg bg-primary-subtle px-2 text-primary">
+                                    {whyTitle.split(' ').slice(-1)}
+                                </span>
+                            </h2>
+                            <p className="mt-3 text-text-secondary">{why.paragraph}</p>
+                        </RevealOnScroll>
+
+                        <RevealOnScroll className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
+                            {why.items.map((item: { icon?: string; title: string; description: string }, i: number) => (
+                                <div
+                                    key={i}
+                                    className="group rounded-2xl border border-border bg-surface p-6 shadow-xs transition-all duration-normal hover:-translate-y-1 hover:border-primary hover:shadow-lg"
+                                >
+                                    <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-on-primary shadow-sm transition-transform duration-normal group-hover:scale-110">
+                                        <WhyChooseIcon name={item.icon ?? 'shield-check'} />
+                                    </div>
+                                    <h3 className="font-bold text-text">{item.title}</h3>
+                                    <p className="mt-1.5 text-sm leading-relaxed text-text-secondary">{item.description}</p>
                                 </div>
-                                <h3 className="font-bold text-text">{item.title}</h3>
-                                <p className="mt-1 text-sm text-text-secondary">{item.description}</p>
-                            </div>
-                        ))}
-                    </RevealOnScroll>
+                            ))}
+                        </RevealOnScroll>
+                    </div>
                 </section>
             )}
 

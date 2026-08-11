@@ -3,9 +3,39 @@ import { FormEvent, useState } from 'react';
 import RevealOnScroll from '@/Components/RevealOnScroll';
 import PublicLayout from '@/Layouts/PublicLayout';
 
+function ClockIcon() {
+    return (
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.6} className="h-3.5 w-3.5">
+            <circle cx="10" cy="10" r="7.5" />
+            <path strokeLinecap="round" d="M10 5.5V10l3 2" />
+        </svg>
+    );
+}
+
+function UsersIcon() {
+    return (
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.6} className="h-3.5 w-3.5">
+            <circle cx="7" cy="6.5" r="2.5" />
+            <path strokeLinecap="round" d="M2.5 16c0-2.5 2-4.5 4.5-4.5s4.5 2 4.5 4.5" />
+            <path strokeLinecap="round" d="M12.5 4.6a2.5 2.5 0 010 4.8M15 16c0-2-1.3-3.7-3-4.3" />
+        </svg>
+    );
+}
+
+function LessonIcon() {
+    return (
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.6} className="h-3.5 w-3.5">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3 5.5A2 2 0 015 3.5h6l4 4v9a2 2 0 01-2 2H5a2 2 0 01-2-2v-11z" />
+            <path strokeLinecap="round" d="M11 3.5v4h4M6.5 11h5M6.5 14h5" />
+        </svg>
+    );
+}
+
 interface Course {
-    id: number; title: string; slug: string; short_description: string | null;
-    base_price: string | null; hours: number | null; category: { name: string } | null;
+    id: number; title: string; slug: string; short_description: string | null; thumbnail_path: string | null;
+    base_price: string | null; hours: number | null; level: string | null;
+    lessons_count: number; enrollments_count: number;
+    category: { name: string } | null; instructor: { name: string } | null;
 }
 interface Props {
     courses: { data: Course[]; links: { url: string | null; label: string; active: boolean }[] };
@@ -40,9 +70,9 @@ export default function Courses({ courses, categories, filters }: Props) {
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             placeholder="Search courses..."
-                            className="w-full rounded-lg border-0 px-4 py-3 text-sm text-text focus:outline-none focus:ring-2 focus:ring-accent"
+                            className="w-full rounded-lg border-0 px-4 py-3 text-sm text-text focus:outline-none focus:ring-2 focus:ring-primary"
                         />
-                        <button type="submit" className="rounded-lg bg-accent px-6 py-3 text-sm font-bold uppercase tracking-wide text-accent-fg hover:bg-accent-hover">
+                        <button type="submit" className="rounded-lg bg-primary px-6 py-3 text-sm font-bold uppercase tracking-wide text-on-primary hover:bg-primary-hover">
                             Search
                         </button>
                     </form>
@@ -50,7 +80,7 @@ export default function Courses({ courses, categories, filters }: Props) {
                     <div className="mt-6 flex flex-wrap justify-center gap-2">
                         <button
                             onClick={() => selectCategory(null)}
-                            className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${!filters.category ? 'bg-accent text-accent-fg' : 'border border-white/20 bg-white/5 text-teal-200 hover:bg-white/10'}`}
+                            className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${!filters.category ? 'bg-primary text-on-primary' : 'border border-white/20 bg-white/5 text-teal-200 hover:bg-white/10'}`}
                         >
                             All
                         </button>
@@ -58,7 +88,7 @@ export default function Courses({ courses, categories, filters }: Props) {
                             <button
                                 key={cat.slug}
                                 onClick={() => selectCategory(cat.slug)}
-                                className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${filters.category === cat.slug ? 'bg-accent text-accent-fg' : 'border border-white/20 bg-white/5 text-teal-200 hover:bg-white/10'}`}
+                                className={`rounded-full px-4 py-1.5 text-sm font-semibold transition-colors ${filters.category === cat.slug ? 'bg-primary text-on-primary' : 'border border-white/20 bg-white/5 text-teal-200 hover:bg-white/10'}`}
                             >
                                 {cat.name}
                             </button>
@@ -68,25 +98,75 @@ export default function Courses({ courses, categories, filters }: Props) {
             </section>
 
             <section className="mx-auto max-w-container px-4 py-16 sm:px-6 lg:px-8">
-                <RevealOnScroll className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                <RevealOnScroll className="grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
                     {courses.data.map((course) => (
-                        <Link key={course.id} href={`/courses/${course.slug}`} className="group">
-                            <div className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm transition-all duration-normal group-hover:-translate-y-1 group-hover:shadow-xl">
-                                <div className="flex h-36 items-center justify-center bg-gradient-to-br from-teal-600 to-teal-900 text-sm font-semibold text-white">
-                                    {course.category?.name ?? 'Course'}
-                                </div>
-                                <div className="p-5">
-                                    <h3 className="font-semibold text-text group-hover:text-primary">{course.title}</h3>
-                                    <p className="mt-1 line-clamp-2 text-sm text-text-secondary">{course.short_description}</p>
-                                    <div className="mt-4 flex items-center justify-between text-sm">
-                                        <span className="font-semibold text-primary">
-                                            {course.base_price ? `Rs. ${Number(course.base_price).toLocaleString()}` : ''}
-                                        </span>
-                                        {course.hours && <span className="text-text-muted">{course.hours}h</span>}
+                        <div key={course.id} className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-sm transition-all duration-normal hover:-translate-y-1.5 hover:border-primary hover:shadow-2xl">
+                            <div className="relative h-40 overflow-hidden bg-gradient-to-br from-teal-600 via-teal-800 to-teal-950">
+                                {course.thumbnail_path ? (
+                                    <img
+                                        src={`/storage/${course.thumbnail_path}`}
+                                        alt=""
+                                        className="h-full w-full object-cover transition-transform duration-slow group-hover:scale-110"
+                                    />
+                                ) : (
+                                    <div className="flex h-full items-center justify-center font-display text-2xl uppercase tracking-widest text-white">
+                                        {course.category?.name ?? 'Course'}
                                     </div>
+                                )}
+                                <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 transition-opacity duration-normal group-hover:opacity-100" />
+                                <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
+                                    {course.category && (
+                                        <span className="rounded-full bg-surface/95 px-2.5 py-1 text-[0.65rem] font-bold uppercase tracking-wide text-secondary shadow-sm">
+                                            {course.category.name}
+                                        </span>
+                                    )}
+                                    {course.level && (
+                                        <span className="rounded-full bg-primary-subtle px-2.5 py-1 text-[0.65rem] font-bold uppercase tracking-wide text-primary shadow-sm">
+                                            {course.level}
+                                        </span>
+                                    )}
                                 </div>
                             </div>
-                        </Link>
+
+                            <div className="flex flex-1 flex-col p-5">
+                                <h3 className="font-bold text-text group-hover:text-primary">{course.title}</h3>
+                                {course.instructor && <p className="mt-0.5 text-xs text-text-muted">by {course.instructor.name}</p>}
+                                <p className="mt-2 line-clamp-2 flex-1 text-sm text-text-secondary">{course.short_description}</p>
+
+                                <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-text-muted">
+                                    {course.hours && (
+                                        <span className="inline-flex items-center gap-1">
+                                            <ClockIcon /> {course.hours}h
+                                        </span>
+                                    )}
+                                    {course.lessons_count > 0 && (
+                                        <span className="inline-flex items-center gap-1">
+                                            <LessonIcon /> {course.lessons_count} lesson{course.lessons_count === 1 ? '' : 's'}
+                                        </span>
+                                    )}
+                                    {course.enrollments_count > 0 && (
+                                        <span className="inline-flex items-center gap-1">
+                                            <UsersIcon /> {course.enrollments_count} enrolled
+                                        </span>
+                                    )}
+                                </div>
+
+                                <div className="mt-4 flex items-center justify-between border-t border-border pt-4">
+                                    <span className="font-display text-lg text-primary">
+                                        {course.base_price ? `Rs. ${Number(course.base_price).toLocaleString()}` : 'Free'}
+                                    </span>
+                                    <Link
+                                        href={`/courses/${course.slug}`}
+                                        className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-xs font-bold uppercase tracking-wide text-on-primary shadow-sm transition-all duration-fast hover:bg-primary-hover hover:shadow-md"
+                                    >
+                                        View Course
+                                        <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5 transition-transform duration-fast group-hover:translate-x-0.5">
+                                            <path d="M11.3 3.3a1 1 0 011.4 0l5 5a1 1 0 010 1.4l-5 5a1 1 0 11-1.4-1.4L14.6 10H4a1 1 0 010-2h10.6l-3.3-3.3a1 1 0 010-1.4z" />
+                                        </svg>
+                                    </Link>
+                                </div>
+                            </div>
+                        </div>
                     ))}
                 </RevealOnScroll>
 
