@@ -1,25 +1,12 @@
 import { Link, usePage } from '@inertiajs/react';
 import { PropsWithChildren, useState } from 'react';
+import ShieldMark from '@/Components/ShieldMark';
 import { PageProps } from '@/types';
 
 function WhatsAppIcon({ className = 'h-7 w-7' }: { className?: string }) {
     return (
         <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
             <path d="M12.04 2c-5.5 0-9.96 4.46-9.96 9.96 0 1.76.46 3.48 1.34 5L2 22l5.2-1.36a9.94 9.94 0 0 0 4.84 1.24h.01c5.5 0 9.96-4.46 9.96-9.96S17.54 2 12.04 2Zm5.83 14.24c-.25.7-1.45 1.34-2 1.42-.51.08-1.15.11-1.86-.12-.43-.14-.98-.32-1.69-.63-2.98-1.29-4.93-4.3-5.08-4.5-.15-.2-1.22-1.62-1.22-3.1 0-1.47.77-2.19 1.05-2.49.27-.3.6-.37.8-.37h.57c.18 0 .43-.07.67.51.25.6.86 2.07.93 2.22.08.15.13.32.03.52-.1.2-.15.32-.3.5-.15.17-.31.39-.45.52-.15.15-.3.31-.13.6.17.3.76 1.25 1.63 2.03 1.12 1 2.07 1.31 2.36 1.46.3.15.47.13.65-.08.18-.2.75-.87.95-1.17.2-.3.4-.25.67-.15.28.1 1.76.83 2.06.98.3.15.5.22.57.35.08.13.08.72-.17 1.42Z" />
-        </svg>
-    );
-}
-
-// Simplified shield-and-anchor mark echoing the real Lion Forces Academy
-// logo (shield, crescent, anchor) as a single-color glyph that scales
-// cleanly at badge size, rather than trying to cram the full illustrated
-// crest into a 20px icon.
-function ShieldMark({ className = 'h-5 w-5' }: { className?: string }) {
-    return (
-        <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
-            <path d="M12 2.5 4.5 5.3v5.9c0 5.2 3.3 8.6 7.5 10.3 4.2-1.7 7.5-5.1 7.5-10.3V5.3L12 2.5Z" opacity={0.18} />
-            <path d="M12 1.6 3.6 4.7v6.5c0 5.6 3.6 9.4 8.1 11.2l.3.13.3-.13c4.5-1.8 8.1-5.6 8.1-11.2V4.7L12 1.6Zm0 2.13 6.9 2.58v5.89c0 4.53-2.78 7.63-6.9 9.35-4.12-1.72-6.9-4.82-6.9-9.35V6.31L12 3.73Z" />
-            <path d="M12 7c-1.24 0-2.25 1-2.25 2.25 0 .9.53 1.67 1.3 2.03v.47H9.5v1.5h1.55v.75c-1.5.28-2.55 1.4-2.55 2.75h1.5c0-.83.9-1.5 2-1.5s2 .67 2 1.5h1.5c0-1.35-1.05-2.47-2.55-2.75v-.75H15v-1.5h-1.55v-.47c.77-.36 1.3-1.13 1.3-2.03C14.75 8 13.74 7 12.5 7Zm0 1.5c.41 0 .75.34.75.75s-.34.75-.75.75-.75-.34-.75-.75.34-.75.75-.75Z" />
         </svg>
     );
 }
@@ -44,7 +31,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
             <header className="sticky top-0 z-40 px-3 pt-3 sm:px-4">
                 <div
                     className="mx-auto flex h-16 max-w-4xl items-center justify-between rounded-full border border-border px-3 shadow-xl backdrop-blur-glass sm:px-4"
-                    style={{ backgroundColor: 'var(--glass-bg)', borderColor: 'var(--glass-border)' }}
+                    style={{ backgroundColor: 'var(--glass-bg)' }}
                 >
                     <Link href="/" className="flex min-w-0 items-center gap-2.5 text-base font-bold text-secondary">
                         <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-primary text-on-primary shadow-sm">
