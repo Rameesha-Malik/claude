@@ -10,6 +10,20 @@ function WhatsAppIcon({ className = 'h-7 w-7' }: { className?: string }) {
     );
 }
 
+// Simplified shield-and-anchor mark echoing the real Lion Forces Academy
+// logo (shield, crescent, anchor) as a single-color glyph that scales
+// cleanly at badge size, rather than trying to cram the full illustrated
+// crest into a 20px icon.
+function ShieldMark({ className = 'h-5 w-5' }: { className?: string }) {
+    return (
+        <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+            <path d="M12 2.5 4.5 5.3v5.9c0 5.2 3.3 8.6 7.5 10.3 4.2-1.7 7.5-5.1 7.5-10.3V5.3L12 2.5Z" opacity={0.18} />
+            <path d="M12 1.6 3.6 4.7v6.5c0 5.6 3.6 9.4 8.1 11.2l.3.13.3-.13c4.5-1.8 8.1-5.6 8.1-11.2V4.7L12 1.6Zm0 2.13 6.9 2.58v5.89c0 4.53-2.78 7.63-6.9 9.35-4.12-1.72-6.9-4.82-6.9-9.35V6.31L12 3.73Z" />
+            <path d="M12 7c-1.24 0-2.25 1-2.25 2.25 0 .9.53 1.67 1.3 2.03v.47H9.5v1.5h1.55v.75c-1.5.28-2.55 1.4-2.55 2.75h1.5c0-.83.9-1.5 2-1.5s2 .67 2 1.5h1.5c0-1.35-1.05-2.47-2.55-2.75v-.75H15v-1.5h-1.55v-.47c.77-.36 1.3-1.13 1.3-2.03C14.75 8 13.74 7 12.5 7Zm0 1.5c.41 0 .75.34.75.75s-.34.75-.75.75-.75-.34-.75-.75.34-.75.75-.75Z" />
+        </svg>
+    );
+}
+
 export default function PublicLayout({ children }: PropsWithChildren) {
     const { site, nav, announcement, auth } = usePage<PageProps>().props;
     const [mobileOpen, setMobileOpen] = useState(false);
@@ -27,46 +41,46 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                 </div>
             )}
 
-            <header
-                className="sticky top-0 z-40 border-b border-border backdrop-blur-glass"
-                style={{ backgroundColor: 'var(--color-surface-translucent)' }}
-            >
-                <div className="mx-auto flex h-18 max-w-container items-center justify-between px-4 sm:px-6 lg:px-8">
-                    <Link href="/" className="flex min-w-0 items-center gap-2 text-lg font-bold text-secondary">
-                        <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-primary text-on-primary">
-                            LF
+            <header className="sticky top-0 z-40 px-3 pt-3 sm:px-4">
+                <div
+                    className="mx-auto flex h-16 max-w-4xl items-center justify-between rounded-full border border-border px-3 shadow-xl backdrop-blur-glass sm:px-4"
+                    style={{ backgroundColor: 'var(--glass-bg)', borderColor: 'var(--glass-border)' }}
+                >
+                    <Link href="/" className="flex min-w-0 items-center gap-2.5 text-base font-bold text-secondary">
+                        <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-primary text-on-primary shadow-sm">
+                            <ShieldMark className="h-5 w-5" />
                         </span>
                         <span className="truncate">{site.name}</span>
                     </Link>
 
-                    <nav className="hidden items-center gap-8 md:flex">
+                    <nav className="hidden items-center gap-1 rounded-full bg-black/[0.03] p-1 md:flex">
                         {nav.header.map((item) => (
                             <Link
                                 key={item.id}
                                 href={item.url}
-                                className="text-sm font-medium text-text-secondary transition-colors duration-fast hover:text-primary"
+                                className="rounded-full px-4 py-2 text-sm font-medium text-text-secondary transition-colors duration-fast hover:bg-surface hover:text-primary"
                             >
                                 {item.label}
                             </Link>
                         ))}
                     </nav>
 
-                    <div className="hidden items-center gap-3 md:flex">
+                    <div className="hidden items-center gap-2 md:flex">
                         {auth.user ? (
                             <Link
                                 href="/dashboard"
-                                className="rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-on-primary shadow-sm transition-all duration-fast hover:bg-primary-hover hover:shadow-md"
+                                className="rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-on-primary shadow-sm transition-all duration-fast hover:bg-primary-hover hover:shadow-md"
                             >
                                 Dashboard
                             </Link>
                         ) : (
                             <>
-                                <Link href="/login" className="text-sm font-medium text-text-secondary hover:text-primary">
+                                <Link href="/login" className="rounded-full px-4 py-2.5 text-sm font-medium text-text-secondary hover:text-primary">
                                     Sign in
                                 </Link>
                                 <Link
                                     href="/register"
-                                    className="rounded-lg bg-primary px-5 py-2.5 text-sm font-semibold text-on-primary shadow-sm transition-all duration-fast hover:bg-primary-hover hover:shadow-md"
+                                    className="rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-on-primary shadow-sm transition-all duration-fast hover:bg-primary-hover hover:shadow-md"
                                 >
                                     Get Started
                                 </Link>
@@ -91,16 +105,16 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                 </div>
 
                 {mobileOpen && (
-                    <nav className="flex flex-col gap-1 border-t border-border bg-surface px-4 py-3 md:hidden">
+                    <nav className="mx-auto mt-2 flex max-w-4xl flex-col gap-1 rounded-3xl border border-border bg-surface p-3 shadow-xl md:hidden">
                         {nav.header.map((item) => (
-                            <Link key={item.id} href={item.url} className="rounded-md px-3 py-2 text-sm font-medium text-text hover:bg-surface-sunken">
+                            <Link key={item.id} href={item.url} className="rounded-xl px-3 py-2 text-sm font-medium text-text hover:bg-surface-sunken">
                                 {item.label}
                             </Link>
                         ))}
-                        <Link href="/login" className="rounded-md px-3 py-2 text-sm font-medium text-text hover:bg-surface-sunken">
+                        <Link href="/login" className="rounded-xl px-3 py-2 text-sm font-medium text-text hover:bg-surface-sunken">
                             Sign in
                         </Link>
-                        <Link href="/register" className="mt-1 rounded-lg bg-primary px-3 py-2 text-center text-sm font-semibold text-on-primary">
+                        <Link href="/register" className="mt-1 rounded-full bg-primary px-3 py-2.5 text-center text-sm font-semibold text-on-primary">
                             Get Started
                         </Link>
                     </nav>
