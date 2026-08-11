@@ -8,6 +8,25 @@ import ShieldMark from '@/Components/ShieldMark';
 import TiltCard from '@/Components/TiltCard';
 import PublicLayout from '@/Layouts/PublicLayout';
 
+function ClockIcon() {
+    return (
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.6} className="h-3.5 w-3.5">
+            <circle cx="10" cy="10" r="7.5" />
+            <path strokeLinecap="round" d="M10 5.5V10l3 2" />
+        </svg>
+    );
+}
+
+function UsersIcon() {
+    return (
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.6} className="h-3.5 w-3.5">
+            <circle cx="7" cy="6.5" r="2.5" />
+            <path strokeLinecap="round" d="M2.5 16c0-2.5 2-4.5 4.5-4.5s4.5 2 4.5 4.5" />
+            <path strokeLinecap="round" d="M12.5 4.6a2.5 2.5 0 010 4.8M15 16c0-2-1.3-3.7-3-4.3" />
+        </svg>
+    );
+}
+
 function StarRow() {
     return (
         <span className="flex items-center gap-0.5 text-gold-500">
@@ -45,8 +64,8 @@ interface StatItem { icon: string; number: string; label: string }
 interface ServiceItem { icon: string; title: string; description: string }
 interface CourseItem {
     id: number; title: string; slug: string; short_description: string | null;
-    thumbnail_path: string | null; base_price: string | null; hours: number | null;
-    category: { name: string } | null;
+    thumbnail_path: string | null; base_price: string | null; hours: number | null; level: string | null;
+    enrollments_count: number; category: { name: string } | null;
 }
 interface FaqItem { question: string; answer: string }
 interface TestimonialItem { student_name: string; photo_path: string | null; testimonial_text: string; rating: number | null }
@@ -311,29 +330,80 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                                 View all &rarr;
                             </Link>
                         </RevealOnScroll>
-                        <RevealOnScroll className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                        <RevealOnScroll className="grid gap-7 sm:grid-cols-2 lg:grid-cols-4">
                             {featuredCourses.map((course) => (
-                                <Link key={course.id} href={`/courses/${course.slug}`} className="group">
-                                    <div className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm transition-all duration-normal group-hover:-translate-y-1 group-hover:border-accent group-hover:shadow-xl">
-                                        <div className="relative flex h-36 items-center justify-center overflow-hidden bg-gradient-to-br from-teal-600 via-teal-800 to-teal-950">
-                                            <span
-                                                className="absolute -right-4 -top-4 h-16 w-16 rotate-12 rounded-lg"
-                                                style={{ backgroundColor: 'rgba(232, 193, 95, 0.2)' }}
-                                            />
-                                            <span className="relative font-display text-2xl uppercase tracking-widest text-white">
-                                                {course.category?.name ?? 'Course'}
-                                            </span>
+                                <TiltCard key={course.id} max={5} className="group h-full rounded-2xl">
+                                    <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-sm transition-all duration-normal group-hover:-translate-y-1.5 group-hover:border-accent group-hover:shadow-2xl">
+                                        <div className="relative h-40 overflow-hidden bg-gradient-to-br from-teal-600 via-teal-800 to-teal-950">
+                                            {course.thumbnail_path ? (
+                                                <img
+                                                    src={`/storage/${course.thumbnail_path}`}
+                                                    alt=""
+                                                    className="h-full w-full object-cover transition-transform duration-slow group-hover:scale-110"
+                                                />
+                                            ) : (
+                                                <>
+                                                    <span
+                                                        aria-hidden
+                                                        className="absolute -right-4 -top-4 h-16 w-16 rotate-12 rounded-lg transition-transform duration-slow group-hover:rotate-45"
+                                                        style={{ backgroundColor: 'rgba(232, 193, 95, 0.2)' }}
+                                                    />
+                                                    <div className="flex h-full items-center justify-center">
+                                                        <span className="relative font-display text-2xl uppercase tracking-widest text-white">
+                                                            {course.category?.name ?? 'Course'}
+                                                        </span>
+                                                    </div>
+                                                </>
+                                            )}
+                                            {/* darken-on-hover so the badges below stay legible over any thumbnail */}
+                                            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 transition-opacity duration-normal group-hover:opacity-100" />
+
+                                            <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
+                                                {course.category && (
+                                                    <span className="rounded-full bg-surface/95 px-2.5 py-1 text-[0.65rem] font-bold uppercase tracking-wide text-secondary shadow-sm">
+                                                        {course.category.name}
+                                                    </span>
+                                                )}
+                                                {course.level && (
+                                                    <span className="rounded-full px-2.5 py-1 text-[0.65rem] font-bold uppercase tracking-wide text-secondary shadow-sm" style={{ backgroundColor: 'var(--gold-400)' }}>
+                                                        {course.level}
+                                                    </span>
+                                                )}
+                                            </div>
                                         </div>
-                                        <div className="p-5">
+
+                                        <div className="flex flex-1 flex-col p-5">
                                             <h3 className="font-bold text-text group-hover:text-primary">{course.title}</h3>
-                                            <p className="mt-1 line-clamp-2 text-sm text-text-secondary">{course.short_description}</p>
-                                            <div className="mt-4 flex items-center justify-between text-sm">
-                                                <span className="font-bold text-primary">{money(course.base_price)}</span>
-                                                {course.hours && <span className="text-text-muted">{course.hours}h</span>}
+                                            <p className="mt-1 line-clamp-2 flex-1 text-sm text-text-secondary">{course.short_description}</p>
+
+                                            <div className="mt-4 flex items-center gap-3 text-xs text-text-muted">
+                                                {course.hours && (
+                                                    <span className="inline-flex items-center gap-1">
+                                                        <ClockIcon /> {course.hours}h
+                                                    </span>
+                                                )}
+                                                {course.enrollments_count > 0 && (
+                                                    <span className="inline-flex items-center gap-1">
+                                                        <UsersIcon /> {course.enrollments_count}+ enrolled
+                                                    </span>
+                                                )}
+                                            </div>
+
+                                            <div className="mt-4 flex items-center justify-between border-t border-border pt-4">
+                                                <span className="font-display text-lg text-primary">{money(course.base_price) ?? 'Free'}</span>
+                                                <Link
+                                                    href={`/courses/${course.slug}`}
+                                                    className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-xs font-bold uppercase tracking-wide text-on-primary shadow-sm transition-all duration-fast hover:bg-primary-hover hover:shadow-md"
+                                                >
+                                                    View Course
+                                                    <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5 transition-transform duration-fast group-hover:translate-x-0.5">
+                                                        <path d="M11.3 3.3a1 1 0 011.4 0l5 5a1 1 0 010 1.4l-5 5a1 1 0 11-1.4-1.4L14.6 10H4a1 1 0 010-2h10.6l-3.3-3.3a1 1 0 010-1.4z" />
+                                                    </svg>
+                                                </Link>
                                             </div>
                                         </div>
                                     </div>
-                                </Link>
+                                </TiltCard>
                             ))}
                         </RevealOnScroll>
                     </div>

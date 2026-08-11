@@ -27,10 +27,11 @@ class PublicSiteController extends Controller
             'stats' => StatsItem::orderBy('order')->get(['icon', 'number', 'label']),
             'services' => ServiceCard::orderBy('order')->get(['icon', 'title', 'description']),
             'featuredCourses' => Course::with('category')
+                ->withCount(['enrollments' => fn ($q) => $q->where('status', 'active')])
                 ->where('status', 'published')
                 ->orderBy('order')
                 ->limit(4)
-                ->get(['id', 'title', 'slug', 'short_description', 'thumbnail_path', 'base_price', 'category_id', 'hours']),
+                ->get(['id', 'title', 'slug', 'short_description', 'thumbnail_path', 'base_price', 'category_id', 'hours', 'level']),
             'faqs' => Faq::where('page', 'home')->where('is_active', true)->orderBy('order')->get(['question', 'answer']),
             'testimonials' => Testimonial::orderBy('order')->get(['student_name', 'photo_path', 'testimonial_text', 'rating']),
             'latestNews' => NewsAnnouncement::where('is_active', true)
