@@ -162,7 +162,10 @@ interface CourseItem {
 }
 interface FaqItem { question: string; answer: string }
 interface TestimonialItem { student_name: string; photo_path: string | null; testimonial_text: string; rating: number | null }
-interface NewsItem { title: string; description: string | null; organization: string | null; deadline_date: string | null }
+interface NewsItem {
+    id: number; title: string; description: string | null; organization: string | null;
+    deadline_date: string | null; created_at: string;
+}
 interface SectionContent { title: string; content: Record<string, any> }
 
 interface Props {
@@ -179,6 +182,15 @@ function money(v: string | null) {
     if (!v) return null;
     return `Rs. ${Number(v).toLocaleString()}`;
 }
+
+function formatDate(v: string) {
+    return new Date(v).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+}
+
+// Cycle through the brand's two "poster" gradients so the news banner
+// (no real image field on news_announcements) still reads as intentional
+// per-card variation rather than 3 identical blocks in a row.
+const NEWS_BANNER_GRADIENTS = ['from-teal-600 via-teal-800 to-teal-950', 'from-secondary via-teal-900 to-teal-950'];
 
 export default function Home({ sections, stats, services, featuredCourses, faqs, testimonials, latestNews }: Props) {
     const hero = sections.hero?.content ?? {};
@@ -599,30 +611,54 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                 </section>
             )}
 
-            {/* ---------------- Latest News ---------------- */}
+            {/* ---------------- Latest News — article-style cards ---------------- */}
             {latestNews.length > 0 && (
                 <section className="mx-auto max-w-container px-4 py-24 sm:px-6 lg:px-8">
-                    <RevealOnScroll className="mb-14 flex flex-wrap items-end justify-between gap-4">
-                        <div>
-                            <SectionKicker>Stay Updated</SectionKicker>
-                            <h2 className="font-display text-4xl uppercase tracking-wide text-text sm:text-5xl">Latest News</h2>
-                        </div>
-                        <Link href="/news" className="font-bold uppercase tracking-wide text-primary hover:text-primary-hover">
-                            View all &rarr;
-                        </Link>
+                    <RevealOnScroll className="mx-auto mb-14 max-w-2xl text-center">
+                        <SectionKicker>Stay Updated</SectionKicker>
+                        <h2 className="font-display text-4xl uppercase tracking-wide text-text sm:text-5xl">Discover Our Latest News</h2>
+                        <p className="mt-3 text-text-secondary">
+                            Application windows, batch announcements, and exam updates across every service you're preparing for.
+                        </p>
                     </RevealOnScroll>
+
                     <RevealOnScroll className="grid gap-6 sm:grid-cols-3">
                         {latestNews.map((item, i) => (
-                            <div key={i} className="rounded-2xl border border-border bg-surface p-6 shadow-sm transition-shadow duration-normal hover:shadow-md">
-                                {item.organization && (
-                                    <span className="mb-3 inline-block rounded-full bg-accent px-3 py-1 text-xs font-bold uppercase tracking-wide text-accent-fg">
-                                        {item.organization}
+                            <div key={item.id} className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-sm transition-all duration-normal hover:-translate-y-1.5 hover:border-primary hover:shadow-2xl">
+                                <div className={`relative flex h-36 items-center justify-center bg-gradient-to-br px-4 text-center ${NEWS_BANNER_GRADIENTS[i % NEWS_BANNER_GRADIENTS.length]}`}>
+                                    <span
+                                        aria-hidden
+                                        className="absolute -right-4 -top-4 h-16 w-16 rotate-12 rounded-lg bg-white/10 transition-transform duration-slow group-hover:rotate-45"
+                                    />
+                                    <span className="relative font-display text-xl uppercase leading-tight tracking-wide text-white">
+                                        {item.organization ?? 'Announcement'}
                                     </span>
-                                )}
-                                <h3 className="font-bold text-text">{item.title}</h3>
-                                <p className="mt-1 line-clamp-2 text-sm text-text-secondary">{item.description}</p>
+                                </div>
+
+                                <div className="flex flex-1 flex-col p-5">
+                                    {item.organization && (
+                                        <span className="mb-2 inline-block w-fit rounded-full bg-primary-subtle px-2.5 py-1 text-[0.65rem] font-bold uppercase tracking-wide text-primary">
+                                            {item.organization}
+                                        </span>
+                                    )}
+                                    <h3 className="font-bold text-text group-hover:text-primary">{item.title}</h3>
+                                    <p className="mt-1.5 line-clamp-2 flex-1 text-sm text-text-secondary">{item.description}</p>
+
+                                    <div className="mt-4 flex items-center justify-between border-t border-border pt-4 text-xs text-text-muted">
+                                        <span>Posted {formatDate(item.created_at)}</span>
+                                        {item.deadline_date && (
+                                            <span className="font-bold text-danger">Apply by {formatDate(item.deadline_date)}</span>
+                                        )}
+                                    </div>
+                                </div>
                             </div>
                         ))}
+                    </RevealOnScroll>
+
+                    <RevealOnScroll className="mt-10 text-center">
+                        <Link href="/news" className="font-bold uppercase tracking-wide text-primary hover:text-primary-hover">
+                            View all news &rarr;
+                        </Link>
                     </RevealOnScroll>
                 </section>
             )}

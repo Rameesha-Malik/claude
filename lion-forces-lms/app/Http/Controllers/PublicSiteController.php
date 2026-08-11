@@ -39,7 +39,7 @@ class PublicSiteController extends Controller
                 ->where(fn ($q) => $q->whereNull('deadline_date')->orWhere('deadline_date', '>=', now()))
                 ->orderByDesc('is_pinned')->orderByDesc('created_at')
                 ->limit(3)
-                ->get(['title', 'description', 'organization', 'deadline_date']),
+                ->get(['id', 'title', 'description', 'organization', 'deadline_date', 'created_at']),
         ]);
     }
 
