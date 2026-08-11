@@ -221,30 +221,80 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                 )}
             </section>
 
-            {/* ---------------- Services / Bento grid ---------------- */}
+            {/* ---------------- What We Offer — fanned card stack + scattered praise ---------------- */}
             {services.length > 0 && (
-                <section className="mx-auto max-w-container px-4 py-24 sm:px-6 lg:px-8">
-                    <RevealOnScroll className="mx-auto mb-14 max-w-2xl text-center">
+                <section className="relative overflow-hidden bg-surface py-24">
+                    <RevealOnScroll className="mx-auto mb-4 max-w-2xl px-4 text-center sm:px-6">
                         <SectionKicker>What We Cover</SectionKicker>
                         <h2 className="font-display text-4xl uppercase tracking-wide text-secondary sm:text-5xl">
                             What We Prepare You For
                         </h2>
                         <p className="mt-3 text-text-secondary">Structured training across every major service entry test.</p>
                     </RevealOnScroll>
-                    <RevealOnScroll className="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                        {services.map((service, i) => (
-                            <TiltCard key={i} className="h-full rounded-2xl">
-                                <div className="group relative flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-surface p-6 shadow-sm transition-all duration-normal hover:-translate-y-1 hover:border-accent hover:shadow-xl">
-                                    <div className="absolute -right-6 -top-6 h-20 w-20 rounded-full bg-primary-subtle transition-transform duration-slow group-hover:scale-150" />
-                                    <div className="relative mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-on-primary shadow-md">
-                                        <ServiceIcon name={service.icon} />
+
+                    {/* Fan stack -- own overflow-hidden box so rotated/offset cards never
+                        widen the page, regardless of viewport size. */}
+                    <div className="relative mx-auto mt-16 h-[22rem] max-w-3xl overflow-hidden px-4 sm:h-[26rem] sm:px-6">
+                        <div
+                            aria-hidden
+                            className="absolute left-1/2 top-1/2 h-[26rem] w-[26rem] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-60 blur-3xl"
+                            style={{ background: 'radial-gradient(circle, var(--color-primary-subtle), var(--gold-300) 70%, transparent 100%)' }}
+                        />
+
+                        <div className="relative flex h-full items-center justify-center">
+                            {services.slice(0, 5).map((service, i) => {
+                                const mid = (services.slice(0, 5).length - 1) / 2;
+                                const offset = i - mid;
+                                const rotate = offset * 9;
+                                return (
+                                    // Outer div owns the static fan position (translateX + rotate)
+                                    // and z-index; TiltCard's own hover tilt writes `transform`
+                                    // directly via anime.js, so it can't share an element with a
+                                    // Tailwind hover-transform utility or an inline static transform
+                                    // without one clobbering the other.
+                                    <div
+                                        key={i}
+                                        className="absolute w-40 sm:w-48"
+                                        style={{ transform: `translateX(${offset * 60}px) rotate(${rotate}deg)`, zIndex: 10 - Math.abs(offset) }}
+                                    >
+                                        <TiltCard max={6} className="rounded-2xl">
+                                            <div className="flex h-48 flex-col rounded-2xl border border-border bg-surface p-5 text-left shadow-xl sm:h-56">
+                                                <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-on-primary shadow-md">
+                                                    <ServiceIcon name={service.icon} />
+                                                </div>
+                                                <h3 className="text-sm font-bold text-text">{service.title}</h3>
+                                                <p className="mt-1.5 line-clamp-3 text-xs leading-relaxed text-text-secondary">{service.description}</p>
+                                            </div>
+                                        </TiltCard>
                                     </div>
-                                    <h3 className="relative text-lg font-bold text-text">{service.title}</h3>
-                                    <p className="relative mt-2 flex-1 text-sm text-text-secondary">{service.description}</p>
+                                );
+                            })}
+                        </div>
+
+                        {/* scattered praise chips -- real testimonial excerpts, not invented quotes */}
+                        {testimonials.slice(0, 4).map((t, i) => {
+                            const positions = [
+                                'left-2 top-4 sm:left-8 sm:top-6',
+                                'right-2 top-16 sm:right-10 sm:top-20',
+                                'bottom-8 left-4 sm:left-12',
+                                'bottom-2 right-2 sm:right-14 sm:bottom-10',
+                            ];
+                            return (
+                                <div key={i} className={`absolute z-20 hidden max-w-[10rem] rounded-xl border border-border bg-surface px-3 py-2 shadow-lg sm:block ${positions[i]}`}>
+                                    <div className="flex items-center gap-1 text-gold-500">
+                                        {Array.from({ length: t.rating ?? 5 }).map((_, s) => (
+                                            <svg key={s} viewBox="0 0 20 20" fill="currentColor" className="h-3 w-3">
+                                                <path d="M10 1.5l2.6 5.6 6.1.6-4.6 4.1 1.3 6-5.4-3-5.4 3 1.3-6-4.6-4.1 6.1-.6L10 1.5Z" />
+                                            </svg>
+                                        ))}
+                                    </div>
+                                    <p className="mt-1 line-clamp-2 text-[0.7rem] leading-snug text-text-secondary">
+                                        &ldquo;{t.testimonial_text}&rdquo;
+                                    </p>
                                 </div>
-                            </TiltCard>
-                        ))}
-                    </RevealOnScroll>
+                            );
+                        })}
+                    </div>
                 </section>
             )}
 
