@@ -509,34 +509,65 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                 </section>
             )}
 
-            {/* ---------------- Why Choose Us — grid of 8, teal throughout (no gold) ---------------- */}
+            {/* ---------------- Why Choose Us — split layout (2nd reference: image + highlighted headline + minimal feature list) ---------------- */}
             {why.items && (
-                <section className="bg-surface-sunken py-24">
+                <section className="bg-gradient-to-br from-secondary to-teal-900 py-20 sm:py-24">
                     <div className="mx-auto max-w-container px-4 sm:px-6 lg:px-8">
-                        <RevealOnScroll className="mx-auto mb-14 max-w-2xl text-center">
-                            <SectionKicker>The Difference</SectionKicker>
-                            <h2 className="font-display text-4xl uppercase tracking-wide text-text sm:text-5xl">
-                                {whyTitle.split(' ').slice(0, -1).join(' ')}{' '}
-                                <span className="relative inline-block rounded-lg bg-primary-subtle px-2 text-primary">
-                                    {whyTitle.split(' ').slice(-1)}
-                                </span>
-                            </h2>
-                            <p className="mt-3 text-text-secondary">{why.paragraph}</p>
-                        </RevealOnScroll>
-
-                        <RevealOnScroll className="grid gap-5 sm:grid-cols-2 lg:grid-cols-4">
-                            {why.items.map((item: { icon?: string; title: string; description: string }, i: number) => (
-                                <div
-                                    key={i}
-                                    className="group rounded-2xl border border-border bg-surface p-6 shadow-xs transition-all duration-normal hover:-translate-y-1 hover:border-primary hover:shadow-lg"
-                                >
-                                    <div className="mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-primary text-on-primary shadow-sm transition-transform duration-normal group-hover:scale-110">
-                                        <WhyChooseIcon name={item.icon ?? 'shield-check'} />
+                        <RevealOnScroll className="overflow-hidden rounded-3xl bg-surface p-6 shadow-2xl sm:p-10 lg:p-14">
+                            <div className="grid gap-10 lg:grid-cols-2 lg:items-center lg:gap-14">
+                                {/* Left: visual panel */}
+                                <div className="relative mx-auto aspect-[4/5] w-full max-w-md lg:max-w-none">
+                                    <div
+                                        aria-hidden
+                                        className="absolute -left-3 -top-3 h-full w-full rounded-2xl sm:-left-5 sm:-top-5"
+                                        style={{
+                                            backgroundColor: 'var(--color-surface-sunken)',
+                                            backgroundImage: 'radial-gradient(var(--color-border-strong) 1.5px, transparent 1.5px)',
+                                            backgroundSize: '14px 14px',
+                                        }}
+                                    />
+                                    <div className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-2xl border border-border bg-gradient-to-br from-secondary via-teal-800 to-teal-950 shadow-xl">
+                                        <ShieldMark className="h-24 w-24 text-white/15" />
                                     </div>
-                                    <h3 className="font-bold text-text">{item.title}</h3>
-                                    <p className="mt-1.5 text-sm leading-relaxed text-text-secondary">{item.description}</p>
+                                    <div className="absolute -bottom-5 left-1/2 flex -translate-x-1/2 items-center gap-3 rounded-2xl bg-surface px-5 py-4 shadow-xl">
+                                        <StarRow />
+                                        <div className="h-8 w-px bg-border" />
+                                        <div>
+                                            <p className="text-sm font-bold text-text">1,500+</p>
+                                            <p className="text-xs text-text-muted">Candidates Trained</p>
+                                        </div>
+                                    </div>
                                 </div>
-                            ))}
+
+                                {/* Right: highlighted headline + minimal feature list */}
+                                <div>
+                                    <div className="mb-3 flex items-center gap-2 text-sm font-bold uppercase tracking-wide text-primary">
+                                        <span className="h-2.5 w-2.5 flex-shrink-0 rounded bg-primary" />
+                                        Why Choose Us?
+                                    </div>
+                                    <h2 className="font-display text-3xl uppercase leading-tight tracking-wide text-text sm:text-4xl">
+                                        {whyTitle.split(' ').slice(0, -2).join(' ')}{' '}
+                                        <span className="relative inline-block rounded-lg bg-primary-subtle px-2 text-primary">
+                                            {whyTitle.split(' ').slice(-2).join(' ')}
+                                        </span>
+                                    </h2>
+                                    <p className="mt-4 text-text-secondary">{why.paragraph}</p>
+
+                                    <div className="mt-8 grid gap-x-6 gap-y-6 sm:grid-cols-2">
+                                        {why.items.map((item: { icon?: string; title: string; description: string }, i: number) => (
+                                            <div key={i} className="flex items-start gap-3">
+                                                <span className="mt-0.5 flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg bg-primary-subtle text-primary">
+                                                    <WhyChooseIcon name={item.icon ?? 'shield-check'} />
+                                                </span>
+                                                <div>
+                                                    <h3 className="font-bold text-text">{item.title}</h3>
+                                                    <p className="mt-0.5 text-sm leading-relaxed text-text-secondary">{item.description}</p>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            </div>
                         </RevealOnScroll>
                     </div>
                 </section>
