@@ -96,10 +96,11 @@ class SiteContentSeeder extends Seeder
         ]);
 
         HomeSection::updateOrCreate(['section_key' => 'how_it_works'], [
-            'title' => 'How It Works',
+            'title' => '3 Easy Steps to Your Selection',
             'order' => 6,
             'is_enabled' => true,
             'content' => [
+                'paragraph' => 'Register, prepare, and track your progress with structured courses, unlimited practice, and expert-designed mock exams — all in one place.',
                 'steps' => [ // REAL — from the old site's "Why use this platform"
                     ['title' => 'Register', 'description' => 'Structured curriculum so you learn in the right order.'],
                     ['title' => 'Learn & Test', 'description' => 'Quizzes and assessments to reinforce knowledge, with progress saved as you go.'],

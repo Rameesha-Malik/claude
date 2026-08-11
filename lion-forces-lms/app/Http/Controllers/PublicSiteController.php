@@ -26,12 +26,13 @@ class PublicSiteController extends Controller
             'sections' => $sections,
             'stats' => StatsItem::orderBy('order')->get(['icon', 'number', 'label']),
             'services' => ServiceCard::orderBy('order')->get(['icon', 'title', 'description']),
-            'featuredCourses' => Course::with('category')
+            'featuredCourses' => Course::with(['category', 'sharedNotes:id,subject_id'])
                 ->withCount(['enrollments' => fn ($q) => $q->where('status', 'active')])
                 ->where('status', 'published')
                 ->orderBy('order')
                 ->limit(4)
-                ->get(['id', 'title', 'slug', 'short_description', 'thumbnail_path', 'base_price', 'category_id', 'hours', 'level']),
+                ->get(['id', 'title', 'slug', 'short_description', 'thumbnail_path', 'base_price', 'category_id', 'hours', 'level'])
+                ->map(fn ($course) => $this->appendTopicsCount($course)),
             'faqs' => Faq::where('page', 'home')->where('is_active', true)->orderBy('order')->get(['question', 'answer']),
             'testimonials' => Testimonial::orderBy('order')->get(['student_name', 'photo_path', 'testimonial_text', 'rating']),
             'latestNews' => NewsAnnouncement::where('is_active', true)
@@ -44,7 +45,7 @@ class PublicSiteController extends Controller
 
     public function courses(Request $request): Response
     {
-        $courses = Course::with(['category', 'instructor:id,name'])
+        $courses = Course::with(['category', 'instructor:id,name', 'sharedNotes:id,subject_id'])
             ->withCount(['lessons', 'enrollments' => fn ($q) => $q->where('status', 'active')])
             ->where('status', 'published')
             ->when($request->category, fn ($q, $cat) => $q->whereHas('category', fn ($q) => $q->where('slug', $cat)))
@@ -53,11 +54,25 @@ class PublicSiteController extends Controller
             ->paginate(12)
             ->withQueryString();
 
+        $courses->getCollection()->transform(fn ($course) => $this->appendTopicsCount($course));
+
         return Inertia::render('Public/Courses', [
             'courses' => $courses,
             'categories' => \App\Models\CourseCategory::where('is_active', true)->orderBy('order')->get(['name', 'slug']),
             'filters' => $request->only(['category', 'search']),
         ]);
+    }
+
+    // "Topics" isn't its own column anywhere -- the closest real concept in
+    // the schema is the number of distinct Subjects covered by a course's
+    // shared Notes Bank items, so that's what's surfaced on course cards
+    // rather than a fabricated number.
+    private function appendTopicsCount(Course $course): Course
+    {
+        $course->topics_count = $course->sharedNotes->pluck('subject_id')->filter()->unique()->count();
+        unset($course->sharedNotes);
+
+        return $course;
     }
 
     public function courseDetail(Course $course): Response

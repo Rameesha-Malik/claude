@@ -22,6 +22,15 @@ function UsersIcon() {
     );
 }
 
+function TopicIcon() {
+    return (
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.6} className="h-3.5 w-3.5">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3.5 4.5h5l8 8-5 5-8-8v-5z" />
+            <circle cx="7" cy="8" r="1" fill="currentColor" stroke="none" />
+        </svg>
+    );
+}
+
 function LessonIcon() {
     return (
         <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.6} className="h-3.5 w-3.5">
@@ -34,7 +43,7 @@ function LessonIcon() {
 interface Course {
     id: number; title: string; slug: string; short_description: string | null; thumbnail_path: string | null;
     base_price: string | null; hours: number | null; level: string | null;
-    lessons_count: number; enrollments_count: number;
+    lessons_count: number; enrollments_count: number; topics_count: number;
     category: { name: string } | null; instructor: { name: string } | null;
 }
 interface Props {
@@ -137,6 +146,11 @@ export default function Courses({ courses, categories, filters }: Props) {
                                     {course.hours && (
                                         <span className="inline-flex items-center gap-1">
                                             <ClockIcon /> {course.hours}h
+                                        </span>
+                                    )}
+                                    {course.topics_count > 0 && (
+                                        <span className="inline-flex items-center gap-1">
+                                            <TopicIcon /> {course.topics_count} topic{course.topics_count === 1 ? '' : 's'}
                                         </span>
                                     )}
                                     {course.lessons_count > 0 && (

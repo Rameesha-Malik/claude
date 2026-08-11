@@ -8,6 +8,72 @@ import ShieldMark from '@/Components/ShieldMark';
 import TiltCard from '@/Components/TiltCard';
 import PublicLayout from '@/Layouts/PublicLayout';
 
+// Small illustrative mockup per "How It Works" step -- built from plain
+// divs/SVG rather than screenshots, so it never depends on external image
+// assets and stays theme-consistent (teal/gold, our actual token classes).
+function StepMockup({ index }: { index: number }) {
+    if (index === 0) {
+        return (
+            <div className="rounded-xl bg-surface p-4 text-left shadow-lg">
+                <p className="text-xs font-bold text-text">Create Your Account</p>
+                <div className="mt-2 space-y-1.5">
+                    <div className="h-2 w-3/4 rounded-full bg-surface-sunken" />
+                    <div className="h-2 w-full rounded-full bg-surface-sunken" />
+                </div>
+                <div className="mt-3 flex items-center justify-between">
+                    <div className="flex -space-x-2">
+                        {['AH', 'MR', 'SK'].map((n, i) => (
+                            <span key={n} className="flex h-6 w-6 items-center justify-center rounded-full border-2 border-surface text-[0.5rem] font-bold text-on-primary" style={{ backgroundColor: i % 2 ? 'var(--color-secondary)' : 'var(--color-primary)' }}>
+                                {n}
+                            </span>
+                        ))}
+                    </div>
+                    <span className="rounded-full bg-primary px-3 py-1 text-[0.6rem] font-bold uppercase text-on-primary">Sign Up</span>
+                </div>
+            </div>
+        );
+    }
+    if (index === 1) {
+        return (
+            <div className="rounded-xl bg-surface p-4 text-left shadow-lg">
+                <div className="mb-2 flex items-center justify-between">
+                    <p className="text-xs font-bold text-text">Q3. Verbal Intelligence</p>
+                    <span className="rounded-full bg-danger-bg px-2 py-0.5 text-[0.6rem] font-bold text-danger">08:42</span>
+                </div>
+                <div className="space-y-1.5">
+                    <div className="flex items-center gap-2 rounded-lg border border-primary bg-primary-subtle px-2 py-1.5">
+                        <span className="flex h-3.5 w-3.5 items-center justify-center rounded-full bg-primary text-on-primary">
+                            <svg viewBox="0 0 20 20" fill="currentColor" className="h-2.5 w-2.5"><path d="M16.7 5.3a1 1 0 010 1.4l-7.5 7.5a1 1 0 01-1.4 0L3.3 9.7a1 1 0 111.4-1.4L8 11.6l6.8-6.8a1 1 0 011.4 0z" /></svg>
+                        </span>
+                        <div className="h-1.5 w-20 rounded-full" style={{ backgroundColor: 'rgba(4, 167, 157, 0.4)' }} />
+                    </div>
+                    <div className="flex items-center gap-2 rounded-lg border border-border px-2 py-1.5">
+                        <span className="h-3.5 w-3.5 rounded-full border border-border" />
+                        <div className="h-1.5 w-16 rounded-full bg-surface-sunken" />
+                    </div>
+                </div>
+            </div>
+        );
+    }
+    return (
+        <div className="rounded-xl bg-surface p-4 text-left shadow-lg">
+            <div className="flex items-center gap-3">
+                <div className="relative flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full" style={{ background: 'conic-gradient(var(--color-primary) 87%, var(--color-border) 0)' }}>
+                    <span className="flex h-9 w-9 items-center justify-center rounded-full bg-surface text-[0.65rem] font-bold text-primary">87%</span>
+                </div>
+                <div>
+                    <p className="text-xs font-bold text-text">Mock Exam Complete</p>
+                    <p className="text-[0.65rem] text-success">Certificate unlocked</p>
+                </div>
+            </div>
+            <div className="mt-3 flex items-center gap-1.5 rounded-lg bg-success-bg px-2.5 py-1.5 text-[0.65rem] font-bold text-success">
+                <svg viewBox="0 0 20 20" fill="currentColor" className="h-3 w-3"><path d="M16.7 5.3a1 1 0 010 1.4l-7.5 7.5a1 1 0 01-1.4 0L3.3 9.7a1 1 0 111.4-1.4L8 11.6l6.8-6.8a1 1 0 011.4 0z" /></svg>
+                Ready for selection
+            </div>
+        </div>
+    );
+}
+
 function WhyChooseIcon({ name }: { name: string }) {
     const paths: Record<string, string> = {
         medal: 'M12 2l2.4 5 5.6.5-4.2 3.7 1.3 5.5L12 13.8 6.9 16.7l1.3-5.5L4 7.5l5.6-.5L12 2zm0 13v7m-3-3l3 3 3-3',
@@ -31,6 +97,15 @@ function ClockIcon() {
         <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.6} className="h-3.5 w-3.5">
             <circle cx="10" cy="10" r="7.5" />
             <path strokeLinecap="round" d="M10 5.5V10l3 2" />
+        </svg>
+    );
+}
+
+function TopicIcon() {
+    return (
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.6} className="h-3.5 w-3.5">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3.5 4.5h5l8 8-5 5-8-8v-5z" />
+            <circle cx="7" cy="8" r="1" fill="currentColor" stroke="none" />
         </svg>
     );
 }
@@ -83,7 +158,7 @@ interface ServiceItem { icon: string; title: string; description: string }
 interface CourseItem {
     id: number; title: string; slug: string; short_description: string | null;
     thumbnail_path: string | null; base_price: string | null; hours: number | null; level: string | null;
-    enrollments_count: number; category: { name: string } | null;
+    enrollments_count: number; topics_count: number; category: { name: string } | null;
 }
 interface FaqItem { question: string; answer: string }
 interface TestimonialItem { student_name: string; photo_path: string | null; testimonial_text: string; rating: number | null }
@@ -110,6 +185,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
     const why = sections.why_choose_us?.content ?? {};
     const whyTitle = sections.why_choose_us?.title ?? 'Why Choose Our Platform?';
     const howItWorks = sections.how_it_works?.content ?? {};
+    const howItWorksTitle = sections.how_it_works?.title ?? '3 Easy Steps to Your Selection';
     const demoTeaser = sections.demo_quiz_teaser?.content ?? {};
     const ctaFooter = sections.cta_footer?.content ?? {};
 
@@ -400,6 +476,11 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                                                         <ClockIcon /> {course.hours}h
                                                     </span>
                                                 )}
+                                                {course.topics_count > 0 && (
+                                                    <span className="inline-flex items-center gap-1">
+                                                        <TopicIcon /> {course.topics_count} topic{course.topics_count === 1 ? '' : 's'}
+                                                    </span>
+                                                )}
                                                 {course.enrollments_count > 0 && (
                                                     <span className="inline-flex items-center gap-1">
                                                         <UsersIcon /> {course.enrollments_count}+ enrolled
@@ -467,15 +548,25 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                     <GradientMesh className="opacity-60" />
                     <div className="relative mx-auto max-w-container px-4 sm:px-6 lg:px-8">
                         <RevealOnScroll className="mx-auto mb-16 max-w-2xl text-center">
-                            <SectionKicker dark>The Process</SectionKicker>
-                            <h2 className="font-display text-4xl uppercase tracking-wide sm:text-5xl">How It Works</h2>
+                            <span className="inline-flex items-center rounded-full bg-surface px-4 py-1.5 text-xs font-bold uppercase tracking-wide text-secondary shadow-sm">
+                                The Process
+                            </span>
+                            <h2 className="mt-5 font-display text-4xl uppercase tracking-wide sm:text-5xl">{howItWorksTitle}</h2>
+                            {howItWorks.paragraph && <p className="mx-auto mt-4 max-w-xl text-teal-200">{howItWorks.paragraph}</p>}
                         </RevealOnScroll>
                         <RevealOnScroll className="grid gap-8 md:grid-cols-3">
                             {howItWorks.steps.map((step: { title: string; description: string }, i: number) => (
-                                <div key={i} className="relative rounded-2xl border border-white/15 bg-white/[0.06] p-8 backdrop-blur-glass transition-transform duration-normal hover:-translate-y-1">
-                                    <div className="mb-4 font-display text-5xl text-gold-400">0{i + 1}</div>
-                                    <h3 className="text-lg font-bold">{step.title}</h3>
-                                    <p className="mt-2 text-sm text-teal-200">{step.description}</p>
+                                <div key={i} className="relative rounded-2xl border border-white/15 bg-white/[0.06] p-6 backdrop-blur-glass transition-transform duration-normal hover:-translate-y-1">
+                                    <div className="mb-4 flex items-start justify-between">
+                                        <div>
+                                            <h3 className="text-lg font-bold">{step.title}</h3>
+                                            <p className="mt-1 text-sm text-teal-200">{step.description}</p>
+                                        </div>
+                                        <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-surface text-sm font-bold text-secondary">
+                                            {i + 1}
+                                        </span>
+                                    </div>
+                                    <StepMockup index={i} />
                                 </div>
                             ))}
                         </RevealOnScroll>
