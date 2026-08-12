@@ -26,7 +26,7 @@ export default function StagedTestIntro({ stagedTest, inProgressAttemptId, resum
                 <div className="rounded-2xl border border-border bg-surface p-6">
                     <h2 className="font-display text-2xl text-text">{stagedTest.title}</h2>
                     {stagedTest.target_exam_name && (
-                        <p className="mt-1 text-sm font-bold uppercase tracking-wide text-accent">{stagedTest.target_exam_name} Pattern</p>
+                        <p className="mt-1 text-sm font-bold uppercase tracking-wide text-gold-700">{stagedTest.target_exam_name} Pattern</p>
                     )}
                     <div className="mt-4 grid grid-cols-2 gap-3 text-center">
                         <div className="rounded-lg bg-surface-sunken p-3">

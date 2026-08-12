@@ -42,7 +42,7 @@ export default function HowToBuy({ packages, faqs }: { packages: PackageItem[]; 
                 <RevealOnScroll className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
                     {STEPS.map((step, i) => (
                         <div key={i} className="relative rounded-2xl border border-border bg-surface p-6">
-                            <div className="mb-3 font-display text-4xl text-accent">0{i + 1}</div>
+                            <div className="mb-3 font-display text-4xl text-gold-700">0{i + 1}</div>
                             <h3 className="font-bold text-text">{step.title}</h3>
                             <p className="mt-1 text-sm text-text-secondary">{step.description}</p>
                         </div>

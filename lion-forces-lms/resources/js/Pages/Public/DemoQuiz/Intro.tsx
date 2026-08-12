@@ -11,7 +11,7 @@ export default function DemoQuizIntro({ quiz }: { quiz: Quiz | null }) {
             <div className="mx-auto max-w-2xl px-4 py-16 sm:px-6 lg:px-8">
                 {quiz ? (
                     <div className="rounded-2xl border border-border bg-surface p-8 text-center">
-                        <p className="mb-2 text-sm font-bold uppercase tracking-wide text-accent">No Sign-Up Required</p>
+                        <p className="mb-2 text-sm font-bold uppercase tracking-wide text-gold-700">No Sign-Up Required</p>
                         <h1 className="font-display text-3xl uppercase text-text sm:text-4xl">{quiz.title}</h1>
                         <div className="mt-6 grid grid-cols-2 gap-3">
                             <div className="rounded-lg bg-surface-sunken p-4">

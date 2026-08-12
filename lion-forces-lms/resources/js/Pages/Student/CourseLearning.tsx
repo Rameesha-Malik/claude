@@ -182,7 +182,7 @@ export default function CourseLearning({ course, personalNotes, lessonProgress, 
 
                     {personalNotes.length > 0 && (
                         <div>
-                            <h3 className="mb-3 font-bold text-accent">Your Guaranteed Notes</h3>
+                            <h3 className="mb-3 font-bold text-gold-700">Your Guaranteed Notes</h3>
                             <div className="space-y-3">
                                 {personalNotes.map((note) => (
                                     <div key={note.id} className="rounded-xl border-2 border-accent bg-surface p-5">

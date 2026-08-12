@@ -33,7 +33,7 @@ export default function MockExamIntro({ mockExam, attemptsUsed, isAvailable, can
                 <div className="rounded-2xl border border-border bg-surface p-6">
                     <h2 className="font-display text-2xl text-text">{mockExam.title}</h2>
                     {mockExam.target_exam_name && (
-                        <p className="mt-1 text-sm font-bold uppercase tracking-wide text-accent">{mockExam.target_exam_name} Pattern</p>
+                        <p className="mt-1 text-sm font-bold uppercase tracking-wide text-gold-700">{mockExam.target_exam_name} Pattern</p>
                     )}
                     <div className="mt-4 grid grid-cols-3 gap-3 text-center">
                         <div className="rounded-lg bg-surface-sunken p-3">

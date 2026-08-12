@@ -39,7 +39,7 @@ function CourseCountdown({ course }: { course: EnrollmentCard }) {
     const remaining = useCountdown(course.target_exam_date);
     if (!remaining) return null;
     return (
-        <div className="mt-2 text-xs font-semibold text-accent">
+        <div className="mt-2 text-xs font-semibold text-gold-700">
             {course.target_exam_name ?? 'Target exam'}: {remaining.days}d {remaining.hours}h remaining
         </div>
     );
@@ -116,7 +116,7 @@ export default function Dashboard({ enrollments, revisionCount, unreadNotificati
 function SummaryCard({ label, value, accent = false }: { label: string; value: string | number; accent?: boolean }) {
     return (
         <div className="rounded-2xl border border-border bg-surface p-5">
-            <div className={`font-display text-3xl ${accent ? 'text-accent' : 'text-primary'}`}>{value}</div>
+            <div className={`font-display text-3xl ${accent ? 'text-gold-700' : 'text-primary'}`}>{value}</div>
             <div className="mt-1 text-sm text-text-secondary">{label}</div>
         </div>
     );

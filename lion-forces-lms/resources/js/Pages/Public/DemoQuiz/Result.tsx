@@ -15,7 +15,7 @@ export default function DemoQuizResult({ attempt, quizTitle }: Props) {
 
             <div className="mx-auto max-w-2xl px-4 py-16 text-center sm:px-6 lg:px-8">
                 <div className="rounded-2xl border border-border bg-surface p-8">
-                    <p className="text-sm font-bold uppercase tracking-wide text-accent">Demo Quiz Complete</p>
+                    <p className="text-sm font-bold uppercase tracking-wide text-gold-700">Demo Quiz Complete</p>
                     <p className="mt-2 font-display text-5xl text-text">{percentage}%</p>
                     <p className="mt-1 text-text-secondary">You scored {score} out of {total}</p>
 
