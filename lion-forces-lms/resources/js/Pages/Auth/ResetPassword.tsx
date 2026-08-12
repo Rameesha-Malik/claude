@@ -29,7 +29,7 @@ export default function ResetPassword({
     };
 
     return (
-        <GuestLayout>
+        <GuestLayout title="Reset Password" description="Choose a new password for your account">
             <Head title="Reset Password" />
 
             <form onSubmit={submit}>

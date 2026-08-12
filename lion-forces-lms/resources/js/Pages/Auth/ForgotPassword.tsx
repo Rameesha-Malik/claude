@@ -17,7 +17,7 @@ export default function ForgotPassword({ status }: { status?: string }) {
     };
 
     return (
-        <GuestLayout>
+        <GuestLayout title="Forgot Password" description="We'll email you a link to reset it">
             <Head title="Forgot Password" />
 
             <div className="mb-4 text-sm text-text-secondary">

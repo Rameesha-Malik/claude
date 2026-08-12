@@ -20,7 +20,7 @@ export default function ConfirmPassword() {
     };
 
     return (
-        <GuestLayout>
+        <GuestLayout title="Confirm Password" description="Please confirm your password to continue">
             <Head title="Confirm Password" />
 
             <div className="mb-4 text-sm text-text-secondary">
