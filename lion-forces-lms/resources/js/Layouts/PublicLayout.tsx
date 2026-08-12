@@ -140,7 +140,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                             <ul className="space-y-2 text-sm text-teal-100">
                                 {site.supportEmail && (
                                     <li>
-                                        <a href={`mailto:${site.supportEmail}`} className="hover:text-white">
+                                        <a href={`mailto:${site.supportEmail}`} className="break-all hover:text-white">
                                             {site.supportEmail}
                                         </a>
                                     </li>
