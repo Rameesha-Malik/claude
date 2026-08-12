@@ -6,6 +6,7 @@ import RevealOnScroll from '@/Components/RevealOnScroll';
 import SectionKicker from '@/Components/SectionKicker';
 import ShieldMark from '@/Components/ShieldMark';
 import TiltCard from '@/Components/TiltCard';
+import WaveRibbon from '@/Components/WaveRibbon';
 import PublicLayout from '@/Layouts/PublicLayout';
 
 // Small illustrative mockup per "How It Works" step -- built from plain
@@ -192,6 +193,11 @@ function formatDate(v: string) {
 // per-card variation rather than 3 identical blocks in a row.
 const NEWS_BANNER_GRADIENTS = ['from-teal-600 via-teal-800 to-teal-950', 'from-secondary via-teal-900 to-teal-950'];
 
+// Real exam/service names the platform prepares candidates for (same set
+// named in the hero subheading and used as course category badges) --
+// surfaced here as a decorative "trust bar" tag ribbon, not invented copy.
+const TRUST_TAGS = ['Pak Army', 'Pak Navy', 'Pak Air Force', 'ISSB', 'PMA', 'Lady Cadet Course', 'AFNS', 'Rangers'];
+
 export default function Home({ sections, stats, services, featuredCourses, faqs, testimonials, latestNews }: Props) {
     const hero = sections.hero?.content ?? {};
     const why = sections.why_choose_us?.content ?? {};
@@ -330,22 +336,44 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                     </RevealOnScroll>
                 </div>
 
-                {/* stat strip -- light cards instead of dark glass, matching the new light hero */}
-                {stats.length > 0 && (
-                    <div className="relative mx-auto mt-20 grid max-w-4xl grid-cols-2 gap-4 px-4 sm:gap-6 sm:px-6 md:grid-cols-4 lg:px-8">
-                        {stats.map((stat, i) => (
-                            <TiltCard key={i} max={8} className="rounded-2xl">
-                                <div className="rounded-2xl border border-border bg-surface p-6 text-center shadow-lg">
-                                    <div className="font-display text-3xl text-primary sm:text-4xl">
-                                        <AnimatedCounter value={stat.number} />
-                                    </div>
-                                    <div className="mt-1 text-sm text-text-secondary">{stat.label}</div>
-                                </div>
-                            </TiltCard>
+            </section>
+
+            {/* ---------------- Trust Bar — wavy ribbon of the exams we prepare for, arched over the real stats ---------------- */}
+            {stats.length > 0 && (
+                <section className="relative overflow-hidden bg-secondary pb-14 pt-16 sm:pt-20">
+                    <GradientMesh className="opacity-50" />
+
+                    {/* decorative -- real exam/service names already named in the hero copy above,
+                        just surfaced as a wavy tag ribbon instead of plain prose */}
+                    <div aria-hidden className="relative mx-auto flex max-w-4xl flex-wrap justify-center gap-x-3 gap-y-6 px-6">
+                        {TRUST_TAGS.map((tag, i) => (
+                            <span
+                                key={tag}
+                                className={`rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wide shadow-lg sm:text-sm ${i % 2 === 0 ? 'text-white' : 'text-on-accent'}`}
+                                style={{
+                                    background: i % 2 === 0
+                                        ? 'linear-gradient(135deg, var(--teal-700), var(--teal-500))'
+                                        : 'linear-gradient(135deg, var(--gold-500), var(--gold-300))',
+                                    transform: `translateY(${Math.sin(i * 1.1) * 10}px) rotate(${Math.sin(i * 0.7) * 5}deg)`,
+                                }}
+                            >
+                                {tag}
+                            </span>
                         ))}
                     </div>
-                )}
-            </section>
+
+                    <RevealOnScroll className="relative mx-auto mt-14 grid max-w-4xl grid-cols-2 gap-8 px-4 sm:px-6 md:grid-cols-4 lg:px-8">
+                        {stats.map((stat, i) => (
+                            <div key={i} className="text-center">
+                                <div className="font-display text-4xl text-white sm:text-5xl">
+                                    <AnimatedCounter value={stat.number} />
+                                </div>
+                                <div className="mt-1 text-sm text-teal-200">{stat.label}</div>
+                            </div>
+                        ))}
+                    </RevealOnScroll>
+                </section>
+            )}
 
             {/* ---------------- What We Offer — fanned card stack + scattered praise ---------------- */}
             {services.length > 0 && (
@@ -661,6 +689,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                 <RevealOnScroll>
                     <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-700 via-teal-800 to-teal-950 p-10 text-center text-white shadow-2xl sm:p-16">
                         <GradientMesh />
+                        <WaveRibbon />
                         <div className="relative">
                             <SectionKicker dark>
                                 <span className="mx-auto">No Login Required</span>
@@ -677,25 +706,48 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                 </RevealOnScroll>
             </section>
 
-            {/* ---------------- FAQs ---------------- */}
+            {/* ---------------- FAQs — gradient "ask us" panel + accordion ---------------- */}
             {faqs.length > 0 && (
                 <section className="relative overflow-hidden py-24">
                     <GradientMesh variant="light" />
                     <div className="relative mx-auto max-w-container px-4 sm:px-6 lg:px-8">
-                    <RevealOnScroll className="mx-auto mb-14 max-w-2xl text-center">
-                        <SectionKicker>Got Questions?</SectionKicker>
-                        <h2 className="font-display text-4xl uppercase tracking-wide text-text sm:text-5xl">Frequently Asked</h2>
-                    </RevealOnScroll>
-                    <div className="mx-auto max-w-2xl divide-y divide-border rounded-2xl border border-border bg-surface">
-                        {faqs.map((faq, i) => (
-                            <FaqAccordionItem key={i} question={faq.question} answer={faq.answer} />
-                        ))}
-                    </div>
+                        <RevealOnScroll className="mx-auto mb-14 max-w-2xl text-center">
+                            <SectionKicker>Got Questions?</SectionKicker>
+                            <h2 className="font-display text-4xl uppercase tracking-wide text-text sm:text-5xl">Frequently Asked</h2>
+                        </RevealOnScroll>
+
+                        <RevealOnScroll className="mx-auto grid max-w-4xl gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)]">
+                            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-teal-600 to-teal-950 p-8 text-white shadow-lg">
+                                <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15">
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} className="h-7 w-7">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M4 5h13a2 2 0 012 2v7a2 2 0 01-2 2H10l-4 3v-3H5a2 2 0 01-2-2V7a2 2 0 012-2z" />
+                                        <path strokeLinecap="round" d="M8.5 10h7M8.5 13h4.5" />
+                                    </svg>
+                                </span>
+                                <h3 className="mt-6 font-display text-2xl uppercase tracking-wide">Still Have Questions?</h3>
+                                <p className="mt-2 text-sm leading-relaxed text-teal-100">
+                                    Can't find the answer you're looking for? Our team is happy to help with anything about courses,
+                                    payments, or your target exam.
+                                </p>
+                                <Link
+                                    href="/contact"
+                                    className="mt-6 inline-block rounded-full bg-white px-6 py-3 text-sm font-bold uppercase tracking-wide text-secondary shadow-sm transition-transform duration-fast hover:-translate-y-0.5"
+                                >
+                                    Contact Us
+                                </Link>
+                            </div>
+
+                            <div className="divide-y divide-border rounded-2xl border border-border bg-surface">
+                                {faqs.map((faq, i) => (
+                                    <FaqAccordionItem key={i} question={faq.question} answer={faq.answer} />
+                                ))}
+                            </div>
+                        </RevealOnScroll>
                     </div>
                 </section>
             )}
 
-            {/* ---------------- Testimonials ---------------- */}
+            {/* ---------------- Testimonials — mixed photo/quote cards ("What Our Customers Say" reference) ---------------- */}
             {testimonials.length > 0 && (
                 <section className="relative overflow-hidden bg-surface-sunken py-24">
                     <GradientMesh variant="light" />
@@ -704,22 +756,45 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                             <SectionKicker>Real Results</SectionKicker>
                             <h2 className="font-display text-4xl uppercase tracking-wide text-text sm:text-5xl">Success Stories</h2>
                         </RevealOnScroll>
-                        <RevealOnScroll className="grid gap-6 md:grid-cols-3">
-                            {testimonials.map((t, i) => (
-                                <div key={i} className="rounded-2xl border border-border bg-surface p-6 shadow-sm transition-shadow duration-normal hover:shadow-md">
-                                    {t.rating && (
-                                        <div className="mb-3 flex gap-0.5 text-gold-500">
-                                            {Array.from({ length: 5 }).map((_, s) => (
-                                                <svg key={s} className="h-4 w-4" fill={s < t.rating! ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 20 20">
-                                                    <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                                                </svg>
-                                            ))}
+                        <RevealOnScroll className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                            {testimonials.map((t, i) => {
+                                // A real student photo earns the wider two-column "feature" card
+                                // treatment; text-only testimonials stay compact -- the mixed
+                                // layout follows what data actually exists, nothing is staged.
+                                const hasPhoto = !!t.photo_path;
+                                return (
+                                    <div
+                                        key={i}
+                                        className={`rounded-2xl border border-border bg-surface p-6 shadow-sm transition-shadow duration-normal hover:shadow-md ${hasPhoto ? 'flex items-center gap-5 sm:col-span-2' : ''}`}
+                                    >
+                                        {hasPhoto && (
+                                            <img
+                                                src={`/storage/${t.photo_path}`}
+                                                alt=""
+                                                className="hidden h-24 w-24 flex-shrink-0 rounded-2xl object-cover sm:block"
+                                            />
+                                        )}
+                                        <div className="flex-1">
+                                            <p className="text-sm italic leading-relaxed text-text-secondary">&ldquo;{t.testimonial_text}&rdquo;</p>
+                                            <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
+                                                <div className="font-semibold text-text">{t.student_name}</div>
+                                                {t.rating && (
+                                                    <div className="inline-flex items-center gap-1.5 rounded-full bg-primary-subtle px-2.5 py-1 text-xs font-bold text-primary">
+                                                        {t.rating.toFixed(1)}
+                                                        <span className="flex gap-0.5 text-gold-500">
+                                                            {Array.from({ length: 5 }).map((_, s) => (
+                                                                <svg key={s} className="h-3 w-3" fill={s < t.rating! ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 20 20">
+                                                                    <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
+                                                                </svg>
+                                                            ))}
+                                                        </span>
+                                                    </div>
+                                                )}
+                                            </div>
                                         </div>
-                                    )}
-                                    <p className="text-sm italic text-text-secondary">&ldquo;{t.testimonial_text}&rdquo;</p>
-                                    <div className="mt-4 font-semibold text-text">{t.student_name}</div>
-                                </div>
-                            ))}
+                                    </div>
+                                );
+                            })}
                         </RevealOnScroll>
                     </div>
                 </section>
