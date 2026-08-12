@@ -426,8 +426,9 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
 
             {/* ---------------- Featured Courses ---------------- */}
             {featuredCourses.length > 0 && (
-                <section className="bg-surface-sunken py-20">
-                    <div className="mx-auto max-w-container px-4 sm:px-6 lg:px-8">
+                <section className="relative overflow-hidden bg-surface-sunken py-20">
+                    <GradientMesh variant="light" />
+                    <div className="relative mx-auto max-w-container px-4 sm:px-6 lg:px-8">
                         <RevealOnScroll className="mb-14 flex flex-wrap items-end justify-between gap-4">
                             <div>
                                 <SectionKicker>Popular Tracks</SectionKicker>
@@ -523,8 +524,9 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
 
             {/* ---------------- Why Choose Us — bento grid: one bold featured tile + a plain CSS grid for the rest (no absolute positioning, so nothing can misalign) ---------------- */}
             {why.items && (
-                <section className="bg-surface-sunken py-24">
-                    <div className="mx-auto max-w-container px-4 sm:px-6 lg:px-8">
+                <section className="relative overflow-hidden bg-surface-sunken py-24">
+                    <GradientMesh variant="light" />
+                    <div className="relative mx-auto max-w-container px-4 sm:px-6 lg:px-8">
                         <RevealOnScroll className="mx-auto mb-14 max-w-2xl text-center">
                             <SectionKicker>The Difference</SectionKicker>
                             <h2 className="font-display text-4xl uppercase tracking-wide text-text sm:text-5xl">
@@ -601,7 +603,9 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
 
             {/* ---------------- Latest News — article-style cards ---------------- */}
             {latestNews.length > 0 && (
-                <section className="mx-auto max-w-container px-4 py-24 sm:px-6 lg:px-8">
+                <section className="relative overflow-hidden py-24">
+                    <GradientMesh variant="light" />
+                    <div className="relative mx-auto max-w-container px-4 sm:px-6 lg:px-8">
                     <RevealOnScroll className="mx-auto mb-14 max-w-2xl text-center">
                         <SectionKicker>Stay Updated</SectionKicker>
                         <h2 className="font-display text-4xl uppercase tracking-wide text-text sm:text-5xl">Discover Our Latest News</h2>
@@ -648,6 +652,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                             View all news &rarr;
                         </Link>
                     </RevealOnScroll>
+                    </div>
                 </section>
             )}
 
@@ -674,7 +679,9 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
 
             {/* ---------------- FAQs ---------------- */}
             {faqs.length > 0 && (
-                <section className="mx-auto max-w-container px-4 py-24 sm:px-6 lg:px-8">
+                <section className="relative overflow-hidden py-24">
+                    <GradientMesh variant="light" />
+                    <div className="relative mx-auto max-w-container px-4 sm:px-6 lg:px-8">
                     <RevealOnScroll className="mx-auto mb-14 max-w-2xl text-center">
                         <SectionKicker>Got Questions?</SectionKicker>
                         <h2 className="font-display text-4xl uppercase tracking-wide text-text sm:text-5xl">Frequently Asked</h2>
@@ -684,13 +691,15 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                             <FaqAccordionItem key={i} question={faq.question} answer={faq.answer} />
                         ))}
                     </div>
+                    </div>
                 </section>
             )}
 
             {/* ---------------- Testimonials ---------------- */}
             {testimonials.length > 0 && (
-                <section className="bg-surface-sunken py-24">
-                    <div className="mx-auto max-w-container px-4 sm:px-6 lg:px-8">
+                <section className="relative overflow-hidden bg-surface-sunken py-24">
+                    <GradientMesh variant="light" />
+                    <div className="relative mx-auto max-w-container px-4 sm:px-6 lg:px-8">
                         <RevealOnScroll className="mx-auto mb-14 max-w-2xl text-center">
                             <SectionKicker>Real Results</SectionKicker>
                             <h2 className="font-display text-4xl uppercase tracking-wide text-text sm:text-5xl">Success Stories</h2>
