@@ -1,6 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
-import { useState } from 'react';
 import AnimatedCounter from '@/Components/AnimatedCounter';
+import FaqAccordionItem from '@/Components/FaqAccordionItem';
 import GradientMesh from '@/Components/GradientMesh';
 import RevealOnScroll from '@/Components/RevealOnScroll';
 import SectionKicker from '@/Components/SectionKicker';
@@ -783,53 +783,80 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                 </section>
             )}
 
-            {/* ---------------- CTA Footer Banner ---------------- */}
+            {/* ---------------- CTA Footer Banner — text + illustrative "your progress" dashboard preview ---------------- */}
             <section className="mx-auto max-w-container px-4 pb-24 sm:px-6 lg:px-8">
                 <RevealOnScroll>
-                    <div className="relative overflow-hidden rounded-3xl border-2 border-accent bg-surface-brand p-10 text-center sm:p-16">
+                    <div className="relative overflow-hidden rounded-3xl border-2 border-accent bg-surface-brand p-10 sm:p-16">
                         <div
                             aria-hidden
                             className="absolute -right-10 -top-10 h-40 w-40 rotate-12 rounded-3xl"
                             style={{ backgroundColor: 'rgba(212, 165, 55, 0.1)' }}
                         />
-                        <h2 className="relative font-display text-4xl uppercase tracking-wide text-secondary sm:text-5xl">
-                            {ctaFooter.heading}
-                        </h2>
-                        <p className="relative mt-3 text-text-secondary">{ctaFooter.subheading}</p>
-                        <Link
-                            href={ctaFooter.button_link ?? '/register'}
-                            className="relative mt-8 inline-block rounded-xl bg-accent px-10 py-4 font-bold uppercase tracking-wide text-accent-fg shadow-lg transition-all duration-normal ease-spring hover:-translate-y-0.5 hover:bg-accent-hover"
-                        >
-                            {ctaFooter.button_text ?? 'Register Now'}
-                        </Link>
+
+                        <div className="relative grid gap-10 lg:grid-cols-2 lg:items-center">
+                            <div className="text-center lg:text-left">
+                                <h2 className="font-display text-4xl uppercase tracking-wide text-secondary sm:text-5xl">
+                                    {ctaFooter.heading}
+                                </h2>
+                                <p className="mt-3 text-text-secondary">{ctaFooter.subheading}</p>
+                                <Link
+                                    href={ctaFooter.button_link ?? '/register'}
+                                    className="mt-8 inline-block rounded-xl bg-accent px-10 py-4 font-bold uppercase tracking-wide text-accent-fg shadow-lg transition-all duration-normal ease-spring hover:-translate-y-0.5 hover:bg-accent-hover"
+                                >
+                                    {ctaFooter.button_text ?? 'Register Now'}
+                                </Link>
+                            </div>
+
+                            {/* illustrative preview of the real "Performance Graph" feature
+                                (already promised in Why Choose Us) -- mock UI, not a specific
+                                user's real data, same convention as the How It Works mockups */}
+                            <div className="hidden grid-cols-2 gap-4 lg:grid">
+                                <div className="rounded-2xl border border-border bg-surface p-4 shadow-xl">
+                                    <p className="text-xs font-bold uppercase tracking-wide text-text-muted">Practice Areas</p>
+                                    <div className="mt-3 flex flex-wrap gap-1.5">
+                                        {TRUST_TAGS.slice(0, 6).map((tag, i) => (
+                                            <span
+                                                key={tag}
+                                                className="rounded-full bg-primary-subtle px-2.5 py-1 text-[0.65rem] font-bold text-primary"
+                                                style={{ transform: `rotate(${Math.sin(i * 1.3) * 8}deg)` }}
+                                            >
+                                                {tag}
+                                            </span>
+                                        ))}
+                                    </div>
+                                </div>
+
+                                <div className="rounded-2xl border border-border bg-surface p-4 shadow-xl">
+                                    <p className="text-xs font-bold uppercase tracking-wide text-text-muted">Your Progress</p>
+                                    <div className="mt-3 flex gap-2">
+                                        <div className="rounded-xl bg-primary px-3 py-2 text-on-primary">
+                                            <p className="text-[0.6rem] uppercase tracking-wide opacity-80">Accuracy</p>
+                                            <p className="font-display text-lg">+35%</p>
+                                        </div>
+                                        <div className="rounded-xl bg-secondary px-3 py-2 text-white">
+                                            <p className="text-[0.6rem] uppercase tracking-wide text-teal-200">Tests Taken</p>
+                                            <p className="font-display text-lg">120+</p>
+                                        </div>
+                                    </div>
+                                    <svg viewBox="0 0 200 70" className="mt-3 h-16 w-full" preserveAspectRatio="none">
+                                        <polyline
+                                            points="0,55 30,45 60,50 90,30 120,38 150,15 180,20 200,5"
+                                            fill="none"
+                                            stroke="var(--color-primary)"
+                                            strokeWidth="3"
+                                            strokeLinecap="round"
+                                            strokeLinejoin="round"
+                                        />
+                                        <circle cx="150" cy="15" r="4" fill="var(--gold-500)" />
+                                        <circle cx="200" cy="5" r="4" fill="var(--color-primary)" />
+                                    </svg>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                 </RevealOnScroll>
             </section>
         </PublicLayout>
-    );
-}
-
-function FaqAccordionItem({ question, answer }: { question: string; answer: string }) {
-    const [open, setOpen] = useState(false);
-    return (
-        <div>
-            <button
-                className="flex w-full items-center justify-between px-6 py-5 text-left font-medium text-text"
-                onClick={() => setOpen((v) => !v)}
-                aria-expanded={open}
-            >
-                {question}
-                <svg
-                    className={`h-5 w-5 flex-shrink-0 text-text-muted transition-transform duration-fast ${open ? 'rotate-180' : ''}`}
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                >
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                </svg>
-            </button>
-            {open && <div className="px-6 pb-5 text-sm text-text-secondary">{answer}</div>}
-        </div>
     );
 }
 
