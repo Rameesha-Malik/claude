@@ -1,20 +1,30 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
+import GradientMesh from '@/Components/GradientMesh';
 import RevealOnScroll from '@/Components/RevealOnScroll';
 import PublicLayout from '@/Layouts/PublicLayout';
 
-function ClockIcon() {
+function SearchIcon() {
     return (
-        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.6} className="h-3.5 w-3.5">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.8} className="h-5 w-5 flex-shrink-0">
+            <circle cx="9" cy="9" r="6" />
+            <path strokeLinecap="round" d="M17.5 17.5 14 14" />
+        </svg>
+    );
+}
+
+function ClockIcon({ className = '' }: { className?: string }) {
+    return (
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.6} className={`h-3.5 w-3.5 ${className}`}>
             <circle cx="10" cy="10" r="7.5" />
             <path strokeLinecap="round" d="M10 5.5V10l3 2" />
         </svg>
     );
 }
 
-function UsersIcon() {
+function UsersIcon({ className = '' }: { className?: string }) {
     return (
-        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.6} className="h-3.5 w-3.5">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.6} className={`h-3.5 w-3.5 ${className}`}>
             <circle cx="7" cy="6.5" r="2.5" />
             <path strokeLinecap="round" d="M2.5 16c0-2.5 2-4.5 4.5-4.5s4.5 2 4.5 4.5" />
             <path strokeLinecap="round" d="M12.5 4.6a2.5 2.5 0 010 4.8M15 16c0-2-1.3-3.7-3-4.3" />
@@ -22,18 +32,18 @@ function UsersIcon() {
     );
 }
 
-function TopicIcon() {
+function TopicIcon({ className = '' }: { className?: string }) {
     return (
-        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.6} className="h-3.5 w-3.5">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.6} className={`h-3.5 w-3.5 ${className}`}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M3.5 4.5h5l8 8-5 5-8-8v-5z" />
             <circle cx="7" cy="8" r="1" fill="currentColor" stroke="none" />
         </svg>
     );
 }
 
-function LessonIcon() {
+function LessonIcon({ className = '' }: { className?: string }) {
     return (
-        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.6} className="h-3.5 w-3.5">
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.6} className={`h-3.5 w-3.5 ${className}`}>
             <path strokeLinecap="round" strokeLinejoin="round" d="M3 5.5A2 2 0 015 3.5h6l4 4v9a2 2 0 01-2 2H5a2 2 0 01-2-2v-11z" />
             <path strokeLinecap="round" d="M11 3.5v4h4M6.5 11h5M6.5 14h5" />
         </svg>
@@ -69,19 +79,32 @@ export default function Courses({ courses, categories, filters }: Props) {
             <Head title="Courses" />
 
             <section className="relative overflow-hidden bg-gradient-to-br from-secondary to-teal-950 py-20">
+                {/* dot-grid pattern + drifting gradient blobs -- breaks up the
+                    flat dark fill instead of leaving it a solid gradient */}
+                <div
+                    aria-hidden
+                    className="absolute inset-0 opacity-[0.15]"
+                    style={{ backgroundImage: 'radial-gradient(rgba(255,255,255,0.7) 1.5px, transparent 1.5px)', backgroundSize: '20px 20px' }}
+                />
+                <GradientMesh className="opacity-70" />
+
                 <div className="relative mx-auto max-w-container px-4 text-center sm:px-6 lg:px-8">
                     <h1 className="font-display text-5xl uppercase tracking-wide text-white">Courses</h1>
                     <p className="mt-3 text-teal-200">Structured preparation for every major service entry test.</p>
 
-                    <form onSubmit={submitSearch} className="mx-auto mt-8 flex max-w-md gap-2">
+                    <form onSubmit={submitSearch} className="mx-auto mt-8 flex max-w-lg items-center gap-1.5 rounded-full bg-white p-1.5 pl-5 shadow-xl">
+                        <SearchIcon />
                         <input
                             type="text"
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             placeholder="Search courses..."
-                            className="w-full rounded-lg border-0 px-4 py-3 text-sm text-text focus:outline-none focus:ring-2 focus:ring-primary"
+                            className="w-full border-0 bg-transparent py-2.5 text-sm text-text placeholder:text-text-muted focus:outline-none focus:ring-0"
                         />
-                        <button type="submit" className="rounded-lg bg-primary px-6 py-3 text-sm font-bold uppercase tracking-wide text-on-primary hover:bg-primary-hover">
+                        <button
+                            type="submit"
+                            className="flex-shrink-0 rounded-full bg-primary px-6 py-3 text-sm font-bold uppercase tracking-wide text-on-primary shadow-sm transition-colors duration-fast hover:bg-primary-hover"
+                        >
                             Search
                         </button>
                     </form>
@@ -118,9 +141,22 @@ export default function Courses({ courses, categories, filters }: Props) {
                                         className="h-full w-full object-cover transition-transform duration-slow group-hover:scale-110"
                                     />
                                 ) : (
-                                    <div className="flex h-full items-center justify-center font-display text-2xl uppercase tracking-widest text-white">
-                                        {course.category?.name ?? 'Course'}
-                                    </div>
+                                    <>
+                                        <div
+                                            aria-hidden
+                                            className="absolute inset-0 opacity-[0.12]"
+                                            style={{ backgroundImage: 'radial-gradient(rgba(255,255,255,0.8) 1.5px, transparent 1.5px)', backgroundSize: '16px 16px' }}
+                                        />
+                                        <span
+                                            aria-hidden
+                                            className="absolute -right-4 -top-4 h-16 w-16 rotate-12 rounded-lg bg-white/10 transition-transform duration-slow group-hover:rotate-45"
+                                        />
+                                        <div className="flex h-full items-center justify-center">
+                                            <span className="relative font-display text-2xl uppercase tracking-widest text-white">
+                                                {course.category?.name ?? 'Course'}
+                                            </span>
+                                        </div>
+                                    </>
                                 )}
                                 <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 transition-opacity duration-normal group-hover:opacity-100" />
                                 <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
@@ -138,37 +174,47 @@ export default function Courses({ courses, categories, filters }: Props) {
                             </div>
 
                             <div className="flex flex-1 flex-col p-5">
-                                <h3 className="font-bold text-text group-hover:text-primary">{course.title}</h3>
-                                {course.instructor && <p className="mt-0.5 text-xs text-text-muted">by {course.instructor.name}</p>}
-                                <p className="mt-2 line-clamp-2 flex-1 text-sm text-text-secondary">{course.short_description}</p>
+                                <h3 className="font-display text-lg uppercase tracking-wide text-text group-hover:text-primary">{course.title}</h3>
+                                {course.instructor && (
+                                    <div className="mt-1.5 flex items-center gap-1.5">
+                                        <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-primary-subtle text-[0.6rem] font-bold text-primary">
+                                            {course.instructor.name.charAt(0).toUpperCase()}
+                                        </span>
+                                        <p className="text-xs font-medium text-text-secondary">{course.instructor.name}</p>
+                                    </div>
+                                )}
+                                <p className="mt-2.5 line-clamp-2 flex-1 text-sm leading-relaxed text-text-secondary">{course.short_description}</p>
 
-                                <div className="mt-4 flex flex-wrap items-center gap-3 text-xs text-text-muted">
+                                <div className="mt-4 flex flex-wrap gap-1.5">
                                     {course.hours && (
-                                        <span className="inline-flex items-center gap-1">
-                                            <ClockIcon /> {course.hours}h
+                                        <span className="inline-flex items-center gap-1 rounded-full bg-surface-sunken px-2.5 py-1 text-[0.7rem] font-medium text-text-secondary">
+                                            <ClockIcon className="text-primary" /> {course.hours}h
                                         </span>
                                     )}
                                     {course.topics_count > 0 && (
-                                        <span className="inline-flex items-center gap-1">
-                                            <TopicIcon /> {course.topics_count} topic{course.topics_count === 1 ? '' : 's'}
+                                        <span className="inline-flex items-center gap-1 rounded-full bg-surface-sunken px-2.5 py-1 text-[0.7rem] font-medium text-text-secondary">
+                                            <TopicIcon className="text-primary" /> {course.topics_count} topic{course.topics_count === 1 ? '' : 's'}
                                         </span>
                                     )}
                                     {course.lessons_count > 0 && (
-                                        <span className="inline-flex items-center gap-1">
-                                            <LessonIcon /> {course.lessons_count} lesson{course.lessons_count === 1 ? '' : 's'}
+                                        <span className="inline-flex items-center gap-1 rounded-full bg-surface-sunken px-2.5 py-1 text-[0.7rem] font-medium text-text-secondary">
+                                            <LessonIcon className="text-primary" /> {course.lessons_count} lesson{course.lessons_count === 1 ? '' : 's'}
                                         </span>
                                     )}
                                     {course.enrollments_count > 0 && (
-                                        <span className="inline-flex items-center gap-1">
-                                            <UsersIcon /> {course.enrollments_count} enrolled
+                                        <span className="inline-flex items-center gap-1 rounded-full bg-surface-sunken px-2.5 py-1 text-[0.7rem] font-medium text-text-secondary">
+                                            <UsersIcon className="text-primary" /> {course.enrollments_count} enrolled
                                         </span>
                                     )}
                                 </div>
 
                                 <div className="mt-4 flex items-center justify-between border-t border-border pt-4">
-                                    <span className="font-display text-lg text-primary">
-                                        {course.base_price ? `Rs. ${Number(course.base_price).toLocaleString()}` : 'Free'}
-                                    </span>
+                                    <div>
+                                        <p className="text-[0.65rem] font-semibold uppercase tracking-wide text-text-muted">Starting from</p>
+                                        <span className="font-display text-xl text-primary">
+                                            {course.base_price ? `Rs. ${Number(course.base_price).toLocaleString()}` : 'Free'}
+                                        </span>
+                                    </div>
                                     <Link
                                         href={`/courses/${course.slug}`}
                                         className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-xs font-bold uppercase tracking-wide text-on-primary shadow-sm transition-all duration-fast hover:bg-primary-hover hover:shadow-md"
