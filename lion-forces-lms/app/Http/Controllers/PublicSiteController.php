@@ -87,6 +87,7 @@ class PublicSiteController extends Controller
         return Inertia::render('Public/About', [
             'instructors' => Instructor::where('is_active', true)->orderBy('order')->get(['name', 'photo_path', 'qualification', 'experience', 'bio']),
             'section' => HomeSection::where('section_key', 'why_choose_us')->first(['title', 'content']),
+            'stats' => StatsItem::orderBy('order')->get(['icon', 'number', 'label']),
         ]);
     }
 
