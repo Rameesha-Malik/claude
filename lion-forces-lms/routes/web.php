@@ -24,6 +24,7 @@ use App\Http\Controllers\DemoQuizController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicSiteController;
 use App\Http\Controllers\Student\AttemptController as StudentAttemptController;
+use App\Http\Controllers\Student\CheckoutController as StudentCheckoutController;
 use App\Http\Controllers\Student\CourseController as StudentCourseController;
 use App\Http\Controllers\Student\DashboardController as StudentDashboardController;
 use App\Http\Controllers\Student\MockExamController as StudentMockExamController;
@@ -71,6 +72,8 @@ Route::middleware(['auth', 'verified', 'user_type:student'])->prefix('portal')->
     Route::get('/', [StudentDashboardController::class, 'index'])->name('student.dashboard');
     Route::get('/my-courses', [StudentCourseController::class, 'index'])->name('student.courses');
     Route::get('/my-courses/{course:slug}', [StudentCourseController::class, 'show'])->name('student.courses.show');
+    Route::get('/courses/{course:slug}/checkout', [StudentCheckoutController::class, 'create'])->name('student.checkout.create');
+    Route::post('/courses/{course:slug}/checkout', [StudentCheckoutController::class, 'store'])->name('student.checkout.store');
     Route::post('/lessons/{lesson}/complete', [StudentCourseController::class, 'markLessonComplete'])->name('student.lessons.complete');
     Route::post('/courses/{course:slug}/questions', [StudentCourseController::class, 'askQuestion'])->name('student.questions.store');
     Route::post('/courses/{course:slug}/review', [StudentCourseController::class, 'submitReview'])->name('student.reviews.store');

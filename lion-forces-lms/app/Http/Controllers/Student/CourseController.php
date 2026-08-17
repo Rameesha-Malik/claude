@@ -26,8 +26,17 @@ class CourseController extends Controller
     {
         $enrollment = Enrollment::where('user_id', $request->user()->id)
             ->where('course_id', $course->id)
-            ->where('status', 'active')
-            ->firstOrFail();
+            ->first();
+
+        // A pending/suspended/expired enrollment is a real, expected state
+        // (e.g. just submitted payment, awaiting verification) -- distinct
+        // from a 404, which should stay reserved for "not enrolled at all".
+        if (! $enrollment || $enrollment->status !== 'active') {
+            return Inertia::render('Student/CourseLearning', [
+                'course' => $course->only('title'),
+                'enrollmentStatus' => $enrollment?->status ?? null,
+            ]);
+        }
 
         $user = $request->user();
 

@@ -2,7 +2,7 @@ import { Head, router } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 
 interface Payment {
-    id: number; amount: string; method: string; status: string; reference_number: string | null;
+    id: number; amount: string; method: string; status: string; reference_number: string | null; proof_file_path: string | null;
     enrollment: { user: { name: string; email: string } | null; course: { title: string } | null } | null;
     created_at: string;
 }
@@ -36,6 +36,7 @@ export default function PaymentsIndex({ payments, filters }: Props) {
                             <th className="px-5 py-3">Course</th>
                             <th className="px-5 py-3">Method</th>
                             <th className="px-5 py-3">Amount</th>
+                            <th className="px-5 py-3">Proof</th>
                             <th className="px-5 py-3">Status</th>
                             <th className="px-5 py-3" />
                         </tr>
@@ -50,6 +51,21 @@ export default function PaymentsIndex({ payments, filters }: Props) {
                                 <td className="px-5 py-3 text-text-secondary">{p.enrollment?.course?.title}</td>
                                 <td className="px-5 py-3 capitalize text-text-secondary">{p.method.replace('_', ' ')}</td>
                                 <td className="px-5 py-3 font-semibold text-text">Rs. {Number(p.amount).toLocaleString()}</td>
+                                <td className="px-5 py-3">
+                                    {p.proof_file_path ? (
+                                        <a
+                                            href={`/storage/${p.proof_file_path}`}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="font-semibold text-primary hover:underline"
+                                        >
+                                            View
+                                        </a>
+                                    ) : (
+                                        <span className="text-text-muted">—</span>
+                                    )}
+                                    {p.reference_number && <div className="text-xs text-text-muted">Ref: {p.reference_number}</div>}
+                                </td>
                                 <td className="px-5 py-3">
                                     <span className={`rounded-full px-2 py-0.5 text-xs font-bold uppercase ${
                                         p.status === 'verified' ? 'bg-success-bg text-success' : p.status === 'pending' ? 'bg-warning-bg text-warning' : 'bg-danger-bg text-danger'

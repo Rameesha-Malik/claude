@@ -1,10 +1,12 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import PublicLayout from '@/Layouts/PublicLayout';
+import { PageProps } from '@/types';
 
 interface Package { id: number; name: string; description: string | null; price: string; validity_days: number | null }
 interface Lesson { id: number; title: string; type: string }
 interface Review { id: number; rating: number; review_text: string | null; user: { name: string } | null }
 interface Course {
+    slug: string;
     title: string; short_description: string | null; description: string | null; syllabus: string | null;
     base_price: string | null; hours: number | null;
     category: { name: string } | null;
@@ -19,6 +21,9 @@ function Stars({ rating }: { rating: number }) {
 }
 
 export default function CourseDetail({ course }: { course: Course }) {
+    const { auth } = usePage<PageProps>().props;
+    const checkoutHref = auth.user ? `/portal/courses/${course.slug}/checkout` : '/register';
+
     return (
         <PublicLayout>
             <Head title={course.title} />
@@ -97,7 +102,7 @@ export default function CourseDetail({ course }: { course: Course }) {
                             {course.base_price ? `Rs. ${Number(course.base_price).toLocaleString()}` : 'Contact us'}
                         </div>
                         <Link
-                            href="/register"
+                            href={checkoutHref}
                             className="mt-4 block rounded-xl bg-primary py-3 text-center font-semibold text-on-primary hover:bg-primary-hover"
                         >
                             Enroll Now
@@ -107,13 +112,17 @@ export default function CourseDetail({ course }: { course: Course }) {
                             <div className="mt-6 space-y-3">
                                 <div className="text-sm font-semibold text-text">Packages</div>
                                 {course.packages.map((pkg) => (
-                                    <div key={pkg.id} className="rounded-lg border border-border p-3">
+                                    <Link
+                                        key={pkg.id}
+                                        href={auth.user ? `/portal/courses/${course.slug}/checkout?package=${pkg.id}` : '/register'}
+                                        className="block rounded-lg border border-border p-3 transition-colors hover:border-primary hover:bg-primary-subtle"
+                                    >
                                         <div className="flex justify-between text-sm font-medium text-text">
                                             <span>{pkg.name}</span>
                                             <span>Rs. {Number(pkg.price).toLocaleString()}</span>
                                         </div>
                                         {pkg.description && <p className="mt-1 text-xs text-text-secondary">{pkg.description}</p>}
-                                    </div>
+                                    </Link>
                                 ))}
                             </div>
                         )}

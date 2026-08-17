@@ -23,11 +23,15 @@ interface Course {
 }
 interface Review { id: number; rating: number; review_text: string | null; status: string }
 interface Props {
-    course: Course;
-    personalNotes: Note[];
-    lessonProgress: Record<number, { is_completed: boolean }>;
-    questions: Question[];
-    myReview: Review | null;
+    course: Partial<Course> & Pick<Course, 'title'>;
+    personalNotes?: Note[];
+    lessonProgress?: Record<number, { is_completed: boolean }>;
+    questions?: Question[];
+    myReview?: Review | null;
+    /** Present (and not 'active') when the enrollment isn't active yet -- e.g.
+     *  payment just submitted and awaiting admin verification. In that case
+     *  every field above except course.title is omitted by the controller. */
+    enrollmentStatus?: string | null;
 }
 
 const TABS = ['Lectures', 'Notes', 'Quizzes', 'Flashcards', 'Tests', 'Q&A'] as const;
@@ -97,9 +101,47 @@ function LessonPlayer({ lesson }: { lesson: Lesson }) {
     }
 }
 
-export default function CourseLearning({ course, personalNotes, lessonProgress, questions, myReview }: Props) {
+export default function CourseLearning({ course: courseProp, personalNotes = [], lessonProgress = {}, questions = [], myReview = null, enrollmentStatus }: Props) {
     const [tab, setTab] = useState<Tab>('Lectures');
-    const [activeLesson, setActiveLesson] = useState<Lesson | null>(course.lessons[0] ?? null);
+    const [activeLesson, setActiveLesson] = useState<Lesson | null>((courseProp as Course).lessons?.[0] ?? null);
+
+    // `enrollmentStatus` is only ever included in the payload at all for the
+    // guard branch (undefined here means the controller sent the full
+    // course shape) -- checking `!== undefined` rather than truthiness so
+    // "no enrollment exists" (status null) is caught the same as a real
+    // pending/suspended/expired status string.
+    if (enrollmentStatus !== undefined) {
+        return (
+            <StudentLayout header={courseProp.title}>
+                <Head title={courseProp.title} />
+                <div className="mx-auto max-w-lg rounded-2xl border border-border bg-surface p-8 text-center">
+                    <h2 className="font-bold text-text">
+                        {enrollmentStatus === 'pending'
+                            ? 'Enrollment Pending Verification'
+                            : enrollmentStatus === null
+                              ? "You're Not Enrolled"
+                              : 'Access Not Active'}
+                    </h2>
+                    <p className="mt-2 text-sm text-text-secondary">
+                        {enrollmentStatus === 'pending'
+                            ? "We've received your payment and it's awaiting verification, usually within a day."
+                            : enrollmentStatus === null
+                              ? "You haven't enrolled in this course yet."
+                              : 'Your access to this course is not currently active. Contact us if you think this is a mistake.'}
+                    </p>
+                    <Link
+                        href="/portal/my-courses"
+                        className="mt-6 inline-block rounded-lg bg-primary px-6 py-2.5 text-sm font-bold uppercase tracking-wide text-on-primary hover:bg-primary-hover"
+                    >
+                        View My Courses
+                    </Link>
+                </div>
+            </StudentLayout>
+        );
+    }
+
+    // Past the guard above, the controller only ever sends the full shape.
+    const course = courseProp as Course;
 
     return (
         <StudentLayout header={course.title}>
