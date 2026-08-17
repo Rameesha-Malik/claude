@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\ContentLibraryController as AdminContentLibraryCo
 use App\Http\Controllers\Admin\CourseController as AdminCourseController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\DemoQuizController as AdminDemoQuizController;
+use App\Http\Controllers\Admin\FlashcardController as AdminFlashcardController;
 use App\Http\Controllers\Admin\HallOfFameController as AdminHallOfFameController;
 use App\Http\Controllers\Admin\InstructorController as AdminInstructorController;
 use App\Http\Controllers\Admin\MockExamController as AdminMockExamController;
@@ -13,6 +14,7 @@ use App\Http\Controllers\Admin\NewsController as AdminNewsController;
 use App\Http\Controllers\Admin\NotificationController as AdminNotificationController;
 use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
 use App\Http\Controllers\Admin\PracticeTestController as AdminPracticeTestController;
+use App\Http\Controllers\Admin\QuizController as AdminQuizController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Admin\ResourceController as AdminResourceController;
 use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
@@ -30,6 +32,7 @@ use App\Http\Controllers\Student\DashboardController as StudentDashboardControll
 use App\Http\Controllers\Student\MockExamController as StudentMockExamController;
 use App\Http\Controllers\Student\NotificationController as StudentNotificationController;
 use App\Http\Controllers\Student\PracticeTestController as StudentPracticeTestController;
+use App\Http\Controllers\Student\QuizController as StudentQuizController;
 use App\Http\Controllers\Student\StagedTestController as StudentStagedTestController;
 use Illuminate\Support\Facades\Route;
 
@@ -80,6 +83,8 @@ Route::middleware(['auth', 'verified', 'user_type:student'])->prefix('portal')->
 
     Route::get('/practice-tests/{practiceTest}', [StudentPracticeTestController::class, 'show'])->name('student.practice-tests.show');
     Route::post('/practice-tests/{practiceTest}/submit', [StudentPracticeTestController::class, 'submit'])->name('student.practice-tests.submit');
+    Route::get('/quizzes/{quiz}', [StudentQuizController::class, 'show'])->name('student.quizzes.show');
+    Route::post('/quizzes/{quiz}/submit', [StudentQuizController::class, 'submit'])->name('student.quizzes.submit');
     Route::get('/attempts/{attempt}', [StudentAttemptController::class, 'show'])->name('student.attempts.show');
 
     Route::get('/mock-exams/{mockExam}', [StudentMockExamController::class, 'show'])->name('student.mock-exams.show');
@@ -161,6 +166,23 @@ Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->nam
             Route::get('/{practiceTest}/edit', [AdminPracticeTestController::class, 'edit'])->name('edit');
             Route::put('/{practiceTest}', [AdminPracticeTestController::class, 'update'])->name('update');
             Route::delete('/{practiceTest}', [AdminPracticeTestController::class, 'destroy'])->name('destroy');
+        });
+
+        Route::prefix('{course}/quizzes')->name('quizzes.')->group(function () {
+            Route::get('/', [AdminQuizController::class, 'index'])->name('index');
+            Route::get('/create', [AdminQuizController::class, 'create'])->name('create');
+            Route::post('/', [AdminQuizController::class, 'store'])->name('store');
+            Route::get('/{quiz}/edit', [AdminQuizController::class, 'edit'])->name('edit');
+            Route::put('/{quiz}', [AdminQuizController::class, 'update'])->name('update');
+            Route::delete('/{quiz}', [AdminQuizController::class, 'destroy'])->name('destroy');
+        });
+
+        Route::prefix('{course}/flashcards')->name('flashcards.')->group(function () {
+            Route::get('/', [AdminFlashcardController::class, 'index'])->name('index');
+            Route::post('/', [AdminFlashcardController::class, 'store'])->name('store');
+            Route::put('/{flashcard}', [AdminFlashcardController::class, 'update'])->name('update');
+            Route::post('/{flashcard}/status', [AdminFlashcardController::class, 'setStatus'])->name('status');
+            Route::delete('/{flashcard}', [AdminFlashcardController::class, 'destroy'])->name('destroy');
         });
 
         Route::prefix('{course}/mock-exams')->name('mock-exams.')->group(function () {

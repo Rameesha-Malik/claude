@@ -64,6 +64,11 @@ class Course extends Model
         return $this->hasMany(Flashcard::class);
     }
 
+    public function quizzes(): HasMany
+    {
+        return $this->hasMany(Quiz::class)->orderBy('order');
+    }
+
     public function practiceTests(): HasMany
     {
         return $this->hasMany(PracticeTest::class);

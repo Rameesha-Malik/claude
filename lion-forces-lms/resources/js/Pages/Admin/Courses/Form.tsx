@@ -154,6 +154,12 @@ export default function CourseForm({ course, categories, instructors }: Props) {
                                     Manage Practice Tests
                                 </Link>
                                 <Link
+                                    href={`/admin/courses/${course!.id}/quizzes`}
+                                    className="block w-full rounded-lg border border-primary py-2 text-center text-sm font-bold uppercase tracking-wide text-primary hover:bg-primary-subtle"
+                                >
+                                    Manage Quizzes
+                                </Link>
+                                <Link
                                     href={`/admin/courses/${course!.id}/mock-exams`}
                                     className="block w-full rounded-lg border border-primary py-2 text-center text-sm font-bold uppercase tracking-wide text-primary hover:bg-primary-subtle"
                                 >
@@ -166,6 +172,16 @@ export default function CourseForm({ course, categories, instructors }: Props) {
                                     Manage Staged Tests
                                 </Link>
                             </div>
+                        </div>
+                        <div className="rounded-2xl border border-border bg-surface p-5">
+                            <h3 className="mb-3 font-bold text-text">Flashcards</h3>
+                            <p className="mb-3 text-sm text-text-secondary">Quick front/back study cards for this course.</p>
+                            <Link
+                                href={`/admin/courses/${course!.id}/flashcards`}
+                                className="block w-full rounded-lg border border-primary py-2 text-center text-sm font-bold uppercase tracking-wide text-primary hover:bg-primary-subtle"
+                            >
+                                Manage Flashcards
+                            </Link>
                         </div>
                         <PackagesPanel course={course!} />
                         <LessonsPanel course={course!} />

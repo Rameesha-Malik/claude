@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Student;
 use App\Http\Controllers\Controller;
 use App\Models\MockExam;
 use App\Models\PracticeTest;
+use App\Models\Quiz;
 use App\Models\StagedTest;
 use App\Models\TestAttempt;
 use Illuminate\Http\Request;
@@ -26,6 +27,7 @@ class AttemptController extends Controller
         return match ($attempt->attemptable_type) {
             MockExam::class => $this->mockExamResult($attempt),
             StagedTest::class => $this->stagedTestResult($attempt),
+            Quiz::class => $this->quizResult($attempt),
             default => $this->practiceTestResult($attempt),
         };
     }
@@ -40,6 +42,19 @@ class AttemptController extends Controller
             'testTitle' => $attemptable->title ?? 'Test',
             'isRepeatable' => $attemptable->is_repeatable ?? true,
             'practiceTestId' => $attempt->attemptable_id,
+        ]);
+    }
+
+    private function quizResult(TestAttempt $attempt): Response
+    {
+        $attempt->load(['answers.question.options', 'answers.selectedOption']);
+        $quiz = $attempt->attemptable()->first();
+
+        return Inertia::render('Student/Quizzes/Result', [
+            'attempt' => $attempt,
+            'quizTitle' => $quiz->title ?? 'Quiz',
+            'isRepeatable' => $quiz->is_repeatable ?? true,
+            'quizId' => $attempt->attemptable_id,
         ]);
     }
 

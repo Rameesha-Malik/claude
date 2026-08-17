@@ -45,8 +45,10 @@ class CourseController extends Controller
             'sharedNotes',
             'instructor',
             'practiceTests' => fn ($q) => $q->where('is_active', true)->withCount('questions'),
+            'quizzes' => fn ($q) => $q->where('is_active', true)->withCount('questions'),
             'mockExams' => fn ($q) => $q->where('is_active', true)->withCount('sections'),
             'stagedTests' => fn ($q) => $q->where('is_active', true)->withCount('stages'),
+            'flashcards' => fn ($q) => $q->where('status', 'approved'),
         ]);
 
         // Personal/Guaranteed notes: assigned directly to this student, or

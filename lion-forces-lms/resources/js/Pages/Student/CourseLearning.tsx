@@ -10,6 +10,10 @@ interface PracticeTestSummary {
     id: number; title: string; timer_enabled: boolean; duration_minutes: number | null;
     question_selection_mode: string; auto_question_count: number | null; questions_count: number;
 }
+interface QuizSummary {
+    id: number; title: string; question_selection_mode: string; auto_question_count: number | null; questions_count: number;
+}
+interface FlashcardItem { id: number; front_text: string; back_text: string }
 interface MockExamSummary {
     id: number; title: string; target_exam_name: string | null; total_duration_minutes: number | null; sections_count: number;
 }
@@ -18,8 +22,9 @@ interface StagedTestSummary {
 }
 interface Course {
     id: number; slug: string; title: string; lessons: Lesson[]; shared_notes: Note[];
-    instructor: { name: string } | null; practice_tests: PracticeTestSummary[]; mock_exams: MockExamSummary[];
-    staged_tests: StagedTestSummary[];
+    instructor: { name: string } | null; practice_tests: PracticeTestSummary[]; quizzes: QuizSummary[];
+    mock_exams: MockExamSummary[]; staged_tests: StagedTestSummary[]; flashcards: FlashcardItem[];
+    quizzes_enabled: boolean; flashcards_enabled: boolean; tests_enabled: boolean;
 }
 interface Review { id: number; rating: number; review_text: string | null; status: string }
 interface Props {
@@ -143,12 +148,22 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
     // Past the guard above, the controller only ever sends the full shape.
     const course = courseProp as Course;
 
+    // Only show a module's tab when the admin has actually enabled it for
+    // this course (Course.quizzes_enabled / flashcards_enabled /
+    // tests_enabled, set in Admin -> Courses -> Modules).
+    const visibleTabs = TABS.filter((t) => {
+        if (t === 'Quizzes') return course.quizzes_enabled;
+        if (t === 'Flashcards') return course.flashcards_enabled;
+        if (t === 'Tests') return course.tests_enabled;
+        return true;
+    });
+
     return (
         <StudentLayout header={course.title}>
             <Head title={course.title} />
 
             <div className="mb-6 flex flex-wrap gap-2 border-b border-border">
-                {TABS.map((t) => (
+                {visibleTabs.map((t) => (
                     <button
                         key={t}
                         onClick={() => setTab(t)}
@@ -327,14 +342,91 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
                 </div>
             )}
 
-            {(tab === 'Quizzes' || tab === 'Flashcards') && (
-                <div className="rounded-2xl border border-dashed border-border bg-surface p-10 text-center text-text-secondary">
-                    {tab} are coming in the next build phase.
+            {tab === 'Quizzes' && (
+                <div className="space-y-3">
+                    {course.quizzes.map((q) => (
+                        <div key={q.id} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-surface p-5">
+                            <div>
+                                <h4 className="font-semibold text-text">{q.title}</h4>
+                                <p className="text-sm text-text-secondary">
+                                    {q.question_selection_mode === 'manual' ? `${q.questions_count} questions` : `${q.auto_question_count ?? 10} questions (random)`}
+                                    {' · No time limit'}
+                                </p>
+                            </div>
+                            <Link
+                                href={`/portal/quizzes/${q.id}`}
+                                className="rounded-lg bg-primary px-5 py-2 text-sm font-bold uppercase tracking-wide text-on-primary hover:bg-primary-hover"
+                            >
+                                Start Quiz
+                            </Link>
+                        </div>
+                    ))}
+                    {course.quizzes.length === 0 && (
+                        <div className="rounded-2xl border border-dashed border-border bg-surface p-8 text-center text-text-secondary">
+                            No quizzes available for this course yet.
+                        </div>
+                    )}
                 </div>
             )}
 
+            {tab === 'Flashcards' && <FlashcardsPanel cards={course.flashcards} />}
+
             {tab === 'Q&A' && <QaPanel course={course} questions={questions} />}
         </StudentLayout>
+    );
+}
+
+function FlashcardsPanel({ cards }: { cards: FlashcardItem[] }) {
+    if (cards.length === 0) {
+        return (
+            <div className="rounded-2xl border border-dashed border-border bg-surface p-8 text-center text-text-secondary">
+                No flashcards available for this course yet.
+            </div>
+        );
+    }
+
+    return (
+        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+            {cards.map((card) => (
+                <FlashcardTile key={card.id} card={card} />
+            ))}
+        </div>
+    );
+}
+
+function FlashcardTile({ card }: { card: FlashcardItem }) {
+    const [flipped, setFlipped] = useState(false);
+
+    return (
+        <button
+            type="button"
+            onClick={() => setFlipped((v) => !v)}
+            className="block h-44 w-full text-left"
+            style={{ perspective: '1000px' }}
+            aria-label="Flip flashcard"
+        >
+            <div
+                className="relative h-full w-full transition-transform duration-500 motion-reduce:transition-none"
+                style={{ transformStyle: 'preserve-3d', transform: flipped ? 'rotateY(180deg)' : 'none' }}
+            >
+                <div
+                    className="absolute inset-0 flex flex-col justify-between rounded-2xl border border-border bg-surface p-5 shadow-sm"
+                    style={{ backfaceVisibility: 'hidden' }}
+                >
+                    <span className="text-xs font-bold uppercase tracking-wide text-primary">Question</span>
+                    <p className="line-clamp-4 text-sm font-semibold text-text">{card.front_text}</p>
+                    <span className="text-xs text-text-muted">Tap to flip</span>
+                </div>
+                <div
+                    className="absolute inset-0 flex flex-col justify-between rounded-2xl border border-primary bg-primary-subtle p-5 shadow-sm"
+                    style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
+                >
+                    <span className="text-xs font-bold uppercase tracking-wide text-primary">Answer</span>
+                    <p className="line-clamp-4 text-sm text-text">{card.back_text}</p>
+                    <span className="text-xs text-text-muted">Tap to flip back</span>
+                </div>
+            </div>
+        </button>
     );
 }
 
