@@ -224,10 +224,10 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
 
                     {personalNotes.length > 0 && (
                         <div>
-                            <h3 className="mb-3 font-bold text-gold-700">Your Guaranteed Notes</h3>
+                            <h3 className="mb-3 font-bold text-secondary">Your Guaranteed Notes</h3>
                             <div className="space-y-3">
                                 {personalNotes.map((note) => (
-                                    <div key={note.id} className="rounded-xl border-2 border-accent bg-surface p-5">
+                                    <div key={note.id} className="rounded-xl border-2 border-primary bg-surface p-5">
                                         <h4 className="font-semibold text-text">{note.title}</h4>
                                         <p className="mt-2 whitespace-pre-line text-sm text-text-secondary">{note.content}</p>
                                     </div>
@@ -283,7 +283,7 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
                                     </div>
                                     <Link
                                         href={`/portal/mock-exams/${e.id}`}
-                                        className="rounded-lg bg-accent px-5 py-2 text-sm font-bold uppercase tracking-wide text-on-accent hover:opacity-90"
+                                        className="rounded-lg bg-primary px-5 py-2 text-sm font-bold uppercase tracking-wide text-on-primary hover:bg-primary-hover"
                                     >
                                         View Exam
                                     </Link>
@@ -311,7 +311,7 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
                                     </div>
                                     <Link
                                         href={`/portal/staged-tests/${t.id}`}
-                                        className="rounded-lg bg-accent px-5 py-2 text-sm font-bold uppercase tracking-wide text-on-accent hover:opacity-90"
+                                        className="rounded-lg bg-primary px-5 py-2 text-sm font-bold uppercase tracking-wide text-on-primary hover:bg-primary-hover"
                                     >
                                         View Test
                                     </Link>

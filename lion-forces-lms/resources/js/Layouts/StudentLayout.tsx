@@ -1,5 +1,6 @@
 import { Link, usePage, router } from '@inertiajs/react';
 import { PropsWithChildren, ReactNode, useState } from 'react';
+import ShieldMark from '@/Components/ShieldMark';
 import { PageProps } from '@/types';
 
 interface NavEntry {
@@ -26,25 +27,30 @@ export default function StudentLayout({ children, header }: PropsWithChildren<{ 
     const { site, auth, unreadNotificationsCount } = usePage<PageProps>().props;
     const { url } = usePage();
     const [mobileOpen, setMobileOpen] = useState(false);
+    const [menuOpen, setMenuOpen] = useState(false);
 
     const sidebar = (
         <div className="flex h-full flex-col bg-secondary text-white">
-            <Link href="/" className="flex h-18 items-center gap-2 px-6 text-lg font-bold">
-                <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg bg-accent text-accent-fg">LF</span>
+            <Link href="/" className="flex h-18 items-center gap-2.5 px-6 text-lg font-bold">
+                <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-2xl bg-primary text-on-primary shadow-sm">
+                    <ShieldMark className="h-5 w-5" />
+                </span>
                 <span className="truncate">{site.name}</span>
             </Link>
-            <nav className="flex-1 space-y-1 px-3 py-4">
+            <nav className="flex-1 space-y-1.5 px-3 py-4">
                 {NAV.map((item) => {
                     const active = url === item.href || (item.href !== '/portal' && url.startsWith(item.href));
                     return (
                         <Link
                             key={item.href}
                             href={item.href}
-                            className={`flex items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium transition-colors duration-fast ${
-                                active ? 'bg-accent text-accent-fg' : 'text-teal-200 hover:bg-white/10 hover:text-white'
+                            className={`group flex items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-medium transition-all duration-normal ${
+                                active
+                                    ? 'bg-primary text-on-primary shadow-md'
+                                    : 'text-teal-200 hover:translate-x-0.5 hover:bg-white/10 hover:text-white'
                             }`}
                         >
-                            {item.icon}
+                            <span className={`transition-transform duration-normal ${active ? '' : 'group-hover:scale-110'}`}>{item.icon}</span>
                             {item.label}
                         </Link>
                     );
@@ -53,7 +59,7 @@ export default function StudentLayout({ children, header }: PropsWithChildren<{ 
             <div className="border-t border-white/10 p-4">
                 <button
                     onClick={() => router.post('/logout')}
-                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2.5 text-sm font-medium text-teal-200 transition-colors hover:bg-white/10 hover:text-white"
+                    className="flex w-full items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-medium text-teal-200 transition-colors hover:bg-white/10 hover:text-white"
                 >
                     <Icon d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                     Log out
@@ -82,17 +88,51 @@ export default function StudentLayout({ children, header }: PropsWithChildren<{ 
                     </button>
                     {header && <h1 className="font-display text-2xl uppercase tracking-wide text-text">{header}</h1>}
                     <div className="ml-auto flex items-center gap-3">
-                        <Link href="/portal/notifications" className="relative text-text-secondary hover:text-primary" aria-label="Notifications">
+                        <Link
+                            href="/portal/notifications"
+                            className="relative rounded-full p-2 text-text-secondary transition-all duration-fast hover:scale-110 hover:bg-primary-subtle hover:text-primary"
+                            aria-label="Notifications"
+                        >
                             <Icon d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
                             {unreadNotificationsCount > 0 && (
-                                <span className="absolute -right-1 -top-1 flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1 text-[10px] font-bold text-white">
+                                <span className="absolute right-0.5 top-0.5 flex h-4 min-w-4 items-center justify-center rounded-full bg-danger px-1 text-[10px] font-bold text-white">
                                     {unreadNotificationsCount > 9 ? '9+' : unreadNotificationsCount}
                                 </span>
                             )}
                         </Link>
-                        <span className="text-sm font-medium text-text-secondary">{auth.user?.name}</span>
-                        <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-subtle text-sm font-bold text-primary">
-                            {auth.user?.name?.charAt(0).toUpperCase()}
+
+                        <div className="relative">
+                            <button
+                                onClick={() => setMenuOpen((v) => !v)}
+                                className="flex items-center gap-2.5 rounded-full py-1 pl-1 pr-3 transition-colors duration-fast hover:bg-surface-sunken"
+                            >
+                                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-subtle text-sm font-bold text-primary">
+                                    {auth.user?.name?.charAt(0).toUpperCase()}
+                                </div>
+                                <span className="hidden text-sm font-medium text-text-secondary sm:block">{auth.user?.name}</span>
+                                <svg className={`h-4 w-4 text-text-muted transition-transform duration-fast ${menuOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+
+                            {menuOpen && (
+                                <>
+                                    <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
+                                    <div className="absolute right-0 z-50 mt-2 w-48 overflow-hidden rounded-2xl border border-border bg-surface py-1.5 shadow-xl">
+                                        <Link href="/profile" className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-text hover:bg-primary-subtle hover:text-primary">
+                                            <Icon d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                            Profile
+                                        </Link>
+                                        <button
+                                            onClick={() => router.post('/logout')}
+                                            className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-sm text-danger hover:bg-danger-bg"
+                                        >
+                                            <Icon d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                            Log out
+                                        </button>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     </div>
                 </header>
