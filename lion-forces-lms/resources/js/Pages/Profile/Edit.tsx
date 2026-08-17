@@ -1,43 +1,45 @@
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout';
+import { Head, usePage } from '@inertiajs/react';
+import AdminLayout from '@/Layouts/AdminLayout';
+import StudentLayout from '@/Layouts/StudentLayout';
 import { PageProps } from '@/types';
-import { Head } from '@inertiajs/react';
 import DeleteUserForm from './Partials/DeleteUserForm';
 import UpdatePasswordForm from './Partials/UpdatePasswordForm';
 import UpdateProfileInformationForm from './Partials/UpdateProfileInformationForm';
 
-export default function Edit({
-    mustVerifyEmail,
-    status,
-}: PageProps<{ mustVerifyEmail: boolean; status?: string }>) {
+export default function Edit({ mustVerifyEmail, status, userType }: PageProps<{ mustVerifyEmail: boolean; status?: string; userType: string }>) {
+    const { auth } = usePage<PageProps>().props;
+    // /profile is reachable by both admin and student accounts -- wrap it in
+    // whichever portal shell actually matches this user, same idea as the
+    // neutral /dashboard redirect.
+    const Layout = userType === 'admin' ? AdminLayout : StudentLayout;
+
     return (
-        <AuthenticatedLayout
-            header={
-                <h2 className="text-xl font-semibold leading-tight text-gray-800 dark:text-gray-200">
-                    Profile
-                </h2>
-            }
-        >
+        <Layout header="Profile">
             <Head title="Profile" />
 
-            <div className="py-12">
-                <div className="mx-auto max-w-7xl space-y-6 sm:px-6 lg:px-8">
-                    <div className="bg-white p-4 shadow sm:rounded-lg sm:p-8 dark:bg-gray-800">
-                        <UpdateProfileInformationForm
-                            mustVerifyEmail={mustVerifyEmail}
-                            status={status}
-                            className="max-w-xl"
-                        />
+            <div className="mx-auto max-w-2xl space-y-6">
+                <div className="flex items-center gap-4 rounded-3xl border border-border bg-gradient-to-br from-secondary to-teal-950 p-6 text-white">
+                    <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-full bg-white/15 font-display text-2xl">
+                        {auth.user?.name?.charAt(0).toUpperCase()}
                     </div>
-
-                    <div className="bg-white p-4 shadow sm:rounded-lg sm:p-8 dark:bg-gray-800">
-                        <UpdatePasswordForm className="max-w-xl" />
-                    </div>
-
-                    <div className="bg-white p-4 shadow sm:rounded-lg sm:p-8 dark:bg-gray-800">
-                        <DeleteUserForm className="max-w-xl" />
+                    <div className="min-w-0">
+                        <h1 className="truncate text-xl font-bold">{auth.user?.name}</h1>
+                        <p className="truncate text-sm text-teal-200">{auth.user?.email}</p>
                     </div>
                 </div>
+
+                <div className="rounded-3xl border border-border bg-surface p-6 sm:p-8">
+                    <UpdateProfileInformationForm mustVerifyEmail={mustVerifyEmail} status={status} />
+                </div>
+
+                <div className="rounded-3xl border border-border bg-surface p-6 sm:p-8">
+                    <UpdatePasswordForm />
+                </div>
+
+                <div className="rounded-3xl border bg-surface p-6 sm:p-8" style={{ borderColor: 'rgba(220, 38, 38, 0.3)' }}>
+                    <DeleteUserForm />
+                </div>
             </div>
-        </AuthenticatedLayout>
+        </Layout>
     );
 }

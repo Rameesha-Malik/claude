@@ -21,6 +21,10 @@ class ProfileController extends Controller
         return Inertia::render('Profile/Edit', [
             'mustVerifyEmail' => $request->user() instanceof MustVerifyEmail,
             'status' => session('status'),
+            // /profile is reachable by any authenticated user (admin or
+            // student) -- picks which portal shell (sidebar/header) wraps
+            // the page, same idea as the neutral /dashboard redirect.
+            'userType' => $request->user()->user_type,
         ]);
     }
 

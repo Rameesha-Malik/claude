@@ -1,10 +1,11 @@
-import InputError from '@/Components/InputError';
-import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
-import TextInput from '@/Components/TextInput';
 import { Transition } from '@headlessui/react';
 import { Link, useForm, usePage } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
+import { MailIcon, PersonIcon } from '@/Components/AuthIcons';
+import IconTextInput from '@/Components/IconTextInput';
+import InputError from '@/Components/InputError';
+import InputLabel from '@/Components/InputLabel';
+import PrimaryButton from '@/Components/PrimaryButton';
 
 export default function UpdateProfileInformation({
     mustVerifyEmail,
@@ -33,22 +34,20 @@ export default function UpdateProfileInformation({
     return (
         <section className={className}>
             <header>
-                <h2 className="text-lg font-medium text-gray-900 dark:text-gray-100">
-                    Profile Information
-                </h2>
-
-                <p className="mt-1 text-sm text-gray-600 dark:text-gray-400">
+                <h2 className="text-lg font-bold text-text">Profile Information</h2>
+                <p className="mt-1 text-sm text-text-secondary">
                     Update your account's profile information and email address.
                 </p>
             </header>
 
-            <form onSubmit={submit} className="mt-6 space-y-6">
+            <form onSubmit={submit} className="mt-6 space-y-5">
                 <div>
                     <InputLabel htmlFor="name" value="Name" />
 
-                    <TextInput
+                    <IconTextInput
                         id="name"
-                        className="mt-1 block w-full"
+                        icon={<PersonIcon />}
+                        className="mt-1"
                         value={data.name}
                         onChange={(e) => setData('name', e.target.value)}
                         required
@@ -62,10 +61,11 @@ export default function UpdateProfileInformation({
                 <div>
                     <InputLabel htmlFor="email" value="Email" />
 
-                    <TextInput
+                    <IconTextInput
                         id="email"
                         type="email"
-                        className="mt-1 block w-full"
+                        icon={<MailIcon />}
+                        className="mt-1"
                         value={data.email}
                         onChange={(e) => setData('email', e.target.value)}
                         required
@@ -76,23 +76,22 @@ export default function UpdateProfileInformation({
                 </div>
 
                 {mustVerifyEmail && user.email_verified_at === null && (
-                    <div>
-                        <p className="mt-2 text-sm text-gray-800 dark:text-gray-200">
-                            Your email address is unverified.
+                    <div className="rounded-xl bg-warning-bg p-3">
+                        <p className="text-sm text-warning">
+                            Your email address is unverified.{' '}
                             <Link
                                 href={route('verification.send')}
                                 method="post"
                                 as="button"
-                                className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 dark:text-gray-400 dark:hover:text-gray-100 dark:focus:ring-offset-gray-800"
+                                className="font-semibold underline hover:opacity-80"
                             >
                                 Click here to re-send the verification email.
                             </Link>
                         </p>
 
                         {status === 'verification-link-sent' && (
-                            <div className="mt-2 text-sm font-medium text-green-600 dark:text-green-400">
-                                A new verification link has been sent to your
-                                email address.
+                            <div className="mt-2 text-sm font-medium text-success">
+                                A new verification link has been sent to your email address.
                             </div>
                         )}
                     </div>
@@ -108,9 +107,7 @@ export default function UpdateProfileInformation({
                         leave="transition ease-in-out"
                         leaveTo="opacity-0"
                     >
-                        <p className="text-sm text-gray-600 dark:text-gray-400">
-                            Saved.
-                        </p>
+                        <p className="text-sm font-semibold text-success">Saved.</p>
                     </Transition>
                 </div>
             </form>
