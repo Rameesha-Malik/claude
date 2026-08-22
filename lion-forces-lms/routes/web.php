@@ -111,6 +111,8 @@ Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->nam
     Route::prefix('website')->name('website.')->group(function () {
         Route::get('/', [AdminWebsiteController::class, 'index'])->name('index');
         Route::put('/settings', [AdminWebsiteController::class, 'updateSettings'])->name('settings.update');
+        Route::post('/logo', [AdminWebsiteController::class, 'updateLogo'])->name('logo.update');
+        Route::delete('/logo', [AdminWebsiteController::class, 'destroyLogo'])->name('logo.destroy');
         Route::put('/announcement', [AdminWebsiteController::class, 'updateAnnouncement'])->name('announcement.update');
         Route::put('/home-sections/{homeSection}', [AdminWebsiteController::class, 'updateHomeSection'])->name('home-sections.update');
 

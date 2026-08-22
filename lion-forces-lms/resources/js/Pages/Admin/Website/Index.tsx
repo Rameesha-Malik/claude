@@ -1,11 +1,12 @@
 import { Head, router, useForm } from '@inertiajs/react';
-import { FormEvent, useState } from 'react';
+import { ChangeEvent, FormEvent, useState } from 'react';
 import AdminLayout from '@/Layouts/AdminLayout';
 
 interface Settings {
     site_name: string; tagline: string | null; support_email: string | null;
     office_location: string | null; office_hours: string | null;
     whatsapp_number: string | null; whatsapp_enabled: boolean;
+    social_facebook: string | null; social_instagram: string | null; social_youtube: string | null;
 }
 interface Announcement { id?: number; message: string; link_url: string | null; is_active: boolean; expires_at: string | null }
 interface HomeSection { id: number; title: string; content: Record<string, any> }
@@ -15,6 +16,7 @@ interface Faq { id: number; page: string; question: string; answer: string; is_a
 interface Testimonial { id: number; student_name: string; testimonial_text: string; rating: number | null; is_featured: boolean }
 interface Props {
     settings: Settings;
+    logoPath: string | null;
     announcement: Announcement | null;
     heroSection: HomeSection;
     ctaSection: HomeSection;
@@ -53,7 +55,7 @@ export default function WebsiteIndex(props: Props) {
                 ))}
             </div>
 
-            {tab === 'Settings' && <SettingsPanel settings={props.settings} announcement={props.announcement} />}
+            {tab === 'Settings' && <SettingsPanel settings={props.settings} logoPath={props.logoPath} announcement={props.announcement} />}
             {tab === 'Home Page' && <HomePagePanel hero={props.heroSection} cta={props.ctaSection} />}
             {tab === 'Stats' && <StatsPanel items={props.statsItems} />}
             {tab === 'Services' && <ServicesPanel items={props.serviceCards} />}
@@ -79,7 +81,65 @@ function FormErrors({ errors }: { errors: Record<string, string> }) {
     );
 }
 
-function SettingsPanel({ settings, announcement }: { settings: Settings; announcement: Announcement | null }) {
+function LogoPanel({ logoPath }: { logoPath: string | null }) {
+    const [preview, setPreview] = useState<string | null>(null);
+    const form = useForm<{ logo: File | null }>({ logo: null });
+
+    function submit(e: FormEvent) {
+        e.preventDefault();
+        if (!form.data.logo) return;
+        form.post('/admin/website/logo', {
+            forceFormData: true,
+            onSuccess: () => {
+                form.setData('logo', null);
+                setPreview(null);
+            },
+        });
+    }
+
+    function pickFile(e: ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0] ?? null;
+        form.setData('logo', file);
+        setPreview(file ? URL.createObjectURL(file) : null);
+    }
+
+    return (
+        <Panel>
+            <h2 className="mb-1 font-bold text-text">Site Logo</h2>
+            <p className="mb-4 text-sm text-text-secondary">
+                Shown in the header and footer of the public site. Square or wide logos both work — it's scaled to fit each spot automatically.
+            </p>
+            <div className="mb-4 flex items-center gap-4">
+                <div className="flex h-20 w-20 flex-shrink-0 items-center justify-center rounded-2xl border border-dashed border-border bg-surface-sunken">
+                    {preview || logoPath ? (
+                        // eslint-disable-next-line jsx-a11y/alt-text
+                        <img src={preview ?? `/storage/${logoPath}`} className="h-full w-full rounded-2xl object-contain p-1" />
+                    ) : (
+                        <span className="text-xs text-text-muted">No logo</span>
+                    )}
+                </div>
+                <form onSubmit={submit} className="flex flex-wrap items-center gap-3">
+                    <input type="file" accept="image/*" onChange={pickFile} className="text-sm text-text-secondary" />
+                    <button type="submit" disabled={!form.data.logo || form.processing} className={btnClass}>
+                        {form.processing ? 'Uploading…' : 'Upload Logo'}
+                    </button>
+                    {logoPath && (
+                        <button
+                            type="button"
+                            onClick={() => confirm('Remove the current logo?') && router.delete('/admin/website/logo')}
+                            className={btnDangerClass}
+                        >
+                            Remove
+                        </button>
+                    )}
+                </form>
+            </div>
+            <FormErrors errors={form.errors as Record<string, string>} />
+        </Panel>
+    );
+}
+
+function SettingsPanel({ settings, logoPath, announcement }: { settings: Settings; logoPath: string | null; announcement: Announcement | null }) {
     const settingsForm = useForm({ ...settings });
     const announcementForm = useForm({
         message: announcement?.message ?? '',
@@ -100,6 +160,8 @@ function SettingsPanel({ settings, announcement }: { settings: Settings; announc
 
     return (
         <div className="space-y-6">
+            <LogoPanel logoPath={logoPath} />
+
             <Panel>
                 <h2 className="mb-4 font-bold text-text">Site Settings</h2>
                 <form onSubmit={submitSettings} className="space-y-4">
@@ -133,6 +195,42 @@ function SettingsPanel({ settings, announcement }: { settings: Settings; announc
                         <input type="checkbox" checked={settingsForm.data.whatsapp_enabled} onChange={(e) => settingsForm.setData('whatsapp_enabled', e.target.checked)} />
                         Show WhatsApp floating button
                     </label>
+
+                    <div>
+                        <h3 className="mb-2 mt-2 text-sm font-bold uppercase tracking-wide text-text-secondary">Social Media Links</h3>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className={labelClass}>Facebook URL</label>
+                                <input
+                                    className={inputClass}
+                                    placeholder="https://facebook.com/..."
+                                    value={settingsForm.data.social_facebook ?? ''}
+                                    onChange={(e) => settingsForm.setData('social_facebook', e.target.value)}
+                                />
+                            </div>
+                            <div>
+                                <label className={labelClass}>Instagram URL</label>
+                                <input
+                                    className={inputClass}
+                                    placeholder="https://instagram.com/..."
+                                    value={settingsForm.data.social_instagram ?? ''}
+                                    onChange={(e) => settingsForm.setData('social_instagram', e.target.value)}
+                                />
+                            </div>
+                            <div>
+                                <label className={labelClass}>YouTube URL</label>
+                                <input
+                                    className={inputClass}
+                                    placeholder="https://youtube.com/@..."
+                                    value={settingsForm.data.social_youtube ?? ''}
+                                    onChange={(e) => settingsForm.setData('social_youtube', e.target.value)}
+                                />
+                            </div>
+                        </div>
+                        <p className="mt-1.5 text-xs text-text-muted">Leave blank to hide that icon from the site header/footer.</p>
+                    </div>
+
+                    <FormErrors errors={settingsForm.errors} />
                     <button type="submit" disabled={settingsForm.processing} className={btnClass}>Save Settings</button>
                 </form>
             </Panel>

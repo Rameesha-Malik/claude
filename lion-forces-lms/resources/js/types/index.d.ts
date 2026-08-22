@@ -14,6 +14,12 @@ export interface SiteSettings {
     whatsappNumber: string | null;
     whatsappEnabled: boolean;
     copyrightText: string | null;
+    logoPath: string | null;
+    social: {
+        facebook: string | null;
+        instagram: string | null;
+        youtube: string | null;
+    };
 }
 
 export interface NavLink {

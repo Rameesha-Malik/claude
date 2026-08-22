@@ -27,7 +27,11 @@ class WebsiteController extends Controller
                 'office_hours' => Setting::get('office_hours'),
                 'whatsapp_number' => Setting::get('whatsapp_number'),
                 'whatsapp_enabled' => Setting::get('whatsapp_enabled', false),
+                'social_facebook' => Setting::get('social_facebook'),
+                'social_instagram' => Setting::get('social_instagram'),
+                'social_youtube' => Setting::get('social_youtube'),
             ],
+            'logoPath' => Setting::get('site_logo_path'),
             'announcement' => AnnouncementBar::first(),
             'heroSection' => HomeSection::where('section_key', 'hero')->first(),
             'ctaSection' => HomeSection::where('section_key', 'cta_footer')->first(),
@@ -48,6 +52,9 @@ class WebsiteController extends Controller
             'office_hours' => 'nullable|string|max:100',
             'whatsapp_number' => 'nullable|string|max:30',
             'whatsapp_enabled' => 'boolean',
+            'social_facebook' => 'nullable|url|max:255',
+            'social_instagram' => 'nullable|url|max:255',
+            'social_youtube' => 'nullable|url|max:255',
         ]);
 
         foreach ($data as $key => $value) {
@@ -55,6 +62,36 @@ class WebsiteController extends Controller
         }
 
         return back()->with('success', 'Settings updated.');
+    }
+
+    // Stored separately from the rest of the settings form -- a file input
+    // can't ride along with the plain-text PUT above without turning that
+    // into a multipart request, and a bad image upload shouldn't be able to
+    // fail the whole settings save.
+    public function updateLogo(Request $request)
+    {
+        $request->validate(['logo' => 'required|image|max:2048']);
+
+        $old = Setting::get('site_logo_path');
+        $path = $request->file('logo')->store('branding', 'public');
+        Setting::set('site_logo_path', $path);
+
+        if ($old) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($old);
+        }
+
+        return back()->with('success', 'Logo updated.');
+    }
+
+    public function destroyLogo()
+    {
+        $old = Setting::get('site_logo_path');
+        if ($old) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($old);
+        }
+        Setting::set('site_logo_path', null);
+
+        return back()->with('success', 'Logo removed.');
     }
 
     public function updateAnnouncement(Request $request)

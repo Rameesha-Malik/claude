@@ -11,6 +11,72 @@ function WhatsAppIcon({ className = 'h-7 w-7' }: { className?: string }) {
     );
 }
 
+function FacebookIcon({ className = 'h-5 w-5' }: { className?: string }) {
+    return (
+        <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+            <path d="M22 12.06C22 6.5 17.52 2 12 2S2 6.5 2 12.06C2 17.08 5.66 21.24 10.44 22v-7.03H7.9v-2.91h2.54V9.85c0-2.5 1.49-3.89 3.77-3.89 1.09 0 2.24.2 2.24.2v2.46h-1.26c-1.24 0-1.63.77-1.63 1.56v1.88h2.78l-.45 2.91h-2.33V22C18.34 21.24 22 17.08 22 12.06Z" />
+        </svg>
+    );
+}
+
+function InstagramIcon({ className = 'h-5 w-5' }: { className?: string }) {
+    return (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.8} className={className}>
+            <rect x="3" y="3" width="18" height="18" rx="5" />
+            <circle cx="12" cy="12" r="4" />
+            <circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none" />
+        </svg>
+    );
+}
+
+function YoutubeIcon({ className = 'h-5 w-5' }: { className?: string }) {
+    return (
+        <svg viewBox="0 0 24 24" fill="currentColor" className={className}>
+            <path d="M21.58 7.2a2.75 2.75 0 00-1.94-1.95C17.9 4.75 12 4.75 12 4.75s-5.9 0-7.64.5A2.75 2.75 0 002.42 7.2 28.6 28.6 0 002 12a28.6 28.6 0 00.42 4.8 2.75 2.75 0 001.94 1.95c1.74.5 7.64.5 7.64.5s5.9 0 7.64-.5a2.75 2.75 0 001.94-1.95A28.6 28.6 0 0022 12a28.6 28.6 0 00-.42-4.8ZM10 15.02V8.98L15.27 12 10 15.02Z" />
+        </svg>
+    );
+}
+
+function SocialLinks({ social, className = '' }: { social: { facebook: string | null; instagram: string | null; youtube: string | null }; className?: string }) {
+    const links = [
+        { url: social.facebook, icon: FacebookIcon, label: 'Facebook' },
+        { url: social.instagram, icon: InstagramIcon, label: 'Instagram' },
+        { url: social.youtube, icon: YoutubeIcon, label: 'YouTube' },
+    ].filter((l) => l.url);
+
+    if (links.length === 0) return null;
+
+    return (
+        <div className={`flex items-center gap-2 ${className}`}>
+            {links.map(({ url, icon: Icon, label }) => (
+                <a
+                    key={label}
+                    href={url!}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label={label}
+                    className="flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-teal-100 transition-colors hover:bg-white/20 hover:text-white"
+                >
+                    <Icon />
+                </a>
+            ))}
+        </div>
+    );
+}
+
+function SiteLogo({ site, size = 'header' }: { site: PageProps['site']; size?: 'header' | 'footer' }) {
+    const dims = size === 'header' ? 'h-10 w-10' : 'h-12 w-12';
+    if (site.logoPath) {
+        // eslint-disable-next-line jsx-a11y/alt-text
+        return <img src={`/storage/${site.logoPath}`} alt={site.name} className={`${dims} flex-shrink-0 rounded-full object-contain`} />;
+    }
+    return (
+        <span className={`flex ${dims} flex-shrink-0 items-center justify-center rounded-full bg-primary text-on-primary shadow-sm`}>
+            <ShieldMark className="h-5 w-5" />
+        </span>
+    );
+}
+
 export default function PublicLayout({ children }: PropsWithChildren) {
     const { site, nav, announcement, auth } = usePage<PageProps>().props;
     const [mobileOpen, setMobileOpen] = useState(false);
@@ -34,9 +100,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                     style={{ backgroundColor: 'var(--glass-bg)' }}
                 >
                     <Link href="/" className="flex min-w-0 items-center gap-2.5 text-base font-bold text-secondary">
-                        <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-primary text-on-primary shadow-sm">
-                            <ShieldMark className="h-5 w-5" />
-                        </span>
+                        <SiteLogo site={site} size="header" />
                         <span className="truncate">{site.name}</span>
                     </Link>
 
@@ -114,8 +178,12 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                 <div className="mx-auto max-w-container px-4 py-14 sm:px-6 lg:px-8">
                     <div className="grid gap-10 md:grid-cols-4">
                         <div>
-                            <div className="mb-3 text-lg font-bold">{site.name}</div>
+                            <div className="mb-3 flex items-center gap-2.5 text-lg font-bold">
+                                <SiteLogo site={site} size="footer" />
+                                {site.name}
+                            </div>
                             <p className="text-sm text-teal-200">{site.tagline}</p>
+                            <SocialLinks social={site.social} className="mt-4" />
                         </div>
 
                         {nav.footer.map((group) => (

@@ -48,6 +48,12 @@ class HandleInertiaRequests extends Middleware
                 'whatsappNumber' => Setting::get('whatsapp_number'),
                 'whatsappEnabled' => Setting::get('whatsapp_enabled', false),
                 'copyrightText' => Setting::get('copyright_text'),
+                'logoPath' => Setting::get('site_logo_path'),
+                'social' => [
+                    'facebook' => Setting::get('social_facebook'),
+                    'instagram' => Setting::get('social_instagram'),
+                    'youtube' => Setting::get('social_youtube'),
+                ],
             ],
             'nav' => fn () => [
                 'header' => NavItem::whereNull('parent_id')->where('location', 'header')->where('is_visible', true)->orderBy('order')->get(['id', 'label', 'url']),
