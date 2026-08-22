@@ -25,7 +25,7 @@ export default function NewsIndex({ announcements, categories }: { announcements
                             <div>
                                 <div className="mb-1 flex gap-2">
                                     {item.organization && <span className="rounded-full bg-primary-subtle px-2 py-0.5 text-xs font-bold text-primary">{item.organization}</span>}
-                                    {item.is_pinned && <span className="rounded-full bg-accent px-2 py-0.5 text-xs font-bold text-accent-fg">Pinned</span>}
+                                    {item.is_pinned && <span className="rounded-full bg-primary px-2 py-0.5 text-xs font-bold text-on-primary">Pinned</span>}
                                     <span className={`rounded-full px-2 py-0.5 text-xs font-bold uppercase ${item.is_active ? 'bg-success-bg text-success' : 'bg-surface-sunken text-text-muted'}`}>
                                         {item.is_active ? 'Active' : 'Off'}
                                     </span>

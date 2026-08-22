@@ -1,12 +1,13 @@
 import { Link, usePage, router } from '@inertiajs/react';
 import { PropsWithChildren, ReactNode, useState } from 'react';
+import ShieldMark from '@/Components/ShieldMark';
 import { PageProps } from '@/types';
 
 interface NavEntry { label: string; href: string; icon: ReactNode }
 
-function Icon({ d }: { d: string }) {
+function Icon({ d, className = 'h-5 w-5' }: { d: string; className?: string }) {
     return (
-        <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+        <svg className={className} fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d={d} />
         </svg>
     );
@@ -36,38 +37,43 @@ export default function AdminLayout({ children, header }: PropsWithChildren<{ he
     const { site, auth } = usePage<PageProps>().props;
     const { url } = usePage();
     const [mobileOpen, setMobileOpen] = useState(false);
+    const [menuOpen, setMenuOpen] = useState(false);
 
     const sidebar = (
         <div className="flex h-full flex-col bg-secondary text-white">
-            <Link href="/admin" className="flex h-16 items-center gap-2 px-5 text-base font-bold">
-                <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-accent text-xs text-accent-fg">LF</span>
-                Admin Panel
+            <Link href="/admin" className="flex h-16 items-center gap-2.5 px-5 text-base font-bold">
+                <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-2xl bg-primary text-on-primary shadow-sm">
+                    <ShieldMark className="h-5 w-5" />
+                </span>
+                <span className="truncate">Admin Panel</span>
             </Link>
-            <nav className="flex-1 space-y-0.5 overflow-y-auto px-2.5 py-3">
+            <nav className="flex-1 space-y-1 overflow-y-auto px-2.5 py-3">
                 {NAV.map((item) => {
                     const active = url === item.href || (item.href !== '/admin' && url.startsWith(item.href));
                     return (
                         <Link
                             key={item.href}
                             href={item.href}
-                            className={`flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors duration-fast ${
-                                active ? 'bg-accent text-accent-fg' : 'text-teal-200 hover:bg-white/10 hover:text-white'
+                            className={`group flex items-center gap-3 rounded-2xl px-3 py-2 text-sm font-medium transition-all duration-normal ${
+                                active
+                                    ? 'bg-primary text-on-primary shadow-md'
+                                    : 'text-teal-200 hover:translate-x-0.5 hover:bg-white/10 hover:text-white'
                             }`}
                         >
-                            {item.icon}
+                            <span className={`transition-transform duration-normal ${active ? '' : 'group-hover:scale-110'}`}>{item.icon}</span>
                             {item.label}
                         </Link>
                     );
                 })}
             </nav>
             <div className="border-t border-white/10 p-3">
-                <Link href="/" className="mb-1 flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-teal-200 hover:bg-white/10 hover:text-white">
+                <Link href="/" className="mb-1 flex items-center gap-3 rounded-2xl px-3 py-2 text-sm font-medium text-teal-200 transition-colors hover:bg-white/10 hover:text-white">
                     <Icon d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
                     View Site
                 </Link>
                 <button
                     onClick={() => router.post('/logout')}
-                    className="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium text-teal-200 hover:bg-white/10 hover:text-white"
+                    className="flex w-full items-center gap-3 rounded-2xl px-3 py-2 text-sm font-medium text-teal-200 transition-colors hover:bg-white/10 hover:text-white"
                 >
                     <Icon d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
                     Log out
@@ -96,9 +102,38 @@ export default function AdminLayout({ children, header }: PropsWithChildren<{ he
                     </button>
                     {header && <h1 className="text-lg font-bold text-text">{header}</h1>}
                     <div className="ml-auto flex items-center gap-3">
-                        <span className="text-sm font-medium text-text-secondary">{auth.user?.name}</span>
-                        <div className="flex h-8 w-8 items-center justify-center rounded-full bg-primary-subtle text-sm font-bold text-primary">
-                            {auth.user?.name?.charAt(0).toUpperCase()}
+                        <div className="relative">
+                            <button
+                                onClick={() => setMenuOpen((v) => !v)}
+                                className="flex items-center gap-2.5 rounded-full py-1 pl-1 pr-3 transition-colors duration-fast hover:bg-surface-sunken"
+                            >
+                                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-subtle text-sm font-bold text-primary">
+                                    {auth.user?.name?.charAt(0).toUpperCase()}
+                                </div>
+                                <span className="hidden text-sm font-medium text-text-secondary sm:block">{auth.user?.name}</span>
+                                <svg className={`h-4 w-4 text-text-muted transition-transform duration-fast ${menuOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+                                </svg>
+                            </button>
+
+                            {menuOpen && (
+                                <>
+                                    <div className="fixed inset-0 z-40" onClick={() => setMenuOpen(false)} />
+                                    <div className="absolute right-0 z-50 mt-2 w-48 overflow-hidden rounded-2xl border border-border bg-surface py-1.5 shadow-xl">
+                                        <Link href="/profile" className="flex items-center gap-2.5 px-4 py-2.5 text-sm text-text hover:bg-primary-subtle hover:text-primary">
+                                            <Icon d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                                            Profile
+                                        </Link>
+                                        <button
+                                            onClick={() => router.post('/logout')}
+                                            className="flex w-full items-center gap-2.5 px-4 py-2.5 text-left text-sm text-danger hover:bg-danger-bg"
+                                        >
+                                            <Icon d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                                            Log out
+                                        </button>
+                                    </div>
+                                </>
+                            )}
                         </div>
                     </div>
                 </header>

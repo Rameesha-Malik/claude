@@ -13,7 +13,7 @@ export default function ContactInboxIndex({ submissions }: Props) {
 
             <div className="space-y-3">
                 {submissions.data.map((s) => (
-                    <div key={s.id} className={`rounded-2xl border p-5 ${s.is_handled ? 'border-border bg-surface' : 'border-accent bg-surface'}`}>
+                    <div key={s.id} className={`rounded-2xl border p-5 ${s.is_handled ? 'border-border bg-surface' : 'border-warning bg-surface'}`}>
                         <div className="flex items-start justify-between gap-4">
                             <div>
                                 <div className="font-semibold text-text">{s.name} — <span className="font-normal text-text-secondary">{s.email}</span></div>
@@ -23,7 +23,7 @@ export default function ContactInboxIndex({ submissions }: Props) {
                             </div>
                             <button
                                 onClick={() => router.post(`/admin/contact-inbox/${s.id}/toggle-handled`, {}, { preserveScroll: true })}
-                                className={`flex-shrink-0 rounded-full px-3 py-1 text-xs font-bold uppercase ${s.is_handled ? 'bg-success-bg text-success' : 'bg-accent text-accent-fg'}`}
+                                className={`flex-shrink-0 rounded-full px-3 py-1 text-xs font-bold uppercase ${s.is_handled ? 'bg-success-bg text-success' : 'bg-warning-bg text-warning'}`}
                             >
                                 {s.is_handled ? 'Handled' : 'Mark Handled'}
                             </button>
