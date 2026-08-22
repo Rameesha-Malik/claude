@@ -26,6 +26,7 @@ interface Course {
     instructor: { name: string } | null; practice_tests: PracticeTestSummary[]; quizzes: QuizSummary[];
     mock_exams: MockExamSummary[]; staged_tests: StagedTestSummary[]; flashcards: FlashcardItem[];
     quizzes_enabled: boolean; flashcards_enabled: boolean; tests_enabled: boolean;
+    level: string | null; enrollments_count: number; approved_reviews: { rating: number }[];
 }
 interface Review { id: number; rating: number; review_text: string | null; status: string }
 interface Props {
@@ -159,9 +160,25 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
         return true;
     });
 
+    const totalLessons = course.lessons.length;
+    const completedLessons = course.lessons.filter((l) => lessonProgress[l.id]?.is_completed).length;
+    const progressPct = totalLessons ? Math.round((completedLessons / totalLessons) * 100) : 0;
+    const reviewCount = course.approved_reviews.length;
+    const avgRating = reviewCount ? course.approved_reviews.reduce((sum, r) => sum + r.rating, 0) / reviewCount : 0;
+
     return (
         <StudentLayout header={course.title}>
             <Head title={course.title} />
+
+            <CourseMetaBar
+                avgRating={avgRating}
+                reviewCount={reviewCount}
+                level={course.level}
+                enrolledCount={course.enrollments_count}
+                completedLessons={completedLessons}
+                totalLessons={totalLessons}
+                progressPct={progressPct}
+            />
 
             <div className="mb-6 flex flex-wrap gap-1.5 rounded-full border border-border bg-surface p-1.5">
                 {visibleTabs.map((t) => (
@@ -181,39 +198,83 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
 
             {tab === 'Lectures' && (
                 <div className="grid gap-6 lg:grid-cols-3">
-                    <div className="space-y-2 lg:col-span-1">
-                        {course.lessons.map((lesson) => (
-                            <button
-                                key={lesson.id}
-                                onClick={() => setActiveLesson(lesson)}
-                                className={`flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-left text-sm transition-all duration-fast ${
-                                    activeLesson?.id === lesson.id
-                                        ? 'border-primary bg-primary-subtle shadow-sm'
-                                        : 'border-border bg-surface hover:-translate-y-0.5 hover:border-primary hover:shadow-sm'
-                                }`}
-                            >
-                                <span className="font-medium text-text">{lesson.title}</span>
-                                {lessonProgress[lesson.id]?.is_completed && (
-                                    <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-success-bg text-success">&#10003;</span>
-                                )}
-                            </button>
-                        ))}
+                    <div className="lg:col-span-1">
+                        <h3 className="mb-3 font-bold text-text">Course Content</h3>
+                        <div className="space-y-2 rounded-3xl border border-border bg-surface p-2">
+                            {course.lessons.map((lesson, i) => {
+                                const isDone = lessonProgress[lesson.id]?.is_completed;
+                                const isActive = activeLesson?.id === lesson.id;
+                                return (
+                                    <button
+                                        key={lesson.id}
+                                        onClick={() => setActiveLesson(lesson)}
+                                        className={`flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left text-sm transition-all duration-fast ${
+                                            isActive ? 'bg-primary-subtle shadow-sm' : 'hover:bg-surface-sunken'
+                                        }`}
+                                    >
+                                        <span
+                                            className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold transition-colors ${
+                                                isDone
+                                                    ? 'bg-success text-white'
+                                                    : isActive
+                                                      ? 'bg-primary text-on-primary'
+                                                      : 'bg-surface-sunken text-text-secondary'
+                                            }`}
+                                        >
+                                            {isDone ? '✓' : i + 1}
+                                        </span>
+                                        <span className={`font-medium ${isActive ? 'text-primary' : 'text-text'}`}>{lesson.title}</span>
+                                    </button>
+                                );
+                            })}
+                            {course.lessons.length === 0 && (
+                                <p className="p-4 text-sm text-text-secondary">No lectures yet.</p>
+                            )}
+                        </div>
                     </div>
                     <div className="lg:col-span-2">
                         {activeLesson ? (
-                            <div className="rounded-3xl border border-border bg-surface p-6">
-                                <h3 className="font-bold text-text">{activeLesson.title}</h3>
-                                <p className="mt-2 text-sm text-text-secondary">{activeLesson.description}</p>
-                                <div className="mt-4">
+                            <div className="overflow-hidden rounded-3xl border border-border bg-surface">
+                                <div className="bg-secondary p-3">
                                     <LessonPlayer lesson={activeLesson} />
                                 </div>
-                                <button
-                                    onClick={() => router.post(`/portal/lessons/${activeLesson.id}/complete`, {}, { preserveScroll: true })}
-                                    disabled={lessonProgress[activeLesson.id]?.is_completed}
-                                    className="mt-4 rounded-full bg-primary px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-on-primary shadow-sm transition-all duration-fast hover:-translate-y-0.5 hover:bg-primary-hover hover:shadow-md disabled:opacity-50 disabled:hover:translate-y-0"
-                                >
-                                    {lessonProgress[activeLesson.id]?.is_completed ? 'Completed' : 'Mark as Complete'}
-                                </button>
+                                <div className="p-6">
+                                    <h3 className="font-bold text-text">{activeLesson.title}</h3>
+                                    {activeLesson.description && <p className="mt-2 text-sm text-text-secondary">{activeLesson.description}</p>}
+
+                                    <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-border pt-5">
+                                        <button
+                                            onClick={() => {
+                                                const i = course.lessons.findIndex((l) => l.id === activeLesson.id);
+                                                if (i > 0) setActiveLesson(course.lessons[i - 1]);
+                                            }}
+                                            disabled={course.lessons.findIndex((l) => l.id === activeLesson.id) <= 0}
+                                            className="rounded-full border border-border px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-text transition-all duration-fast hover:-translate-y-0.5 hover:border-primary hover:text-primary disabled:opacity-40 disabled:hover:translate-y-0"
+                                        >
+                                            &larr; Previous
+                                        </button>
+                                        <button
+                                            onClick={() => {
+                                                const i = course.lessons.findIndex((l) => l.id === activeLesson.id);
+                                                if (!lessonProgress[activeLesson.id]?.is_completed) {
+                                                    router.post(`/portal/lessons/${activeLesson.id}/complete`, {}, { preserveScroll: true });
+                                                }
+                                                if (i < course.lessons.length - 1) setActiveLesson(course.lessons[i + 1]);
+                                            }}
+                                            disabled={
+                                                lessonProgress[activeLesson.id]?.is_completed &&
+                                                course.lessons.findIndex((l) => l.id === activeLesson.id) === course.lessons.length - 1
+                                            }
+                                            className="ml-auto rounded-full bg-primary px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-on-primary shadow-sm transition-all duration-fast hover:-translate-y-0.5 hover:bg-primary-hover hover:shadow-md disabled:opacity-50 disabled:hover:translate-y-0"
+                                        >
+                                            {lessonProgress[activeLesson.id]?.is_completed
+                                                ? course.lessons.findIndex((l) => l.id === activeLesson.id) === course.lessons.length - 1
+                                                    ? 'Completed'
+                                                    : 'Next Lesson →'
+                                                : 'Mark Complete & Continue →'}
+                                        </button>
+                                    </div>
+                                </div>
                             </div>
                         ) : (
                             <p className="text-text-secondary">No lectures yet.</p>
@@ -353,6 +414,55 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
 
             {tab === 'Q&A' && <QaPanel course={course} questions={questions} />}
         </StudentLayout>
+    );
+}
+
+function CourseMetaBar({
+    avgRating,
+    reviewCount,
+    level,
+    enrolledCount,
+    completedLessons,
+    totalLessons,
+    progressPct,
+}: {
+    avgRating: number;
+    reviewCount: number;
+    level: string | null;
+    enrolledCount: number;
+    completedLessons: number;
+    totalLessons: number;
+    progressPct: number;
+}) {
+    return (
+        <div className="mb-4 flex flex-wrap items-center gap-x-6 gap-y-3 rounded-3xl border border-border bg-surface p-5">
+            {reviewCount > 0 && (
+                <div className="flex items-center gap-1.5 text-sm">
+                    <span className="text-gold-500">{'★'.repeat(Math.round(avgRating))}{'☆'.repeat(5 - Math.round(avgRating))}</span>
+                    <span className="text-text-secondary">
+                        {avgRating.toFixed(1)} ({reviewCount} review{reviewCount === 1 ? '' : 's'})
+                    </span>
+                </div>
+            )}
+            {level && (
+                <span className="rounded-full bg-primary-subtle px-3 py-1 text-xs font-bold uppercase tracking-wide text-primary">{level}</span>
+            )}
+            <span className="text-sm text-text-secondary">
+                <span className="font-semibold text-text">{enrolledCount}</span> enrolled
+            </span>
+            <div className="ml-auto min-w-[200px] flex-1 sm:flex-none">
+                <div className="mb-1.5 flex items-center justify-between text-xs font-semibold text-text-secondary">
+                    <span>Course Progress</span>
+                    <span>{completedLessons}/{totalLessons} · {progressPct}%</span>
+                </div>
+                <div className="h-2 overflow-hidden rounded-full bg-surface-sunken">
+                    <div
+                        className="h-full rounded-full bg-gradient-to-r from-secondary to-primary transition-all duration-slow"
+                        style={{ width: `${progressPct}%` }}
+                    />
+                </div>
+            </div>
+        </div>
     );
 }
 

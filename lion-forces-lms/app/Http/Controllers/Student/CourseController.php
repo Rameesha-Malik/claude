@@ -49,7 +49,9 @@ class CourseController extends Controller
             'mockExams' => fn ($q) => $q->where('is_active', true)->withCount('sections'),
             'stagedTests' => fn ($q) => $q->where('is_active', true)->withCount('stages'),
             'flashcards' => fn ($q) => $q->where('status', 'approved'),
+            'approvedReviews',
         ]);
+        $course->loadCount(['enrollments' => fn ($q) => $q->where('status', 'active')]);
 
         // Personal/Guaranteed notes: assigned directly to this student, or
         // to the package they're enrolled under.
