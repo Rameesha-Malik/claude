@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\ContactInboxController as AdminContactInboxController;
 use App\Http\Controllers\Admin\ContentLibraryController as AdminContentLibraryController;
 use App\Http\Controllers\Admin\CourseController as AdminCourseController;
+use App\Http\Controllers\Admin\CourseQuestionController as AdminCourseQuestionController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\DemoQuizController as AdminDemoQuizController;
 use App\Http\Controllers\Admin\FlashcardController as AdminFlashcardController;
@@ -270,6 +271,11 @@ Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->nam
     Route::prefix('notifications')->name('notifications.')->group(function () {
         Route::get('/', [AdminNotificationController::class, 'index'])->name('index');
         Route::post('/', [AdminNotificationController::class, 'store'])->name('store');
+    });
+
+    Route::prefix('qa')->name('qa.')->group(function () {
+        Route::get('/', [AdminCourseQuestionController::class, 'index'])->name('index');
+        Route::post('/{question}/reply', [AdminCourseQuestionController::class, 'reply'])->name('reply');
     });
 
     Route::prefix('reviews')->name('reviews.')->group(function () {
