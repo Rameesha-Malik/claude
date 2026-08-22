@@ -43,8 +43,11 @@ class CourseController extends Controller
     {
         $data = $this->validateCourse($request);
         $data['slug'] = $this->uniqueSlug($data['title']);
+        $tags = $data['tags'] ?? '';
+        unset($data['tags']);
 
         $course = Course::create($data);
+        $this->syncTags($course, $tags);
 
         return redirect()->route('admin.courses.edit', $course)->with('success', 'Course created. Add lessons and packages below.');
     }
@@ -55,6 +58,7 @@ class CourseController extends Controller
             'packages',
             'lessons' => fn ($q) => $q->orderBy('order'),
             'sections' => fn ($q) => $q->orderBy('order')->with(['lessons' => fn ($q2) => $q2->orderBy('order')]),
+            'tags',
         ]);
 
         return Inertia::render('Admin/Courses/Form', [
@@ -66,9 +70,35 @@ class CourseController extends Controller
 
     public function update(Request $request, Course $course)
     {
-        $course->update($this->validateCourse($request));
+        $data = $this->validateCourse($request);
+        $tags = $data['tags'] ?? '';
+        unset($data['tags']);
+
+        $course->update($data);
+        $this->syncTags($course, $tags);
 
         return back()->with('success', 'Course updated.');
+    }
+
+    // Free-text, comma-separated tags -- find-or-create by name so admins
+    // can type "Army, Navy, PAF" without ever managing a separate tags
+    // screen. Kept deliberately lightweight since tags are a search/filter
+    // aid, not a structural feature like Topics.
+    private function syncTags(Course $course, string $raw): void
+    {
+        $names = collect(explode(',', $raw))
+            ->map(fn ($n) => trim($n))
+            ->filter()
+            ->unique();
+
+        $ids = $names->map(function ($name) {
+            return \App\Models\Tag::firstOrCreate(
+                ['name' => $name],
+                ['slug' => Str::slug($name)],
+            )->id;
+        });
+
+        $course->tags()->sync($ids);
     }
 
     public function destroy(Course $course)
@@ -96,6 +126,7 @@ class CourseController extends Controller
             'tests_enabled' => 'boolean',
             'target_exam_name' => 'nullable|string|max:100',
             'target_exam_date' => 'nullable|date',
+            'tags' => 'nullable|string|max:500',
         ]);
     }
 

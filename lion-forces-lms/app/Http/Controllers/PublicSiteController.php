@@ -45,11 +45,12 @@ class PublicSiteController extends Controller
 
     public function courses(Request $request): Response
     {
-        $courses = Course::with(['category', 'instructor:id,name', 'sharedNotes:id,subject_id'])
+        $courses = Course::with(['category', 'instructor:id,name', 'sharedNotes:id,subject_id', 'tags:id,name'])
             ->withCount(['lessons', 'enrollments' => fn ($q) => $q->where('status', 'active')])
             ->where('status', 'published')
             ->when($request->category, fn ($q, $cat) => $q->whereHas('category', fn ($q) => $q->where('slug', $cat)))
             ->when($request->search, fn ($q, $s) => $q->where('title', 'like', "%{$s}%"))
+            ->when($request->tag, fn ($q, $tag) => $q->whereHas('tags', fn ($q) => $q->where('name', $tag)))
             ->orderBy('order')
             ->paginate(12)
             ->withQueryString();
@@ -59,7 +60,8 @@ class PublicSiteController extends Controller
         return Inertia::render('Public/Courses', [
             'courses' => $courses,
             'categories' => \App\Models\CourseCategory::where('is_active', true)->orderBy('order')->get(['name', 'slug']),
-            'filters' => $request->only(['category', 'search']),
+            'tags' => \App\Models\Tag::orderBy('name')->get(['name']),
+            'filters' => $request->only(['category', 'search', 'tag']),
         ]);
     }
 
@@ -77,7 +79,7 @@ class PublicSiteController extends Controller
 
     public function courseDetail(Course $course): Response
     {
-        $course->load(['category', 'instructor', 'packages' => fn ($q) => $q->where('is_active', true), 'approvedReviews.user', 'lessons' => fn ($q) => $q->where('is_free_preview', true)]);
+        $course->load(['category', 'instructor', 'packages' => fn ($q) => $q->where('is_active', true), 'approvedReviews.user', 'lessons' => fn ($q) => $q->where('is_free_preview', true), 'tags:id,name']);
 
         return Inertia::render('Public/CourseDetail', ['course' => $course]);
     }

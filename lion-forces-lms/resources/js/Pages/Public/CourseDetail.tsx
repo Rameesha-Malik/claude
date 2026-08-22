@@ -14,6 +14,7 @@ interface Course {
     packages: Package[];
     lessons: Lesson[];
     approved_reviews: Review[];
+    tags: { name: string }[];
 }
 
 function Stars({ rating }: { rating: number }) {
@@ -30,9 +31,14 @@ export default function CourseDetail({ course }: { course: Course }) {
 
             <section className="bg-gradient-to-br from-secondary to-teal-950 py-20 text-text-inverse">
                 <div className="mx-auto max-w-container px-4 sm:px-6 lg:px-8">
-                    {course.category && (
-                        <span className="rounded-full bg-accent px-3 py-1 text-xs font-bold uppercase tracking-wide text-accent-fg">{course.category.name}</span>
-                    )}
+                    <div className="flex flex-wrap gap-2">
+                        {course.category && (
+                            <span className="rounded-full bg-primary px-3 py-1 text-xs font-bold uppercase tracking-wide text-on-primary">{course.category.name}</span>
+                        )}
+                        {course.tags.map((t) => (
+                            <span key={t.name} className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-teal-100">#{t.name}</span>
+                        ))}
+                    </div>
                     <h1 className="mt-4 font-display text-5xl uppercase tracking-wide">{course.title}</h1>
                     <p className="mt-3 max-w-2xl text-teal-200">{course.short_description}</p>
                 </div>

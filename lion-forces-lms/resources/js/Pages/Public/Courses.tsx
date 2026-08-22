@@ -54,15 +54,16 @@ interface Course {
     id: number; title: string; slug: string; short_description: string | null; thumbnail_path: string | null;
     base_price: string | null; hours: number | null; level: string | null;
     lessons_count: number; enrollments_count: number; topics_count: number;
-    category: { name: string } | null; instructor: { name: string } | null;
+    category: { name: string } | null; instructor: { name: string } | null; tags: { name: string }[];
 }
 interface Props {
     courses: { data: Course[]; links: { url: string | null; label: string; active: boolean }[] };
     categories: { name: string; slug: string }[];
-    filters: { category?: string; search?: string };
+    tags: { name: string }[];
+    filters: { category?: string; search?: string; tag?: string };
 }
 
-export default function Courses({ courses, categories, filters }: Props) {
+export default function Courses({ courses, categories, tags, filters }: Props) {
     const [search, setSearch] = useState(filters.search ?? '');
 
     function submitSearch(e: FormEvent) {
@@ -72,6 +73,10 @@ export default function Courses({ courses, categories, filters }: Props) {
 
     function selectCategory(slug: string | null) {
         router.get('/courses', { ...filters, category: slug ?? undefined }, { preserveState: true });
+    }
+
+    function selectTag(name: string | null) {
+        router.get('/courses', { ...filters, tag: name ?? undefined }, { preserveState: true });
     }
 
     return (
@@ -126,6 +131,28 @@ export default function Courses({ courses, categories, filters }: Props) {
                             </button>
                         ))}
                     </div>
+
+                    {tags.length > 0 && (
+                        <div className="mt-3 flex flex-wrap justify-center gap-1.5">
+                            {filters.tag && (
+                                <button
+                                    onClick={() => selectTag(null)}
+                                    className="rounded-full bg-white/10 px-3 py-1 text-xs font-semibold text-teal-100 hover:bg-white/20"
+                                >
+                                    &times; {filters.tag}
+                                </button>
+                            )}
+                            {tags.filter((t) => t.name !== filters.tag).map((t) => (
+                                <button
+                                    key={t.name}
+                                    onClick={() => selectTag(t.name)}
+                                    className="rounded-full border border-white/10 px-3 py-1 text-xs font-medium text-teal-300 hover:border-white/30 hover:text-teal-100"
+                                >
+                                    #{t.name}
+                                </button>
+                            ))}
+                        </div>
+                    )}
                 </div>
             </section>
 
@@ -184,6 +211,15 @@ export default function Courses({ courses, categories, filters }: Props) {
                                     </div>
                                 )}
                                 <p className="mt-2.5 line-clamp-2 flex-1 text-sm leading-relaxed text-text-secondary">{course.short_description}</p>
+                                {course.tags.length > 0 && (
+                                    <div className="mt-2 flex flex-wrap gap-1.5">
+                                        {course.tags.map((t) => (
+                                            <span key={t.name} className="rounded-full bg-surface-sunken px-2 py-0.5 text-[0.65rem] font-semibold text-text-secondary">
+                                                #{t.name}
+                                            </span>
+                                        ))}
+                                    </div>
+                                )}
 
                                 <div className="mt-4 flex flex-wrap gap-1.5">
                                     {course.hours && (

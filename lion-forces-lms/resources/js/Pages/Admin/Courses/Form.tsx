@@ -7,13 +7,14 @@ interface Instructor { id: number; name: string }
 interface Package { id: number; name: string; description: string | null; price: string; validity_days: number | null }
 interface Lesson { id: number; title: string; type: string; is_free_preview: boolean; section_id: number | null }
 interface Section { id: number; title: string; lessons: Lesson[] }
+interface Tag { id: number; name: string }
 interface Course {
     id: number; title: string; category_id: number; instructor_id: number | null;
     short_description: string | null; description: string | null; syllabus: string | null;
     level: string | null; hours: number | null; base_price: string | null; status: string;
     quizzes_enabled: boolean; flashcards_enabled: boolean; tests_enabled: boolean;
     target_exam_name: string | null; target_exam_date: string | null;
-    packages: Package[]; lessons: Lesson[]; sections: Section[];
+    packages: Package[]; lessons: Lesson[]; sections: Section[]; tags: Tag[];
 }
 interface Props { course?: Course; categories: Category[]; instructors: Instructor[] }
 
@@ -39,6 +40,7 @@ export default function CourseForm({ course, categories, instructors }: Props) {
         tests_enabled: course?.tests_enabled ?? false,
         target_exam_name: course?.target_exam_name ?? '',
         target_exam_date: course?.target_exam_date ?? '',
+        tags: course?.tags.map((t) => t.name).join(', ') ?? '',
     });
 
     function submit(e: React.FormEvent) {
@@ -113,6 +115,17 @@ export default function CourseForm({ course, categories, instructors }: Props) {
                                 <label className={labelClass}>Target Exam Date</label>
                                 <input type="date" className={inputClass} value={form.data.target_exam_date} onChange={(e) => form.setData('target_exam_date', e.target.value)} />
                             </div>
+                        </div>
+
+                        <div>
+                            <label className={labelClass}>Tags</label>
+                            <input
+                                className={inputClass}
+                                placeholder="e.g. Army, Navy, PAF"
+                                value={form.data.tags}
+                                onChange={(e) => form.setData('tags', e.target.value)}
+                            />
+                            <p className="mt-1 text-xs text-text-muted">Comma-separated. Shown on the course card and used for search/filtering.</p>
                         </div>
 
                         <div>
