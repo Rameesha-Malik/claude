@@ -1,6 +1,6 @@
 import { Link, usePage } from '@inertiajs/react';
 import { PropsWithChildren, useState } from 'react';
-import ShieldMark from '@/Components/ShieldMark';
+import SiteLogo from '@/Components/SiteLogo';
 import { PageProps } from '@/types';
 
 function WhatsAppIcon({ className = 'h-7 w-7' }: { className?: string }) {
@@ -64,19 +64,6 @@ function SocialLinks({ social, className = '' }: { social: { facebook: string | 
     );
 }
 
-function SiteLogo({ site, size = 'header' }: { site: PageProps['site']; size?: 'header' | 'footer' }) {
-    const dims = size === 'header' ? 'h-10 w-10' : 'h-12 w-12';
-    if (site.logoPath) {
-        // eslint-disable-next-line jsx-a11y/alt-text
-        return <img src={`/storage/${site.logoPath}`} alt={site.name} className={`${dims} flex-shrink-0 rounded-full object-contain`} />;
-    }
-    return (
-        <span className={`flex ${dims} flex-shrink-0 items-center justify-center rounded-full bg-primary text-on-primary shadow-sm`}>
-            <ShieldMark className="h-5 w-5" />
-        </span>
-    );
-}
-
 export default function PublicLayout({ children }: PropsWithChildren) {
     const { site, nav, announcement, auth } = usePage<PageProps>().props;
     const [mobileOpen, setMobileOpen] = useState(false);
@@ -100,7 +87,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                     style={{ backgroundColor: 'var(--glass-bg)' }}
                 >
                     <Link href="/" className="flex min-w-0 items-center gap-2.5 text-base font-bold text-secondary">
-                        <SiteLogo site={site} size="header" />
+                        <SiteLogo site={site} size="nav" />
                         <span className="truncate">{site.name}</span>
                     </Link>
 

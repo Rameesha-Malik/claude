@@ -1,6 +1,6 @@
 import { Link, usePage, router } from '@inertiajs/react';
 import { PropsWithChildren, ReactNode, useState } from 'react';
-import ShieldMark from '@/Components/ShieldMark';
+import SiteLogo from '@/Components/SiteLogo';
 import { PageProps } from '@/types';
 
 interface NavEntry { label: string; href: string; icon: ReactNode }
@@ -45,9 +45,7 @@ export default function AdminLayout({ children, header }: PropsWithChildren<{ he
     const sidebar = (
         <div className="flex h-full flex-col bg-secondary text-white">
             <Link href="/admin" className="flex h-16 items-center gap-2.5 px-5 text-base font-bold">
-                <span className="flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-2xl bg-primary text-on-primary shadow-sm">
-                    <ShieldMark className="h-5 w-5" />
-                </span>
+                <SiteLogo site={site} shape="rounded" />
                 <span className="truncate">Admin Panel</span>
             </Link>
             <nav className="flex-1 space-y-1 overflow-y-auto px-2.5 py-3">
