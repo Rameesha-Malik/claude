@@ -1,5 +1,6 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import { useState } from 'react';
+import RevealOnScroll from '@/Components/RevealOnScroll';
 import StudentLayout from '@/Layouts/StudentLayout';
 
 interface Lesson { id: number; title: string; type: string; external_url: string | null; file_path: string | null; description: string | null }
@@ -162,13 +163,13 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
         <StudentLayout header={course.title}>
             <Head title={course.title} />
 
-            <div className="mb-6 flex flex-wrap gap-2 border-b border-border">
+            <div className="mb-6 flex flex-wrap gap-1.5 rounded-full border border-border bg-surface p-1.5">
                 {visibleTabs.map((t) => (
                     <button
                         key={t}
                         onClick={() => setTab(t)}
-                        className={`border-b-2 px-4 py-3 text-sm font-bold uppercase tracking-wide transition-colors ${
-                            tab === t ? 'border-primary text-primary' : 'border-transparent text-text-secondary hover:text-text'
+                        className={`rounded-full px-4 py-2 text-sm font-bold uppercase tracking-wide transition-all duration-fast ${
+                            tab === t ? 'bg-primary text-on-primary shadow-sm' : 'text-text-secondary hover:bg-surface-sunken hover:text-text'
                         }`}
                     >
                         {t}
@@ -185,20 +186,22 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
                             <button
                                 key={lesson.id}
                                 onClick={() => setActiveLesson(lesson)}
-                                className={`flex w-full items-center justify-between rounded-lg border px-4 py-3 text-left text-sm transition-colors ${
-                                    activeLesson?.id === lesson.id ? 'border-primary bg-primary-subtle' : 'border-border bg-surface hover:border-primary'
+                                className={`flex w-full items-center justify-between rounded-2xl border px-4 py-3 text-left text-sm transition-all duration-fast ${
+                                    activeLesson?.id === lesson.id
+                                        ? 'border-primary bg-primary-subtle shadow-sm'
+                                        : 'border-border bg-surface hover:-translate-y-0.5 hover:border-primary hover:shadow-sm'
                                 }`}
                             >
                                 <span className="font-medium text-text">{lesson.title}</span>
                                 {lessonProgress[lesson.id]?.is_completed && (
-                                    <span className="text-success">&#10003;</span>
+                                    <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-success-bg text-success">&#10003;</span>
                                 )}
                             </button>
                         ))}
                     </div>
                     <div className="lg:col-span-2">
                         {activeLesson ? (
-                            <div className="rounded-2xl border border-border bg-surface p-6">
+                            <div className="rounded-3xl border border-border bg-surface p-6">
                                 <h3 className="font-bold text-text">{activeLesson.title}</h3>
                                 <p className="mt-2 text-sm text-text-secondary">{activeLesson.description}</p>
                                 <div className="mt-4">
@@ -207,7 +210,7 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
                                 <button
                                     onClick={() => router.post(`/portal/lessons/${activeLesson.id}/complete`, {}, { preserveScroll: true })}
                                     disabled={lessonProgress[activeLesson.id]?.is_completed}
-                                    className="mt-4 rounded-lg bg-primary px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-on-primary hover:bg-primary-hover disabled:opacity-50"
+                                    className="mt-4 rounded-full bg-primary px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-on-primary shadow-sm transition-all duration-fast hover:-translate-y-0.5 hover:bg-primary-hover hover:shadow-md disabled:opacity-50 disabled:hover:translate-y-0"
                                 >
                                     {lessonProgress[activeLesson.id]?.is_completed ? 'Completed' : 'Mark as Complete'}
                                 </button>
@@ -226,28 +229,28 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
                         {course.shared_notes.length === 0 ? (
                             <p className="text-sm text-text-secondary">No notes published yet.</p>
                         ) : (
-                            <div className="space-y-3">
+                            <RevealOnScroll staggerMs={50} className="space-y-3">
                                 {course.shared_notes.map((note) => (
-                                    <div key={note.id} className="rounded-xl border border-border bg-surface p-5">
+                                    <div key={note.id} className="rounded-2xl border border-border bg-surface p-5 transition-shadow duration-normal hover:shadow-md">
                                         <h4 className="font-semibold text-text">{note.title}</h4>
                                         <p className="mt-2 whitespace-pre-line text-sm text-text-secondary">{note.content}</p>
                                     </div>
                                 ))}
-                            </div>
+                            </RevealOnScroll>
                         )}
                     </div>
 
                     {personalNotes.length > 0 && (
                         <div>
                             <h3 className="mb-3 font-bold text-secondary">Your Guaranteed Notes</h3>
-                            <div className="space-y-3">
+                            <RevealOnScroll staggerMs={50} className="space-y-3">
                                 {personalNotes.map((note) => (
-                                    <div key={note.id} className="rounded-xl border-2 border-primary bg-surface p-5">
+                                    <div key={note.id} className="rounded-2xl border-2 border-primary bg-surface p-5 transition-shadow duration-normal hover:shadow-md">
                                         <h4 className="font-semibold text-text">{note.title}</h4>
                                         <p className="mt-2 whitespace-pre-line text-sm text-text-secondary">{note.content}</p>
                                     </div>
                                 ))}
-                            </div>
+                            </RevealOnScroll>
                         </div>
                     )}
                 </div>
@@ -257,116 +260,93 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
                 <div className="space-y-8">
                     <div>
                         <h3 className="mb-3 font-bold text-text">Practice Tests</h3>
-                        <div className="space-y-3">
+                        <RevealOnScroll staggerMs={50} className="space-y-3">
                             {course.practice_tests.map((t) => (
-                                <div key={t.id} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-surface p-5">
-                                    <div>
-                                        <h4 className="font-semibold text-text">{t.title}</h4>
-                                        <p className="text-sm text-text-secondary">
-                                            {t.question_selection_mode === 'manual' ? `${t.questions_count} questions` : `${t.auto_question_count ?? 10} questions (random)`}
-                                            {t.timer_enabled && t.duration_minutes ? ` · ${t.duration_minutes} min` : ' · No time limit'}
-                                        </p>
-                                    </div>
-                                    <Link
-                                        href={`/portal/practice-tests/${t.id}`}
-                                        className="rounded-lg bg-primary px-5 py-2 text-sm font-bold uppercase tracking-wide text-on-primary hover:bg-primary-hover"
-                                    >
-                                        Start Test
-                                    </Link>
-                                </div>
+                                <TestCard
+                                    key={t.id}
+                                    title={t.title}
+                                    meta={
+                                        (t.question_selection_mode === 'manual' ? `${t.questions_count} questions` : `${t.auto_question_count ?? 10} questions (random)`) +
+                                        (t.timer_enabled && t.duration_minutes ? ` · ${t.duration_minutes} min` : ' · No time limit')
+                                    }
+                                    href={`/portal/practice-tests/${t.id}`}
+                                    cta="Start Test"
+                                />
                             ))}
                             {course.practice_tests.length === 0 && (
-                                <div className="rounded-2xl border border-dashed border-border bg-surface p-8 text-center text-text-secondary">
+                                <div className="rounded-3xl border border-dashed border-border bg-surface p-8 text-center text-text-secondary">
                                     No practice tests available for this course yet.
                                 </div>
                             )}
-                        </div>
+                        </RevealOnScroll>
                     </div>
 
                     <div>
                         <h3 className="mb-3 font-bold text-text">Mock Exams</h3>
-                        <div className="space-y-3">
+                        <RevealOnScroll staggerMs={50} className="space-y-3">
                             {course.mock_exams.map((e) => (
-                                <div key={e.id} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-surface p-5">
-                                    <div>
-                                        <h4 className="font-semibold text-text">{e.title}</h4>
-                                        <p className="text-sm text-text-secondary">
-                                            {e.sections_count} section{e.sections_count === 1 ? '' : 's'}
-                                            {e.target_exam_name ? ` · ${e.target_exam_name} pattern` : ''}
-                                            {e.total_duration_minutes ? ` · ${e.total_duration_minutes} min` : ''}
-                                        </p>
-                                    </div>
-                                    <Link
-                                        href={`/portal/mock-exams/${e.id}`}
-                                        className="rounded-lg bg-primary px-5 py-2 text-sm font-bold uppercase tracking-wide text-on-primary hover:bg-primary-hover"
-                                    >
-                                        View Exam
-                                    </Link>
-                                </div>
+                                <TestCard
+                                    key={e.id}
+                                    title={e.title}
+                                    meta={
+                                        `${e.sections_count} section${e.sections_count === 1 ? '' : 's'}` +
+                                        (e.target_exam_name ? ` · ${e.target_exam_name} pattern` : '') +
+                                        (e.total_duration_minutes ? ` · ${e.total_duration_minutes} min` : '')
+                                    }
+                                    href={`/portal/mock-exams/${e.id}`}
+                                    cta="View Exam"
+                                />
                             ))}
                             {course.mock_exams.length === 0 && (
-                                <div className="rounded-2xl border border-dashed border-border bg-surface p-8 text-center text-text-secondary">
+                                <div className="rounded-3xl border border-dashed border-border bg-surface p-8 text-center text-text-secondary">
                                     No mock exams available for this course yet.
                                 </div>
                             )}
-                        </div>
+                        </RevealOnScroll>
                     </div>
 
                     <div>
                         <h3 className="mb-3 font-bold text-text">Staged Tests</h3>
-                        <div className="space-y-3">
+                        <RevealOnScroll staggerMs={50} className="space-y-3">
                             {course.staged_tests.map((t) => (
-                                <div key={t.id} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-surface p-5">
-                                    <div>
-                                        <h4 className="font-semibold text-text">{t.title}</h4>
-                                        <p className="text-sm text-text-secondary">
-                                            {t.stages_count} stage{t.stages_count === 1 ? '' : 's'}
-                                            {t.target_exam_name ? ` · ${t.target_exam_name} pattern` : ''}
-                                        </p>
-                                    </div>
-                                    <Link
-                                        href={`/portal/staged-tests/${t.id}`}
-                                        className="rounded-lg bg-primary px-5 py-2 text-sm font-bold uppercase tracking-wide text-on-primary hover:bg-primary-hover"
-                                    >
-                                        View Test
-                                    </Link>
-                                </div>
+                                <TestCard
+                                    key={t.id}
+                                    title={t.title}
+                                    meta={`${t.stages_count} stage${t.stages_count === 1 ? '' : 's'}${t.target_exam_name ? ` · ${t.target_exam_name} pattern` : ''}`}
+                                    href={`/portal/staged-tests/${t.id}`}
+                                    cta="View Test"
+                                />
                             ))}
                             {course.staged_tests.length === 0 && (
-                                <div className="rounded-2xl border border-dashed border-border bg-surface p-8 text-center text-text-secondary">
+                                <div className="rounded-3xl border border-dashed border-border bg-surface p-8 text-center text-text-secondary">
                                     No staged tests available for this course yet.
                                 </div>
                             )}
-                        </div>
+                        </RevealOnScroll>
                     </div>
                 </div>
             )}
 
             {tab === 'Quizzes' && (
-                <div className="space-y-3">
+                <RevealOnScroll staggerMs={50} className="space-y-3">
                     {course.quizzes.map((q) => (
-                        <div key={q.id} className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-surface p-5">
-                            <div>
-                                <h4 className="font-semibold text-text">{q.title}</h4>
-                                <p className="text-sm text-text-secondary">
-                                    {q.question_selection_mode === 'manual' ? `${q.questions_count} questions` : `${q.auto_question_count ?? 10} questions (random)`}
-                                    {' · No time limit'}
-                                </p>
-                            </div>
-                            <Link
-                                href={`/portal/quizzes/${q.id}`}
-                                className="rounded-lg bg-primary px-5 py-2 text-sm font-bold uppercase tracking-wide text-on-primary hover:bg-primary-hover"
-                            >
-                                Start Quiz
-                            </Link>
-                        </div>
+                        <TestCard
+                            key={q.id}
+                            title={q.title}
+                            meta={
+                                (q.question_selection_mode === 'manual' ? `${q.questions_count} questions` : `${q.auto_question_count ?? 10} questions (random)`) +
+                                ' · No time limit'
+                            }
+                            href={`/portal/quizzes/${q.id}`}
+                            cta="Start Quiz"
+                        />
                     ))}
                     {course.quizzes.length === 0 && (
-                        <div className="rounded-2xl border border-dashed border-border bg-surface p-8 text-center text-text-secondary">
+                        <div className="rounded-3xl border border-dashed border-border bg-surface p-8 text-center text-text-secondary">
                             No quizzes available for this course yet.
                         </div>
                     )}
-                </div>
+                </RevealOnScroll>
             )}
 
             {tab === 'Flashcards' && <FlashcardsPanel cards={course.flashcards} />}
@@ -376,21 +356,38 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
     );
 }
 
+function TestCard({ title, meta, href, cta }: { title: string; meta: string; href: string; cta: string }) {
+    return (
+        <div className="group flex flex-wrap items-center justify-between gap-3 rounded-3xl border border-border bg-surface p-5 transition-all duration-normal hover:-translate-y-0.5 hover:border-primary hover:shadow-lg">
+            <div>
+                <h4 className="font-semibold text-text group-hover:text-primary">{title}</h4>
+                <p className="text-sm text-text-secondary">{meta}</p>
+            </div>
+            <Link
+                href={href}
+                className="rounded-full bg-primary px-5 py-2 text-sm font-bold uppercase tracking-wide text-on-primary shadow-sm transition-all duration-fast hover:-translate-y-0.5 hover:bg-primary-hover hover:shadow-md"
+            >
+                {cta}
+            </Link>
+        </div>
+    );
+}
+
 function FlashcardsPanel({ cards }: { cards: FlashcardItem[] }) {
     if (cards.length === 0) {
         return (
-            <div className="rounded-2xl border border-dashed border-border bg-surface p-8 text-center text-text-secondary">
+            <div className="rounded-3xl border border-dashed border-border bg-surface p-8 text-center text-text-secondary">
                 No flashcards available for this course yet.
             </div>
         );
     }
 
     return (
-        <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
+        <RevealOnScroll staggerMs={40} className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
             {cards.map((card) => (
                 <FlashcardTile key={card.id} card={card} />
             ))}
-        </div>
+        </RevealOnScroll>
     );
 }
 
@@ -401,7 +398,7 @@ function FlashcardTile({ card }: { card: FlashcardItem }) {
         <button
             type="button"
             onClick={() => setFlipped((v) => !v)}
-            className="block h-44 w-full text-left"
+            className="group block h-44 w-full text-left transition-transform duration-normal hover:-translate-y-1"
             style={{ perspective: '1000px' }}
             aria-label="Flip flashcard"
         >
@@ -410,7 +407,7 @@ function FlashcardTile({ card }: { card: FlashcardItem }) {
                 style={{ transformStyle: 'preserve-3d', transform: flipped ? 'rotateY(180deg)' : 'none' }}
             >
                 <div
-                    className="absolute inset-0 flex flex-col justify-between rounded-2xl border border-border bg-surface p-5 shadow-sm"
+                    className="absolute inset-0 flex flex-col justify-between rounded-3xl border border-border bg-surface p-5 shadow-sm transition-shadow duration-normal group-hover:shadow-lg"
                     style={{ backfaceVisibility: 'hidden' }}
                 >
                     <span className="text-xs font-bold uppercase tracking-wide text-primary">Question</span>
@@ -418,7 +415,7 @@ function FlashcardTile({ card }: { card: FlashcardItem }) {
                     <span className="text-xs text-text-muted">Tap to flip</span>
                 </div>
                 <div
-                    className="absolute inset-0 flex flex-col justify-between rounded-2xl border border-primary bg-primary-subtle p-5 shadow-sm"
+                    className="absolute inset-0 flex flex-col justify-between rounded-3xl border border-primary bg-primary-subtle p-5 shadow-sm transition-shadow duration-normal group-hover:shadow-lg"
                     style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
                 >
                     <span className="text-xs font-bold uppercase tracking-wide text-primary">Answer</span>
@@ -440,29 +437,29 @@ function QaPanel({ course, questions }: { course: Course; questions: Question[] 
 
     return (
         <div className="grid gap-6 lg:grid-cols-2">
-            <form onSubmit={submit} className="h-fit rounded-2xl border border-border bg-surface p-6">
+            <form onSubmit={submit} className="h-fit rounded-3xl border border-border bg-surface p-6">
                 <h3 className="mb-3 font-bold text-text">Ask a Question</h3>
                 <textarea
                     rows={4}
                     value={data.question_text}
                     onChange={(e) => setData('question_text', e.target.value)}
                     placeholder="Ask about a lecture, note, or anything course-related..."
-                    className="w-full rounded-lg border border-border p-3 text-sm focus:border-primary focus:shadow-glow focus:outline-none"
+                    className="w-full rounded-2xl border border-border p-3 text-sm transition-colors focus:border-primary focus:shadow-glow focus:outline-none"
                 />
                 <button
                     type="submit"
                     disabled={processing}
-                    className="mt-3 rounded-lg bg-primary px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-on-primary hover:bg-primary-hover disabled:opacity-50"
+                    className="mt-3 rounded-full bg-primary px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-on-primary shadow-sm transition-all duration-fast hover:-translate-y-0.5 hover:bg-primary-hover hover:shadow-md disabled:opacity-50 disabled:hover:translate-y-0"
                 >
                     Ask
                 </button>
                 <p className="mt-2 text-xs text-text-muted">Only you and the admin can see this conversation.</p>
             </form>
 
-            <div className="space-y-4">
+            <RevealOnScroll staggerMs={50} className="space-y-4">
                 {questions.length === 0 && <p className="text-sm text-text-secondary">You haven't asked anything yet.</p>}
                 {questions.map((q) => (
-                    <div key={q.id} className="rounded-xl border border-border bg-surface p-5">
+                    <div key={q.id} className="rounded-3xl border border-border bg-surface p-5 transition-shadow duration-normal hover:shadow-md">
                         <div className="flex items-center justify-between">
                             <span className="text-sm font-semibold text-text">You</span>
                             <span
@@ -475,14 +472,14 @@ function QaPanel({ course, questions }: { course: Course; questions: Question[] 
                         </div>
                         <p className="mt-1 text-sm text-text-secondary">{q.question_text}</p>
                         {q.replies.map((r) => (
-                            <div key={r.id} className="mt-3 rounded-lg bg-primary-subtle p-3">
+                            <div key={r.id} className="mt-3 rounded-2xl bg-primary-subtle p-3">
                                 <span className="text-xs font-bold text-primary">{r.admin?.name ?? 'Admin'}</span>
                                 <p className="mt-1 text-sm text-text">{r.reply_text}</p>
                             </div>
                         ))}
                     </div>
                 ))}
-            </div>
+            </RevealOnScroll>
         </div>
     );
 }
@@ -507,7 +504,7 @@ function ReviewWidget({ course, myReview }: { course: Course; myReview: Review |
 
     if (!open) {
         return (
-            <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-surface p-4">
+            <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-3xl border border-border bg-surface p-4 transition-shadow duration-normal hover:shadow-md">
                 <div className="text-sm text-text-secondary">
                     {myReview ? (
                         <>Your review: <span className="text-gold-500">{'★'.repeat(myReview.rating)}{'☆'.repeat(5 - myReview.rating)}</span> · {STATUS_LABEL[myReview.status]}</>
@@ -523,10 +520,16 @@ function ReviewWidget({ course, myReview }: { course: Course; myReview: Review |
     }
 
     return (
-        <form onSubmit={submit} className="mb-6 space-y-3 rounded-2xl border border-primary bg-surface p-5">
+        <form onSubmit={submit} className="mb-6 space-y-3 rounded-3xl border border-primary bg-surface p-5 shadow-sm">
             <div className="flex items-center gap-1">
                 {[1, 2, 3, 4, 5].map((n) => (
-                    <button key={n} type="button" onClick={() => setData('rating', n)} className="text-2xl text-gold-500" aria-label={`${n} stars`}>
+                    <button
+                        key={n}
+                        type="button"
+                        onClick={() => setData('rating', n)}
+                        className="text-2xl text-gold-500 transition-transform duration-fast hover:scale-125"
+                        aria-label={`${n} stars`}
+                    >
                         {n <= data.rating ? '★' : '☆'}
                     </button>
                 ))}
@@ -536,13 +539,21 @@ function ReviewWidget({ course, myReview }: { course: Course; myReview: Review |
                 value={data.review_text}
                 onChange={(e) => setData('review_text', e.target.value)}
                 placeholder="What did you think of this course? (optional)"
-                className="w-full rounded-lg border border-border p-3 text-sm focus:border-primary focus:shadow-glow focus:outline-none"
+                className="w-full rounded-2xl border border-border p-3 text-sm transition-colors focus:border-primary focus:shadow-glow focus:outline-none"
             />
             <div className="flex gap-3">
-                <button type="submit" disabled={processing} className="rounded-lg bg-primary px-5 py-2 text-sm font-bold uppercase tracking-wide text-on-primary hover:bg-primary-hover disabled:opacity-50">
+                <button
+                    type="submit"
+                    disabled={processing}
+                    className="rounded-full bg-primary px-5 py-2 text-sm font-bold uppercase tracking-wide text-on-primary shadow-sm transition-all duration-fast hover:-translate-y-0.5 hover:bg-primary-hover hover:shadow-md disabled:opacity-50 disabled:hover:translate-y-0"
+                >
                     Submit Review
                 </button>
-                <button type="button" onClick={() => setOpen(false)} className="rounded-lg border border-border px-5 py-2 text-sm font-bold uppercase text-text hover:border-primary">
+                <button
+                    type="button"
+                    onClick={() => setOpen(false)}
+                    className="rounded-full border border-border px-5 py-2 text-sm font-bold uppercase text-text transition-all duration-fast hover:-translate-y-0.5 hover:border-primary hover:text-primary"
+                >
                     Cancel
                 </button>
             </div>

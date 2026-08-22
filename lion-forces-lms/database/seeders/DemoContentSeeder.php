@@ -482,16 +482,21 @@ class DemoContentSeeder extends Seeder
         }
 
         if (! $student->unreadNotifications()->exists()) {
-            \Illuminate\Support\Facades\DB::table('notifications')->insert([
-                'id' => (string) \Illuminate\Support\Str::uuid(),
-                'type' => 'App\\Notifications\\GenericNotification',
-                'notifiable_type' => User::class,
-                'notifiable_id' => $student->id,
-                'data' => json_encode(['message' => 'Welcome! Your demo account has been set up with sample courses.']),
-                'read_at' => null,
-                'created_at' => now(),
-                'updated_at' => now(),
-            ]);
+            // Use the real notification path (AdminBroadcastNotification via
+            // a NotificationBroadcast row) rather than a raw table insert,
+            // so the shape ({broadcast_id, title, body}) matches what the
+            // student-facing Notifications page actually expects.
+            $broadcast = \App\Models\NotificationBroadcast::updateOrCreate(
+                ['title' => 'Welcome to Lion Forces Academy'],
+                [
+                    'body' => 'Your demo account has been set up with sample courses -- explore your dashboard to get started.',
+                    'target_type' => 'all',
+                    'sent_by' => User::where('user_type', 'admin')->value('id'),
+                    'recipient_count' => 1,
+                    'sent_at' => now(),
+                ],
+            );
+            $student->notify(new \App\Notifications\AdminBroadcastNotification($broadcast));
         }
     }
 }
