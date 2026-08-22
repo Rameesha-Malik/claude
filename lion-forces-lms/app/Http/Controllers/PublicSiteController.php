@@ -172,4 +172,22 @@ class PublicSiteController extends Controller
 
         return Inertia::render('Public/Notes', ['notes' => $notes]);
     }
+
+    public function bundles(): Response
+    {
+        $bundles = \App\Models\Bundle::with(['courses:id,title,base_price'])
+            ->where('is_active', true)
+            ->orderBy('order')
+            ->get();
+
+        return Inertia::render('Public/Bundles', ['bundles' => $bundles]);
+    }
+
+    public function bundleDetail(\App\Models\Bundle $bundle): Response
+    {
+        abort_unless($bundle->is_active, 404);
+        $bundle->load(['courses' => fn ($q) => $q->orderBy('order')]);
+
+        return Inertia::render('Public/BundleDetail', ['bundle' => $bundle]);
+    }
 }

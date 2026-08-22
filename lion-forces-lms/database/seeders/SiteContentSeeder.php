@@ -55,6 +55,7 @@ class SiteContentSeeder extends Seeder
         NavItem::updateOrCreate(['label' => 'Notes', 'parent_id' => $resources->id], ['url' => '/notes', 'order' => 2, 'is_visible' => true, 'location' => 'footer']);
         NavItem::updateOrCreate(['label' => 'How to Buy', 'parent_id' => $resources->id], ['url' => '/how-to-buy', 'order' => 3, 'is_visible' => true, 'location' => 'footer']);
         NavItem::updateOrCreate(['label' => 'Free Demo', 'parent_id' => $resources->id], ['url' => '/demo-quiz', 'order' => 4, 'is_visible' => true, 'location' => 'footer']);
+        NavItem::updateOrCreate(['label' => 'Bundles', 'parent_id' => $resources->id], ['url' => '/bundles', 'order' => 5, 'is_visible' => true, 'location' => 'footer']);
 
         $legal = NavItem::updateOrCreate(['label' => 'Legal', 'location' => 'footer'], ['url' => '#', 'order' => 2, 'is_visible' => true]);
         NavItem::updateOrCreate(['label' => 'Privacy Policy', 'parent_id' => $legal->id], ['url' => '/privacy-policy', 'order' => 1, 'is_visible' => true, 'location' => 'footer']);

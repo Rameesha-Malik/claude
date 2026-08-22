@@ -13,7 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
     'category_id', 'instructor_id', 'title', 'slug', 'thumbnail_path',
     'short_description', 'description', 'syllabus', 'level', 'hours',
     'base_price', 'status', 'quizzes_enabled', 'flashcards_enabled',
-    'tests_enabled', 'target_exam_name', 'target_exam_date', 'order',
+    'tests_enabled', 'assignments_enabled', 'target_exam_name', 'target_exam_date', 'order',
 ])]
 class Course extends Model
 {
@@ -25,6 +25,7 @@ class Course extends Model
             'quizzes_enabled' => 'boolean',
             'flashcards_enabled' => 'boolean',
             'tests_enabled' => 'boolean',
+            'assignments_enabled' => 'boolean',
             'target_exam_date' => 'date',
             'base_price' => 'decimal:2',
         ];
@@ -58,6 +59,16 @@ class Course extends Model
     public function tags(): BelongsToMany
     {
         return $this->belongsToMany(Tag::class);
+    }
+
+    public function bundles(): BelongsToMany
+    {
+        return $this->belongsToMany(Bundle::class);
+    }
+
+    public function assignments(): HasMany
+    {
+        return $this->hasMany(Assignment::class)->orderBy('order');
     }
 
     // Shared "Guaranteed Notes" tab — Notes Bank items assigned to every

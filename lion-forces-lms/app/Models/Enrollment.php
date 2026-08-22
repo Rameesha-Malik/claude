@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['user_id', 'course_id', 'package_id', 'status', 'activated_at', 'expires_at'])]
+#[Fillable(['user_id', 'course_id', 'package_id', 'bundle_purchase_id', 'status', 'activated_at', 'expires_at'])]
 class Enrollment extends Model
 {
     use HasFactory;
@@ -31,6 +31,11 @@ class Enrollment extends Model
     public function package(): BelongsTo
     {
         return $this->belongsTo(CoursePackage::class, 'package_id');
+    }
+
+    public function bundlePurchase(): BelongsTo
+    {
+        return $this->belongsTo(BundlePurchase::class);
     }
 
     public function payments(): HasMany

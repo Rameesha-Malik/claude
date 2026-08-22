@@ -22,11 +22,20 @@ interface MockExamSummary {
 interface StagedTestSummary {
     id: number; title: string; target_exam_name: string | null; stages_count: number;
 }
+interface AssignmentSubmission {
+    id: number; status: string; marks_awarded: number | null; feedback: string | null;
+    submission_text: string | null; file_path: string | null; submitted_at: string;
+}
+interface AssignmentItem {
+    id: number; title: string; instructions: string | null; max_marks: number | null;
+    due_date: string | null; submissions: AssignmentSubmission[];
+}
 interface Course {
     id: number; slug: string; title: string; lessons: Lesson[]; sections: Section[]; shared_notes: Note[];
     instructor: { name: string } | null; practice_tests: PracticeTestSummary[]; quizzes: QuizSummary[];
     mock_exams: MockExamSummary[]; staged_tests: StagedTestSummary[]; flashcards: FlashcardItem[];
-    quizzes_enabled: boolean; flashcards_enabled: boolean; tests_enabled: boolean;
+    assignments: AssignmentItem[];
+    quizzes_enabled: boolean; flashcards_enabled: boolean; tests_enabled: boolean; assignments_enabled: boolean;
     level: string | null; enrollments_count: number; approved_reviews: { rating: number }[];
 }
 interface Review { id: number; rating: number; review_text: string | null; status: string }
@@ -42,7 +51,7 @@ interface Props {
     enrollmentStatus?: string | null;
 }
 
-const TABS = ['Lectures', 'Notes', 'Quizzes', 'Flashcards', 'Tests', 'Q&A'] as const;
+const TABS = ['Lectures', 'Notes', 'Quizzes', 'Flashcards', 'Tests', 'Assignments', 'Q&A'] as const;
 type Tab = (typeof TABS)[number];
 
 function youtubeEmbedUrl(url: string): string | null {
@@ -158,6 +167,7 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
         if (t === 'Quizzes') return course.quizzes_enabled;
         if (t === 'Flashcards') return course.flashcards_enabled;
         if (t === 'Tests') return course.tests_enabled;
+        if (t === 'Assignments') return course.assignments_enabled;
         return true;
     });
 
@@ -440,6 +450,17 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
 
             {tab === 'Flashcards' && <FlashcardsPanel cards={course.flashcards} />}
 
+            {tab === 'Assignments' && (
+                <RevealOnScroll staggerMs={50} className="space-y-4">
+                    {course.assignments.map((a) => <AssignmentCard key={a.id} assignment={a} />)}
+                    {course.assignments.length === 0 && (
+                        <div className="rounded-3xl border border-dashed border-border bg-surface p-8 text-center text-text-secondary">
+                            No assignments for this course yet.
+                        </div>
+                    )}
+                </RevealOnScroll>
+            )}
+
             {tab === 'Q&A' && <QaPanel course={course} questions={questions} />}
         </StudentLayout>
     );
@@ -594,6 +615,110 @@ function FlashcardTile({ card }: { card: FlashcardItem }) {
                 </div>
             </div>
         </button>
+    );
+}
+
+function AssignmentCard({ assignment }: { assignment: AssignmentItem }) {
+    const submission = assignment.submissions[0] ?? null;
+    const [editing, setEditing] = useState(!submission);
+    const form = useForm<{ submission_text: string; file: File | null }>({
+        submission_text: submission?.submission_text ?? '',
+        file: null,
+    });
+
+    function submit(e: React.FormEvent) {
+        e.preventDefault();
+        form.post(`/portal/assignments/${assignment.id}/submit`, {
+            forceFormData: true,
+            preserveScroll: true,
+            onSuccess: () => { form.setData('file', null); setEditing(false); },
+        });
+    }
+
+    const overdue = assignment.due_date && new Date(assignment.due_date) < new Date() && !submission;
+
+    return (
+        <div className="rounded-3xl border border-border bg-surface p-5">
+            <div className="flex flex-wrap items-start justify-between gap-3">
+                <div>
+                    <h4 className="font-semibold text-text">{assignment.title}</h4>
+                    <p className="mt-1 text-xs text-text-muted">
+                        {assignment.max_marks ? `${assignment.max_marks} marks` : 'Ungraded'}
+                        {assignment.due_date && ` · Due ${new Date(assignment.due_date).toLocaleDateString()}`}
+                    </p>
+                </div>
+                <span
+                    className={`rounded-full px-2.5 py-0.5 text-xs font-bold uppercase ${
+                        submission?.status === 'graded'
+                            ? 'bg-success-bg text-success'
+                            : submission
+                              ? 'bg-primary-subtle text-primary'
+                              : overdue
+                                ? 'bg-danger-bg text-danger'
+                                : 'bg-warning-bg text-warning'
+                    }`}
+                >
+                    {submission?.status === 'graded' ? 'Graded' : submission ? 'Submitted' : overdue ? 'Overdue' : 'Not Submitted'}
+                </span>
+            </div>
+
+            {assignment.instructions && <p className="mt-3 whitespace-pre-line text-sm text-text-secondary">{assignment.instructions}</p>}
+
+            {submission?.status === 'graded' && (
+                <div className="mt-4 rounded-2xl bg-success-bg p-4">
+                    <p className="text-sm font-bold text-success">
+                        Score: {submission.marks_awarded ?? 0}{assignment.max_marks ? ` / ${assignment.max_marks}` : ''}
+                    </p>
+                    {submission.feedback && <p className="mt-1 text-sm text-text">{submission.feedback}</p>}
+                </div>
+            )}
+
+            {submission && !editing && (
+                <div className="mt-4 flex flex-wrap items-center gap-3 border-t border-border pt-4 text-sm">
+                    <span className="text-text-secondary">Submitted {new Date(submission.submitted_at).toLocaleString()}</span>
+                    {submission.file_path && (
+                        <a href={`/storage/${submission.file_path}`} target="_blank" rel="noopener noreferrer" className="font-semibold text-primary hover:underline">
+                            View My File →
+                        </a>
+                    )}
+                    <button onClick={() => setEditing(true)} className="font-semibold text-primary hover:underline">
+                        Resubmit
+                    </button>
+                </div>
+            )}
+
+            {editing && (
+                <form onSubmit={submit} className="mt-4 space-y-3 border-t border-border pt-4">
+                    <textarea
+                        rows={3}
+                        placeholder="Write your answer (optional if attaching a file)"
+                        className="w-full rounded-2xl border border-border p-3 text-sm transition-colors focus:border-primary focus:shadow-glow focus:outline-none"
+                        value={form.data.submission_text}
+                        onChange={(e) => form.setData('submission_text', e.target.value)}
+                    />
+                    <input
+                        type="file"
+                        onChange={(e) => form.setData('file', e.target.files?.[0] ?? null)}
+                        className="w-full text-sm text-text-secondary file:mr-3 file:rounded-lg file:border-0 file:bg-primary file:px-3 file:py-1.5 file:text-xs file:font-bold file:uppercase file:text-on-primary"
+                    />
+                    {Object.values(form.errors).map((m, i) => <div key={i} className="text-sm text-danger">{m}</div>)}
+                    <div className="flex gap-2">
+                        <button
+                            type="submit"
+                            disabled={form.processing}
+                            className="rounded-full bg-primary px-5 py-2 text-sm font-bold uppercase tracking-wide text-on-primary shadow-sm transition-all duration-fast hover:-translate-y-0.5 hover:bg-primary-hover hover:shadow-md disabled:opacity-50"
+                        >
+                            {form.processing ? 'Submitting…' : submission ? 'Resubmit' : 'Submit'}
+                        </button>
+                        {submission && (
+                            <button type="button" onClick={() => setEditing(false)} className="rounded-full border border-border px-5 py-2 text-sm font-bold uppercase text-text hover:border-primary">
+                                Cancel
+                            </button>
+                        )}
+                    </div>
+                </form>
+            )}
+        </div>
     );
 }
 

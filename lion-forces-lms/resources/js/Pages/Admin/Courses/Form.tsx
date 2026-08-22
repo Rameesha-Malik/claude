@@ -12,7 +12,7 @@ interface Course {
     id: number; title: string; category_id: number; instructor_id: number | null;
     short_description: string | null; description: string | null; syllabus: string | null;
     level: string | null; hours: number | null; base_price: string | null; status: string;
-    quizzes_enabled: boolean; flashcards_enabled: boolean; tests_enabled: boolean;
+    quizzes_enabled: boolean; flashcards_enabled: boolean; tests_enabled: boolean; assignments_enabled: boolean;
     target_exam_name: string | null; target_exam_date: string | null;
     packages: Package[]; lessons: Lesson[]; sections: Section[]; tags: Tag[];
 }
@@ -38,6 +38,7 @@ export default function CourseForm({ course, categories, instructors }: Props) {
         quizzes_enabled: course?.quizzes_enabled ?? false,
         flashcards_enabled: course?.flashcards_enabled ?? false,
         tests_enabled: course?.tests_enabled ?? false,
+        assignments_enabled: course?.assignments_enabled ?? false,
         target_exam_name: course?.target_exam_name ?? '',
         target_exam_date: course?.target_exam_date ?? '',
         tags: course?.tags.map((t) => t.name).join(', ') ?? '',
@@ -140,7 +141,7 @@ export default function CourseForm({ course, categories, instructors }: Props) {
                         <div>
                             <label className={labelClass}>Modules (Lectures + Notes are always included)</label>
                             <div className="flex gap-4">
-                                {(['quizzes_enabled', 'flashcards_enabled', 'tests_enabled'] as const).map((key) => (
+                                {(['quizzes_enabled', 'flashcards_enabled', 'tests_enabled', 'assignments_enabled'] as const).map((key) => (
                                     <label key={key} className="flex items-center gap-2 text-sm text-text">
                                         <input type="checkbox" checked={form.data[key]} onChange={(e) => form.setData(key, e.target.checked)} />
                                         {key.replace('_enabled', '')}
@@ -195,6 +196,16 @@ export default function CourseForm({ course, categories, instructors }: Props) {
                                 className="block w-full rounded-lg border border-primary py-2 text-center text-sm font-bold uppercase tracking-wide text-primary hover:bg-primary-subtle"
                             >
                                 Manage Flashcards
+                            </Link>
+                        </div>
+                        <div className="rounded-2xl border border-border bg-surface p-5">
+                            <h3 className="mb-3 font-bold text-text">Assignments</h3>
+                            <p className="mb-3 text-sm text-text-secondary">Gradable file/text submissions, separate from MCQ tests.</p>
+                            <Link
+                                href={`/admin/courses/${course!.id}/assignments`}
+                                className="block w-full rounded-lg border border-primary py-2 text-center text-sm font-bold uppercase tracking-wide text-primary hover:bg-primary-subtle"
+                            >
+                                Manage Assignments
                             </Link>
                         </div>
                         <PackagesPanel course={course!} />

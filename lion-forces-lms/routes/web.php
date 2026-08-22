@@ -1,5 +1,8 @@
 <?php
 
+use App\Http\Controllers\Admin\AssignmentController as AdminAssignmentController;
+use App\Http\Controllers\Admin\BundleController as AdminBundleController;
+use App\Http\Controllers\Admin\BundlePurchaseController as AdminBundlePurchaseController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\ContactInboxController as AdminContactInboxController;
 use App\Http\Controllers\Admin\ContentLibraryController as AdminContentLibraryController;
@@ -26,7 +29,9 @@ use App\Http\Controllers\Admin\WebsiteController as AdminWebsiteController;
 use App\Http\Controllers\DemoQuizController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicSiteController;
+use App\Http\Controllers\Student\AssignmentController as StudentAssignmentController;
 use App\Http\Controllers\Student\AttemptController as StudentAttemptController;
+use App\Http\Controllers\Student\BundleCheckoutController as StudentBundleCheckoutController;
 use App\Http\Controllers\Student\CheckoutController as StudentCheckoutController;
 use App\Http\Controllers\Student\CourseController as StudentCourseController;
 use App\Http\Controllers\Student\DashboardController as StudentDashboardController;
@@ -48,6 +53,8 @@ Route::get('/resources', [PublicSiteController::class, 'resources'])->name('reso
 Route::get('/how-to-buy', [PublicSiteController::class, 'howToBuy'])->name('how-to-buy');
 Route::get('/practice-tests', [PublicSiteController::class, 'practiceTests'])->name('practice-tests');
 Route::get('/notes', [PublicSiteController::class, 'notes'])->name('notes');
+Route::get('/bundles', [PublicSiteController::class, 'bundles'])->name('bundles');
+Route::get('/bundles/{bundle:slug}', [PublicSiteController::class, 'bundleDetail'])->name('bundles.show');
 
 Route::get('/demo-quiz', [DemoQuizController::class, 'show'])->name('demo-quiz.show');
 Route::post('/demo-quiz/start', [DemoQuizController::class, 'start'])->name('demo-quiz.start');
@@ -80,9 +87,12 @@ Route::middleware(['auth', 'verified', 'user_type:student'])->prefix('portal')->
     Route::get('/my-courses/{course:slug}', [StudentCourseController::class, 'show'])->name('student.courses.show');
     Route::get('/courses/{course:slug}/checkout', [StudentCheckoutController::class, 'create'])->name('student.checkout.create');
     Route::post('/courses/{course:slug}/checkout', [StudentCheckoutController::class, 'store'])->name('student.checkout.store');
+    Route::get('/bundles/{bundle:slug}/checkout', [StudentBundleCheckoutController::class, 'create'])->name('student.bundle-checkout.create');
+    Route::post('/bundles/{bundle:slug}/checkout', [StudentBundleCheckoutController::class, 'store'])->name('student.bundle-checkout.store');
     Route::post('/lessons/{lesson}/complete', [StudentCourseController::class, 'markLessonComplete'])->name('student.lessons.complete');
     Route::post('/courses/{course:slug}/questions', [StudentCourseController::class, 'askQuestion'])->name('student.questions.store');
     Route::post('/courses/{course:slug}/review', [StudentCourseController::class, 'submitReview'])->name('student.reviews.store');
+    Route::post('/assignments/{assignment}/submit', [StudentAssignmentController::class, 'submit'])->name('student.assignments.submit');
 
     Route::get('/practice-tests/{practiceTest}', [StudentPracticeTestController::class, 'show'])->name('student.practice-tests.show');
     Route::post('/practice-tests/{practiceTest}/submit', [StudentPracticeTestController::class, 'submit'])->name('student.practice-tests.submit');
@@ -194,6 +204,15 @@ Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->nam
             Route::delete('/{flashcard}', [AdminFlashcardController::class, 'destroy'])->name('destroy');
         });
 
+        Route::prefix('{course}/assignments')->name('assignments.')->group(function () {
+            Route::get('/', [AdminAssignmentController::class, 'index'])->name('index');
+            Route::post('/', [AdminAssignmentController::class, 'store'])->name('store');
+            Route::put('/{assignment}', [AdminAssignmentController::class, 'update'])->name('update');
+            Route::delete('/{assignment}', [AdminAssignmentController::class, 'destroy'])->name('destroy');
+            Route::get('/{assignment}/submissions', [AdminAssignmentController::class, 'submissions'])->name('submissions');
+            Route::post('/submissions/{submission}/grade', [AdminAssignmentController::class, 'grade'])->name('submissions.grade');
+        });
+
         Route::prefix('{course}/mock-exams')->name('mock-exams.')->group(function () {
             Route::get('/', [AdminMockExamController::class, 'index'])->name('index');
             Route::get('/create', [AdminMockExamController::class, 'create'])->name('create');
@@ -262,6 +281,21 @@ Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->nam
         Route::get('/', [AdminPaymentController::class, 'index'])->name('index');
         Route::post('/{payment}/verify', [AdminPaymentController::class, 'verify'])->name('verify');
         Route::post('/{payment}/reject', [AdminPaymentController::class, 'reject'])->name('reject');
+    });
+
+    Route::prefix('bundles')->name('bundles.')->group(function () {
+        Route::get('/', [AdminBundleController::class, 'index'])->name('index');
+        Route::get('/create', [AdminBundleController::class, 'create'])->name('create');
+        Route::post('/', [AdminBundleController::class, 'store'])->name('store');
+        Route::get('/{bundle}/edit', [AdminBundleController::class, 'edit'])->name('edit');
+        Route::put('/{bundle}', [AdminBundleController::class, 'update'])->name('update');
+        Route::delete('/{bundle}', [AdminBundleController::class, 'destroy'])->name('destroy');
+    });
+
+    Route::prefix('bundle-purchases')->name('bundle-purchases.')->group(function () {
+        Route::get('/', [AdminBundlePurchaseController::class, 'index'])->name('index');
+        Route::post('/{purchase}/verify', [AdminBundlePurchaseController::class, 'verify'])->name('verify');
+        Route::post('/{purchase}/reject', [AdminBundlePurchaseController::class, 'reject'])->name('reject');
     });
 
     Route::prefix('contact-inbox')->name('contact-inbox.')->group(function () {
