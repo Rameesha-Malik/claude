@@ -142,4 +142,32 @@ class PublicSiteController extends Controller
             'faqs' => Faq::where('page', 'how_to_buy')->where('is_active', true)->orderBy('order')->get(['question', 'answer']),
         ]);
     }
+
+    // Practice tests are gated behind an active enrollment (they live inside
+    // a course), so there's nothing anonymous to attempt here -- this is a
+    // marketing/teaser page showing what's available per course, driving to
+    // course detail / registration rather than a real test.
+    public function practiceTests(): Response
+    {
+        $tests = \App\Models\PracticeTest::with('course:id,title,slug,category_id', 'course.category:id,name')
+            ->where('is_active', true)
+            ->withCount('questions')
+            ->whereHas('course', fn ($q) => $q->where('status', 'published'))
+            ->orderBy('course_id')
+            ->get(['id', 'course_id', 'title', 'question_selection_mode', 'auto_question_count']);
+
+        return Inertia::render('Public/PracticeTests', [
+            'tests' => $tests,
+            'totalQuestions' => \App\Models\QuestionBank::count(),
+        ]);
+    }
+
+    public function notes(): Response
+    {
+        $notes = \App\Models\NotesBank::with('subject:id,name', 'courses:id,title,slug')
+            ->orderBy('title')
+            ->get(['id', 'subject_id', 'title', 'content']);
+
+        return Inertia::render('Public/Notes', ['notes' => $notes]);
+    }
 }

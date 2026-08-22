@@ -45,6 +45,8 @@ Route::post('/contact', [PublicSiteController::class, 'submitContact'])->name('c
 Route::get('/news', [PublicSiteController::class, 'news'])->name('news');
 Route::get('/resources', [PublicSiteController::class, 'resources'])->name('resources');
 Route::get('/how-to-buy', [PublicSiteController::class, 'howToBuy'])->name('how-to-buy');
+Route::get('/practice-tests', [PublicSiteController::class, 'practiceTests'])->name('practice-tests');
+Route::get('/notes', [PublicSiteController::class, 'notes'])->name('notes');
 
 Route::get('/demo-quiz', [DemoQuizController::class, 'show'])->name('demo-quiz.show');
 Route::post('/demo-quiz/start', [DemoQuizController::class, 'start'])->name('demo-quiz.start');
