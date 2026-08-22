@@ -14,6 +14,7 @@ class DatabaseSeeder extends Seeder
             CatalogSeeder::class,
             SiteContentSeeder::class,
             NewsResourceSeeder::class,
+            DemoContentSeeder::class,
         ]);
     }
 }
