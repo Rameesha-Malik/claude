@@ -5,14 +5,15 @@ import AdminLayout from '@/Layouts/AdminLayout';
 interface Category { id: number; name: string }
 interface Instructor { id: number; name: string }
 interface Package { id: number; name: string; description: string | null; price: string; validity_days: number | null }
-interface Lesson { id: number; title: string; type: string; is_free_preview: boolean }
+interface Lesson { id: number; title: string; type: string; is_free_preview: boolean; section_id: number | null }
+interface Section { id: number; title: string; lessons: Lesson[] }
 interface Course {
     id: number; title: string; category_id: number; instructor_id: number | null;
     short_description: string | null; description: string | null; syllabus: string | null;
     level: string | null; hours: number | null; base_price: string | null; status: string;
     quizzes_enabled: boolean; flashcards_enabled: boolean; tests_enabled: boolean;
     target_exam_name: string | null; target_exam_date: string | null;
-    packages: Package[]; lessons: Lesson[];
+    packages: Package[]; lessons: Lesson[]; sections: Section[];
 }
 interface Props { course?: Course; categories: Category[]; instructors: Instructor[] }
 
@@ -234,35 +235,94 @@ const FILE_ACCEPT: Record<string, string> = {
     document: '.pdf,.doc,.docx,.ppt,.pptx',
 };
 
+function LessonRow({ lesson }: { lesson: Lesson }) {
+    return (
+        <div className="flex items-center justify-between rounded-lg border border-border p-3 text-sm">
+            <div>
+                <div className="font-semibold text-text">{lesson.title}</div>
+                <div className="text-xs uppercase text-text-muted">{lesson.type.replace('_', ' ')}{lesson.is_free_preview ? ' · Free Preview' : ''}</div>
+            </div>
+            <button onClick={() => router.delete(`/admin/courses/lessons/${lesson.id}`)} className="text-xs font-bold uppercase text-danger hover:underline">Delete</button>
+        </div>
+    );
+}
+
+function AddTopicForm({ courseId }: { courseId: number }) {
+    const form = useForm({ title: '' });
+
+    return (
+        <form
+            onSubmit={(e) => { e.preventDefault(); form.post(`/admin/courses/${courseId}/sections`, { onSuccess: () => form.reset() }); }}
+            className="mb-4 flex gap-2"
+        >
+            <input className={inputClass} placeholder="New topic name (e.g. Chemistry Lectures)" value={form.data.title} onChange={(e) => form.setData('title', e.target.value)} />
+            <button type="submit" disabled={form.processing} className="flex-shrink-0 rounded-lg border border-primary px-4 py-2 text-sm font-bold uppercase text-primary hover:bg-primary-subtle">
+                + Add Topic
+            </button>
+        </form>
+    );
+}
+
 function LessonsPanel({ course }: { course: Course }) {
-    const addForm = useForm<{ title: string; type: string; external_url: string; is_free_preview: boolean; file: File | null }>({
-        title: '', type: 'video_youtube', external_url: '', is_free_preview: false, file: null,
+    const addForm = useForm<{ title: string; type: string; external_url: string; is_free_preview: boolean; section_id: string; file: File | null }>({
+        title: '', type: 'video_youtube', external_url: '', is_free_preview: false, section_id: '', file: null,
     });
     const isUrlType = URL_TYPES.includes(addForm.data.type);
+    const ungrouped = course.lessons.filter((l) => l.section_id === null);
 
     return (
         <div className="rounded-2xl border border-border bg-surface p-5">
-            <h3 className="mb-3 font-bold text-text">Lessons</h3>
-            <div className="mb-4 space-y-2">
-                {course.lessons.map((lesson) => (
-                    <div key={lesson.id} className="flex items-center justify-between rounded-lg border border-border p-3 text-sm">
-                        <div>
-                            <div className="font-semibold text-text">{lesson.title}</div>
-                            <div className="text-xs uppercase text-text-muted">{lesson.type.replace('_', ' ')}{lesson.is_free_preview ? ' · Free Preview' : ''}</div>
+            <h3 className="mb-1 font-bold text-text">Course Content</h3>
+            <p className="mb-3 text-sm text-text-secondary">
+                Group lessons under topics (optional) — mirrors how the lesson list is organized for students.
+            </p>
+
+            <AddTopicForm courseId={course.id} />
+
+            <div className="mb-4 space-y-4">
+                {course.sections.map((section) => (
+                    <div key={section.id} className="rounded-xl border border-border p-3">
+                        <div className="mb-2 flex items-center justify-between">
+                            <h4 className="font-semibold text-text">{section.title}</h4>
+                            <button
+                                onClick={() => confirm('Remove this topic? Its lessons will become ungrouped, not deleted.') && router.delete(`/admin/courses/sections/${section.id}`)}
+                                className="text-xs font-bold uppercase text-danger hover:underline"
+                            >
+                                Remove Topic
+                            </button>
                         </div>
-                        <button onClick={() => router.delete(`/admin/courses/lessons/${lesson.id}`)} className="text-xs font-bold uppercase text-danger hover:underline">Delete</button>
+                        <div className="space-y-2">
+                            {section.lessons.map((lesson) => <LessonRow key={lesson.id} lesson={lesson} />)}
+                            {section.lessons.length === 0 && <p className="text-sm text-text-secondary">No lessons in this topic yet.</p>}
+                        </div>
                     </div>
                 ))}
-                {course.lessons.length === 0 && <p className="text-sm text-text-secondary">No lessons yet.</p>}
+
+                {(ungrouped.length > 0 || course.sections.length === 0) && (
+                    <div>
+                        {course.sections.length > 0 && <h4 className="mb-2 text-sm font-semibold uppercase tracking-wide text-text-muted">Ungrouped</h4>}
+                        <div className="space-y-2">
+                            {ungrouped.map((lesson) => <LessonRow key={lesson.id} lesson={lesson} />)}
+                            {ungrouped.length === 0 && <p className="text-sm text-text-secondary">No lessons yet.</p>}
+                        </div>
+                    </div>
+                )}
             </div>
+
             <form
                 onSubmit={(e) => { e.preventDefault(); addForm.post(`/admin/courses/${course.id}/lessons`, { onSuccess: () => addForm.reset() }); }}
-                className="space-y-2"
+                className="space-y-2 border-t border-border pt-4"
             >
                 <input className={inputClass} placeholder="Lesson Title" value={addForm.data.title} onChange={(e) => addForm.setData('title', e.target.value)} />
-                <select className={inputClass} value={addForm.data.type} onChange={(e) => addForm.setData('type', e.target.value)}>
-                    {['video_youtube', 'video_upload', 'pdf', 'audio', 'document', 'link'].map((t) => <option key={t} value={t}>{t.replace('_', ' ')}</option>)}
-                </select>
+                <div className="grid grid-cols-2 gap-2">
+                    <select className={inputClass} value={addForm.data.type} onChange={(e) => addForm.setData('type', e.target.value)}>
+                        {['video_youtube', 'video_upload', 'pdf', 'audio', 'document', 'link'].map((t) => <option key={t} value={t}>{t.replace('_', ' ')}</option>)}
+                    </select>
+                    <select className={inputClass} value={addForm.data.section_id} onChange={(e) => addForm.setData('section_id', e.target.value)}>
+                        <option value="">No topic (ungrouped)</option>
+                        {course.sections.map((s) => <option key={s.id} value={s.id}>{s.title}</option>)}
+                    </select>
+                </div>
                 {isUrlType ? (
                     <input
                         className={inputClass}

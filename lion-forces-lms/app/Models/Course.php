@@ -50,6 +50,11 @@ class Course extends Model
         return $this->hasMany(Lesson::class)->orderBy('order');
     }
 
+    public function sections(): HasMany
+    {
+        return $this->hasMany(CourseSection::class)->orderBy('order');
+    }
+
     // Shared "Guaranteed Notes" tab — Notes Bank items assigned to every
     // enrolled student of this course.
     public function sharedNotes(): BelongsToMany

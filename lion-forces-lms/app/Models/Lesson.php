@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
-    'course_id', 'title', 'type', 'file_path', 'external_url',
+    'course_id', 'section_id', 'title', 'type', 'file_path', 'external_url',
     'description', 'order', 'is_free_preview',
 ])]
 class Lesson extends Model
@@ -24,6 +24,13 @@ class Lesson extends Model
     public function course(): BelongsTo
     {
         return $this->belongsTo(Course::class);
+    }
+
+    // Null when this lesson predates the Topics/Sections feature, or was
+    // never assigned to one -- it just renders outside any group.
+    public function section(): BelongsTo
+    {
+        return $this->belongsTo(CourseSection::class, 'section_id');
     }
 
     public function progress(): HasMany

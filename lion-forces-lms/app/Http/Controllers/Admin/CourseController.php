@@ -10,6 +10,7 @@ use App\Models\Instructor;
 use App\Models\Lesson;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -50,7 +51,11 @@ class CourseController extends Controller
 
     public function edit(Course $course): Response
     {
-        $course->load(['packages', 'lessons' => fn ($q) => $q->orderBy('order')]);
+        $course->load([
+            'packages',
+            'lessons' => fn ($q) => $q->orderBy('order'),
+            'sections' => fn ($q) => $q->orderBy('order')->with(['lessons' => fn ($q2) => $q2->orderBy('order')]),
+        ]);
 
         return Inertia::render('Admin/Courses/Form', [
             'course' => $course,
@@ -150,7 +155,7 @@ class CourseController extends Controller
     // Laravel's own validation never runs if PHP rejects the upload first.
     public function storeLesson(Request $request, Course $course)
     {
-        $data = collect($request->validate($this->lessonRules($request, required: true)))->except('file')->toArray();
+        $data = collect($request->validate($this->lessonRules($request, required: true, course: $course)))->except('file')->toArray();
 
         $data['file_path'] = $this->handleLessonFile($request);
 
@@ -161,7 +166,7 @@ class CourseController extends Controller
 
     public function updateLesson(Request $request, Lesson $lesson)
     {
-        $data = collect($request->validate($this->lessonRules($request, required: false)))->except('file')->toArray();
+        $data = collect($request->validate($this->lessonRules($request, required: false, course: $lesson->course)))->except('file')->toArray();
 
         if ($newPath = $this->handleLessonFile($request)) {
             if ($lesson->file_path) {
@@ -185,7 +190,38 @@ class CourseController extends Controller
         return back()->with('success', 'Lesson removed.');
     }
 
-    private function lessonRules(Request $request, bool $required): array
+    // "Topics" in Tutor LMS terms — a named group lessons can be filed
+    // under. Ungrouped (section_id null) lessons still render fine on the
+    // student side, so this is additive and doesn't require backfilling
+    // existing courses.
+    public function storeSection(Request $request, Course $course)
+    {
+        $data = $request->validate(['title' => 'required|string|max:150']);
+
+        $course->sections()->create($data + ['order' => $course->sections()->max('order') + 1]);
+
+        return back()->with('success', 'Section added.');
+    }
+
+    public function updateSection(Request $request, \App\Models\CourseSection $section)
+    {
+        $section->update($request->validate(['title' => 'required|string|max:150']));
+
+        return back()->with('success', 'Section updated.');
+    }
+
+    public function destroySection(\App\Models\CourseSection $section)
+    {
+        // Lessons in this section aren't deleted -- they fall back to
+        // ungrouped (section_id nullOnDelete handles this at the DB level
+        // too, but we're explicit here since we're in the same request).
+        $section->lessons()->update(['section_id' => null]);
+        $section->delete();
+
+        return back()->with('success', 'Section removed. Its lessons are now ungrouped.');
+    }
+
+    private function lessonRules(Request $request, bool $required, ?Course $course = null): array
     {
         $urlType = in_array($request->input('type'), ['video_youtube', 'link']);
         $fileRule = $urlType ? 'nullable' : ($required ? 'required' : 'nullable');
@@ -194,6 +230,10 @@ class CourseController extends Controller
             'title' => 'required|string|max:255',
             'type' => 'required|in:pdf,audio,video_upload,video_youtube,document,link',
             'external_url' => $urlType ? 'required|string|max:500' : 'nullable|string|max:500',
+            'section_id' => [
+                'nullable',
+                Rule::exists('course_sections', 'id')->where(fn ($q) => $course ? $q->where('course_id', $course->id) : $q),
+            ],
             'file' => match ($request->input('type')) {
                 'pdf' => "{$fileRule}|file|mimes:pdf|max:20480",
                 'audio' => "{$fileRule}|file|mimes:mp3,wav,m4a|max:102400",

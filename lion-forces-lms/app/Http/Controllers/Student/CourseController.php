@@ -42,6 +42,7 @@ class CourseController extends Controller
 
         $course->load([
             'lessons' => fn ($q) => $q->orderBy('order'),
+            'sections' => fn ($q) => $q->orderBy('order')->with(['lessons' => fn ($q2) => $q2->orderBy('order')]),
             'sharedNotes',
             'instructor',
             'practiceTests' => fn ($q) => $q->where('is_active', true)->withCount('questions'),

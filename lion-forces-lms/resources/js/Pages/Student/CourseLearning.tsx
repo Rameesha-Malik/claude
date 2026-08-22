@@ -3,7 +3,8 @@ import { useState } from 'react';
 import RevealOnScroll from '@/Components/RevealOnScroll';
 import StudentLayout from '@/Layouts/StudentLayout';
 
-interface Lesson { id: number; title: string; type: string; external_url: string | null; file_path: string | null; description: string | null }
+interface Lesson { id: number; title: string; type: string; external_url: string | null; file_path: string | null; description: string | null; section_id: number | null }
+interface Section { id: number; title: string; lessons: Lesson[] }
 interface Note { id: number; title: string; content: string | null }
 interface Reply { id: number; reply_text: string; admin: { name: string } | null; created_at: string }
 interface Question { id: number; question_text: string; status: string; created_at: string; replies: Reply[] }
@@ -22,7 +23,7 @@ interface StagedTestSummary {
     id: number; title: string; target_exam_name: string | null; stages_count: number;
 }
 interface Course {
-    id: number; slug: string; title: string; lessons: Lesson[]; shared_notes: Note[];
+    id: number; slug: string; title: string; lessons: Lesson[]; sections: Section[]; shared_notes: Note[];
     instructor: { name: string } | null; practice_tests: PracticeTestSummary[]; quizzes: QuizSummary[];
     mock_exams: MockExamSummary[]; staged_tests: StagedTestSummary[]; flashcards: FlashcardItem[];
     quizzes_enabled: boolean; flashcards_enabled: boolean; tests_enabled: boolean;
@@ -200,37 +201,64 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
                 <div className="grid gap-6 lg:grid-cols-3">
                     <div className="lg:col-span-1">
                         <h3 className="mb-3 font-bold text-text">Course Content</h3>
-                        <div className="space-y-2 rounded-3xl border border-border bg-surface p-2">
-                            {course.lessons.map((lesson, i) => {
-                                const isDone = lessonProgress[lesson.id]?.is_completed;
-                                const isActive = activeLesson?.id === lesson.id;
-                                return (
-                                    <button
+                        {course.sections.length === 0 ? (
+                            <div className="space-y-2 rounded-3xl border border-border bg-surface p-2">
+                                {course.lessons.map((lesson, i) => (
+                                    <LessonListItem
                                         key={lesson.id}
+                                        lesson={lesson}
+                                        number={i + 1}
+                                        isActive={activeLesson?.id === lesson.id}
+                                        isDone={!!lessonProgress[lesson.id]?.is_completed}
                                         onClick={() => setActiveLesson(lesson)}
-                                        className={`flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left text-sm transition-all duration-fast ${
-                                            isActive ? 'bg-primary-subtle shadow-sm' : 'hover:bg-surface-sunken'
-                                        }`}
-                                    >
-                                        <span
-                                            className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold transition-colors ${
-                                                isDone
-                                                    ? 'bg-success text-white'
-                                                    : isActive
-                                                      ? 'bg-primary text-on-primary'
-                                                      : 'bg-surface-sunken text-text-secondary'
-                                            }`}
-                                        >
-                                            {isDone ? '✓' : i + 1}
-                                        </span>
-                                        <span className={`font-medium ${isActive ? 'text-primary' : 'text-text'}`}>{lesson.title}</span>
-                                    </button>
-                                );
-                            })}
-                            {course.lessons.length === 0 && (
-                                <p className="p-4 text-sm text-text-secondary">No lectures yet.</p>
-                            )}
-                        </div>
+                                    />
+                                ))}
+                                {course.lessons.length === 0 && (
+                                    <p className="p-4 text-sm text-text-secondary">No lectures yet.</p>
+                                )}
+                            </div>
+                        ) : (
+                            <div className="space-y-3">
+                                {course.sections.map((section) => (
+                                    <div key={section.id} className="overflow-hidden rounded-3xl border border-border bg-surface">
+                                        <div className="border-b border-border bg-surface-sunken px-4 py-2.5 text-sm font-bold text-text">
+                                            {section.title}
+                                        </div>
+                                        <div className="space-y-1 p-2">
+                                            {section.lessons.map((lesson, i) => (
+                                                <LessonListItem
+                                                    key={lesson.id}
+                                                    lesson={lesson}
+                                                    number={i + 1}
+                                                    isActive={activeLesson?.id === lesson.id}
+                                                    isDone={!!lessonProgress[lesson.id]?.is_completed}
+                                                    onClick={() => setActiveLesson(lesson)}
+                                                />
+                                            ))}
+                                        </div>
+                                    </div>
+                                ))}
+                                {course.lessons.some((l) => l.section_id === null) && (
+                                    <div className="overflow-hidden rounded-3xl border border-border bg-surface">
+                                        <div className="border-b border-border bg-surface-sunken px-4 py-2.5 text-sm font-bold text-text">
+                                            Other Lessons
+                                        </div>
+                                        <div className="space-y-1 p-2">
+                                            {course.lessons.filter((l) => l.section_id === null).map((lesson, i) => (
+                                                <LessonListItem
+                                                    key={lesson.id}
+                                                    lesson={lesson}
+                                                    number={i + 1}
+                                                    isActive={activeLesson?.id === lesson.id}
+                                                    isDone={!!lessonProgress[lesson.id]?.is_completed}
+                                                    onClick={() => setActiveLesson(lesson)}
+                                                />
+                                            ))}
+                                        </div>
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
                     <div className="lg:col-span-2">
                         {activeLesson ? (
@@ -414,6 +442,38 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
 
             {tab === 'Q&A' && <QaPanel course={course} questions={questions} />}
         </StudentLayout>
+    );
+}
+
+function LessonListItem({
+    lesson,
+    number,
+    isActive,
+    isDone,
+    onClick,
+}: {
+    lesson: Lesson;
+    number: number;
+    isActive: boolean;
+    isDone: boolean;
+    onClick: () => void;
+}) {
+    return (
+        <button
+            onClick={onClick}
+            className={`flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left text-sm transition-all duration-fast ${
+                isActive ? 'bg-primary-subtle shadow-sm' : 'hover:bg-surface-sunken'
+            }`}
+        >
+            <span
+                className={`flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-xs font-bold transition-colors ${
+                    isDone ? 'bg-success text-white' : isActive ? 'bg-primary text-on-primary' : 'bg-surface-sunken text-text-secondary'
+                }`}
+            >
+                {isDone ? '✓' : number}
+            </span>
+            <span className={`font-medium ${isActive ? 'text-primary' : 'text-text'}`}>{lesson.title}</span>
+        </button>
     );
 }
 

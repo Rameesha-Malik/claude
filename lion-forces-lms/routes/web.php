@@ -164,6 +164,10 @@ Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->nam
         Route::put('/lessons/{lesson}', [AdminCourseController::class, 'updateLesson'])->name('lessons.update');
         Route::delete('/lessons/{lesson}', [AdminCourseController::class, 'destroyLesson'])->name('lessons.destroy');
 
+        Route::post('/{course}/sections', [AdminCourseController::class, 'storeSection'])->name('sections.store');
+        Route::put('/sections/{section}', [AdminCourseController::class, 'updateSection'])->name('sections.update');
+        Route::delete('/sections/{section}', [AdminCourseController::class, 'destroySection'])->name('sections.destroy');
+
         Route::prefix('{course}/practice-tests')->name('practice-tests.')->group(function () {
             Route::get('/', [AdminPracticeTestController::class, 'index'])->name('index');
             Route::get('/create', [AdminPracticeTestController::class, 'create'])->name('create');
