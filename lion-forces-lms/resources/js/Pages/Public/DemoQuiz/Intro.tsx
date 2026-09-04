@@ -43,8 +43,11 @@ export default function DemoQuizIntro({ quiz }: { quiz: Quiz | null }) {
                             </div>
                             <button
                                 onClick={() => router.post('/demo-quiz/start')}
-                                className="mt-8 rounded-full bg-primary px-10 py-4 text-sm font-bold uppercase tracking-wide text-on-primary shadow-lg transition-all duration-normal ease-spring hover:-translate-y-0.5 hover:bg-primary-hover hover:shadow-xl"
+                                className="mt-8 inline-flex items-center gap-2 rounded-full bg-primary px-10 py-4 text-sm font-bold uppercase tracking-wide text-on-primary shadow-lg transition-all duration-normal ease-spring hover:-translate-y-0.5 hover:bg-primary-hover hover:shadow-xl"
                             >
+                                <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                                    <path d="M8 5v14l11-7z" />
+                                </svg>
                                 Start Free Demo Quiz
                             </button>
                         </div>
