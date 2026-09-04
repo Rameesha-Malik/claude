@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\DemoQuiz;
+use App\Models\DemoQuizAnswer;
 use App\Models\DemoQuizAttempt;
 use App\Models\QuestionBank;
 use Illuminate\Http\Request;
@@ -88,20 +89,34 @@ class DemoQuizController extends Controller
         $wrongCount = 0;
         $skippedCount = 0;
 
-        foreach ($data['answers'] as $answer) {
+        foreach ($data['answers'] as $i => $answer) {
             $question = $questions->get($answer['question_id']);
             $selectedOption = $answer['selected_option_id']
                 ? $question->options->firstWhere('id', $answer['selected_option_id'])
                 : null;
 
+            $isCorrect = $selectedOption ? (bool) $selectedOption->is_correct : null;
+
             if (! $selectedOption) {
                 $skippedCount++;
-            } elseif ($selectedOption->is_correct) {
+            } elseif ($isCorrect) {
                 $score++;
                 $correctCount++;
             } else {
                 $wrongCount++;
             }
+
+            // Saved per-question (not just the aggregate score) so the
+            // result page can show which specific questions were right,
+            // wrong, or skipped -- same review other test types already
+            // offer via test_attempt_answers.
+            DemoQuizAnswer::create([
+                'demo_quiz_attempt_id' => $attempt->id,
+                'question_id' => $question->id,
+                'selected_option_id' => $selectedOption?->id,
+                'is_correct' => $isCorrect,
+                'order' => $i + 1,
+            ]);
         }
 
         $attempt->update([
@@ -121,8 +136,13 @@ class DemoQuizController extends Controller
         $this->authorizeGuest($request, $attempt);
         abort_unless($attempt->submitted_at, 403);
 
+        $attempt->load(['answers' => fn ($q) => $q->orderBy('order'), 'answers.question.options', 'answers.selectedOption']);
+
         return Inertia::render('Public/DemoQuiz/Result', [
-            'attempt' => $attempt->only('id', 'score', 'total_marks', 'correct_count', 'wrong_count', 'skipped_count'),
+            'attempt' => [
+                ...$attempt->only('id', 'score', 'total_marks', 'correct_count', 'wrong_count', 'skipped_count'),
+                'answers' => $attempt->answers,
+            ],
             'quizTitle' => $attempt->demoQuiz->title,
         ]);
     }

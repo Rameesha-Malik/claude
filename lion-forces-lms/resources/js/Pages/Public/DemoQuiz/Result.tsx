@@ -1,10 +1,17 @@
 import { Head, Link } from '@inertiajs/react';
 import GradientMesh from '@/Components/GradientMesh';
+import RevealOnScroll from '@/Components/RevealOnScroll';
 import SectionKicker from '@/Components/SectionKicker';
 import WaveRibbon from '@/Components/WaveRibbon';
 import PublicLayout from '@/Layouts/PublicLayout';
 
-interface Attempt { id: number; score: string; total_marks: string; correct_count: number; wrong_count: number; skipped_count: number }
+interface Option { id: number; option_text: string; is_correct: boolean }
+interface Question { id: number; question_text: string; explanation: string | null; options: Option[] }
+interface Answer { id: number; selected_option_id: number | null; is_correct: boolean | null; question: Question }
+interface Attempt {
+    id: number; score: string; total_marks: string; correct_count: number; wrong_count: number; skipped_count: number;
+    answers: Answer[];
+}
 interface Props { attempt: Attempt; quizTitle: string }
 
 // Circular score gauge -- uses the feedback ramp (green/gold/red) exactly as
@@ -100,6 +107,48 @@ export default function DemoQuizResult({ attempt, quizTitle }: Props) {
                             Try another demo quiz
                         </Link>
                     </div>
+
+                    {attempt.answers.length > 0 && (
+                        <div className="mt-10">
+                            <h2 className="mb-4 text-center font-display text-2xl uppercase tracking-wide text-text">Review Your Answers</h2>
+                            <RevealOnScroll staggerMs={40} className="space-y-5">
+                                {attempt.answers.map((a, i) => (
+                                    <div key={a.id} className="rounded-2xl border border-border bg-surface p-5 text-left">
+                                        <p className="mb-3 font-semibold text-text">
+                                            <span className="mr-2 text-text-muted">Q{i + 1}.</span>
+                                            {a.question.question_text}
+                                        </p>
+                                        <div className="space-y-2">
+                                            {a.question.options.map((opt) => {
+                                                const isSelected = a.selected_option_id === opt.id;
+                                                let classes = 'border-border';
+                                                if (opt.is_correct) classes = 'border-success bg-success-bg';
+                                                else if (isSelected && !opt.is_correct) classes = 'border-danger bg-danger-bg';
+                                                return (
+                                                    <div key={opt.id} className={`flex items-center justify-between rounded-lg border p-3 text-sm ${classes}`}>
+                                                        <span className="text-text">{opt.option_text}</span>
+                                                        <span className="text-xs font-bold uppercase">
+                                                            {opt.is_correct && <span className="text-success">Correct Answer</span>}
+                                                            {isSelected && !opt.is_correct && <span className="text-danger">Your Answer</span>}
+                                                        </span>
+                                                    </div>
+                                                );
+                                            })}
+                                            {a.selected_option_id === null && (
+                                                <p className="text-xs font-bold uppercase text-text-muted">You skipped this question.</p>
+                                            )}
+                                        </div>
+                                        {a.question.explanation && (
+                                            <div className="mt-3 rounded-lg bg-primary-subtle p-3 text-sm text-text">
+                                                <span className="font-bold text-primary">Explanation: </span>
+                                                {a.question.explanation}
+                                            </div>
+                                        )}
+                                    </div>
+                                ))}
+                            </RevealOnScroll>
+                        </div>
+                    )}
                 </div>
             </section>
         </PublicLayout>
