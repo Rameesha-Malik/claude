@@ -106,11 +106,14 @@ export default function CourseDetail({ course }: { course: Course }) {
                         <div className="text-3xl font-bold text-primary">
                             {course.base_price ? `Rs. ${Number(course.base_price).toLocaleString()}` : 'Contact us'}
                         </div>
+                        {/* Logged-in candidates go straight to the course (its own
+                            enrollment check handles "not purchased yet"); visitors get
+                            routed to How to Buy rather than straight into checkout. */}
                         <Link
-                            href="/how-to-buy"
+                            href={auth.user ? `/portal/my-courses/${course.slug}` : '/how-to-buy'}
                             className="mt-4 block rounded-xl bg-primary py-3 text-center font-semibold text-on-primary hover:bg-primary-hover"
                         >
-                            Enroll Now
+                            {auth.user ? 'Start Learning' : 'Buy Now'}
                         </Link>
 
                         {course.packages.length > 0 && (

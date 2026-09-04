@@ -1,5 +1,6 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import PublicLayout from '@/Layouts/PublicLayout';
+import { PageProps } from '@/types';
 
 interface Course { id: number; title: string; slug: string; base_price: string | null; short_description: string | null }
 interface Bundle {
@@ -8,6 +9,7 @@ interface Bundle {
 }
 
 export default function BundleDetail({ bundle }: { bundle: Bundle }) {
+    const { auth } = usePage<PageProps>().props;
     const individualTotal = bundle.courses.reduce((sum, c) => sum + Number(c.base_price ?? 0), 0);
     const savings = individualTotal - Number(bundle.price);
 
@@ -55,11 +57,15 @@ export default function BundleDetail({ bundle }: { bundle: Bundle }) {
                             Rs. {savings.toLocaleString()} cheaper than buying each course separately.
                         </p>
                     )}
+                    {/* Logged-in candidates go to their course list (a bundle spans
+                        several courses, so there's no single "learn" page to send
+                        them to); visitors get routed to How to Buy instead of
+                        straight into checkout. */}
                     <Link
-                        href="/how-to-buy"
+                        href={auth.user ? '/portal/my-courses' : '/how-to-buy'}
                         className="mt-5 block w-full rounded-full bg-primary py-3 text-center text-sm font-bold uppercase tracking-wide text-on-primary shadow-sm transition-all duration-fast hover:-translate-y-0.5 hover:bg-primary-hover hover:shadow-md"
                     >
-                        Enroll Now
+                        {auth.user ? 'Start Learning' : 'Buy Now'}
                     </Link>
                 </div>
             </section>
