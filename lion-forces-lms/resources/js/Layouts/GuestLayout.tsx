@@ -1,8 +1,8 @@
 import { Link, usePage } from '@inertiajs/react';
 import { PropsWithChildren } from 'react';
-import GradientMesh from '@/Components/GradientMesh';
 import ShieldMark from '@/Components/ShieldMark';
 import { PageProps } from '@/types';
+import authParade from '@/assets/hero/auth-parade.jpg';
 
 interface Props {
     title: string;
@@ -11,10 +11,7 @@ interface Props {
 
 // Split-panel auth shell: a brand visual on the left (hidden below lg,
 // since there's no room for it once the form needs the full width) and
-// the actual form on the right. The left panel is a code-built
-// placeholder -- teal gradient + ShieldMark watermark, same treatment as
-// the Home hero's photo panel -- pending a real campaign photo the way
-// that one is too (see the hero placeholder note there).
+// the actual form on the right.
 export default function Guest({ children, title, description }: PropsWithChildren<Props>) {
     const { site } = usePage<PageProps>().props;
 
@@ -28,7 +25,22 @@ export default function Guest({ children, title, description }: PropsWithChildre
         >
             <div className="relative flex w-full max-w-5xl overflow-hidden rounded-3xl bg-surface shadow-2xl">
                 <div className="relative hidden w-full max-w-md flex-col justify-between overflow-hidden bg-gradient-to-br from-secondary via-teal-800 to-teal-950 p-8 lg:flex">
-                    <GradientMesh className="opacity-60" />
+                    <img
+                        src={authParade}
+                        alt=""
+                        aria-hidden
+                        className="absolute inset-0 h-full w-full object-cover"
+                    />
+                    {/* dark brand-color wash so the white nav buttons / rating card stay
+                        legible over the photo -- inline rgba, not a Tailwind opacity-modified
+                        `secondary` utility, since that token is a plain CSS color value, not
+                        an alpha-ready channel triplet (see the Home hero / About panel fixes
+                        for the same underlying issue) */}
+                    <div
+                        aria-hidden
+                        className="absolute inset-0"
+                        style={{ background: 'linear-gradient(180deg, rgba(4, 39, 38, 0.55), rgba(4, 39, 38, 0.15) 40%, rgba(4, 39, 38, 0.75))' }}
+                    />
 
                     {/* corner bracket accents -- explicit rgba, since Tailwind's /NN opacity
                         modifier is a silent no-op on custom-property-backed colors like gold-400 */}
@@ -50,11 +62,7 @@ export default function Guest({ children, title, description }: PropsWithChildre
                         </Link>
                     </div>
 
-                    <div className="relative flex flex-1 items-center justify-center">
-                        <ShieldMark className="h-32 w-32 text-white/10" />
-                    </div>
-
-                    <div className="relative rounded-xl border border-white/10 bg-black/25 px-4 py-3 backdrop-blur-sm">
+                    <div className="relative mt-auto rounded-xl border border-white/10 bg-black/25 px-4 py-3 backdrop-blur-sm">
                         <div className="flex gap-0.5 text-gold-400">
                             {Array.from({ length: 5 }).map((_, s) => (
                                 <svg key={s} viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5">
