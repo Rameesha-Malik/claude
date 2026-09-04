@@ -61,6 +61,15 @@ export default function QuestionRunner({
     const remainingCount = total - answeredCount;
     const isLast = currentIndex === total - 1;
 
+    // Questions visited but left unanswered -- called out by their actual
+    // number (not just a count) so a candidate can jump straight back to
+    // any one of them, same as clicking its tile in the palette below.
+    const skippedIndexes = questions.reduce<number[]>((acc, q, i) => {
+        const isAnswered = answers[q.id] !== null && answers[q.id] !== undefined;
+        if (!isAnswered && visited.has(i) && i !== currentIndex) acc.push(i);
+        return acc;
+    }, []);
+
     function goTo(index: number) {
         const clamped = Math.max(0, Math.min(total - 1, index));
         setCurrentIndex(clamped);
@@ -91,6 +100,22 @@ export default function QuestionRunner({
                     </div>
                     {timerNode}
                 </div>
+
+                {skippedIndexes.length > 0 && (
+                    <div className="mt-3 flex flex-wrap items-center gap-1.5 text-sm">
+                        <span className="text-text-secondary">Skipped:</span>
+                        {skippedIndexes.map((i) => (
+                            <button
+                                key={i}
+                                type="button"
+                                onClick={() => goTo(i)}
+                                className="rounded-full border border-warning bg-warning-bg px-2.5 py-0.5 text-xs font-bold text-warning transition-transform hover:-translate-y-0.5"
+                            >
+                                Q{i + 1}
+                            </button>
+                        ))}
+                    </div>
+                )}
 
                 {/* Question palette -- jump to any question directly, colored by status. */}
                 <div className="mt-3 flex flex-wrap gap-1.5">
