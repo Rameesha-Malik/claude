@@ -7,6 +7,8 @@ use App\Models\Course;
 use App\Models\Enrollment;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rules;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -27,6 +29,30 @@ class StudentController extends Controller
             'students' => $students,
             'filters' => $request->only(['search', 'status']),
         ]);
+    }
+
+    // Client question: "How to add student from admin panel?" -- there was
+    // no answer, because this didn't exist: the only way a student account
+    // got created was self-registration via the public /register page.
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'name' => 'required|string|max:255',
+            'email' => 'required|string|lowercase|email|max:255|unique:users,email',
+            'phone' => 'nullable|string|max:30',
+            'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ]);
+
+        User::create([
+            'user_type' => 'student',
+            'name' => $data['name'],
+            'email' => $data['email'],
+            'phone' => $data['phone'] ?? null,
+            'password' => Hash::make($data['password']),
+            'is_active' => true,
+        ]);
+
+        return back()->with('success', 'Student account created.');
     }
 
     public function show(User $student): Response

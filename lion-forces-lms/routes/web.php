@@ -145,6 +145,7 @@ Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->nam
 
     Route::prefix('students')->name('students.')->group(function () {
         Route::get('/', [AdminStudentController::class, 'index'])->name('index');
+        Route::post('/', [AdminStudentController::class, 'store'])->name('store');
         Route::get('/{student}', [AdminStudentController::class, 'show'])->name('show');
         Route::post('/{student}/toggle-suspend', [AdminStudentController::class, 'toggleSuspend'])->name('toggle-suspend');
         Route::post('/{student}/enroll', [AdminStudentController::class, 'enroll'])->name('enroll');

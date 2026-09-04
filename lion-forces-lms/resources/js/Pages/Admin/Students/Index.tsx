@@ -1,6 +1,67 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
 import AdminLayout from '@/Layouts/AdminLayout';
+
+const inputClass = 'rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:shadow-glow focus:outline-none';
+
+function AddStudentForm() {
+    const [open, setOpen] = useState(false);
+    const form = useForm({ name: '', email: '', phone: '', password: '', password_confirmation: '' });
+
+    function submit(e: FormEvent) {
+        e.preventDefault();
+        form.post('/admin/students', {
+            onSuccess: () => {
+                form.reset();
+                setOpen(false);
+            },
+        });
+    }
+
+    if (!open) {
+        return (
+            <button
+                onClick={() => setOpen(true)}
+                className="rounded-lg bg-primary px-4 py-2 text-sm font-bold uppercase text-on-primary hover:bg-primary-hover"
+            >
+                + Add Student
+            </button>
+        );
+    }
+
+    return (
+        <form onSubmit={submit} className="mb-6 rounded-2xl border border-border bg-surface p-5">
+            <div className="mb-3 flex items-center justify-between">
+                <h2 className="font-bold text-text">Add Student</h2>
+                <button type="button" onClick={() => setOpen(false)} className="text-sm text-text-muted hover:text-text">Cancel</button>
+            </div>
+            <div className="grid gap-3 sm:grid-cols-2">
+                <div>
+                    <input className={`${inputClass} w-full`} placeholder="Full name" value={form.data.name} onChange={(e) => form.setData('name', e.target.value)} />
+                    {form.errors.name && <p className="mt-1 text-xs text-danger">{form.errors.name}</p>}
+                </div>
+                <div>
+                    <input className={`${inputClass} w-full`} placeholder="Email" type="email" value={form.data.email} onChange={(e) => form.setData('email', e.target.value)} />
+                    {form.errors.email && <p className="mt-1 text-xs text-danger">{form.errors.email}</p>}
+                </div>
+                <div>
+                    <input className={`${inputClass} w-full`} placeholder="Phone (optional)" value={form.data.phone} onChange={(e) => form.setData('phone', e.target.value)} />
+                </div>
+                <div />
+                <div>
+                    <input className={`${inputClass} w-full`} placeholder="Password" type="password" value={form.data.password} onChange={(e) => form.setData('password', e.target.value)} />
+                    {form.errors.password && <p className="mt-1 text-xs text-danger">{form.errors.password}</p>}
+                </div>
+                <div>
+                    <input className={`${inputClass} w-full`} placeholder="Confirm password" type="password" value={form.data.password_confirmation} onChange={(e) => form.setData('password_confirmation', e.target.value)} />
+                </div>
+            </div>
+            <button type="submit" disabled={form.processing} className="mt-4 rounded-lg bg-primary px-5 py-2.5 text-sm font-bold uppercase text-on-primary hover:bg-primary-hover disabled:opacity-50">
+                {form.processing ? 'Creating…' : 'Create Student'}
+            </button>
+        </form>
+    );
+}
 
 interface Student {
     id: number; name: string; email: string; is_active: boolean; created_at: string;
@@ -37,22 +98,25 @@ export default function StudentsIndex({ students, filters }: Props) {
                     />
                     <button type="submit" className="rounded-lg bg-primary px-4 py-2 text-sm font-bold uppercase text-on-primary hover:bg-primary-hover">Search</button>
                 </form>
-                <div className="flex gap-2">
-                    {[
-                        { key: null, label: 'All' },
-                        { key: 'active', label: 'Active' },
-                        { key: 'suspended', label: 'Suspended' },
-                    ].map((opt) => (
-                        <button
-                            key={opt.label}
-                            onClick={() => setStatus(opt.key)}
-                            className={`rounded-full px-3 py-1.5 text-sm font-medium ${
-                                (filters.status ?? null) === opt.key ? 'bg-primary text-on-primary' : 'bg-surface text-text-secondary hover:bg-primary-subtle'
-                            }`}
-                        >
-                            {opt.label}
-                        </button>
-                    ))}
+                <div className="flex items-center gap-3">
+                    <div className="flex gap-2">
+                        {[
+                            { key: null, label: 'All' },
+                            { key: 'active', label: 'Active' },
+                            { key: 'suspended', label: 'Suspended' },
+                        ].map((opt) => (
+                            <button
+                                key={opt.label}
+                                onClick={() => setStatus(opt.key)}
+                                className={`rounded-full px-3 py-1.5 text-sm font-medium ${
+                                    (filters.status ?? null) === opt.key ? 'bg-primary text-on-primary' : 'bg-surface text-text-secondary hover:bg-primary-subtle'
+                                }`}
+                            >
+                                {opt.label}
+                            </button>
+                        ))}
+                    </div>
+                    <AddStudentForm />
                 </div>
             </div>
 
