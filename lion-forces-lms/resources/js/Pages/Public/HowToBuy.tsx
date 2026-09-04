@@ -86,12 +86,6 @@ export default function HowToBuy({ packages, faqs }: { packages: PackageItem[]; 
             </section>
 
             <section className="mx-auto max-w-container px-4 py-20 sm:px-6 lg:px-8">
-                <RevealOnScroll className="mx-auto mb-10 max-w-2xl text-center">
-                    <p className="text-sm text-text-secondary">
-                        Guide shown in English and{' '}
-                        <span dir="rtl" className="font-urdu">اردو</span> both — no separate popup needed.
-                    </p>
-                </RevealOnScroll>
                 <RevealOnScroll className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     {STEPS.map((step, i) => (
                         <div key={i} className="relative rounded-2xl border border-border bg-surface p-6">
