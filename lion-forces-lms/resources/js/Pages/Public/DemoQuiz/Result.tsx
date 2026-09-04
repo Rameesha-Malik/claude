@@ -4,7 +4,7 @@ import SectionKicker from '@/Components/SectionKicker';
 import WaveRibbon from '@/Components/WaveRibbon';
 import PublicLayout from '@/Layouts/PublicLayout';
 
-interface Attempt { id: number; score: string; total_marks: string }
+interface Attempt { id: number; score: string; total_marks: string; correct_count: number; wrong_count: number; skipped_count: number }
 interface Props { attempt: Attempt; quizTitle: string }
 
 // Circular score gauge -- uses the feedback ramp (green/gold/red) exactly as
@@ -64,6 +64,21 @@ export default function DemoQuizResult({ attempt, quizTitle }: Props) {
                     <div className="rounded-2xl border border-border bg-surface p-8 text-center shadow-2xl">
                         <ScoreRing percentage={percentage} />
                         <p className="mt-3 text-text-secondary">You scored {score} out of {total}</p>
+
+                        <div className="mt-6 flex justify-center gap-4 text-center text-sm">
+                            <div className="rounded-2xl bg-surface-sunken px-4 py-2.5">
+                                <p className="text-xl font-bold text-success">{attempt.correct_count}</p>
+                                <p className="text-text-muted">Correct</p>
+                            </div>
+                            <div className="rounded-2xl bg-surface-sunken px-4 py-2.5">
+                                <p className="text-xl font-bold text-danger">{attempt.wrong_count}</p>
+                                <p className="text-text-muted">Wrong</p>
+                            </div>
+                            <div className="rounded-2xl bg-surface-sunken px-4 py-2.5">
+                                <p className="text-xl font-bold text-text-muted">{attempt.skipped_count}</p>
+                                <p className="text-text-muted">Skipped</p>
+                            </div>
+                        </div>
 
                         <div className="mt-8 rounded-xl bg-primary-subtle p-6">
                             <h2 className="font-display text-xl uppercase text-text">Like what you saw?</h2>

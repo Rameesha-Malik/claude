@@ -84,20 +84,32 @@ class DemoQuizController extends Controller
 
         $score = 0;
         $total = $questions->count();
+        $correctCount = 0;
+        $wrongCount = 0;
+        $skippedCount = 0;
 
         foreach ($data['answers'] as $answer) {
             $question = $questions->get($answer['question_id']);
             $selectedOption = $answer['selected_option_id']
                 ? $question->options->firstWhere('id', $answer['selected_option_id'])
                 : null;
-            if ($selectedOption?->is_correct) {
+
+            if (! $selectedOption) {
+                $skippedCount++;
+            } elseif ($selectedOption->is_correct) {
                 $score++;
+                $correctCount++;
+            } else {
+                $wrongCount++;
             }
         }
 
         $attempt->update([
             'score' => $score,
             'total_marks' => $total,
+            'correct_count' => $correctCount,
+            'wrong_count' => $wrongCount,
+            'skipped_count' => $skippedCount,
             'submitted_at' => now(),
         ]);
 
@@ -110,7 +122,7 @@ class DemoQuizController extends Controller
         abort_unless($attempt->submitted_at, 403);
 
         return Inertia::render('Public/DemoQuiz/Result', [
-            'attempt' => $attempt->only('id', 'score', 'total_marks'),
+            'attempt' => $attempt->only('id', 'score', 'total_marks', 'correct_count', 'wrong_count', 'skipped_count'),
             'quizTitle' => $attempt->demoQuiz->title,
         ]);
     }

@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['demo_quiz_id', 'guest_token', 'score', 'total_marks', 'started_at', 'submitted_at'])]
+#[Fillable(['demo_quiz_id', 'guest_token', 'score', 'total_marks', 'correct_count', 'wrong_count', 'skipped_count', 'started_at', 'submitted_at'])]
 class DemoQuizAttempt extends Model
 {
     use HasFactory;
