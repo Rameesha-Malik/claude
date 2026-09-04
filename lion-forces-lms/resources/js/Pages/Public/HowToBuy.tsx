@@ -35,6 +35,12 @@ export default function HowToBuy({ packages, faqs }: { packages: PackageItem[]; 
                     <p className="mx-auto mt-4 max-w-xl text-teal-200">
                         Five simple steps from registration to your first lesson.
                     </p>
+                    <Link
+                        href="/register"
+                        className="mt-8 inline-block rounded-full bg-accent px-8 py-4 text-sm font-bold uppercase tracking-wide text-accent-fg shadow-lg transition-all duration-normal ease-spring hover:-translate-y-0.5 hover:bg-accent-hover"
+                    >
+                        Register Now
+                    </Link>
                 </div>
             </section>
 
@@ -132,6 +138,23 @@ export default function HowToBuy({ packages, faqs }: { packages: PackageItem[]; 
                     </div>
                 </section>
             )}
+
+            <section className="mx-auto max-w-container px-4 pb-24 pt-20 sm:px-6 lg:px-8">
+                <RevealOnScroll className="rounded-3xl bg-surface-brand p-10 text-center sm:p-16">
+                    <h2 className="font-display text-4xl uppercase tracking-wide text-secondary sm:text-5xl">
+                        Ready to Get Started?
+                    </h2>
+                    <p className="mx-auto mt-3 max-w-md text-text-secondary">
+                        Register in under a minute and pick your package from the pricing above.
+                    </p>
+                    <Link
+                        href="/register"
+                        className="mt-8 inline-block rounded-full bg-secondary px-10 py-4 text-sm font-bold uppercase tracking-wide text-on-secondary shadow-lg transition-all duration-normal ease-spring hover:-translate-y-0.5 hover:bg-teal-800"
+                    >
+                        Register Now
+                    </Link>
+                </RevealOnScroll>
+            </section>
         </PublicLayout>
     );
 }

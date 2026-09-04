@@ -23,7 +23,6 @@ function Stars({ rating }: { rating: number }) {
 
 export default function CourseDetail({ course }: { course: Course }) {
     const { auth } = usePage<PageProps>().props;
-    const checkoutHref = auth.user ? `/portal/courses/${course.slug}/checkout` : '/register';
 
     return (
         <PublicLayout>
@@ -108,7 +107,7 @@ export default function CourseDetail({ course }: { course: Course }) {
                             {course.base_price ? `Rs. ${Number(course.base_price).toLocaleString()}` : 'Contact us'}
                         </div>
                         <Link
-                            href={checkoutHref}
+                            href="/how-to-buy"
                             className="mt-4 block rounded-xl bg-primary py-3 text-center font-semibold text-on-primary hover:bg-primary-hover"
                         >
                             Enroll Now

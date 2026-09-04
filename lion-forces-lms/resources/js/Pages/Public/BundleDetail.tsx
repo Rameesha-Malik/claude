@@ -1,6 +1,5 @@
-import { Head, Link, usePage } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import PublicLayout from '@/Layouts/PublicLayout';
-import { PageProps } from '@/types';
 
 interface Course { id: number; title: string; slug: string; base_price: string | null; short_description: string | null }
 interface Bundle {
@@ -9,8 +8,6 @@ interface Bundle {
 }
 
 export default function BundleDetail({ bundle }: { bundle: Bundle }) {
-    const { auth } = usePage<PageProps>().props;
-    const checkoutHref = auth.user ? `/portal/bundles/${bundle.slug}/checkout` : '/register';
     const individualTotal = bundle.courses.reduce((sum, c) => sum + Number(c.base_price ?? 0), 0);
     const savings = individualTotal - Number(bundle.price);
 
@@ -59,10 +56,10 @@ export default function BundleDetail({ bundle }: { bundle: Bundle }) {
                         </p>
                     )}
                     <Link
-                        href={checkoutHref}
+                        href="/how-to-buy"
                         className="mt-5 block w-full rounded-full bg-primary py-3 text-center text-sm font-bold uppercase tracking-wide text-on-primary shadow-sm transition-all duration-fast hover:-translate-y-0.5 hover:bg-primary-hover hover:shadow-md"
                     >
-                        {auth.user ? 'Enroll Now' : 'Sign Up to Enroll'}
+                        Enroll Now
                     </Link>
                 </div>
             </section>
