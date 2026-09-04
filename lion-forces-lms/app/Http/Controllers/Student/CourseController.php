@@ -54,6 +54,7 @@ class CourseController extends Controller
             'approvedReviews',
         ]);
         $course->loadCount(['enrollments' => fn ($q) => $q->where('status', 'active')]);
+        $this->attachLatestAttempts($course, $user->id);
 
         // Personal/Guaranteed notes: assigned directly to this student, or
         // to the package they're enrolled under.
@@ -87,6 +88,39 @@ class CourseController extends Controller
             'questions' => $questions,
             'myReview' => $myReview,
         ]);
+    }
+
+    // Attaches each test/quiz's most recent *submitted* attempt id (or null)
+    // so the frontend can offer a "View Results" link alongside "Start" --
+    // previously a finished attempt's result page was only reachable once,
+    // right after submission, with no way to come back and review it later.
+    private function attachLatestAttempts(Course $course, int $userId): void
+    {
+        $groups = [
+            \App\Models\PracticeTest::class => $course->practiceTests,
+            \App\Models\Quiz::class => $course->quizzes,
+            \App\Models\MockExam::class => $course->mockExams,
+            \App\Models\StagedTest::class => $course->stagedTests,
+        ];
+
+        foreach ($groups as $type => $items) {
+            if ($items->isEmpty()) {
+                continue;
+            }
+
+            $latestByAttemptable = \App\Models\TestAttempt::where('user_id', $userId)
+                ->where('attemptable_type', $type)
+                ->whereIn('attemptable_id', $items->pluck('id'))
+                ->where('status', 'submitted')
+                ->orderByDesc('submitted_at')
+                ->get(['id', 'attemptable_id'])
+                ->unique('attemptable_id')
+                ->keyBy('attemptable_id');
+
+            $items->each(function ($item) use ($latestByAttemptable) {
+                $item->latest_attempt_id = $latestByAttemptable->get($item->id)?->id;
+            });
+        }
     }
 
     public function submitReview(Request $request, Course $course)

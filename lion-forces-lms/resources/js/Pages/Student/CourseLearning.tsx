@@ -11,16 +11,20 @@ interface Question { id: number; question_text: string; status: string; created_
 interface PracticeTestSummary {
     id: number; title: string; timer_enabled: boolean; duration_minutes: number | null;
     question_selection_mode: string; auto_question_count: number | null; questions_count: number;
+    latest_attempt_id: number | null;
 }
 interface QuizSummary {
     id: number; title: string; question_selection_mode: string; auto_question_count: number | null; questions_count: number;
+    latest_attempt_id: number | null;
 }
 interface FlashcardItem { id: number; front_text: string; back_text: string }
 interface MockExamSummary {
     id: number; title: string; target_exam_name: string | null; total_duration_minutes: number | null; sections_count: number;
+    latest_attempt_id: number | null;
 }
 interface StagedTestSummary {
     id: number; title: string; target_exam_name: string | null; stages_count: number;
+    latest_attempt_id: number | null;
 }
 interface AssignmentSubmission {
     id: number; status: string; marks_awarded: number | null; feedback: string | null;
@@ -369,7 +373,8 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
                                         (t.timer_enabled && t.duration_minutes ? ` · ${t.duration_minutes} min` : ' · No time limit')
                                     }
                                     href={`/portal/practice-tests/${t.id}`}
-                                    cta="Start Test"
+                                    cta={t.latest_attempt_id ? 'Retake Test' : 'Start Test'}
+                                    latestAttemptId={t.latest_attempt_id}
                                 />
                             ))}
                             {course.practice_tests.length === 0 && (
@@ -394,6 +399,7 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
                                     }
                                     href={`/portal/mock-exams/${e.id}`}
                                     cta="View Exam"
+                                    latestAttemptId={e.latest_attempt_id}
                                 />
                             ))}
                             {course.mock_exams.length === 0 && (
@@ -414,6 +420,7 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
                                     meta={`${t.stages_count} stage${t.stages_count === 1 ? '' : 's'}${t.target_exam_name ? ` · ${t.target_exam_name} pattern` : ''}`}
                                     href={`/portal/staged-tests/${t.id}`}
                                     cta="View Test"
+                                    latestAttemptId={t.latest_attempt_id}
                                 />
                             ))}
                             {course.staged_tests.length === 0 && (
@@ -437,7 +444,8 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
                                 ' · No time limit'
                             }
                             href={`/portal/quizzes/${q.id}`}
-                            cta="Start Quiz"
+                            cta={q.latest_attempt_id ? 'Retake Quiz' : 'Start Quiz'}
+                            latestAttemptId={q.latest_attempt_id}
                         />
                     ))}
                     {course.quizzes.length === 0 && (
@@ -547,19 +555,43 @@ function CourseMetaBar({
     );
 }
 
-function TestCard({ title, meta, href, cta }: { title: string; meta: string; href: string; cta: string }) {
+function TestCard({
+    title,
+    meta,
+    href,
+    cta,
+    latestAttemptId,
+}: {
+    title: string;
+    meta: string;
+    href: string;
+    cta: string;
+    /** When set, a completed attempt exists -- offer a way back to it so a
+     *  student can review it again later, not just once right after submitting. */
+    latestAttemptId?: number | null;
+}) {
     return (
         <div className="group flex flex-wrap items-center justify-between gap-3 rounded-3xl border border-border bg-surface p-5 transition-all duration-normal hover:-translate-y-0.5 hover:border-primary hover:shadow-lg">
             <div>
                 <h4 className="font-semibold text-text group-hover:text-primary">{title}</h4>
                 <p className="text-sm text-text-secondary">{meta}</p>
             </div>
-            <Link
-                href={href}
-                className="rounded-full bg-primary px-5 py-2 text-sm font-bold uppercase tracking-wide text-on-primary shadow-sm transition-all duration-fast hover:-translate-y-0.5 hover:bg-primary-hover hover:shadow-md"
-            >
-                {cta}
-            </Link>
+            <div className="flex flex-wrap gap-2">
+                {latestAttemptId && (
+                    <Link
+                        href={`/portal/attempts/${latestAttemptId}`}
+                        className="rounded-full border border-border px-5 py-2 text-sm font-bold uppercase tracking-wide text-text transition-all duration-fast hover:-translate-y-0.5 hover:border-primary hover:text-primary"
+                    >
+                        View Results
+                    </Link>
+                )}
+                <Link
+                    href={href}
+                    className="rounded-full bg-primary px-5 py-2 text-sm font-bold uppercase tracking-wide text-on-primary shadow-sm transition-all duration-fast hover:-translate-y-0.5 hover:bg-primary-hover hover:shadow-md"
+                >
+                    {cta}
+                </Link>
+            </div>
         </div>
     );
 }
