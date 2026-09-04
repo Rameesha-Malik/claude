@@ -7,6 +7,7 @@ import ShieldMark from '@/Components/ShieldMark';
 import TiltCard from '@/Components/TiltCard';
 import WhyChooseIcon from '@/Components/WhyChooseIcon';
 import PublicLayout from '@/Layouts/PublicLayout';
+import heroAboutMentorship from '@/assets/hero/about-mentorship.jpg';
 
 interface Instructor { name: string; photo_path: string | null; qualification: string | null; experience: string | null; bio: string | null }
 interface StatItem { icon: string | null; number: string; label: string }
@@ -85,7 +86,7 @@ export default function About({ instructors, section, stats }: Props) {
                         </div>
                     </RevealOnScroll>
 
-                    {/* floating card stack -- placeholder brand panel, same
+                    {/* floating card stack -- real mentorship photo, same
                         approach as the Home hero photo slot */}
                     <RevealOnScroll staggerMs={110} className="relative hidden min-h-[22rem] lg:block">
                         <div
@@ -97,8 +98,21 @@ export default function About({ instructors, section, stats }: Props) {
                                 backgroundSize: '14px 14px',
                             }}
                         />
-                        <div className="relative flex h-[90%] w-[90%] items-center justify-center overflow-hidden rounded-[2rem] border border-border bg-gradient-to-br from-secondary via-teal-800 to-teal-950 shadow-2xl">
-                            <ShieldMark className="h-24 w-24 text-white/10" />
+                        <div className="relative h-[90%] w-[90%] overflow-hidden rounded-[2rem] border border-border bg-gradient-to-br from-secondary via-teal-800 to-teal-950 shadow-2xl">
+                            <img
+                                src={heroAboutMentorship}
+                                alt="A Pakistan armed forces instructor mentoring cadets around a study table"
+                                className="h-full w-full object-cover"
+                            />
+                            {/* subtle brand-color wash, matching the Home hero treatment --
+                                inline rgba, not a Tailwind opacity-modified `secondary` utility,
+                                since that token is a plain CSS color value, not an alpha-ready
+                                channel triplet */}
+                            <div
+                                aria-hidden
+                                className="absolute inset-0"
+                                style={{ background: 'linear-gradient(to top, rgba(4, 39, 38, 0.6), rgba(4, 39, 38, 0.05) 55%, transparent 80%)' }}
+                            />
                         </div>
 
                         {instructors[0] && (
