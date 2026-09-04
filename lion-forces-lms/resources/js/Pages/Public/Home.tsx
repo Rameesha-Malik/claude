@@ -4,11 +4,11 @@ import FaqAccordionItem from '@/Components/FaqAccordionItem';
 import GradientMesh from '@/Components/GradientMesh';
 import RevealOnScroll from '@/Components/RevealOnScroll';
 import SectionKicker from '@/Components/SectionKicker';
-import ShieldMark from '@/Components/ShieldMark';
 import TiltCard from '@/Components/TiltCard';
 import WaveRibbon from '@/Components/WaveRibbon';
 import WhyChooseIcon from '@/Components/WhyChooseIcon';
 import PublicLayout from '@/Layouts/PublicLayout';
+import heroCadetsStudying from '@/assets/hero/cadets-studying.jpg';
 
 // Small illustrative mockup per "How It Works" step -- built from plain
 // divs/SVG rather than screenshots, so it never depends on external image
@@ -285,9 +285,21 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                                 }}
                             />
 
-                            {/* PLACEHOLDER — swap for the generated cadet/candidate photo (<img>) once available */}
-                            <div className="relative flex h-full w-full items-center justify-center overflow-hidden rounded-[2rem] border border-border bg-gradient-to-br from-secondary via-teal-800 to-teal-950 shadow-2xl">
-                                <ShieldMark className="h-28 w-28 text-white/15" />
+                            <div className="relative h-full w-full overflow-hidden rounded-[2rem] border border-border bg-gradient-to-br from-secondary via-teal-800 to-teal-950 shadow-2xl">
+                                <img
+                                    src={heroCadetsStudying}
+                                    alt="Pakistan armed forces academy cadets preparing together"
+                                    className="h-full w-full object-cover"
+                                />
+                                {/* subtle brand-color wash at the base so the photo reads as part of
+                                    this palette rather than a stock insert -- an inline rgba (not a
+                                    Tailwind opacity-modified `secondary` utility) because the token
+                                    is a plain CSS color value, not an alpha-ready channel triplet */}
+                                <div
+                                    aria-hidden
+                                    className="absolute inset-0"
+                                    style={{ background: 'linear-gradient(to top, rgba(4, 39, 38, 0.65), rgba(4, 39, 38, 0.08) 55%, transparent 80%)' }}
+                                />
                             </div>
 
                             <FloatingBadge className="left-0 top-8 -translate-x-1/3 sm:-translate-x-1/2">
