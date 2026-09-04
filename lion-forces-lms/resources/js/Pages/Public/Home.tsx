@@ -4,6 +4,7 @@ import FaqAccordionItem from '@/Components/FaqAccordionItem';
 import GradientMesh from '@/Components/GradientMesh';
 import RevealOnScroll from '@/Components/RevealOnScroll';
 import SectionKicker from '@/Components/SectionKicker';
+import ShieldMark from '@/Components/ShieldMark';
 import TiltCard from '@/Components/TiltCard';
 import WaveRibbon from '@/Components/WaveRibbon';
 import WhyChooseIcon from '@/Components/WhyChooseIcon';
@@ -373,7 +374,19 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
             {/* ---------------- What We Offer — fanned card stack + scattered praise ---------------- */}
             {services.length > 0 && (
                 <section className="relative overflow-hidden bg-surface py-24">
-                    <RevealOnScroll className="mx-auto mb-4 max-w-2xl px-4 text-center sm:px-6">
+                    <GradientMesh variant="light" />
+
+                    {/* Large faint shield watermarks in the wide side margins either side of
+                        the fan stack -- those margins sit outside the max-w-3xl content
+                        column below and were empty on anything wider than ~1024px. */}
+                    {/* opacity-* (not a `text-primary/[0.05]` slash modifier) -- `primary`
+                        is a plain CSS color value, not an alpha-ready channel triplet, so
+                        that modifier silently resolves to fully opaque (see the Home hero
+                        and About panel gradient fixes for the same underlying issue). */}
+                    <ShieldMark aria-hidden className="pointer-events-none absolute -left-16 top-1/2 hidden h-72 w-72 -translate-y-1/2 text-primary opacity-[0.06] xl:block" />
+                    <ShieldMark aria-hidden className="pointer-events-none absolute -right-16 top-1/2 hidden h-72 w-72 -translate-y-1/2 rotate-12 text-primary opacity-[0.06] xl:block" />
+
+                    <RevealOnScroll className="relative mx-auto mb-4 max-w-2xl px-4 text-center sm:px-6">
                         <SectionKicker>What We Cover</SectionKicker>
                         <h2 className="font-display text-4xl uppercase tracking-wide text-secondary sm:text-5xl">
                             What We Prepare You For
