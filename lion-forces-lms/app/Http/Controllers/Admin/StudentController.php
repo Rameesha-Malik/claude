@@ -62,13 +62,12 @@ class StudentController extends Controller
             'package_id' => 'nullable|exists:course_packages,id',
         ]);
 
-        Enrollment::create([
+        $enrollment = Enrollment::create([
             'user_id' => $student->id,
             'course_id' => $data['course_id'],
             'package_id' => $data['package_id'] ?? null,
-            'status' => 'active',
-            'activated_at' => now(),
         ]);
+        $enrollment->activate();
 
         return back()->with('success', 'Student enrolled.');
     }
@@ -76,10 +75,12 @@ class StudentController extends Controller
     public function updateEnrollmentStatus(Request $request, Enrollment $enrollment)
     {
         $data = $request->validate(['status' => 'required|in:pending,active,suspended,expired']);
-        $enrollment->update([
-            'status' => $data['status'],
-            'activated_at' => $data['status'] === 'active' && ! $enrollment->activated_at ? now() : $enrollment->activated_at,
-        ]);
+
+        if ($data['status'] === 'active') {
+            $enrollment->activate();
+        } else {
+            $enrollment->update(['status' => $data['status']]);
+        }
 
         return back()->with('success', 'Enrollment status updated.');
     }

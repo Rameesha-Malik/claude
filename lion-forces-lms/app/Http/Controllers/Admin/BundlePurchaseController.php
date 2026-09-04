@@ -33,12 +33,10 @@ class BundlePurchaseController extends Controller
             'verified_at' => now(),
         ]);
 
-        $purchase->enrollments()->get()->each(function ($enrollment) {
-            $enrollment->update([
-                'status' => 'active',
-                'activated_at' => $enrollment->activated_at ?? now(),
-            ]);
-        });
+        // Enrollment::activate() computes the real expiry date from the
+        // package's validity_days -- a bundle's fanned-out enrollments
+        // weren't getting one set at all before this.
+        $purchase->enrollments()->get()->each(fn ($enrollment) => $enrollment->activate());
 
         return back()->with('success', 'Bundle purchase verified — all included courses activated.');
     }

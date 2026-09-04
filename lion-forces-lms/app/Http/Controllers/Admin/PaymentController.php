@@ -33,10 +33,9 @@ class PaymentController extends Controller
         // Activating the enrollment is the point of verifying payment —
         // without this the manual bank-transfer/Easypaisa/JazzCash flow
         // never actually grants access after the admin confirms funds.
-        $payment->enrollment->update([
-            'status' => 'active',
-            'activated_at' => $payment->enrollment->activated_at ?? now(),
-        ]);
+        // Enrollment::activate() also computes the real expiry date from
+        // the package's validity_days, not just the active/inactive flag.
+        $payment->enrollment->activate();
 
         return back()->with('success', 'Payment verified and enrollment activated.');
     }

@@ -31,10 +31,16 @@ class CourseController extends Controller
         // A pending/suspended/expired enrollment is a real, expected state
         // (e.g. just submitted payment, awaiting verification) -- distinct
         // from a 404, which should stay reserved for "not enrolled at all".
-        if (! $enrollment || $enrollment->status !== 'active') {
+        // isActive() (not the raw status column) is what actually gates
+        // access here -- an enrollment can still say status: active in the
+        // database past its package's validity_days if nothing has flipped
+        // it to 'expired' yet, and content access must not outlive that.
+        if (! $enrollment || ! $enrollment->isActive()) {
             return Inertia::render('Student/CourseLearning', [
                 'course' => $course->only('title'),
-                'enrollmentStatus' => $enrollment?->status ?? null,
+                'enrollmentStatus' => $enrollment && ! $enrollment->isActive() && $enrollment->status === 'active'
+                    ? 'expired'
+                    : $enrollment?->status ?? null,
             ]);
         }
 

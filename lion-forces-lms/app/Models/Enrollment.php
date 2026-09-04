@@ -48,4 +48,34 @@ class Enrollment extends Model
         return $this->status === 'active'
             && (! $this->expires_at || $this->expires_at->isFuture());
     }
+
+    // Query-builder equivalent of isActive() -- for the authorizeEnrollment()
+    // checks gating practice tests/quizzes/mock exams/staged tests, which
+    // query the database directly rather than loading a model to call
+    // isActive() on. Kept in one place so "active" means the same thing
+    // everywhere access is granted.
+    public function scopeActive($query)
+    {
+        return $query->where('status', 'active')
+            ->where(fn ($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()));
+    }
+
+    // Marks this enrollment active and computes its real expiry date from
+    // the chosen package's validity_days -- every place that grants access
+    // (manual payment verification, bundle purchase verification, an admin
+    // enrolling a student directly) should go through this rather than
+    // setting `status: 'active'` by hand, which previously left expires_at
+    // permanently null: the "180 days access" shown on pricing cards was
+    // never actually being enforced anywhere.
+    public function activate(): void
+    {
+        $activatedAt = $this->activated_at ?? now();
+        $validityDays = $this->package?->validity_days;
+
+        $this->update([
+            'status' => 'active',
+            'activated_at' => $activatedAt,
+            'expires_at' => $validityDays ? $activatedAt->copy()->addDays($validityDays) : null,
+        ]);
+    }
 }
