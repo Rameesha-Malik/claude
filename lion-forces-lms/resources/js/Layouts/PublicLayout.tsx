@@ -195,7 +195,11 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                             <ul className="space-y-2 text-sm text-teal-100">
                                 {site.supportEmail && (
                                     <li>
-                                        <a href={`mailto:${site.supportEmail}`} className="break-all hover:text-white">
+                                        {/* whitespace-nowrap + a smaller size, not break-all -- the
+                                            email is one unbreakable "word", and break-all was
+                                            splitting it mid-word (e.g. "...gmail.co" / "m") rather
+                                            than keeping it on one line. */}
+                                        <a href={`mailto:${site.supportEmail}`} className="block whitespace-nowrap text-xs hover:text-white sm:text-sm">
                                             {site.supportEmail}
                                         </a>
                                     </li>
