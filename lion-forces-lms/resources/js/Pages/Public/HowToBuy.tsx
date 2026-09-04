@@ -1,7 +1,8 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import RevealOnScroll from '@/Components/RevealOnScroll';
 import SectionKicker from '@/Components/SectionKicker';
 import PublicLayout from '@/Layouts/PublicLayout';
+import { PageProps } from '@/types';
 
 interface PackageItem {
     id: number; name: string; description: string | null; price: string;
@@ -9,12 +10,42 @@ interface PackageItem {
 }
 interface FaqItem { question: string; answer: string }
 
+// Bilingual (English + Urdu) so a visitor reading in either language sees
+// the real process -- client feedback specifically: notes reach students
+// via the mobile app, lectures via the website, and the WhatsApp-screenshot
+// step (not a generic "we'll verify it") is what actually happens. Shown
+// directly on the page rather than as a popup, per that same feedback.
 const STEPS = [
-    { title: 'Register', description: 'Create your free account in under a minute.' },
-    { title: 'Choose a Package', description: 'Pick the course and package that fits your target exam.' },
-    { title: 'Pay', description: 'Bank Transfer, Easypaisa, or JazzCash — details shown at checkout.' },
-    { title: 'Admin Activates', description: 'We verify your payment and activate access, usually within a day.' },
-    { title: 'Start Learning', description: 'Full access to lectures, notes, and practice tests unlocks instantly.' },
+    {
+        title: 'Register',
+        en: 'Create your free account in under a minute.',
+        ur: 'ایک منٹ سے بھی کم وقت میں اپنا مفت اکاؤنٹ بنائیں۔',
+    },
+    {
+        title: 'Choose a Package',
+        en: 'Pick the course and package that fits your target exam.',
+        ur: 'اپنے ٹارگٹ امتحان کے مطابق کورس اور پیکج منتخب کریں۔',
+    },
+    {
+        title: 'Pay',
+        en: 'Pay via Bank Transfer, Easypaisa, or JazzCash — details shown at checkout.',
+        ur: 'بینک ٹرانسفر، ایزی پیسہ یا جاز کیش کے ذریعے ادائیگی کریں — تفصیلات چیک آؤٹ پر دکھائی جائیں گی۔',
+    },
+    {
+        title: 'Send Screenshot on WhatsApp',
+        en: 'Send us a screenshot of your payment receipt on WhatsApp.',
+        ur: 'اپنی ادائیگی کی رسید کا اسکرین شاٹ ہمیں واٹس ایپ پر بھیجیں۔',
+    },
+    {
+        title: 'Verified in ~3 Hours',
+        en: 'We confirm your payment and activate your access, usually within about 3 hours.',
+        ur: 'ہم آپ کی ادائیگی کی تصدیق کر کے تقریباً 3 گھنٹوں میں آپ کی رسائی فعال کر دیتے ہیں۔',
+    },
+    {
+        title: 'Start Preparing',
+        en: 'Notes are available on our mobile app, and lectures on the website.',
+        ur: 'نوٹس ہماری موبائل ایپ پر اور لیکچرز ویب سائٹ پر دستیاب ہوتے ہیں۔',
+    },
 ];
 
 const PAYMENT_METHODS = [
@@ -23,7 +54,17 @@ const PAYMENT_METHODS = [
     { name: 'JazzCash', description: 'Send payment directly via the JazzCash app.' },
 ];
 
+function CheckIcon() {
+    return (
+        <svg className="h-4 w-4 flex-shrink-0 text-success" fill="none" stroke="currentColor" strokeWidth={2.5} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
+        </svg>
+    );
+}
+
 export default function HowToBuy({ packages, faqs }: { packages: PackageItem[]; faqs: FaqItem[] }) {
+    const { site } = usePage<PageProps>().props;
+
     return (
         <PublicLayout>
             <Head title="How to Buy" />
@@ -33,7 +74,7 @@ export default function HowToBuy({ packages, faqs }: { packages: PackageItem[]; 
                     <SectionKicker dark><span className="mx-auto">Get Started</span></SectionKicker>
                     <h1 className="font-display text-5xl uppercase tracking-wide sm:text-6xl">How to Buy</h1>
                     <p className="mx-auto mt-4 max-w-xl text-teal-200">
-                        Five simple steps from registration to your first lesson.
+                        Simple steps from registration to your first lesson.
                     </p>
                     <Link
                         href="/register"
@@ -45,12 +86,25 @@ export default function HowToBuy({ packages, faqs }: { packages: PackageItem[]; 
             </section>
 
             <section className="mx-auto max-w-container px-4 py-20 sm:px-6 lg:px-8">
-                <RevealOnScroll className="grid gap-6 sm:grid-cols-2 lg:grid-cols-5">
+                <RevealOnScroll className="mx-auto mb-10 max-w-2xl text-center">
+                    <p className="text-sm text-text-secondary">
+                        Guide shown in English and{' '}
+                        <span dir="rtl" className="font-urdu">اردو</span> both — no separate popup needed.
+                    </p>
+                </RevealOnScroll>
+                <RevealOnScroll className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     {STEPS.map((step, i) => (
                         <div key={i} className="relative rounded-2xl border border-border bg-surface p-6">
                             <div className="mb-3 font-display text-4xl text-gold-700">0{i + 1}</div>
                             <h3 className="font-bold text-text">{step.title}</h3>
-                            <p className="mt-1 text-sm text-text-secondary">{step.description}</p>
+                            <p className="mt-1 text-sm text-text-secondary">
+                                {step.title === 'Send Screenshot on WhatsApp' && site.whatsappNumber
+                                    ? `Send us a screenshot of your payment receipt on WhatsApp (${site.whatsappNumber}).`
+                                    : step.en}
+                            </p>
+                            <p dir="rtl" className="mt-2 font-urdu text-sm leading-relaxed text-text-secondary">
+                                {step.ur}
+                            </p>
                         </div>
                     ))}
                 </RevealOnScroll>
@@ -63,39 +117,51 @@ export default function HowToBuy({ packages, faqs }: { packages: PackageItem[]; 
                             <SectionKicker>Pricing</SectionKicker>
                             <h2 className="font-display text-4xl uppercase tracking-wide text-text sm:text-5xl">Packages</h2>
                         </RevealOnScroll>
-                        <RevealOnScroll className="overflow-x-auto rounded-2xl border border-border bg-surface">
-                            <table className="w-full text-left text-sm">
-                                <thead className="border-b border-border bg-surface-sunken">
-                                    <tr>
-                                        <th className="px-6 py-4 font-bold uppercase tracking-wide text-text-secondary">Package</th>
-                                        <th className="px-6 py-4 font-bold uppercase tracking-wide text-text-secondary">Course</th>
-                                        <th className="px-6 py-4 font-bold uppercase tracking-wide text-text-secondary">Validity</th>
-                                        <th className="px-6 py-4 text-right font-bold uppercase tracking-wide text-text-secondary">Price</th>
-                                        <th className="px-6 py-4" />
-                                    </tr>
-                                </thead>
-                                <tbody className="divide-y divide-border">
-                                    {packages.map((pkg) => (
-                                        <tr key={pkg.id}>
-                                            <td className="px-6 py-4 font-semibold text-text">{pkg.name}</td>
-                                            <td className="px-6 py-4 text-text-secondary">{pkg.course?.title}</td>
-                                            <td className="px-6 py-4 text-text-secondary">
-                                                {pkg.validity_days ? `${pkg.validity_days} days` : 'Lifetime'}
-                                            </td>
-                                            <td className="px-6 py-4 text-right font-bold text-primary">
-                                                Rs. {Number(pkg.price).toLocaleString()}
-                                            </td>
-                                            <td className="px-6 py-4 text-right">
-                                                {pkg.course && (
-                                                    <Link href={`/courses/${pkg.course.id}`} className="font-semibold text-primary hover:underline">
-                                                        View &rarr;
-                                                    </Link>
-                                                )}
-                                            </td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
+                        <RevealOnScroll staggerMs={60} className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                            {packages.map((pkg) => {
+                                // Each line of the admin-entered description becomes one
+                                // checkmarked feature -- a plan-comparison-card look (à la
+                                // Hostinger's pricing tiers) instead of a plain table row.
+                                const features = (pkg.description ?? '')
+                                    .split('\n')
+                                    .map((line) => line.replace(/^[-•*]\s*/, '').trim())
+                                    .filter(Boolean);
+                                return (
+                                    <div
+                                        key={pkg.id}
+                                        className="flex flex-col rounded-2xl border border-border bg-surface p-6 shadow-sm transition-all duration-normal hover:-translate-y-1 hover:border-primary hover:shadow-lg"
+                                    >
+                                        <p className="text-xs font-bold uppercase tracking-wide text-primary">{pkg.course?.title}</p>
+                                        <h3 className="mt-1 font-display text-xl uppercase tracking-wide text-text">{pkg.name}</h3>
+                                        <p className="mt-3 font-display text-3xl text-text">
+                                            Rs. {Number(pkg.price).toLocaleString()}
+                                        </p>
+                                        <p className="text-xs text-text-muted">
+                                            {pkg.validity_days ? `${pkg.validity_days} days access` : 'Lifetime access'}
+                                        </p>
+
+                                        {features.length > 0 && (
+                                            <ul className="mt-5 flex-1 space-y-2.5 border-t border-border pt-5">
+                                                {features.map((f, i) => (
+                                                    <li key={i} className="flex items-start gap-2 text-sm text-text-secondary">
+                                                        <CheckIcon />
+                                                        {f}
+                                                    </li>
+                                                ))}
+                                            </ul>
+                                        )}
+
+                                        {pkg.course && (
+                                            <Link
+                                                href={`/courses/${pkg.course.id}`}
+                                                className="mt-6 block rounded-full bg-primary py-2.5 text-center text-sm font-bold uppercase tracking-wide text-on-primary shadow-sm transition-all duration-fast hover:-translate-y-0.5 hover:bg-primary-hover hover:shadow-md"
+                                            >
+                                                View Package
+                                            </Link>
+                                        )}
+                                    </div>
+                                );
+                            })}
                         </RevealOnScroll>
                     </div>
                 </section>
