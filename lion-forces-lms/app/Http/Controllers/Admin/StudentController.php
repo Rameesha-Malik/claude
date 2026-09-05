@@ -31,6 +31,24 @@ class StudentController extends Controller
         ]);
     }
 
+    // Lightweight typeahead for the Enrollments page's "Enroll student"
+    // picker -- returns JSON, not an Inertia page, since it's called from
+    // a search box while another page stays open.
+    public function search(Request $request)
+    {
+        $q = trim((string) $request->query('q', ''));
+        if ($q === '') {
+            return response()->json([]);
+        }
+
+        return response()->json(
+            User::where('user_type', 'student')
+                ->where(fn ($query) => $query->where('name', 'like', "%{$q}%")->orWhere('email', 'like', "%{$q}%"))
+                ->limit(10)
+                ->get(['id', 'name', 'email'])
+        );
+    }
+
     // Client question: "How to add student from admin panel?" -- there was
     // no answer, because this didn't exist: the only way a student account
     // got created was self-registration via the public /register page.
