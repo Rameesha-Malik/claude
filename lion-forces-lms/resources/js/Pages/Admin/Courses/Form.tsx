@@ -1,5 +1,5 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
-import { useState } from 'react';
+import RichTextArea from '@/Components/RichTextArea';
 import AdminLayout from '@/Layouts/AdminLayout';
 
 interface Category { id: number; name: string }
@@ -85,11 +85,11 @@ export default function CourseForm({ course, categories, instructors }: Props) {
                         </div>
                         <div>
                             <label className={labelClass}>Full Description</label>
-                            <textarea rows={4} className={inputClass} value={form.data.description} onChange={(e) => form.setData('description', e.target.value)} />
+                            <RichTextArea rows={4} className={inputClass} value={form.data.description} onChange={(v) => form.setData('description', v)} />
                         </div>
                         <div>
                             <label className={labelClass}>Syllabus</label>
-                            <textarea rows={3} className={inputClass} value={form.data.syllabus} onChange={(e) => form.setData('syllabus', e.target.value)} />
+                            <RichTextArea rows={3} className={inputClass} value={form.data.syllabus} onChange={(v) => form.setData('syllabus', v)} />
                         </div>
 
                         <div className="grid grid-cols-3 gap-4">
@@ -158,6 +158,12 @@ export default function CourseForm({ course, categories, instructors }: Props) {
 
                 {isEdit && (
                     <div className="space-y-6">
+                        {/* Moved to the top of the sidebar and relabeled -- this was
+                            previously the last of six stacked panels, which is why
+                            "where do I add video lectures" kept coming up. The
+                            structure is Course -> Topics -> Lessons (video/pdf/etc),
+                            same idea as most course platforms' "Curriculum" tab. */}
+                        <CurriculumPanel course={course!} />
                         <div className="rounded-2xl border border-border bg-surface p-5">
                             <h3 className="mb-3 font-bold text-text">Assessment Engine</h3>
                             <p className="mb-3 text-sm text-text-secondary">Build tests using questions from the Content Library.</p>
@@ -209,7 +215,6 @@ export default function CourseForm({ course, categories, instructors }: Props) {
                             </Link>
                         </div>
                         <PackagesPanel course={course!} />
-                        <LessonsPanel course={course!} />
                     </div>
                 )}
             </div>
@@ -258,13 +263,24 @@ const FILE_ACCEPT: Record<string, string> = {
     video_upload: '.mp4,.mov,.webm',
     document: '.pdf,.doc,.docx,.ppt,.pptx',
 };
+// "video lectures" is the #1 thing admins look for in this panel -- both
+// video options say "Video" up front instead of "video_youtube"/"video_upload"
+// so they're not mistaken for some other content type while scanning the list.
+const LESSON_TYPE_LABELS: Record<string, string> = {
+    video_youtube: 'Video (YouTube Link)',
+    video_upload: 'Video (File Upload)',
+    pdf: 'PDF',
+    audio: 'Audio',
+    document: 'Document',
+    link: 'External Link',
+};
 
 function LessonRow({ lesson }: { lesson: Lesson }) {
     return (
         <div className="flex items-center justify-between rounded-lg border border-border p-3 text-sm">
             <div>
                 <div className="font-semibold text-text">{lesson.title}</div>
-                <div className="text-xs uppercase text-text-muted">{lesson.type.replace('_', ' ')}{lesson.is_free_preview ? ' · Free Preview' : ''}</div>
+                <div className="text-xs uppercase text-text-muted">{LESSON_TYPE_LABELS[lesson.type] ?? lesson.type}{lesson.is_free_preview ? ' · Free Preview' : ''}</div>
             </div>
             <button onClick={() => router.delete(`/admin/courses/lessons/${lesson.id}`)} className="text-xs font-bold uppercase text-danger hover:underline">Delete</button>
         </div>
@@ -287,7 +303,7 @@ function AddTopicForm({ courseId }: { courseId: number }) {
     );
 }
 
-function LessonsPanel({ course }: { course: Course }) {
+function CurriculumPanel({ course }: { course: Course }) {
     const addForm = useForm<{ title: string; type: string; external_url: string; is_free_preview: boolean; section_id: string; file: File | null }>({
         title: '', type: 'video_youtube', external_url: '', is_free_preview: false, section_id: '', file: null,
     });
@@ -295,10 +311,12 @@ function LessonsPanel({ course }: { course: Course }) {
     const ungrouped = course.lessons.filter((l) => l.section_id === null);
 
     return (
-        <div className="rounded-2xl border border-border bg-surface p-5">
-            <h3 className="mb-1 font-bold text-text">Course Content</h3>
+        <div className="rounded-2xl border-2 border-primary bg-surface p-5">
+            <h3 className="mb-1 font-bold text-text">Curriculum — Topics &amp; Video Lectures</h3>
             <p className="mb-3 text-sm text-text-secondary">
-                Group lessons under topics (optional) — mirrors how the lesson list is organized for students.
+                This is where video lectures live: <strong>Course → Topic → Lesson</strong>. Add a topic below (e.g. "Chemistry
+                Lectures"), then add lessons into it — pick type <em>video (YouTube link)</em> or <em>video (file upload)</em> for a
+                lecture. Lessons left ungrouped still show to students, just not under a named topic.
             </p>
 
             <AddTopicForm courseId={course.id} />
@@ -340,7 +358,7 @@ function LessonsPanel({ course }: { course: Course }) {
                 <input className={inputClass} placeholder="Lesson Title" value={addForm.data.title} onChange={(e) => addForm.setData('title', e.target.value)} />
                 <div className="grid grid-cols-2 gap-2">
                     <select className={inputClass} value={addForm.data.type} onChange={(e) => addForm.setData('type', e.target.value)}>
-                        {['video_youtube', 'video_upload', 'pdf', 'audio', 'document', 'link'].map((t) => <option key={t} value={t}>{t.replace('_', ' ')}</option>)}
+                        {Object.entries(LESSON_TYPE_LABELS).map(([t, label]) => <option key={t} value={t}>{label}</option>)}
                     </select>
                     <select className={inputClass} value={addForm.data.section_id} onChange={(e) => addForm.setData('section_id', e.target.value)}>
                         <option value="">No topic (ungrouped)</option>

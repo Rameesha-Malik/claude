@@ -1,4 +1,5 @@
 import { Head, Link, usePage } from '@inertiajs/react';
+import LiteMarkdown from '@/Components/LiteMarkdown';
 import PublicLayout from '@/Layouts/PublicLayout';
 import { PageProps } from '@/types';
 
@@ -46,12 +47,12 @@ export default function CourseDetail({ course }: { course: Course }) {
             <section className="mx-auto grid max-w-container gap-10 px-4 py-16 sm:px-6 lg:grid-cols-3 lg:px-8">
                 <div className="lg:col-span-2">
                     <h2 className="text-xl font-semibold text-text">Overview</h2>
-                    <p className="mt-3 whitespace-pre-line text-text-secondary">{course.description}</p>
+                    {course.description && <LiteMarkdown text={course.description} className="mt-3 text-text-secondary" />}
 
                     {course.syllabus && (
                         <>
                             <h2 className="mt-8 text-xl font-semibold text-text">Syllabus</h2>
-                            <p className="mt-3 whitespace-pre-line text-text-secondary">{course.syllabus}</p>
+                            <LiteMarkdown text={course.syllabus} className="mt-3 text-text-secondary" />
                         </>
                     )}
 
