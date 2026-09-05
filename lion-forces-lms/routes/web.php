@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\CourseController as AdminCourseController;
 use App\Http\Controllers\Admin\CourseQuestionController as AdminCourseQuestionController;
 use App\Http\Controllers\Admin\EnrollmentController as AdminEnrollmentController;
 use App\Http\Controllers\Admin\LeaderboardController as AdminLeaderboardController;
+use App\Http\Controllers\Admin\PerformanceController as AdminPerformanceController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\DemoQuizController as AdminDemoQuizController;
 use App\Http\Controllers\Admin\FlashcardController as AdminFlashcardController;
@@ -299,6 +300,7 @@ Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->nam
         Route::delete('/{enrollment}', [AdminEnrollmentController::class, 'destroy'])->name('destroy');
     });
     Route::get('/leaderboard', [AdminLeaderboardController::class, 'index'])->name('leaderboard.index');
+    Route::get('/performance', [AdminPerformanceController::class, 'index'])->name('performance.index');
     Route::get('/activity', [AdminActivityController::class, 'index'])->name('activity.index');
 
     Route::prefix('bundles')->name('bundles.')->group(function () {
