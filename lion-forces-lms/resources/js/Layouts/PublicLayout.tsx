@@ -83,42 +83,46 @@ export default function PublicLayout({ children }: PropsWithChildren) {
 
             <header className="sticky top-0 z-40 px-3 pt-3 sm:px-4">
                 <div
-                    className="mx-auto flex h-16 max-w-4xl items-center justify-between rounded-full border border-border px-3 shadow-xl backdrop-blur-glass sm:px-4"
+                    className="mx-auto flex h-16 max-w-7xl items-center justify-between gap-3 rounded-full border border-border px-3 shadow-xl backdrop-blur-glass sm:px-4"
                     style={{ backgroundColor: 'var(--glass-bg)' }}
                 >
-                    <Link href="/" className="flex min-w-0 items-center gap-2.5 text-base font-bold text-secondary">
+                    <Link href="/" className="flex min-w-0 flex-shrink-0 items-center gap-2.5 text-base font-bold text-secondary">
                         <SiteLogo site={site} size="nav" />
-                        <span className="truncate">{site.name}</span>
+                        <span className="hidden truncate xl:inline">{site.name}</span>
                     </Link>
 
-                    <nav className="hidden items-center gap-1 rounded-full bg-black/[0.03] p-1 md:flex">
+                    {/* Nav item count is admin-editable (grew from 4 to 8 header links) --
+                        the pill only holds all of them on one line from xl: up, with no
+                        per-item wrapping; below that it collapses into the hamburger menu
+                        instead of squeezing/wrapping into an uneven-height row. */}
+                    <nav className="hidden items-center gap-0.5 overflow-x-auto rounded-full bg-black/[0.03] p-1 xl:flex">
                         {nav.header.map((item) => (
                             <Link
                                 key={item.id}
                                 href={item.url}
-                                className="rounded-full px-4 py-2 text-sm font-medium text-text-secondary transition-colors duration-fast hover:bg-surface hover:text-primary"
+                                className="whitespace-nowrap rounded-full px-3 py-2 text-sm font-medium text-text-secondary transition-colors duration-fast hover:bg-surface hover:text-primary"
                             >
                                 {item.label}
                             </Link>
                         ))}
                     </nav>
 
-                    <div className="hidden items-center gap-2 md:flex">
+                    <div className="hidden flex-shrink-0 items-center gap-2 xl:flex">
                         {auth.user ? (
                             <Link
                                 href="/dashboard"
-                                className="rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-on-primary shadow-sm transition-all duration-fast hover:bg-primary-hover hover:shadow-md"
+                                className="whitespace-nowrap rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-on-primary shadow-sm transition-all duration-fast hover:bg-primary-hover hover:shadow-md"
                             >
                                 Dashboard
                             </Link>
                         ) : (
                             <>
-                                <Link href="/login" className="rounded-full px-4 py-2.5 text-sm font-medium text-text-secondary hover:text-primary">
+                                <Link href="/login" className="whitespace-nowrap rounded-full px-4 py-2.5 text-sm font-medium text-text-secondary hover:text-primary">
                                     Sign in
                                 </Link>
                                 <Link
                                     href="/register"
-                                    className="rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-on-primary shadow-sm transition-all duration-fast hover:bg-primary-hover hover:shadow-md"
+                                    className="whitespace-nowrap rounded-full bg-primary px-5 py-2.5 text-sm font-semibold text-on-primary shadow-sm transition-all duration-fast hover:bg-primary-hover hover:shadow-md"
                                 >
                                     Get Started
                                 </Link>
@@ -127,7 +131,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                     </div>
 
                     <button
-                        className="p-2 text-text md:hidden"
+                        className="p-2 text-text xl:hidden"
                         onClick={() => setMobileOpen((v) => !v)}
                         aria-label="Toggle menu"
                         aria-expanded={mobileOpen}
@@ -143,7 +147,7 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                 </div>
 
                 {mobileOpen && (
-                    <nav className="mx-auto mt-2 flex max-w-4xl flex-col gap-1 rounded-3xl border border-border bg-surface p-3 shadow-xl md:hidden">
+                    <nav className="mx-auto mt-2 flex max-w-7xl flex-col gap-1 rounded-3xl border border-border bg-surface p-3 shadow-xl xl:hidden">
                         {nav.header.map((item) => (
                             <Link key={item.id} href={item.url} className="rounded-xl px-3 py-2 text-sm font-medium text-text hover:bg-surface-sunken">
                                 {item.label}
