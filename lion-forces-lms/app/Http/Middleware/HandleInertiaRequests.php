@@ -35,7 +35,13 @@ class HandleInertiaRequests extends Middleware
         return [
             ...parent::share($request),
             'auth' => [
-                'user' => $request->user(),
+                // isContentManager drives which admin nav links render --
+                // the routes are already enforced server-side regardless
+                // (RestrictContentManagers middleware), this just keeps a
+                // content manager from seeing links that would 403.
+                'user' => fn () => $request->user()
+                    ? [...$request->user()->toArray(), 'isContentManager' => $request->user()->hasRole('content_manager')]
+                    : null,
             ],
             // Global site chrome — shared on every request so nav/footer/
             // announcement bar never repeat a query per page controller.

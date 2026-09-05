@@ -3,6 +3,8 @@ export interface User {
     name: string;
     email: string;
     email_verified_at?: string;
+    /** True only for accounts with the 'content_manager' role -- drives which admin nav links render. */
+    isContentManager?: boolean;
 }
 
 export interface SiteSettings {

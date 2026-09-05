@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\BundlePurchaseController as AdminBundlePurchaseCo
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\ContactInboxController as AdminContactInboxController;
 use App\Http\Controllers\Admin\ContentLibraryController as AdminContentLibraryController;
+use App\Http\Controllers\Admin\ContentManagerController as AdminContentManagerController;
 use App\Http\Controllers\Admin\CourseController as AdminCourseController;
 use App\Http\Controllers\Admin\CourseQuestionController as AdminCourseQuestionController;
 use App\Http\Controllers\Admin\EnrollmentController as AdminEnrollmentController;
@@ -123,7 +124,7 @@ Route::middleware(['auth', 'verified', 'user_type:student'])->prefix('portal')->
 Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/', [AdminDashboardController::class, 'index'])->name('dashboard');
 
-    Route::prefix('website')->name('website.')->group(function () {
+    Route::middleware('not.content_manager')->prefix('website')->name('website.')->group(function () {
         Route::get('/', [AdminWebsiteController::class, 'index'])->name('index');
         Route::put('/settings', [AdminWebsiteController::class, 'updateSettings'])->name('settings.update');
         Route::post('/logo', [AdminWebsiteController::class, 'updateLogo'])->name('logo.update');
@@ -148,7 +149,7 @@ Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->nam
         Route::delete('/testimonials/{testimonial}', [AdminWebsiteController::class, 'destroyTestimonial'])->name('testimonials.destroy');
     });
 
-    Route::prefix('students')->name('students.')->group(function () {
+    Route::middleware('not.content_manager')->prefix('students')->name('students.')->group(function () {
         Route::get('/', [AdminStudentController::class, 'index'])->name('index');
         Route::get('/search', [AdminStudentController::class, 'search'])->name('search');
         Route::post('/', [AdminStudentController::class, 'store'])->name('store');
@@ -285,13 +286,13 @@ Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->nam
         Route::delete('/{hallOfFame}', [AdminHallOfFameController::class, 'destroy'])->name('destroy');
     });
 
-    Route::prefix('payments')->name('payments.')->group(function () {
+    Route::middleware('not.content_manager')->prefix('payments')->name('payments.')->group(function () {
         Route::get('/', [AdminPaymentController::class, 'index'])->name('index');
         Route::post('/{payment}/verify', [AdminPaymentController::class, 'verify'])->name('verify');
         Route::post('/{payment}/reject', [AdminPaymentController::class, 'reject'])->name('reject');
     });
 
-    Route::prefix('enrollments')->name('enrollments.')->group(function () {
+    Route::middleware('not.content_manager')->prefix('enrollments')->name('enrollments.')->group(function () {
         Route::get('/', [AdminEnrollmentController::class, 'index'])->name('index');
         Route::post('/', [AdminEnrollmentController::class, 'store'])->name('store');
         Route::post('/bulk', [AdminEnrollmentController::class, 'bulk'])->name('bulk');
@@ -309,7 +310,7 @@ Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->nam
         Route::delete('/{bundle}', [AdminBundleController::class, 'destroy'])->name('destroy');
     });
 
-    Route::prefix('bundle-purchases')->name('bundle-purchases.')->group(function () {
+    Route::middleware('not.content_manager')->prefix('bundle-purchases')->name('bundle-purchases.')->group(function () {
         Route::get('/', [AdminBundlePurchaseController::class, 'index'])->name('index');
         Route::post('/{purchase}/verify', [AdminBundlePurchaseController::class, 'verify'])->name('verify');
         Route::post('/{purchase}/reject', [AdminBundlePurchaseController::class, 'reject'])->name('reject');
@@ -351,12 +352,19 @@ Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->nam
         Route::delete('/{demoQuiz}', [AdminDemoQuizController::class, 'destroy'])->name('destroy');
     });
 
-    Route::prefix('settings')->name('settings.')->group(function () {
+    Route::middleware('not.content_manager')->prefix('settings')->name('settings.')->group(function () {
         Route::get('/', [AdminSettingsController::class, 'index'])->name('index');
         Route::post('/staff', [AdminSettingsController::class, 'storeStaff'])->name('staff.store');
         Route::put('/staff/{staff}/role', [AdminSettingsController::class, 'updateStaffRole'])->name('staff.role');
         Route::post('/staff/{staff}/toggle-active', [AdminSettingsController::class, 'toggleStaffActive'])->name('staff.toggle-active');
         Route::put('/payment', [AdminSettingsController::class, 'updatePaymentSettings'])->name('payment.update');
+    });
+
+    Route::middleware('not.content_manager')->prefix('content-managers')->name('content-managers.')->group(function () {
+        Route::get('/', [AdminContentManagerController::class, 'index'])->name('index');
+        Route::post('/', [AdminContentManagerController::class, 'store'])->name('store');
+        Route::put('/{manager}/courses', [AdminContentManagerController::class, 'updateCourses'])->name('courses');
+        Route::delete('/{manager}', [AdminContentManagerController::class, 'destroy'])->name('destroy');
     });
 });
 

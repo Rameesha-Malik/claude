@@ -29,6 +29,7 @@ return Application::configure(basePath: dirname(__DIR__))
 
         $middleware->alias([
             'user_type' => \App\Http\Middleware\EnsureUserType::class,
+            'not.content_manager' => \App\Http\Middleware\RestrictContentManagers::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

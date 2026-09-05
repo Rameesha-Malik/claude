@@ -46,6 +46,20 @@ class User extends Authenticatable
         return $this->user_type === 'student';
     }
 
+    // Courses a "content manager" account is scoped to -- irrelevant for
+    // every other role (owner/staff have no such restriction).
+    public function managedCourses(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
+    {
+        return $this->belongsToMany(Course::class, 'content_manager_courses');
+    }
+
+    // Content managers can only edit lessons/sections/packages on courses
+    // they're explicitly assigned to; every other admin role always passes.
+    public function canManageCourse(Course $course): bool
+    {
+        return ! $this->hasRole('content_manager') || $this->managedCourses()->where('courses.id', $course->id)->exists();
+    }
+
     // --- Admin side ---
 
     public function instructorProfile(): HasOne

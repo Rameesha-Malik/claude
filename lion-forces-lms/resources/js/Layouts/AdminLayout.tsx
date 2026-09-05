@@ -18,6 +18,7 @@ const NAV: NavEntry[] = [
     { label: 'Activity', href: '/admin/activity', icon: <Icon d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /> },
     { label: 'Website', href: '/admin/website', icon: <Icon d="M3.75 3v11.25A2.25 2.25 0 006 16.5h12a2.25 2.25 0 002.25-2.25V3m-16.5 0h16.5M3.75 3v0M3 15.75h18" /> },
     { label: 'Students', href: '/admin/students', icon: <Icon d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /> },
+    { label: 'Content Managers', href: '/admin/content-managers', icon: <Icon d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m5-9.13a4 4 0 110 8 4 4 0 010-8zm6 4a4 4 0 11-8 0" /> },
     { label: 'Enrollments', href: '/admin/enrollments', icon: <Icon d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /> },
     { label: 'Courses', href: '/admin/courses', icon: <Icon d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422A12.083 12.083 0 0112 20.417a12.083 12.083 0 01-6.16-9.839L12 14z" /> },
     { label: 'Categories', href: '/admin/categories', icon: <Icon d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-5 5a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 9V4a1 1 0 011-1z" /> },
@@ -39,11 +40,17 @@ const NAV: NavEntry[] = [
     { label: 'Settings', href: '/admin/settings', icon: <Icon d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /> },
 ];
 
+// Routes actually gated by the RestrictContentManagers middleware
+// (see routes/web.php) -- kept in sync with that list so a content
+// manager never sees a link that would just 403.
+const CONTENT_MANAGER_BLOCKED = ['/admin/website', '/admin/students', '/admin/content-managers', '/admin/enrollments', '/admin/payments', '/admin/bundle-purchases', '/admin/settings'];
+
 export default function AdminLayout({ children, header }: PropsWithChildren<{ header?: string }>) {
     const { site, auth } = usePage<PageProps>().props;
     const { url } = usePage();
     const [mobileOpen, setMobileOpen] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
+    const visibleNav = auth.user?.isContentManager ? NAV.filter((item) => !CONTENT_MANAGER_BLOCKED.includes(item.href)) : NAV;
 
     const sidebar = (
         <div className="flex h-full flex-col bg-secondary text-white">
@@ -52,7 +59,7 @@ export default function AdminLayout({ children, header }: PropsWithChildren<{ he
                 <span className="truncate">Admin Panel</span>
             </Link>
             <nav className="flex-1 space-y-1 overflow-y-auto px-2.5 py-3">
-                {NAV.map((item) => {
+                {visibleNav.map((item) => {
                     const active = url === item.href || (item.href !== '/admin' && url.startsWith(item.href));
                     return (
                         <Link

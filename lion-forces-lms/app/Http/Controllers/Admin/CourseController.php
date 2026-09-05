@@ -20,6 +20,9 @@ class CourseController extends Controller
     public function index(Request $request): Response
     {
         $courses = Course::with('category')
+            // A content manager only ever sees the courses they're
+            // assigned to -- everyone else (owner/staff) sees all of them.
+            ->when($request->user()->hasRole('content_manager'), fn ($q) => $q->whereIn('id', $request->user()->managedCourses()->pluck('courses.id')))
             ->when($request->search, fn ($q, $s) => $q->where('title', 'like', "%{$s}%"))
             ->when($request->status, fn ($q, $s) => $q->where('status', $s))
             ->orderBy('order')
@@ -32,8 +35,13 @@ class CourseController extends Controller
         ]);
     }
 
-    public function create(): Response
+    public function create(Request $request): Response
     {
+        // Creating (and, below, deleting) a whole course -- including its
+        // pricing structure -- stays owner/staff-only; a content manager
+        // works within courses already assigned to them.
+        abort_if($request->user()->hasRole('content_manager'), 403);
+
         return Inertia::render('Admin/Courses/Form', [
             'categories' => CourseCategory::orderBy('name')->get(['id', 'name']),
             'instructors' => Instructor::orderBy('name')->get(['id', 'name']),
@@ -42,6 +50,8 @@ class CourseController extends Controller
 
     public function store(Request $request)
     {
+        abort_if($request->user()->hasRole('content_manager'), 403);
+
         $data = $this->validateCourse($request);
         $data['slug'] = $this->uniqueSlug($data['title']);
         $tags = $data['tags'] ?? '';
@@ -54,8 +64,10 @@ class CourseController extends Controller
         return redirect()->route('admin.courses.edit', $course)->with('success', 'Course created. Add lessons and packages below.');
     }
 
-    public function edit(Course $course): Response
+    public function edit(Request $request, Course $course): Response
     {
+        abort_unless($request->user()->canManageCourse($course), 403);
+
         $course->load([
             'packages',
             'lessons' => fn ($q) => $q->orderBy('order'),
@@ -72,6 +84,8 @@ class CourseController extends Controller
 
     public function update(Request $request, Course $course)
     {
+        abort_unless($request->user()->canManageCourse($course), 403);
+
         $data = $this->validateCourse($request);
         $tags = $data['tags'] ?? '';
         unset($data['tags']);
@@ -104,8 +118,10 @@ class CourseController extends Controller
         $course->tags()->sync($ids);
     }
 
-    public function destroy(Course $course)
+    public function destroy(Request $request, Course $course)
     {
+        abort_if($request->user()->hasRole('content_manager'), 403);
+
         $course->delete();
 
         return redirect()->route('admin.courses.index')->with('success', 'Course removed.');
@@ -146,9 +162,12 @@ class CourseController extends Controller
         return $slug;
     }
 
-    // --- Packages ---
+    // --- Packages --- pricing/access terms, kept owner/staff-only even
+    // for a content manager assigned to this course.
     public function storePackage(Request $request, Course $course)
     {
+        abort_if($request->user()->hasRole('content_manager'), 403);
+
         $data = $request->validate([
             'name' => 'required|string|max:150',
             'description' => 'nullable|string|max:500',
@@ -163,6 +182,8 @@ class CourseController extends Controller
 
     public function updatePackage(Request $request, CoursePackage $package)
     {
+        abort_if($request->user()->hasRole('content_manager'), 403);
+
         $package->update($request->validate([
             'name' => 'required|string|max:150',
             'description' => 'nullable|string|max:500',
@@ -174,8 +195,10 @@ class CourseController extends Controller
         return back()->with('success', 'Package updated.');
     }
 
-    public function destroyPackage(CoursePackage $package)
+    public function destroyPackage(Request $request, CoursePackage $package)
     {
+        abort_if($request->user()->hasRole('content_manager'), 403);
+
         $package->delete();
 
         return back()->with('success', 'Package removed.');
@@ -190,6 +213,8 @@ class CourseController extends Controller
     // Laravel's own validation never runs if PHP rejects the upload first.
     public function storeLesson(Request $request, Course $course)
     {
+        abort_unless($request->user()->canManageCourse($course), 403);
+
         $data = collect($request->validate($this->lessonRules($request, required: true, course: $course)))->except('file')->toArray();
 
         $data['file_path'] = $this->handleLessonFile($request);
@@ -202,6 +227,8 @@ class CourseController extends Controller
 
     public function updateLesson(Request $request, Lesson $lesson)
     {
+        abort_unless($request->user()->canManageCourse($lesson->course), 403);
+
         $data = collect($request->validate($this->lessonRules($request, required: false, course: $lesson->course)))->except('file')->toArray();
 
         if ($newPath = $this->handleLessonFile($request)) {
@@ -217,8 +244,10 @@ class CourseController extends Controller
         return back()->with('success', 'Lesson updated.');
     }
 
-    public function destroyLesson(Lesson $lesson)
+    public function destroyLesson(Request $request, Lesson $lesson)
     {
+        abort_unless($request->user()->canManageCourse($lesson->course), 403);
+
         if ($lesson->file_path) {
             \Illuminate\Support\Facades\Storage::disk('public')->delete($lesson->file_path);
         }
@@ -233,6 +262,8 @@ class CourseController extends Controller
     // existing courses.
     public function storeSection(Request $request, Course $course)
     {
+        abort_unless($request->user()->canManageCourse($course), 403);
+
         $data = $request->validate(['title' => 'required|string|max:150']);
 
         $section = $course->sections()->create($data + ['order' => $course->sections()->max('order') + 1]);
@@ -243,14 +274,18 @@ class CourseController extends Controller
 
     public function updateSection(Request $request, \App\Models\CourseSection $section)
     {
+        abort_unless($request->user()->canManageCourse($section->course), 403);
+
         $section->update($request->validate(['title' => 'required|string|max:150']));
         ActivityLog::record('edited', 'Topic', $section->id, "Topic \"{$section->title}\" was updated.", $section->course_id);
 
         return back()->with('success', 'Section updated.');
     }
 
-    public function destroySection(\App\Models\CourseSection $section)
+    public function destroySection(Request $request, \App\Models\CourseSection $section)
     {
+        abort_unless($request->user()->canManageCourse($section->course), 403);
+
         // Lessons in this section aren't deleted -- they fall back to
         // ungrouped (section_id nullOnDelete handles this at the DB level
         // too, but we're explicit here since we're in the same request).
