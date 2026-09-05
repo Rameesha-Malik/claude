@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\ActivityController as AdminActivityController;
 use App\Http\Controllers\Admin\AssignmentController as AdminAssignmentController;
 use App\Http\Controllers\Admin\BundleController as AdminBundleController;
 use App\Http\Controllers\Admin\BundlePurchaseController as AdminBundlePurchaseController;
@@ -8,6 +9,8 @@ use App\Http\Controllers\Admin\ContactInboxController as AdminContactInboxContro
 use App\Http\Controllers\Admin\ContentLibraryController as AdminContentLibraryController;
 use App\Http\Controllers\Admin\CourseController as AdminCourseController;
 use App\Http\Controllers\Admin\CourseQuestionController as AdminCourseQuestionController;
+use App\Http\Controllers\Admin\EnrollmentController as AdminEnrollmentController;
+use App\Http\Controllers\Admin\LeaderboardController as AdminLeaderboardController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
 use App\Http\Controllers\Admin\DemoQuizController as AdminDemoQuizController;
 use App\Http\Controllers\Admin\FlashcardController as AdminFlashcardController;
@@ -285,6 +288,10 @@ Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->nam
         Route::post('/{payment}/verify', [AdminPaymentController::class, 'verify'])->name('verify');
         Route::post('/{payment}/reject', [AdminPaymentController::class, 'reject'])->name('reject');
     });
+
+    Route::get('/enrollments', [AdminEnrollmentController::class, 'index'])->name('enrollments.index');
+    Route::get('/leaderboard', [AdminLeaderboardController::class, 'index'])->name('leaderboard.index');
+    Route::get('/activity', [AdminActivityController::class, 'index'])->name('activity.index');
 
     Route::prefix('bundles')->name('bundles.')->group(function () {
         Route::get('/', [AdminBundleController::class, 'index'])->name('index');

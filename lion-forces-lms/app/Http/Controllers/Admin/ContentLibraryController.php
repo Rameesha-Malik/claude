@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\ActivityLog;
 use App\Models\NotesBank;
 use App\Models\QuestionBank;
 use App\Models\Subject;
@@ -63,6 +64,8 @@ class ContentLibraryController extends Controller
             ]);
         }
 
+        ActivityLog::record('added', 'MCQ', $question->id, 'MCQ added.');
+
         return back()->with('success', 'Question added to the bank.');
     }
 
@@ -90,6 +93,8 @@ class ContentLibraryController extends Controller
             ]);
         }
 
+        ActivityLog::record('edited', 'MCQ', $question->id, 'MCQ updated.');
+
         return back()->with('success', 'Question updated — change reflects in every course using it.');
     }
 
@@ -109,7 +114,8 @@ class ContentLibraryController extends Controller
             'content' => 'nullable|string',
         ]);
 
-        NotesBank::create($data + ['created_by' => $request->user()->id]);
+        $note = NotesBank::create($data + ['created_by' => $request->user()->id]);
+        ActivityLog::record('added', 'Note', $note->id, "Note \"{$note->title}\" was added.");
 
         return back()->with('success', 'Note added to the bank.');
     }
@@ -121,6 +127,8 @@ class ContentLibraryController extends Controller
             'title' => 'required|string|max:255',
             'content' => 'nullable|string',
         ]));
+
+        ActivityLog::record('edited', 'Note', $note->id, "Note \"{$note->title}\" was updated.");
 
         return back()->with('success', 'Note updated — change reflects in every course using it.');
     }

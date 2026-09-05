@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\ActivityLog;
 use App\Models\Course;
 use App\Models\CourseCategory;
 use App\Models\CoursePackage;
@@ -48,6 +49,7 @@ class CourseController extends Controller
 
         $course = Course::create($data);
         $this->syncTags($course, $tags);
+        ActivityLog::record('added', 'Course', $course->id, "Course \"{$course->title}\" was created.", $course->id);
 
         return redirect()->route('admin.courses.edit', $course)->with('success', 'Course created. Add lessons and packages below.');
     }
@@ -76,6 +78,7 @@ class CourseController extends Controller
 
         $course->update($data);
         $this->syncTags($course, $tags);
+        ActivityLog::record('edited', 'Course', $course->id, "Course \"{$course->title}\" was updated.", $course->id);
 
         return back()->with('success', 'Course updated.');
     }
@@ -191,7 +194,8 @@ class CourseController extends Controller
 
         $data['file_path'] = $this->handleLessonFile($request);
 
-        $course->lessons()->create($data + ['order' => $course->lessons()->max('order') + 1]);
+        $lesson = $course->lessons()->create($data + ['order' => $course->lessons()->max('order') + 1]);
+        ActivityLog::record('added', 'Lecture', $lesson->id, "Lecture \"{$lesson->title}\" was added to {$course->title}.", $course->id);
 
         return back()->with('success', 'Lesson added.');
     }
@@ -208,6 +212,7 @@ class CourseController extends Controller
         }
 
         $lesson->update($data);
+        ActivityLog::record('edited', 'Lecture', $lesson->id, "Lecture \"{$lesson->title}\" was updated.", $lesson->course_id);
 
         return back()->with('success', 'Lesson updated.');
     }
@@ -230,7 +235,8 @@ class CourseController extends Controller
     {
         $data = $request->validate(['title' => 'required|string|max:150']);
 
-        $course->sections()->create($data + ['order' => $course->sections()->max('order') + 1]);
+        $section = $course->sections()->create($data + ['order' => $course->sections()->max('order') + 1]);
+        ActivityLog::record('added', 'Topic', $section->id, "Topic \"{$section->title}\" was added.", $course->id);
 
         return back()->with('success', 'Section added.');
     }
@@ -238,6 +244,7 @@ class CourseController extends Controller
     public function updateSection(Request $request, \App\Models\CourseSection $section)
     {
         $section->update($request->validate(['title' => 'required|string|max:150']));
+        ActivityLog::record('edited', 'Topic', $section->id, "Topic \"{$section->title}\" was updated.", $section->course_id);
 
         return back()->with('success', 'Section updated.');
     }
