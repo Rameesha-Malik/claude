@@ -75,14 +75,20 @@ class CatalogSeeder extends Seeder
                 'order' => $order,
             ]);
 
-            CoursePackage::updateOrCreate(['course_id' => $course->id, 'name' => 'Standard'], [
+            // firstOrCreate, not updateOrCreate: this placeholder pricing is
+            // meant to be replaced with real content once, in the admin --
+            // updateOrCreate would silently overwrite that real content
+            // (including re-flipping is_active back to true on a package an
+            // admin deliberately deactivated) every time this seeder runs
+            // again, e.g. if SEED_ON_BOOT is left on in a deploy environment.
+            CoursePackage::firstOrCreate(['course_id' => $course->id, 'name' => 'Standard'], [
                 'description' => 'Full course access, lectures, notes, and practice tests.',
                 'price' => 5000, // PLACEHOLDER
                 'validity_days' => 180,
                 'order' => 1,
                 'is_active' => true,
             ]);
-            CoursePackage::updateOrCreate(['course_id' => $course->id, 'name' => "{$short} Guaranteed Package"], [
+            CoursePackage::firstOrCreate(['course_id' => $course->id, 'name' => "{$short} Guaranteed Package"], [
                 'description' => 'Everything in Standard, plus guaranteed notes and mock exams.',
                 'price' => 7500, // PLACEHOLDER
                 'validity_days' => 365,
