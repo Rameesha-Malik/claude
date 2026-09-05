@@ -60,7 +60,14 @@ export default function RevealOnScroll({
                     }
                 });
             },
-            { threshold: 0.15 },
+            // Fires while the section is still 300px below the viewport, not
+            // only once it's already visible -- at normal scroll speed this
+            // gives the (up to ~650ms + stagger) animation time to finish
+            // before a reader's eyes actually reach it. Without this, a
+            // multi-item grid with a real stagger delay (e.g. 6 cards) could
+            // still be mid-fade -- looking washed-out, not broken -- right as
+            // it scrolls into view.
+            { threshold: 0.01, rootMargin: '0px 0px 300px 0px' },
         );
 
         observer.observe(el);
