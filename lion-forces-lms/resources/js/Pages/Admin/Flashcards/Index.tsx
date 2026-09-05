@@ -1,4 +1,5 @@
 import { Head, router, useForm } from '@inertiajs/react';
+import RichTextArea from '@/Components/RichTextArea';
 import AdminLayout from '@/Layouts/AdminLayout';
 
 interface FlashcardRow {
@@ -28,12 +29,12 @@ export default function FlashcardsIndex({ course, flashcards }: Props) {
                     <h3 className="font-bold text-text">Add a Flashcard</h3>
                     <div>
                         <label className="mb-1 block text-sm font-medium text-text">Front (question / prompt)</label>
-                        <textarea rows={3} className={inputClass} value={form.data.front_text} onChange={(e) => form.setData('front_text', e.target.value)} />
+                        <RichTextArea rows={3} className={inputClass} value={form.data.front_text} onChange={(v) => form.setData('front_text', v)} />
                         {form.errors.front_text && <div className="mt-1 text-xs text-danger">{form.errors.front_text}</div>}
                     </div>
                     <div>
                         <label className="mb-1 block text-sm font-medium text-text">Back (answer)</label>
-                        <textarea rows={3} className={inputClass} value={form.data.back_text} onChange={(e) => form.setData('back_text', e.target.value)} />
+                        <RichTextArea rows={3} className={inputClass} value={form.data.back_text} onChange={(v) => form.setData('back_text', v)} />
                         {form.errors.back_text && <div className="mt-1 text-xs text-danger">{form.errors.back_text}</div>}
                     </div>
                     <button type="submit" disabled={form.processing} className="w-full rounded-lg bg-primary py-2.5 text-sm font-bold uppercase tracking-wide text-on-primary hover:bg-primary-hover">

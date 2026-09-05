@@ -1,4 +1,5 @@
 import { Head, useForm } from '@inertiajs/react';
+import RichTextArea from '@/Components/RichTextArea';
 import AdminLayout from '@/Layouts/AdminLayout';
 
 interface Course { id: number; title: string }
@@ -49,7 +50,7 @@ export default function NotificationsIndex({ broadcasts, courses, packages }: Pr
                     </div>
                     <div>
                         <label className={labelClass}>Message</label>
-                        <textarea rows={4} className={inputClass} value={form.data.body} onChange={(e) => form.setData('body', e.target.value)} />
+                        <RichTextArea rows={4} className={inputClass} value={form.data.body} onChange={(v) => form.setData('body', v)} />
                     </div>
                     <div>
                         <label className={labelClass}>Send To</label>

@@ -1,4 +1,5 @@
 import { Head, router, useForm, usePage } from '@inertiajs/react';
+import RichTextArea from '@/Components/RichTextArea';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { PageProps } from '@/types';
 
@@ -83,7 +84,7 @@ export default function SettingsIndex({ staff, roles, paymentSettings }: Props) 
                     >
                         <div>
                             <label className="mb-1 block text-sm font-medium text-text">Bank Transfer Details</label>
-                            <textarea rows={2} className={inputClass} value={paymentForm.data.bank_details ?? ''} onChange={(e) => paymentForm.setData('bank_details', e.target.value)} />
+                            <RichTextArea rows={2} className={inputClass} value={paymentForm.data.bank_details ?? ''} onChange={(v) => paymentForm.setData('bank_details', v)} />
                         </div>
                         <div className="grid grid-cols-2 gap-3">
                             <div>

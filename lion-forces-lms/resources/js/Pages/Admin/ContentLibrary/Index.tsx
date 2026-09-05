@@ -1,5 +1,6 @@
 import { Head, router, useForm } from '@inertiajs/react';
 import { useState } from 'react';
+import RichTextArea from '@/Components/RichTextArea';
 import AdminLayout from '@/Layouts/AdminLayout';
 
 interface Subject { id: number; name: string }
@@ -132,14 +133,14 @@ function QuestionForm({ subjects, onDone }: { subjects: Subject[]; onDone: () =>
                     {['easy', 'medium', 'hard'].map((d) => <option key={d} value={d}>{d}</option>)}
                 </select>
             </div>
-            <textarea rows={2} className={inputClass} placeholder="Question text" value={form.data.question_text} onChange={(e) => form.setData('question_text', e.target.value)} />
+            <RichTextArea rows={2} className={inputClass} placeholder="Question text" value={form.data.question_text} onChange={(v) => form.setData('question_text', v)} />
             {form.data.options.map((opt, i) => (
                 <div key={i} className="flex items-center gap-2">
                     <input type="radio" checked={opt.is_correct} onChange={() => setOption(i, 'is_correct', true)} />
                     <input className={inputClass} placeholder={`Option ${i + 1}`} value={opt.option_text} onChange={(e) => setOption(i, 'option_text', e.target.value)} />
                 </div>
             ))}
-            <textarea rows={2} className={inputClass} placeholder="Explanation (optional)" value={form.data.explanation} onChange={(e) => form.setData('explanation', e.target.value)} />
+            <RichTextArea rows={2} className={inputClass} placeholder="Explanation (optional)" value={form.data.explanation} onChange={(v) => form.setData('explanation', v)} />
             <button type="submit" disabled={form.processing} className={btnClass}>Save Question</button>
             {Object.values(form.errors).map((m, i) => <div key={i} className="text-sm text-danger">{String(m)}</div>)}
         </form>
@@ -177,7 +178,7 @@ function NotesPanel({ notes, subjects }: { notes: Paginated<Note>; subjects: Sub
                     {subjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
                 </select>
                 <input className={inputClass} placeholder="Title" value={addForm.data.title} onChange={(e) => addForm.setData('title', e.target.value)} />
-                <textarea rows={4} className={inputClass} placeholder="Content" value={addForm.data.content} onChange={(e) => addForm.setData('content', e.target.value)} />
+                <RichTextArea rows={4} className={inputClass} placeholder="Content" value={addForm.data.content} onChange={(v) => addForm.setData('content', v)} />
                 <button type="submit" disabled={addForm.processing} className={btnClass}>Add Note</button>
                 {Object.values(addForm.errors).map((m, i) => <div key={i} className="text-sm text-danger">{String(m)}</div>)}
             </form>

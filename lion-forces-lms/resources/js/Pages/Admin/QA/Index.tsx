@@ -1,5 +1,6 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEventHandler, useState } from 'react';
+import RichTextArea from '@/Components/RichTextArea';
 import AdminLayout from '@/Layouts/AdminLayout';
 
 interface Reply { id: number; reply_text: string; admin: { name: string } | null; created_at: string }
@@ -108,13 +109,12 @@ function QuestionCard({ question }: { question: QuestionItem }) {
 
             {replying ? (
                 <form onSubmit={submit} className="mt-3">
-                    <textarea
+                    <RichTextArea
                         rows={3}
                         value={data.reply_text}
-                        onChange={(e) => setData('reply_text', e.target.value)}
+                        onChange={(v) => setData('reply_text', v)}
                         placeholder="Write a reply…"
                         className="w-full rounded-lg border border-border p-3 text-sm focus:border-primary focus:shadow-glow focus:outline-none"
-                        autoFocus
                     />
                     <div className="mt-2 flex gap-2">
                         <button type="submit" disabled={processing} className="rounded-lg bg-primary px-4 py-2 text-sm font-bold uppercase tracking-wide text-on-primary hover:bg-primary-hover disabled:opacity-50">

@@ -1,11 +1,12 @@
 import { Head, useForm, usePage } from '@inertiajs/react';
 import { FormEvent } from 'react';
 import { MailIcon, PersonIcon } from '@/Components/AuthIcons';
-import { MessageIcon, PhoneIcon, TagIcon } from '@/Components/ContactFieldIcons';
+import { PhoneIcon, TagIcon } from '@/Components/ContactFieldIcons';
 import FaqAccordionItem from '@/Components/FaqAccordionItem';
 import GradientMesh from '@/Components/GradientMesh';
 import IconTextInput from '@/Components/IconTextInput';
 import RevealOnScroll from '@/Components/RevealOnScroll';
+import RichTextArea from '@/Components/RichTextArea';
 import SectionKicker from '@/Components/SectionKicker';
 import PublicLayout from '@/Layouts/PublicLayout';
 import { PageProps } from '@/types';
@@ -189,17 +190,14 @@ export default function Contact({ faqs }: { faqs: FaqItem[] }) {
                                 </Field>
                             </div>
                             <Field label="Message" error={errors.message}>
-                                <div className="relative">
-                                    <span className="pointer-events-none absolute left-0 top-3 flex items-center pl-3.5 text-text-muted">
-                                        <MessageIcon />
-                                    </span>
-                                    <textarea
-                                        rows={4}
-                                        value={data.message}
-                                        onChange={(e) => setData('message', e.target.value)}
-                                        className="w-full rounded-lg border-border bg-surface py-3 pl-11 pr-4 text-sm text-text shadow-xs transition-shadow duration-fast focus:border-primary focus:shadow-glow focus:outline-none"
-                                    />
-                                </div>
+                                {/* No left-icon overlay here (unlike the other fields) -- the
+                                    formatting toolbar above the textarea took that visual slot. */}
+                                <RichTextArea
+                                    rows={4}
+                                    value={data.message}
+                                    onChange={(v) => setData('message', v)}
+                                    className="w-full rounded-lg border-border bg-surface py-3 px-4 text-sm text-text shadow-xs transition-shadow duration-fast focus:border-primary focus:shadow-glow focus:outline-none"
+                                />
                             </Field>
                             <button
                                 type="submit"

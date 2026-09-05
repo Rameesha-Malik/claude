@@ -39,13 +39,18 @@ function prefixLine(el: HTMLTextAreaElement, prefix: string) {
 }
 
 /**
- * A plain <textarea> with a lightweight bold/heading/bullet toolbar --
- * client feedback: "text editor options in all areas of website like bold
- * heading etc." Deliberately not a full WYSIWYG (no new dependency, no
- * arbitrary-HTML storage/XSS surface): it writes simple markdown-like
- * syntax (**bold**, ## Heading, "- " bullets) into the same plain-text
- * field these forms already save, and liteMarkdown.tsx renders just those
- * three things back out safely wherever this content is displayed publicly.
+ * A plain <textarea> with a lightweight formatting toolbar (bold, italic,
+ * underline, heading, bullet list) -- client feedback: "add text editor in
+ * all places of website where it used to input text like bold italic
+ * underline font etc." Deliberately not a full WYSIWYG (no new dependency,
+ * no arbitrary-HTML storage/XSS surface): it writes simple markdown-like
+ * syntax (**bold**, *italic*, ++underline++, ## Heading, "- " bullets) into
+ * the same plain-text field these forms already save, and LiteMarkdown.tsx
+ * renders just those patterns back out safely wherever this content is
+ * displayed. "Font" wasn't taken literally as a font-family picker -- that
+ * would mean storing arbitrary style data for a formatting model built
+ * entirely around safe, fixed markdown patterns; happy to add if a specific
+ * need for it comes up.
  */
 export default function RichTextArea({ value, onChange, rows = 4, className = '', placeholder }: Props) {
     const ref = useRef<HTMLTextAreaElement>(null);
@@ -60,6 +65,12 @@ export default function RichTextArea({ value, onChange, rows = 4, className = ''
             <div className="mb-1.5 flex gap-1">
                 <button type="button" title="Bold" onClick={() => apply((el) => wrapSelection(el, '**', '**', 'bold text'))} className={toolbarBtn}>
                     <strong>B</strong>
+                </button>
+                <button type="button" title="Italic" onClick={() => apply((el) => wrapSelection(el, '*', '*', 'italic text'))} className={toolbarBtn}>
+                    <em>I</em>
+                </button>
+                <button type="button" title="Underline" onClick={() => apply((el) => wrapSelection(el, '++', '++', 'underlined text'))} className={toolbarBtn}>
+                    <span className="underline">U</span>
                 </button>
                 <button type="button" title="Heading" onClick={() => apply((el) => prefixLine(el, '## '))} className={toolbarBtn}>
                     H

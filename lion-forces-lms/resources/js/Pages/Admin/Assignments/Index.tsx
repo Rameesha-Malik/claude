@@ -1,4 +1,5 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
+import RichTextArea from '@/Components/RichTextArea';
 import AdminLayout from '@/Layouts/AdminLayout';
 
 interface AssignmentRow {
@@ -36,7 +37,7 @@ export default function AssignmentsIndex({ course, assignments, sections }: Prop
                     </div>
                     <div>
                         <label className="mb-1 block text-sm font-medium text-text">Instructions</label>
-                        <textarea rows={4} className={inputClass} value={form.data.instructions} onChange={(e) => form.setData('instructions', e.target.value)} />
+                        <RichTextArea rows={4} className={inputClass} value={form.data.instructions} onChange={(v) => form.setData('instructions', v)} />
                     </div>
                     <div className="grid grid-cols-2 gap-3">
                         <div>

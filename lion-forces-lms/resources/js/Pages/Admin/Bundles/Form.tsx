@@ -1,5 +1,6 @@
 import { Head, useForm } from '@inertiajs/react';
 import { useState } from 'react';
+import RichTextArea from '@/Components/RichTextArea';
 import AdminLayout from '@/Layouts/AdminLayout';
 
 interface CourseOption { id: number; title: string; base_price: string | null }
@@ -63,7 +64,7 @@ export default function BundleForm({ bundle, courses }: Props) {
                 </div>
                 <div>
                     <label className={labelClass}>Description</label>
-                    <textarea rows={3} className={inputClass} value={form.data.description} onChange={(e) => form.setData('description', e.target.value)} />
+                    <RichTextArea rows={3} className={inputClass} value={form.data.description} onChange={(v) => form.setData('description', v)} />
                 </div>
                 <div>
                     <label className={labelClass}>Bundle Price (Rs.)</label>

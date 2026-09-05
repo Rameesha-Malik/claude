@@ -1,5 +1,6 @@
 import { Head, useForm } from '@inertiajs/react';
 import { useState } from 'react';
+import RichTextArea from '@/Components/RichTextArea';
 import AdminLayout from '@/Layouts/AdminLayout';
 
 interface Submission {
@@ -89,12 +90,12 @@ function SubmissionCard({ submission, maxMarks, courseId }: { submission: Submis
                             onChange={(e) => form.setData('marks_awarded', e.target.value)}
                         />
                     </div>
-                    <textarea
+                    <RichTextArea
                         rows={3}
                         placeholder="Feedback"
                         className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:shadow-glow focus:outline-none"
                         value={form.data.feedback}
-                        onChange={(e) => form.setData('feedback', e.target.value)}
+                        onChange={(v) => form.setData('feedback', v)}
                     />
                     <div className="flex gap-2">
                         <button type="submit" disabled={form.processing} className="rounded-lg bg-primary px-4 py-2 text-sm font-bold uppercase text-on-primary hover:bg-primary-hover">

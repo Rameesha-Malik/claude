@@ -1,18 +1,27 @@
 import { Fragment, ReactNode } from 'react';
 
-// Renders **bold**, "## Heading" / "### Heading" lines, and "- " bullet
-// lines from RichTextArea's plain-text output as real React elements --
-// never dangerouslySetInnerHTML, so there's no HTML-injection surface even
-// though this content comes from an admin-controlled field, not just a
-// trusted one. Anything that isn't one of those three patterns renders as
-// plain text exactly as typed.
+// Renders **bold**, *italic*, ++underline++, "## Heading" / "### Heading"
+// lines, and "- " bullet lines from RichTextArea's plain-text output as
+// real React elements -- never dangerouslySetInnerHTML, so there's no
+// HTML-injection surface even though this content comes from an
+// admin-controlled field, not just a trusted one. Anything that isn't one
+// of those patterns renders as plain text exactly as typed. Bold is matched
+// before italic in the alternation so a **bold** run isn't split apart by
+// the single-asterisk italic pattern first.
 function renderInline(text: string, keyPrefix: string): ReactNode[] {
-    const parts = text.split(/(\*\*[^*]+\*\*)/g);
+    const parts = text.split(/(\*\*[^*]+\*\*|\+\+[^+]+\+\+|\*[^*]+\*)/g);
     return parts.map((part, i) => {
+        const key = `${keyPrefix}-${i}`;
         if (part.startsWith('**') && part.endsWith('**') && part.length > 4) {
-            return <strong key={`${keyPrefix}-${i}`}>{part.slice(2, -2)}</strong>;
+            return <strong key={key}>{part.slice(2, -2)}</strong>;
         }
-        return <Fragment key={`${keyPrefix}-${i}`}>{part}</Fragment>;
+        if (part.startsWith('++') && part.endsWith('++') && part.length > 4) {
+            return <u key={key}>{part.slice(2, -2)}</u>;
+        }
+        if (part.startsWith('*') && part.endsWith('*') && part.length > 2) {
+            return <em key={key}>{part.slice(1, -1)}</em>;
+        }
+        return <Fragment key={key}>{part}</Fragment>;
     });
 }
 

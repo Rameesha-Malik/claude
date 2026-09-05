@@ -1,4 +1,5 @@
 import { Head, router, useForm } from '@inertiajs/react';
+import RichTextArea from '@/Components/RichTextArea';
 import AdminLayout from '@/Layouts/AdminLayout';
 
 interface Instructor { id: number; name: string; qualification: string | null; experience: string | null; bio: string | null; is_active: boolean }
@@ -39,7 +40,7 @@ export default function InstructorsIndex({ instructors }: { instructors: Instruc
                 <input className={inputClass} placeholder="Name" value={addForm.data.name} onChange={(e) => addForm.setData('name', e.target.value)} />
                 <input className={inputClass} placeholder="Qualification" value={addForm.data.qualification} onChange={(e) => addForm.setData('qualification', e.target.value)} />
                 <input className={inputClass} placeholder="Experience" value={addForm.data.experience} onChange={(e) => addForm.setData('experience', e.target.value)} />
-                <textarea rows={3} className={inputClass} placeholder="Bio" value={addForm.data.bio} onChange={(e) => addForm.setData('bio', e.target.value)} />
+                <RichTextArea rows={3} className={inputClass} placeholder="Bio" value={addForm.data.bio} onChange={(v) => addForm.setData('bio', v)} />
                 <button type="submit" disabled={addForm.processing} className={btnClass}>Add Instructor</button>
                 {Object.values(addForm.errors).map((m, i) => <div key={i} className="text-sm text-danger">{String(m)}</div>)}
             </form>

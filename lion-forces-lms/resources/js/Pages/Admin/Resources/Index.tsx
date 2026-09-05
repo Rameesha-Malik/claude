@@ -1,4 +1,5 @@
 import { Head, router, useForm } from '@inertiajs/react';
+import RichTextArea from '@/Components/RichTextArea';
 import AdminLayout from '@/Layouts/AdminLayout';
 
 interface ResourceItem { id: number; title: string; category: string | null; description: string | null; external_link: string | null; is_published: boolean }
@@ -39,7 +40,7 @@ export default function ResourcesIndex({ resources }: { resources: ResourceItem[
             >
                 <input className={inputClass} placeholder="Title" value={addForm.data.title} onChange={(e) => addForm.setData('title', e.target.value)} />
                 <input className={inputClass} placeholder="Category (e.g. Syllabus)" value={addForm.data.category} onChange={(e) => addForm.setData('category', e.target.value)} />
-                <textarea rows={2} className={inputClass} placeholder="Description" value={addForm.data.description} onChange={(e) => addForm.setData('description', e.target.value)} />
+                <RichTextArea rows={2} className={inputClass} placeholder="Description" value={addForm.data.description} onChange={(v) => addForm.setData('description', v)} />
                 <input className={inputClass} placeholder="Link (URL to file)" value={addForm.data.external_link} onChange={(e) => addForm.setData('external_link', e.target.value)} />
                 <button type="submit" disabled={addForm.processing} className={btnClass}>Add Resource</button>
                 {Object.values(addForm.errors).map((m, i) => <div key={i} className="text-sm text-danger">{String(m)}</div>)}

@@ -1,4 +1,5 @@
 import { Head, router, useForm } from '@inertiajs/react';
+import RichTextArea from '@/Components/RichTextArea';
 import AdminLayout from '@/Layouts/AdminLayout';
 
 interface Category { id: number; name: string }
@@ -63,7 +64,7 @@ export default function NewsIndex({ announcements, categories }: { announcements
                 className="max-w-xl space-y-2 rounded-2xl border border-border bg-surface p-5"
             >
                 <input className={inputClass} placeholder="Title" value={addForm.data.title} onChange={(e) => addForm.setData('title', e.target.value)} />
-                <textarea rows={2} className={inputClass} placeholder="Description" value={addForm.data.description} onChange={(e) => addForm.setData('description', e.target.value)} />
+                <RichTextArea rows={2} className={inputClass} placeholder="Description" value={addForm.data.description} onChange={(v) => addForm.setData('description', v)} />
                 <div className="flex gap-2">
                     <input className={inputClass} placeholder="Organization (e.g. PMA)" value={addForm.data.organization} onChange={(e) => addForm.setData('organization', e.target.value)} />
                     <input type="date" className={inputClass} value={addForm.data.deadline_date} onChange={(e) => addForm.setData('deadline_date', e.target.value)} />

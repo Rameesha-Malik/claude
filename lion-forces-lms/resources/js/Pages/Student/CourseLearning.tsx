@@ -1,6 +1,7 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import { useState } from 'react';
 import RevealOnScroll from '@/Components/RevealOnScroll';
+import RichTextArea from '@/Components/RichTextArea';
 import StudentLayout from '@/Layouts/StudentLayout';
 
 interface Lesson { id: number; title: string; type: string; external_url: string | null; file_path: string | null; description: string | null; section_id: number | null }
@@ -721,12 +722,12 @@ function AssignmentCard({ assignment }: { assignment: AssignmentItem }) {
 
             {editing && (
                 <form onSubmit={submit} className="mt-4 space-y-3 border-t border-border pt-4">
-                    <textarea
+                    <RichTextArea
                         rows={3}
                         placeholder="Write your answer (optional if attaching a file)"
                         className="w-full rounded-2xl border border-border p-3 text-sm transition-colors focus:border-primary focus:shadow-glow focus:outline-none"
                         value={form.data.submission_text}
-                        onChange={(e) => form.setData('submission_text', e.target.value)}
+                        onChange={(v) => form.setData('submission_text', v)}
                     />
                     <input
                         type="file"
@@ -766,10 +767,10 @@ function QaPanel({ course, questions }: { course: Course; questions: Question[] 
         <div className="grid gap-6 lg:grid-cols-2">
             <form onSubmit={submit} className="h-fit rounded-3xl border border-border bg-surface p-6">
                 <h3 className="mb-3 font-bold text-text">Ask a Question</h3>
-                <textarea
+                <RichTextArea
                     rows={4}
                     value={data.question_text}
-                    onChange={(e) => setData('question_text', e.target.value)}
+                    onChange={(v) => setData('question_text', v)}
                     placeholder="Ask about a lecture, note, or anything course-related..."
                     className="w-full rounded-2xl border border-border p-3 text-sm transition-colors focus:border-primary focus:shadow-glow focus:outline-none"
                 />
@@ -861,10 +862,10 @@ function ReviewWidget({ course, myReview }: { course: Course; myReview: Review |
                     </button>
                 ))}
             </div>
-            <textarea
+            <RichTextArea
                 rows={3}
                 value={data.review_text}
-                onChange={(e) => setData('review_text', e.target.value)}
+                onChange={(v) => setData('review_text', v)}
                 placeholder="What did you think of this course? (optional)"
                 className="w-full rounded-2xl border border-border p-3 text-sm transition-colors focus:border-primary focus:shadow-glow focus:outline-none"
             />

@@ -1,4 +1,5 @@
 import { Head, router, useForm } from '@inertiajs/react';
+import RichTextArea from '@/Components/RichTextArea';
 import AdminLayout from '@/Layouts/AdminLayout';
 
 interface Entry { id: number; name: string; achievement_text: string; is_active: boolean }
@@ -35,7 +36,7 @@ export default function HallOfFameIndex({ entries }: { entries: Entry[] }) {
                 className="max-w-xl space-y-2 rounded-2xl border border-border bg-surface p-5"
             >
                 <input className={inputClass} placeholder="Name" value={addForm.data.name} onChange={(e) => addForm.setData('name', e.target.value)} />
-                <textarea rows={3} className={inputClass} placeholder="Achievement" value={addForm.data.achievement_text} onChange={(e) => addForm.setData('achievement_text', e.target.value)} />
+                <RichTextArea rows={3} className={inputClass} placeholder="Achievement" value={addForm.data.achievement_text} onChange={(v) => addForm.setData('achievement_text', v)} />
                 <button type="submit" disabled={addForm.processing} className={btnClass}>Add Entry</button>
                 {Object.values(addForm.errors).map((m, i) => <div key={i} className="text-sm text-danger">{String(m)}</div>)}
             </form>

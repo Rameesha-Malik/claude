@@ -1,5 +1,6 @@
 import { Head, router, useForm } from '@inertiajs/react';
 import { ChangeEvent, FormEvent, useState } from 'react';
+import RichTextArea from '@/Components/RichTextArea';
 import AdminLayout from '@/Layouts/AdminLayout';
 
 interface Settings {
@@ -282,7 +283,7 @@ function HomePagePanel({ hero, cta }: { hero: HomeSection; cta: HomeSection }) {
                     </div>
                     <div>
                         <label className={labelClass}>Subheading</label>
-                        <textarea rows={2} className={inputClass} value={heroForm.data.subheading ?? ''} onChange={(e) => heroForm.setData('subheading', e.target.value)} />
+                        <RichTextArea rows={2} className={inputClass} value={heroForm.data.subheading ?? ''} onChange={(v) => heroForm.setData('subheading', v)} />
                     </div>
                     <div className="grid grid-cols-2 gap-4">
                         <div>
