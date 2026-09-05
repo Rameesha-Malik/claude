@@ -18,8 +18,18 @@ export default function ReportsIndex({ filters, student, course, test, payment }
     const [from, setFrom] = useState(filters.from ?? '');
     const [to, setTo] = useState(filters.to ?? '');
 
-    function applyFilter() {
-        router.get('/admin/reports', { from: from || undefined, to: to || undefined }, { preserveState: true });
+    function applyFilter(overrideFrom?: string, overrideTo?: string) {
+        router.get('/admin/reports', { from: overrideFrom ?? from ?? undefined, to: overrideTo ?? to ?? undefined }, { preserveState: true });
+    }
+
+    function applyPreset(days: number | 'year') {
+        const end = new Date();
+        const start = days === 'year' ? new Date(end.getFullYear(), 0, 1) : new Date(end.getTime() - days * 86400000);
+        const f = start.toISOString().slice(0, 10);
+        const t = end.toISOString().slice(0, 10);
+        setFrom(f);
+        setTo(t);
+        applyFilter(f, t);
     }
 
     function exportCsv(type: string) {
@@ -39,7 +49,18 @@ export default function ReportsIndex({ filters, student, course, test, payment }
                     <label className="mb-1 block text-xs font-bold uppercase text-text-muted">To</label>
                     <input type="date" value={to} onChange={(e) => setTo(e.target.value)} className="rounded-lg border border-border px-3 py-2 text-sm" />
                 </div>
-                <button onClick={applyFilter} className="rounded-lg bg-primary px-4 py-2 text-sm font-bold uppercase text-on-primary hover:bg-primary-hover">Apply</button>
+                <button onClick={() => applyFilter()} className="rounded-lg bg-primary px-4 py-2 text-sm font-bold uppercase text-on-primary hover:bg-primary-hover">Apply</button>
+                <div className="flex flex-wrap gap-2">
+                    {[['Last 7 days', 7], ['Last 30 days', 30], ['Last 90 days', 90], ['This year', 'year']].map(([label, val]) => (
+                        <button
+                            key={label as string}
+                            onClick={() => applyPreset(val as number | 'year')}
+                            className="rounded-full border border-border px-3 py-2 text-sm font-medium text-text-secondary hover:border-primary hover:text-primary"
+                        >
+                            {label}
+                        </button>
+                    ))}
+                </div>
             </div>
 
             <div className="mb-6 flex gap-2 border-b border-border">
