@@ -1,5 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
 import { useState } from 'react';
+import AnswerReviewCard, { WrongAnswersReview } from '@/Components/AnswerReviewCard';
 import StudentLayout from '@/Layouts/StudentLayout';
 
 interface Option { id: number; option_text: string; is_correct: boolean }
@@ -35,6 +36,8 @@ export default function StagedTestResult({ attempt, testTitle, stages }: Props) 
                 </Link>
             </div>
 
+            <WrongAnswersReview answers={stages.flatMap((s) => s.answers)} />
+
             <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {stages.map((s) => {
                     const pct = Number(s.total_marks) > 0 ? Math.round((Math.max(Number(s.score), 0) / Number(s.total_marks)) * 100) : 0;
@@ -65,37 +68,7 @@ export default function StagedTestResult({ attempt, testTitle, stages }: Props) 
                 <div key={s.id} className="space-y-5">
                     <h3 className="font-bold text-text">{s.name} — Question Review</h3>
                     {s.answers.map((a, i) => (
-                        <div key={a.id} className="rounded-2xl border border-border bg-surface p-5">
-                            <p className="mb-3 font-semibold text-text">
-                                <span className="mr-2 text-text-muted">Q{i + 1}.</span>
-                                {a.question.question_text}
-                            </p>
-                            <div className="space-y-2">
-                                {a.question.options.map((opt) => {
-                                    const isSelected = a.selected_option_id === opt.id;
-                                    let classes = 'border-border';
-                                    if (opt.is_correct) classes = 'border-success bg-success-bg';
-                                    else if (isSelected && !opt.is_correct) classes = 'border-danger bg-danger-bg';
-                                    return (
-                                        <div key={opt.id} className={`flex items-center justify-between rounded-lg border p-3 text-sm ${classes}`}>
-                                            <span className="text-text">{opt.option_text}</span>
-                                            <span className="text-xs font-bold uppercase">
-                                                {opt.is_correct && <span className="text-success">Correct Answer</span>}
-                                                {isSelected && !opt.is_correct && <span className="text-danger">Your Answer</span>}
-                                            </span>
-                                        </div>
-                                    );
-                                })}
-                                {a.selected_option_id === null && <p className="text-xs font-bold uppercase text-text-muted">You skipped this question.</p>}
-                            </div>
-                            {a.question.explanation && (
-                                <div className="mt-3 rounded-lg bg-primary-subtle p-3 text-sm text-text">
-                                    <span className="font-bold text-primary">Explanation: </span>
-                                    {a.question.explanation}
-                                </div>
-                            )}
-                            <p className="mt-2 text-xs text-text-muted">Marks awarded: {a.marks_awarded}</p>
-                        </div>
+                        <AnswerReviewCard key={a.id} a={a} index={i} />
                     ))}
                     {s.answers.length === 0 && <p className="text-sm text-text-secondary">No questions in this stage.</p>}
                 </div>

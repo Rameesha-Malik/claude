@@ -1,4 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
+import AnswerReviewCard from '@/Components/AnswerReviewCard';
 import GradientMesh from '@/Components/GradientMesh';
 import RevealOnScroll from '@/Components/RevealOnScroll';
 import SectionKicker from '@/Components/SectionKicker';
@@ -108,43 +109,23 @@ export default function DemoQuizResult({ attempt, quizTitle }: Props) {
                         </Link>
                     </div>
 
+                    {attempt.wrong_count > 0 && (
+                        <div className="mt-10 rounded-2xl border border-warning bg-warning-bg p-5 text-left">
+                            <p className="font-bold text-text">
+                                Enrolled students get every wrong answer saved to a personal{' '}
+                                <span className="text-primary">Revision List</span> automatically, so it's easy to come back and
+                                relearn exactly what tripped them up.{' '}
+                                <Link href="/register" className="underline hover:text-primary">Create a free account</Link> to get that too.
+                            </p>
+                        </div>
+                    )}
+
                     {attempt.answers.length > 0 && (
                         <div className="mt-10">
                             <h2 className="mb-4 text-center font-display text-2xl uppercase tracking-wide text-text">Review Your Answers</h2>
                             <RevealOnScroll staggerMs={40} className="space-y-5">
                                 {attempt.answers.map((a, i) => (
-                                    <div key={a.id} className="rounded-2xl border border-border bg-surface p-5 text-left">
-                                        <p className="mb-3 font-semibold text-text">
-                                            <span className="mr-2 text-text-muted">Q{i + 1}.</span>
-                                            {a.question.question_text}
-                                        </p>
-                                        <div className="space-y-2">
-                                            {a.question.options.map((opt) => {
-                                                const isSelected = a.selected_option_id === opt.id;
-                                                let classes = 'border-border';
-                                                if (opt.is_correct) classes = 'border-success bg-success-bg';
-                                                else if (isSelected && !opt.is_correct) classes = 'border-danger bg-danger-bg';
-                                                return (
-                                                    <div key={opt.id} className={`flex items-center justify-between rounded-lg border p-3 text-sm ${classes}`}>
-                                                        <span className="text-text">{opt.option_text}</span>
-                                                        <span className="text-xs font-bold uppercase">
-                                                            {opt.is_correct && <span className="text-success">Correct Answer</span>}
-                                                            {isSelected && !opt.is_correct && <span className="text-danger">Your Answer</span>}
-                                                        </span>
-                                                    </div>
-                                                );
-                                            })}
-                                            {a.selected_option_id === null && (
-                                                <p className="text-xs font-bold uppercase text-text-muted">You skipped this question.</p>
-                                            )}
-                                        </div>
-                                        {a.question.explanation && (
-                                            <div className="mt-3 rounded-lg bg-primary-subtle p-3 text-sm text-text">
-                                                <span className="font-bold text-primary">Explanation: </span>
-                                                {a.question.explanation}
-                                            </div>
-                                        )}
-                                    </div>
+                                    <AnswerReviewCard key={a.id} a={a} index={i} />
                                 ))}
                             </RevealOnScroll>
                         </div>

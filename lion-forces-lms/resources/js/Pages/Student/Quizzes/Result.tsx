@@ -1,5 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
 import AnimatedCounter from '@/Components/AnimatedCounter';
+import AnswerReviewCard, { WrongAnswersReview } from '@/Components/AnswerReviewCard';
 import RevealOnScroll from '@/Components/RevealOnScroll';
 import StudentLayout from '@/Layouts/StudentLayout';
 
@@ -70,43 +71,12 @@ export default function QuizResult({ attempt, quizTitle, isRepeatable, quizId }:
                 </div>
             </div>
 
+            <WrongAnswersReview answers={attempt.answers} />
+
+            <h2 className="mb-4 font-display text-xl uppercase tracking-wide text-text">All Questions</h2>
             <RevealOnScroll staggerMs={40} className="space-y-5">
                 {attempt.answers.map((a, i) => (
-                    <div key={a.id} className="rounded-3xl border border-border bg-surface p-5 transition-shadow duration-normal hover:shadow-md">
-                        <p className="mb-3 font-semibold text-text">
-                            <span className="mr-2 text-text-muted">Q{i + 1}.</span>
-                            {a.question.question_text}
-                        </p>
-                        <div className="space-y-2">
-                            {a.question.options.map((opt) => {
-                                const isSelected = a.selected_option_id === opt.id;
-                                const isCorrectOption = opt.is_correct;
-                                let classes = 'border-border';
-                                if (isCorrectOption) classes = 'border-success bg-success-bg';
-                                else if (isSelected && !isCorrectOption) classes = 'border-danger bg-danger-bg';
-                                return (
-                                    <div key={opt.id} className={`flex items-center justify-between rounded-2xl border p-3 text-sm ${classes}`}>
-                                        <span className="text-text">{opt.option_text}</span>
-                                        <span className="text-xs font-bold uppercase">
-                                            {isCorrectOption && <span className="text-success">Correct Answer</span>}
-                                            {isSelected && !isCorrectOption && <span className="text-danger">Your Answer</span>}
-                                            {isSelected && isCorrectOption && <span className="text-success"> (Your Answer)</span>}
-                                        </span>
-                                    </div>
-                                );
-                            })}
-                            {a.selected_option_id === null && (
-                                <p className="text-xs font-bold uppercase text-text-muted">You skipped this question.</p>
-                            )}
-                        </div>
-                        {a.question.explanation && (
-                            <div className="mt-3 rounded-2xl bg-primary-subtle p-3 text-sm text-text">
-                                <span className="font-bold text-primary">Explanation: </span>
-                                {a.question.explanation}
-                            </div>
-                        )}
-                        <p className="mt-2 text-xs text-text-muted">Marks awarded: {a.marks_awarded}</p>
-                    </div>
+                    <AnswerReviewCard key={a.id} a={a} index={i} />
                 ))}
             </RevealOnScroll>
         </StudentLayout>

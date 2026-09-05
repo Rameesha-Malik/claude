@@ -38,6 +38,7 @@ use App\Http\Controllers\Student\DashboardController as StudentDashboardControll
 use App\Http\Controllers\Student\MockExamController as StudentMockExamController;
 use App\Http\Controllers\Student\NotificationController as StudentNotificationController;
 use App\Http\Controllers\Student\PracticeTestController as StudentPracticeTestController;
+use App\Http\Controllers\Student\RevisionListController as StudentRevisionListController;
 use App\Http\Controllers\Student\QuizController as StudentQuizController;
 use App\Http\Controllers\Student\StagedTestController as StudentStagedTestController;
 use Illuminate\Support\Facades\Route;
@@ -83,6 +84,7 @@ Route::get('/dashboard', function () {
 
 Route::middleware(['auth', 'verified', 'user_type:student'])->prefix('portal')->group(function () {
     Route::get('/', [StudentDashboardController::class, 'index'])->name('student.dashboard');
+    Route::get('/revision-list', [StudentRevisionListController::class, 'index'])->name('student.revision-list');
     Route::get('/my-courses', [StudentCourseController::class, 'index'])->name('student.courses');
     Route::get('/my-courses/{course:slug}', [StudentCourseController::class, 'show'])->name('student.courses.show');
     Route::get('/courses/{course:slug}/checkout', [StudentCheckoutController::class, 'create'])->name('student.checkout.create');

@@ -104,6 +104,7 @@ export default function Dashboard({ enrollments, revisionCount, unreadNotificati
                     icon={<Icon d={ICONS.flag} />}
                     tone={revisionCount > 0 ? 'warning' : 'primary'}
                     badge={revisionCount > 0 ? 'Needs attention' : undefined}
+                    href="/portal/revision-list"
                 />
                 <SummaryCard
                     label="Unread Notifications"
@@ -205,6 +206,7 @@ function SummaryCard({
     tone = 'primary',
     badge,
     badgeTone,
+    href,
 }: {
     label: string;
     value: string | number;
@@ -212,10 +214,17 @@ function SummaryCard({
     tone?: 'primary' | 'warning';
     badge?: string;
     badgeTone?: 'success' | 'warning';
+    /** Makes the whole card a link -- e.g. the revision count previously had
+     *  nowhere to click through to. */
+    href?: string;
 }) {
     const resolvedBadgeTone = badgeTone ?? (tone === 'warning' ? 'warning' : 'success');
+    const Wrapper = href ? Link : 'div';
     return (
-        <div className="group rounded-3xl border border-border bg-surface p-5 transition-all duration-normal hover:-translate-y-1 hover:shadow-lg">
+        <Wrapper
+            {...(href ? { href } : {})}
+            className="group rounded-3xl border border-border bg-surface p-5 transition-all duration-normal hover:-translate-y-1 hover:shadow-lg"
+        >
             <div className="flex items-center justify-between">
                 <span
                     className={`flex h-11 w-11 items-center justify-center rounded-2xl transition-transform duration-normal group-hover:scale-110 ${
@@ -238,6 +247,6 @@ function SummaryCard({
                 <AnimatedCounter value={String(value)} />
             </div>
             <div className="mt-1 text-sm text-text-secondary">{label}</div>
-        </div>
+        </Wrapper>
     );
 }
