@@ -154,6 +154,7 @@ Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->nam
         Route::get('/{student}', [AdminStudentController::class, 'show'])->name('show');
         Route::post('/{student}/toggle-suspend', [AdminStudentController::class, 'toggleSuspend'])->name('toggle-suspend');
         Route::post('/{student}/enroll', [AdminStudentController::class, 'enroll'])->name('enroll');
+        Route::delete('/{student}', [AdminStudentController::class, 'destroy'])->name('destroy');
         Route::put('/enrollments/{enrollment}/status', [AdminStudentController::class, 'updateEnrollmentStatus'])->name('enrollments.status');
     });
 

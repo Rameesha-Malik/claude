@@ -79,6 +79,20 @@ class StudentController extends Controller
         return back()->with('success', $student->is_active ? 'Student reactivated.' : 'Student suspended.');
     }
 
+    // Cascades through enrollments, payments, test attempts/answers,
+    // revision list items and saved questions -- every users.id-linked
+    // table is cascadeOnDelete (see 2026_08_10_000008/000009 migrations),
+    // so this doesn't leave orphaned rows behind. Confirmed client-side
+    // before this ever fires (see Students/Index.tsx).
+    public function destroy(User $student)
+    {
+        abort_unless($student->user_type === 'student', 404);
+
+        $student->delete();
+
+        return back()->with('success', 'Student account deleted.');
+    }
+
     public function enroll(Request $request, User $student)
     {
         abort_unless($student->user_type === 'student', 404);
