@@ -4,7 +4,7 @@ import SectionKicker from '@/Components/SectionKicker';
 import PublicLayout from '@/Layouts/PublicLayout';
 
 interface NoteItem {
-    id: number; title: string; content: string | null;
+    id: number; title: string; content: string | null; price: string | null; is_paid: boolean; unlocked: boolean;
     subject: { name: string } | null; courses: { id: number; title: string; slug: string }[];
 }
 
@@ -33,13 +33,28 @@ export default function Notes({ notes }: { notes: NoteItem[] }) {
                                 key={n.id}
                                 className="group rounded-3xl border border-border bg-surface p-6 transition-all duration-normal hover:-translate-y-1 hover:border-primary hover:shadow-lg"
                             >
-                                {n.subject && (
-                                    <span className="rounded-full bg-primary-subtle px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide text-primary">
-                                        {n.subject.name}
-                                    </span>
-                                )}
+                                <div className="flex flex-wrap items-center gap-2">
+                                    {n.subject && (
+                                        <span className="rounded-full bg-primary-subtle px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide text-primary">
+                                            {n.subject.name}
+                                        </span>
+                                    )}
+                                    {n.is_paid && (
+                                        <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide ${n.unlocked ? 'bg-success-bg text-success' : 'bg-warning-bg text-warning'}`}>
+                                            {n.unlocked ? 'Unlocked' : `Rs. ${Number(n.price).toLocaleString()}`}
+                                        </span>
+                                    )}
+                                </div>
                                 <h3 className="mt-3 font-bold text-text group-hover:text-primary">{n.title}</h3>
                                 {n.content && <p className="mt-1 line-clamp-3 text-sm text-text-secondary">{n.content}</p>}
+                                {n.is_paid && !n.unlocked && (
+                                    <Link
+                                        href={`/portal/notes/${n.id}/purchase`}
+                                        className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-xs font-bold uppercase tracking-wide text-on-primary hover:bg-primary-hover"
+                                    >
+                                        Buy Now — Rs. {Number(n.price).toLocaleString()}
+                                    </Link>
+                                )}
                                 {n.courses.length > 0 && (
                                     <div className="mt-4 flex flex-wrap gap-2">
                                         {n.courses.map((c) => (

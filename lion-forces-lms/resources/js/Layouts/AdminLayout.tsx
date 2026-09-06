@@ -23,6 +23,7 @@ const NAV: NavEntry[] = [
     { label: 'Courses', href: '/admin/courses', icon: <Icon d="M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422A12.083 12.083 0 0112 20.417a12.083 12.083 0 01-6.16-9.839L12 14z" /> },
     { label: 'Categories', href: '/admin/categories', icon: <Icon d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-5 5a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 9V4a1 1 0 011-1z" /> },
     { label: 'Content Library', href: '/admin/content-library', icon: <Icon d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253M12 6.253C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253" /> },
+    { label: 'Guaranteed Notes', href: '/admin/guaranteed-notes', icon: <Icon d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" /> },
     { label: 'News', href: '/admin/news', icon: <Icon d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10l6 6v8a2 2 0 01-2 2z" /> },
     { label: 'Resources', href: '/admin/resources', icon: <Icon d="M12 4.5v15m7.5-7.5h-15" /> },
     { label: 'Instructors', href: '/admin/instructors', icon: <Icon d="M17.982 18.725A7.488 7.488 0 0012 15.75a7.488 7.488 0 00-5.982 2.975M15 6.75a3 3 0 11-6 0 3 3 0 016 0z" /> },

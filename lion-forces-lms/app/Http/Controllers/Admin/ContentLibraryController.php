@@ -112,6 +112,8 @@ class ContentLibraryController extends Controller
             'subject_id' => 'nullable|exists:subjects,id',
             'title' => 'required|string|max:255',
             'content' => 'nullable|string',
+            'price' => 'nullable|numeric|min:0',
+            'is_published' => 'boolean',
         ]);
 
         $note = NotesBank::create($data + ['created_by' => $request->user()->id]);
@@ -126,6 +128,8 @@ class ContentLibraryController extends Controller
             'subject_id' => 'nullable|exists:subjects,id',
             'title' => 'required|string|max:255',
             'content' => 'nullable|string',
+            'price' => 'nullable|numeric|min:0',
+            'is_published' => 'boolean',
         ]));
 
         ActivityLog::record('edited', 'Note', $note->id, "Note \"{$note->title}\" was updated.");

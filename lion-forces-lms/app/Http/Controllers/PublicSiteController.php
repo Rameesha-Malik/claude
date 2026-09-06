@@ -170,11 +170,26 @@ class PublicSiteController extends Controller
         ]);
     }
 
-    public function notes(): Response
+    public function notes(Request $request): Response
     {
+        $userId = $request->user()?->id;
+
+        // Access = free, or already granted via a purchase/package
+        // assignment (App\Models\NoteAssignment -- the same tier-2
+        // "Guaranteed Notes" mechanism used for package-based access).
+        $unlockedNoteIds = $userId
+            ? \App\Models\NoteAssignment::where('assignable_type', \App\Models\User::class)->where('assignable_id', $userId)->pluck('note_id')
+            : collect();
+
         $notes = \App\Models\NotesBank::with('subject:id,name', 'courses:id,title,slug')
+            ->where('is_published', true)
             ->orderBy('title')
-            ->get(['id', 'subject_id', 'title', 'content']);
+            ->get(['id', 'subject_id', 'title', 'content', 'file_path', 'price'])
+            ->map(fn ($n) => [
+                ...$n->toArray(),
+                'is_paid' => $n->isPaid(),
+                'unlocked' => ! $n->isPaid() || $unlockedNoteIds->contains($n->id),
+            ]);
 
         return Inertia::render('Public/Notes', ['notes' => $notes]);
     }

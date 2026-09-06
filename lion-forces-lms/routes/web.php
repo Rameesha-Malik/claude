@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\BundlePurchaseController as AdminBundlePurchaseCo
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\ContactInboxController as AdminContactInboxController;
 use App\Http\Controllers\Admin\ContentLibraryController as AdminContentLibraryController;
+use App\Http\Controllers\Admin\GuaranteedNotesController as AdminGuaranteedNotesController;
 use App\Http\Controllers\Admin\ContentManagerController as AdminContentManagerController;
 use App\Http\Controllers\Admin\CourseController as AdminCourseController;
 use App\Http\Controllers\Admin\CourseQuestionController as AdminCourseQuestionController;
@@ -39,6 +40,7 @@ use App\Http\Controllers\Student\AssignmentController as StudentAssignmentContro
 use App\Http\Controllers\Student\AttemptController as StudentAttemptController;
 use App\Http\Controllers\Student\BundleCheckoutController as StudentBundleCheckoutController;
 use App\Http\Controllers\Student\CheckoutController as StudentCheckoutController;
+use App\Http\Controllers\Student\NotePurchaseController as StudentNotePurchaseController;
 use App\Http\Controllers\Student\CourseController as StudentCourseController;
 use App\Http\Controllers\Student\DashboardController as StudentDashboardController;
 use App\Http\Controllers\Student\MockExamController as StudentMockExamController;
@@ -97,6 +99,8 @@ Route::middleware(['auth', 'verified', 'user_type:student'])->prefix('portal')->
     Route::post('/courses/{course:slug}/checkout', [StudentCheckoutController::class, 'store'])->name('student.checkout.store');
     Route::get('/bundles/{bundle:slug}/checkout', [StudentBundleCheckoutController::class, 'create'])->name('student.bundle-checkout.create');
     Route::post('/bundles/{bundle:slug}/checkout', [StudentBundleCheckoutController::class, 'store'])->name('student.bundle-checkout.store');
+    Route::get('/notes/{note}/purchase', [StudentNotePurchaseController::class, 'create'])->name('student.notes.purchase.create');
+    Route::post('/notes/{note}/purchase', [StudentNotePurchaseController::class, 'store'])->name('student.notes.purchase.store');
     Route::post('/lessons/{lesson}/complete', [StudentCourseController::class, 'markLessonComplete'])->name('student.lessons.complete');
     Route::post('/courses/{course:slug}/questions', [StudentCourseController::class, 'askQuestion'])->name('student.questions.store');
     Route::post('/courses/{course:slug}/review', [StudentCourseController::class, 'submitReview'])->name('student.reviews.store');
@@ -259,6 +263,19 @@ Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->nam
         Route::post('/notes', [AdminContentLibraryController::class, 'storeNote'])->name('notes.store');
         Route::put('/notes/{note}', [AdminContentLibraryController::class, 'updateNote'])->name('notes.update');
         Route::delete('/notes/{note}', [AdminContentLibraryController::class, 'destroyNote'])->name('notes.destroy');
+    });
+
+    Route::prefix('guaranteed-notes')->name('guaranteed-notes.')->group(function () {
+        Route::get('/', [AdminGuaranteedNotesController::class, 'index'])->name('index');
+
+        // Purchase verification is money-handling, same as Payments --
+        // stays owner/staff-only even though a content manager can
+        // otherwise manage the notes themselves as content.
+        Route::middleware('not.content_manager')->group(function () {
+            Route::get('/purchase-requests', [AdminGuaranteedNotesController::class, 'purchaseRequests'])->name('purchase-requests');
+            Route::post('/purchase-requests/{purchase}/verify', [AdminGuaranteedNotesController::class, 'verify'])->name('purchase-requests.verify');
+            Route::post('/purchase-requests/{purchase}/reject', [AdminGuaranteedNotesController::class, 'reject'])->name('purchase-requests.reject');
+        });
     });
 
     Route::prefix('news')->name('news.')->group(function () {

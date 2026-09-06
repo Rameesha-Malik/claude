@@ -9,16 +9,33 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['subject_id', 'title', 'content', 'file_path', 'created_by'])]
+#[Fillable(['subject_id', 'title', 'content', 'file_path', 'price', 'is_published', 'created_by'])]
 class NotesBank extends Model
 {
     use HasFactory;
 
     protected $table = 'notes_bank';
 
+    protected function casts(): array
+    {
+        return ['price' => 'decimal:2', 'is_published' => 'boolean'];
+    }
+
     public function subject(): BelongsTo
     {
         return $this->belongsTo(Subject::class);
+    }
+
+    public function purchases(): HasMany
+    {
+        return $this->hasMany(NotePurchase::class, 'note_id');
+    }
+
+    // Free unless a price is explicitly set -- avoids a separate "access"
+    // column that could drift out of sync with price.
+    public function isPaid(): bool
+    {
+        return (float) ($this->price ?? 0) > 0;
     }
 
     public function creator(): BelongsTo
