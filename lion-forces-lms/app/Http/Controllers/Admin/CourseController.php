@@ -19,20 +19,45 @@ class CourseController extends Controller
 {
     public function index(Request $request): Response
     {
-        $courses = Course::with('category')
+        $isContentManager = $request->user()->hasRole('content_manager');
+        $perPage = (int) ($request->per_page ?? 15);
+
+        $courses = Course::with(['category', 'instructor'])
+            ->withCount(['enrollments as enrollments_count' => fn ($q) => $q->where('status', 'active'), 'sections'])
             // A content manager only ever sees the courses they're
             // assigned to -- everyone else (owner/staff) sees all of them.
-            ->when($request->user()->hasRole('content_manager'), fn ($q) => $q->whereIn('id', $request->user()->managedCourses()->pluck('courses.id')))
+            ->when($isContentManager, fn ($q) => $q->whereIn('id', $request->user()->managedCourses()->pluck('courses.id')))
             ->when($request->search, fn ($q, $s) => $q->where('title', 'like', "%{$s}%"))
-            ->when($request->status, fn ($q, $s) => $q->where('status', $s))
+            ->when($request->status === 'active', fn ($q) => $q->where('status', 'published'))
+            ->when($request->status === 'inactive', fn ($q) => $q->whereIn('status', ['draft', 'hidden']))
             ->orderBy('order')
-            ->paginate(15)
+            ->paginate($perPage)
             ->withQueryString();
+
+        $baseline = Course::query()->when($isContentManager, fn ($q) => $q->whereIn('id', $request->user()->managedCourses()->pluck('courses.id')));
 
         return Inertia::render('Admin/Courses/Index', [
             'courses' => $courses,
-            'filters' => $request->only(['search', 'status']),
+            'filters' => $request->only(['search', 'status', 'per_page']),
+            'stats' => [
+                'total' => (clone $baseline)->count(),
+                'active' => (clone $baseline)->where('status', 'published')->count(),
+                'enrolled' => (clone $baseline)->withCount(['enrollments as active_enrollments_count' => fn ($q) => $q->where('status', 'active')])->get()->sum('active_enrollments_count'),
+            ],
         ]);
+    }
+
+    // Quick single-click Active <-> Inactive toggle from the course list --
+    // "draft" courses activate straight to "published" (there's no
+    // separate "reopen as draft" gesture here, just publish/unpublish).
+    public function toggleStatus(Request $request, Course $course)
+    {
+        abort_unless($request->user()->canManageCourse($course), 403);
+
+        $course->update(['status' => $course->status === 'published' ? 'hidden' : 'published']);
+        ActivityLog::record('edited', 'Course', $course->id, 'Course "'.$course->title.'" was '.($course->status === 'published' ? 'activated' : 'deactivated').'.', $course->id);
+
+        return back()->with('success', $course->status === 'published' ? 'Course activated.' : 'Course deactivated.');
     }
 
     public function create(Request $request): Response
