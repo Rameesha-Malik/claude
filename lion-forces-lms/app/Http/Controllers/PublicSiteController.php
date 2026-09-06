@@ -112,6 +112,12 @@ class PublicSiteController extends Controller
 
         \App\Models\ContactSubmission::create($data);
 
+        \App\Models\User::notifyAdmins(
+            'New contact inquiry',
+            "{$data['name']} sent a message".($data['subject'] ? ": {$data['subject']}" : '.'),
+            '/admin/contact-inbox',
+        );
+
         return back()->with('success', 'Your message has been sent. We typically reply within a day.');
     }
 

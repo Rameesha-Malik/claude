@@ -20,6 +20,7 @@ use App\Http\Controllers\Admin\HallOfFameController as AdminHallOfFameController
 use App\Http\Controllers\Admin\InstructorController as AdminInstructorController;
 use App\Http\Controllers\Admin\MockExamController as AdminMockExamController;
 use App\Http\Controllers\Admin\NewsController as AdminNewsController;
+use App\Http\Controllers\Admin\AlertController as AdminAlertController;
 use App\Http\Controllers\Admin\NotificationController as AdminNotificationController;
 use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
 use App\Http\Controllers\Admin\PracticeTestController as AdminPracticeTestController;
@@ -331,6 +332,14 @@ Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->nam
     Route::prefix('notifications')->name('notifications.')->group(function () {
         Route::get('/', [AdminNotificationController::class, 'index'])->name('index');
         Route::post('/', [AdminNotificationController::class, 'store'])->name('store');
+    });
+
+    // The admin's own alert inbox -- distinct from the "notifications"
+    // group above, which is the broadcast-composer (admin -> students).
+    Route::prefix('alerts')->name('alerts.')->group(function () {
+        Route::get('/', [AdminAlertController::class, 'index'])->name('index');
+        Route::post('/{id}/read', [AdminAlertController::class, 'markRead'])->name('read');
+        Route::post('/mark-all-read', [AdminAlertController::class, 'markAllRead'])->name('mark-all-read');
     });
 
     Route::prefix('qa')->name('qa.')->group(function () {

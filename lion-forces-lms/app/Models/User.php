@@ -46,6 +46,17 @@ class User extends Authenticatable
         return $this->user_type === 'student';
     }
 
+    // Fires an AdminAlertNotification (new pending payment, new contact
+    // inquiry, ...) to every admin account except content managers --
+    // every alert's link_url points at a page RestrictContentManagers
+    // already blocks them from, so they'd just 403 on the click-through.
+    public static function notifyAdmins(string $title, string $message, string $linkUrl): void
+    {
+        $recipients = static::where('user_type', 'admin')->get()->reject(fn (self $u) => $u->hasRole('content_manager'));
+
+        \Illuminate\Support\Facades\Notification::send($recipients, new \App\Notifications\AdminAlertNotification($title, $message, $linkUrl));
+    }
+
     // Courses a "content manager" account is scoped to -- irrelevant for
     // every other role (owner/staff have no such restriction).
     public function managedCourses(): \Illuminate\Database\Eloquent\Relations\BelongsToMany
