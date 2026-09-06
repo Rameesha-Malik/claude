@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\DemoQuiz;
 use App\Models\QuestionBank;
+use App\Models\Setting;
 use App\Models\Subject;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -99,5 +100,34 @@ class DemoQuizController extends Controller
             $sync[$id] = ['order' => $i + 1];
         }
         $quiz->questions()->sync($sync);
+    }
+
+    // Hero title/subtitle for the public /demo-quiz page -- previously
+    // hardcoded in the Intro.tsx component, so wording could only change
+    // via a code deploy. Same Setting::get/set key-value store already
+    // used for payment settings, since this is just two freeform strings,
+    // not a repeatable structured section list.
+    public function pageContent(): Response
+    {
+        return Inertia::render('Admin/DemoQuiz/PageContent', [
+            'content' => [
+                'title' => Setting::get('demo_quiz_page_title', 'Free Demo Quizzes'),
+                'subtitle' => Setting::get('demo_quiz_page_subtitle', 'Try a sample of the real thing — the same question bank, timer, and scoring our enrolled students use.'),
+            ],
+            'totalQuestions' => DemoQuiz::where('is_active', true)->withCount('questions')->get()->sum('questions_count'),
+        ]);
+    }
+
+    public function updatePageContent(Request $request)
+    {
+        $data = $request->validate([
+            'title' => 'required|string|max:255',
+            'subtitle' => 'required|string|max:1000',
+        ]);
+
+        Setting::set('demo_quiz_page_title', $data['title']);
+        Setting::set('demo_quiz_page_subtitle', $data['subtitle']);
+
+        return back()->with('success', 'Demo page content updated.');
     }
 }

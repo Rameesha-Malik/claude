@@ -357,6 +357,8 @@ Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->nam
 
     Route::prefix('demo-quiz')->name('demo-quiz.')->group(function () {
         Route::get('/', [AdminDemoQuizController::class, 'index'])->name('index');
+        Route::get('/page-content', [AdminDemoQuizController::class, 'pageContent'])->name('page-content');
+        Route::put('/page-content', [AdminDemoQuizController::class, 'updatePageContent'])->name('page-content.update');
         Route::get('/create', [AdminDemoQuizController::class, 'create'])->name('create');
         Route::post('/', [AdminDemoQuizController::class, 'store'])->name('store');
         Route::get('/{demoQuiz}/edit', [AdminDemoQuizController::class, 'edit'])->name('edit');

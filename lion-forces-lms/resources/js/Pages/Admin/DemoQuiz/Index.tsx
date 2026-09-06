@@ -29,6 +29,9 @@ export default function DemoQuizIndex({ quizzes }: { quizzes: Quiz[] }) {
                     </div>
                 </div>
                 <div className="flex flex-shrink-0 flex-wrap gap-2">
+                    <Link href="/admin/demo-quiz/page-content" className="rounded-xl border border-border bg-surface px-4 py-2.5 text-sm font-bold text-text hover:border-primary hover:text-primary">
+                        Demo Page Content
+                    </Link>
                     <Link href="/admin/content-library" className="rounded-xl border border-border bg-surface px-4 py-2.5 text-sm font-bold text-text hover:border-primary hover:text-primary">
                         Categories
                     </Link>

@@ -5,9 +5,9 @@ import WaveRibbon from '@/Components/WaveRibbon';
 import PublicLayout from '@/Layouts/PublicLayout';
 
 interface Quiz { id: number; title: string; duration_minutes: number; questions_count: number; subject: { name: string } | null }
-interface Props { quiz: Quiz | null; quizzes: Quiz[] }
+interface Props { quiz: Quiz | null; quizzes: Quiz[]; pageContent: { title: string; subtitle: string } }
 
-export default function DemoQuizIntro({ quiz, quizzes }: Props) {
+export default function DemoQuizIntro({ quiz, quizzes, pageContent }: Props) {
     const hasMultiple = quizzes.length > 1;
     return (
         <PublicLayout>
@@ -22,13 +22,9 @@ export default function DemoQuizIntro({ quiz, quizzes }: Props) {
                         <span className="mx-auto">No Sign-Up Required</span>
                     </SectionKicker>
                     <h1 className="font-display text-4xl uppercase tracking-wide sm:text-5xl">
-                        {hasMultiple ? 'Free Demo Quizzes' : quiz ? quiz.title : 'Free Demo Quiz'}
+                        {hasMultiple ? pageContent.title : quiz ? quiz.title : pageContent.title}
                     </h1>
-                    <p className="mt-4 text-teal-200">
-                        {hasMultiple
-                            ? 'Pick a category and try a sample of the real thing — the same question bank, timer, and scoring our enrolled students use.'
-                            : 'Try a sample of the real thing — the same question bank, timer, and scoring our enrolled students use.'}
-                    </p>
+                    <p className="mt-4 text-teal-200">{pageContent.subtitle}</p>
                 </div>
             </section>
 

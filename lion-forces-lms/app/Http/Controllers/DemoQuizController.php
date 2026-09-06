@@ -6,6 +6,7 @@ use App\Models\DemoQuiz;
 use App\Models\DemoQuizAnswer;
 use App\Models\DemoQuizAttempt;
 use App\Models\QuestionBank;
+use App\Models\Setting;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use Inertia\Inertia;
@@ -29,6 +30,10 @@ class DemoQuizController extends Controller
         return Inertia::render('Public/DemoQuiz/Intro', [
             'quiz' => $activeQuizzes->count() === 1 ? $activeQuizzes->first() : null,
             'quizzes' => $activeQuizzes->count() > 1 ? $activeQuizzes->values() : [],
+            'pageContent' => [
+                'title' => Setting::get('demo_quiz_page_title', 'Free Demo Quizzes'),
+                'subtitle' => Setting::get('demo_quiz_page_subtitle', 'Try a sample of the real thing — the same question bank, timer, and scoring our enrolled students use.'),
+            ],
         ]);
     }
 
