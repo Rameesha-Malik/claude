@@ -31,8 +31,16 @@ class PracticeTestController extends Controller
             'options' => $q->options->map(fn ($o) => ['id' => $o->id, 'option_text' => $o->option_text])->values(),
         ])->values();
 
+        // Settings > Quizzes > "Default quiz time" fills in for a timed
+        // test whose own duration was left blank when it was created.
+        $duration = $practiceTest->duration_minutes ?? (int) \App\Models\Setting::get('default_quiz_duration_minutes');
+
         return Inertia::render('Student/PracticeTests/Take', [
-            'practiceTest' => $practiceTest->only('id', 'title', 'timer_enabled', 'duration_minutes', 'marks_per_question', 'negative_marking'),
+            'practiceTest' => [
+                ...$practiceTest->only('id', 'title', 'timer_enabled', 'marks_per_question', 'negative_marking'),
+                'duration_minutes' => $duration ?: null,
+            ],
+            'quizRules' => \App\Models\Setting::get('default_quiz_rules'),
             'questions' => $questions,
         ]);
     }
@@ -105,6 +113,10 @@ class PracticeTestController extends Controller
             'percentage' => $percentage,
             'passed' => $percentage >= 50, // practice tests are low-stakes; 50% is a soft benchmark, not a gate
         ]);
+
+        if (\App\Support\NotificationSettings::enabled('quiz_submitted')) {
+            \App\Models\User::notifyAdmins('Practice test submitted', "{$user->name} submitted \"{$practiceTest->title}\" ({$percentage}%).", '/admin/reports');
+        }
 
         return redirect()->route('student.attempts.show', $attempt);
     }

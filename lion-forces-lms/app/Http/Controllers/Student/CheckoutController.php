@@ -90,11 +90,13 @@ class CheckoutController extends Controller
             'proof_file_path' => $request->file('proof_file')->store('payment-proofs', 'public'),
         ]);
 
-        User::notifyAdmins(
-            'New payment submitted',
-            "{$request->user()->name} submitted a payment of Rs. ".number_format($amount)." for {$course->title}.",
-            '/admin/payments',
-        );
+        if (\App\Support\NotificationSettings::enabled('payment_received')) {
+            User::notifyAdmins(
+                'New payment submitted',
+                "{$request->user()->name} submitted a payment of Rs. ".number_format($amount)." for {$course->title}.",
+                '/admin/payments',
+            );
+        }
 
         return redirect()->route('student.courses')->with('success', 'Payment submitted! We\'ll verify it and activate your course, usually within a day.');
     }

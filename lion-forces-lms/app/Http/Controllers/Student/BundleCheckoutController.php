@@ -92,11 +92,13 @@ class BundleCheckoutController extends Controller
             ]);
         }
 
-        User::notifyAdmins(
-            'New bundle payment submitted',
-            "{$request->user()->name} submitted a payment of Rs. ".number_format($bundle->price)." for the \"{$bundle->title}\" bundle.",
-            '/admin/bundle-purchases',
-        );
+        if (\App\Support\NotificationSettings::enabled('payment_received')) {
+            User::notifyAdmins(
+                'New bundle payment submitted',
+                "{$request->user()->name} submitted a payment of Rs. ".number_format($bundle->price)." for the \"{$bundle->title}\" bundle.",
+                '/admin/bundle-purchases',
+            );
+        }
 
         return redirect()->route('student.courses')->with('success', 'Payment submitted! We\'ll verify it and activate your courses, usually within a day.');
     }

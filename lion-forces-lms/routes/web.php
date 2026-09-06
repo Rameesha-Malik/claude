@@ -82,6 +82,10 @@ Route::post('/questions/{question}/check-answer', [QuestionCheckController::clas
 Route::post('/questions/{question}/report', [QuestionCheckController::class, 'report'])->name('questions.report');
 Route::post('/questions/{question}/favourite', [QuestionCheckController::class, 'toggleFavourite'])->name('questions.favourite');
 
+Route::get('/robots.txt', [\App\Http\Controllers\SeoController::class, 'robots'])->name('robots');
+Route::get('/llms.txt', [\App\Http\Controllers\SeoController::class, 'llms'])->name('llms');
+Route::get('/sitemap.xml', [\App\Http\Controllers\SeoController::class, 'sitemap'])->name('sitemap');
+
 // Neutral post-login landing: AuthenticatedSessionController always
 // redirects here regardless of role, so it can't itself be gated to one
 // user_type. It only ever dispatches onward.
@@ -101,7 +105,7 @@ Route::get('/dashboard', function () {
     };
 })->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::middleware(['auth', 'verified', 'user_type:student'])->prefix('portal')->group(function () {
+Route::middleware(['auth', 'verified', 'user_type:student', 'check.active'])->prefix('portal')->group(function () {
     Route::get('/', [StudentDashboardController::class, 'index'])->name('student.dashboard');
     Route::get('/revision-list', [StudentRevisionListController::class, 'index'])->name('student.revision-list');
     Route::get('/my-courses', [StudentCourseController::class, 'index'])->name('student.courses');
@@ -422,6 +426,17 @@ Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->nam
         Route::put('/staff/{staff}/role', [AdminSettingsController::class, 'updateStaffRole'])->name('staff.role');
         Route::post('/staff/{staff}/toggle-active', [AdminSettingsController::class, 'toggleStaffActive'])->name('staff.toggle-active');
         Route::put('/payment', [AdminSettingsController::class, 'updatePaymentSettings'])->name('payment.update');
+
+        Route::put('/general', [AdminSettingsController::class, 'updateGeneral'])->name('general.update');
+        Route::post('/brand-image/{slot}', [AdminSettingsController::class, 'updateBrandImage'])->name('brand-image.update');
+        Route::put('/mail', [AdminSettingsController::class, 'updateMail'])->name('mail.update');
+        Route::post('/mail/test', [AdminSettingsController::class, 'testMail'])->name('mail.test');
+        Route::put('/notifications', [AdminSettingsController::class, 'updateNotifications'])->name('notifications.update');
+        Route::put('/security', [AdminSettingsController::class, 'updateSecurity'])->name('security.update');
+        Route::post('/students/reset-devices', [AdminSettingsController::class, 'resetDevices'])->name('students.reset-devices');
+        Route::put('/courses', [AdminSettingsController::class, 'updateCourses'])->name('courses.update');
+        Route::put('/quizzes', [AdminSettingsController::class, 'updateQuizzes'])->name('quizzes.update');
+        Route::put('/features', [AdminSettingsController::class, 'updateFeatures'])->name('features.update');
     });
 
     Route::middleware('not.content_manager')->prefix('content-managers')->name('content-managers.')->group(function () {

@@ -58,6 +58,15 @@ class QuestionCheckController extends Controller
             'reason' => $data['reason'],
         ]);
 
+        if (\App\Support\NotificationSettings::enabled('question_reported')) {
+            $reporter = $request->user()?->name ?? 'A guest';
+            \App\Models\User::notifyAdmins(
+                'Question reported',
+                "{$reporter} flagged a question: \"{$data['reason']}\"",
+                '/admin/reported-questions',
+            );
+        }
+
         return response()->json(['reported' => true]);
     }
 

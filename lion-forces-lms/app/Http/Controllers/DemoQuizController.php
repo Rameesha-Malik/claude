@@ -140,6 +140,10 @@ class DemoQuizController extends Controller
             'submitted_at' => now(),
         ]);
 
+        if (\App\Support\NotificationSettings::enabled('quiz_submitted')) {
+            \App\Models\User::notifyAdmins('Demo quiz submitted', "A guest submitted a demo quiz ({$correctCount} correct, {$wrongCount} wrong).", '/admin/demo-quiz');
+        }
+
         return redirect()->route('demo-quiz.result', $attempt);
     }
 

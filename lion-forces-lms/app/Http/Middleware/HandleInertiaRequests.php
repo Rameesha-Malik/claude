@@ -73,6 +73,9 @@ class HandleInertiaRequests extends Middleware
             // Shared so the bell badge is correct on every student page
             // without every controller having to remember to pass it.
             'unreadNotificationsCount' => fn () => $request->user()?->unreadNotifications()->count() ?? 0,
+            // Global feature toggles (Settings > Features) -- shared so any
+            // layout/nav/page can hide a link without a per-page query.
+            'features' => fn () => \App\Support\FeatureFlags::all(),
         ];
     }
 }

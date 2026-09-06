@@ -71,11 +71,13 @@ class NotePurchaseController extends Controller
             'proof_file_path' => $request->file('proof_file')->store('note-purchase-proofs', 'public'),
         ]);
 
-        User::notifyAdmins(
-            'New note purchase submitted',
-            "{$request->user()->name} submitted a payment of Rs. ".number_format($note->price)." for \"{$note->title}\".",
-            '/admin/guaranteed-notes/purchase-requests',
-        );
+        if (\App\Support\NotificationSettings::enabled('payment_received')) {
+            User::notifyAdmins(
+                'New note purchase submitted',
+                "{$request->user()->name} submitted a payment of Rs. ".number_format($note->price)." for \"{$note->title}\".",
+                '/admin/guaranteed-notes/purchase-requests',
+            );
+        }
 
         return redirect()->route('notes')->with('success', 'Purchase submitted! We\'ll verify it and unlock the note, usually within a day.');
     }

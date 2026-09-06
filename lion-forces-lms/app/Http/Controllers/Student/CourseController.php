@@ -86,6 +86,12 @@ class CourseController extends Controller
 
         $myReview = CourseReview::where('course_id', $course->id)->where('user_id', $user->id)->first();
 
+        // Settings > Features global toggles are a master switch on top of
+        // this course's own flashcards_enabled/tests_enabled checkboxes --
+        // a course can only show a tab when BOTH are on.
+        $course->flashcards_enabled = $course->flashcards_enabled && \App\Support\FeatureFlags::enabled('flashcards');
+        $course->tests_enabled = $course->tests_enabled && \App\Support\FeatureFlags::enabled('full_test');
+
         return Inertia::render('Student/CourseLearning', [
             'course' => $course,
             'enrollment' => $enrollment,
@@ -145,6 +151,14 @@ class CourseController extends Controller
             ['rating' => $data['rating'], 'review_text' => $data['review_text'] ?? null, 'status' => 'pending'],
         );
 
+        if (\App\Support\NotificationSettings::enabled('new_review')) {
+            \App\Models\User::notifyAdmins(
+                'New review submitted',
+                "{$request->user()->name} left a {$data['rating']}-star review on \"{$course->title}\".",
+                '/admin/reviews',
+            );
+        }
+
         return back()->with('success', 'Thanks! Your review will appear once approved.');
     }
 
@@ -171,6 +185,18 @@ class CourseController extends Controller
             'lesson_id' => $data['lesson_id'] ?? null,
             'question_text' => $data['question_text'],
         ]);
+
+        // "Lecture Q&A" (tied to a lesson) vs "Course Q&A" (general) are the
+        // same CourseQuestion table/page (see CourseQuestion's own comment)
+        // -- just two separate notification toggles for the same event.
+        $event = ($data['lesson_id'] ?? null) ? 'new_lecture_question' : 'course_qa_question';
+        if (\App\Support\NotificationSettings::enabled($event)) {
+            \App\Models\User::notifyAdmins(
+                'New question asked',
+                "{$request->user()->name} asked a question on \"{$course->title}\".",
+                '/admin/qa',
+            );
+        }
 
         return back()->with('success', 'Your question has been sent.');
     }

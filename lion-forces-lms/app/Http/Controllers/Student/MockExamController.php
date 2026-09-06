@@ -18,6 +18,7 @@ class MockExamController extends Controller
 {
     public function show(Request $request, MockExam $mockExam): Response
     {
+        abort_unless(\App\Support\FeatureFlags::enabled('full_test'), 404);
         $this->authorizeEnrollment($request, $mockExam);
         $mockExam->load(['sections' => fn ($q) => $q->withCount('questions')]);
 
@@ -87,10 +88,17 @@ class MockExamController extends Controller
             'options' => $q->options->map(fn ($o) => ['id' => $o->id, 'option_text' => $o->option_text])->values(),
         ])->values();
 
+        // Settings > Quizzes > "Default quiz time" fills in for a section
+        // whose own duration was left blank when it was created.
+        $sectionDuration = $section->duration_minutes ?? (int) \App\Models\Setting::get('default_quiz_duration_minutes');
+
         return Inertia::render('Student/MockExams/Section', [
             'mockExam' => $mockExam->only('id', 'title', 'fullscreen_required', 'disallow_back_navigation'),
             'attemptId' => $attempt->id,
-            'section' => $section->only('id', 'name', 'order', 'duration_minutes', 'marks_per_question', 'negative_marking'),
+            'section' => [
+                ...$section->only('id', 'name', 'order', 'marks_per_question', 'negative_marking'),
+                'duration_minutes' => $sectionDuration ?: null,
+            ],
             'sections' => $sections->map->only('id', 'name', 'order')->values(),
             'isLastSection' => $section->id === $sections->last()->id,
             'questions' => $questions,
@@ -184,6 +192,10 @@ class MockExamController extends Controller
             'submitted_at' => now(),
         ]);
 
+        if (\App\Support\NotificationSettings::enabled('quiz_submitted')) {
+            \App\Models\User::notifyAdmins('Mock exam submitted', "{$attempt->user->name} submitted a mock exam ({$percentage}%).", '/admin/reports');
+        }
+
         return redirect()->route('student.attempts.show', $attempt);
     }
 
@@ -219,7 +231,11 @@ class MockExamController extends Controller
 
     private function canStart(MockExam $mockExam, int $attemptsUsed): bool
     {
-        return ! $mockExam->attempt_limit || $attemptsUsed < $mockExam->attempt_limit;
+        // Settings > Quizzes > "Default max attempts" fills in for a mock
+        // exam whose own attempt_limit was left blank.
+        $limit = $mockExam->attempt_limit ?? (int) \App\Models\Setting::get('default_max_attempts');
+
+        return ! $limit || $attemptsUsed < $limit;
     }
 
     private function authorizeEnrollment(Request $request, MockExam $mockExam): void

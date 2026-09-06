@@ -18,6 +18,7 @@ class StagedTestController extends Controller
 {
     public function show(Request $request, StagedTest $stagedTest): Response
     {
+        abort_unless(\App\Support\FeatureFlags::enabled('full_test'), 404);
         $this->authorizeEnrollment($request, $stagedTest);
         $stagedTest->load(['stages' => fn ($q) => $q->withCount('questions')]);
 
@@ -180,6 +181,10 @@ class StagedTestController extends Controller
             'passed' => $allStagesPassed,
             'submitted_at' => now(),
         ]);
+
+        if (\App\Support\NotificationSettings::enabled('quiz_submitted')) {
+            \App\Models\User::notifyAdmins('Staged test submitted', "{$attempt->user->name} submitted a staged test ({$percentage}%).", '/admin/reports');
+        }
 
         return redirect()->route('student.attempts.show', $attempt);
     }

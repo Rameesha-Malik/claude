@@ -9,7 +9,7 @@ interface PracticeTest {
     id: number; title: string; timer_enabled: boolean; duration_minutes: number | null;
     marks_per_question: string; negative_marking: string;
 }
-interface Props { practiceTest: PracticeTest; questions: Question[] }
+interface Props { practiceTest: PracticeTest; questions: Question[]; quizRules?: string | null }
 
 function formatTime(totalSeconds: number): string {
     const m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
@@ -17,7 +17,7 @@ function formatTime(totalSeconds: number): string {
     return `${m}:${s}`;
 }
 
-export default function TakePracticeTest({ practiceTest, questions }: Props) {
+export default function TakePracticeTest({ practiceTest, questions, quizRules }: Props) {
     const [answers, setAnswers] = useState<Record<number, number | null>>({});
     const [submitting, setSubmitting] = useState(false);
     const startedAt = useRef(new Date().toISOString());
@@ -55,6 +55,13 @@ export default function TakePracticeTest({ practiceTest, questions }: Props) {
     return (
         <StudentLayout header={practiceTest.title}>
             <Head title={practiceTest.title} />
+
+            {quizRules && (
+                <div className="mb-4 rounded-2xl border border-border bg-surface-sunken p-4 text-sm text-text-secondary">
+                    <p className="mb-1 text-xs font-bold uppercase tracking-wide text-text-muted">Instructions</p>
+                    {quizRules}
+                </div>
+            )}
 
             <QuestionRunner
                 questions={questions}

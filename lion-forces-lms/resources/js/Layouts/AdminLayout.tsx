@@ -53,12 +53,25 @@ const NAV: NavEntry[] = [
 // manager never sees a link that would just 403.
 const CONTENT_MANAGER_BLOCKED = ['/admin/website', '/admin/students', '/admin/content-managers', '/admin/enrollments', '/admin/payments', '/admin/bundle-purchases', '/admin/settings'];
 
+// Nav entries tied to a Settings > Features global toggle -- hidden
+// entirely (not just disabled) when that feature is off, same as the
+// student-facing routes behind them.
+const FEATURE_GATED_NAV: Record<string, string> = {
+    '/admin/guaranteed-notes': 'notes',
+    '/admin/guaranteed-notes/testimonials': 'notes',
+    '/admin/guaranteed-notes/faqs': 'notes',
+};
+
 export default function AdminLayout({ children, header }: PropsWithChildren<{ header?: string }>) {
-    const { site, auth, unreadNotificationsCount } = usePage<PageProps>().props;
+    const { site, auth, unreadNotificationsCount, features } = usePage<PageProps>().props;
     const { url } = usePage();
     const [mobileOpen, setMobileOpen] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
-    const visibleNav = auth.user?.isContentManager ? NAV.filter((item) => !CONTENT_MANAGER_BLOCKED.includes(item.href)) : NAV;
+    let visibleNav = auth.user?.isContentManager ? NAV.filter((item) => !CONTENT_MANAGER_BLOCKED.includes(item.href)) : NAV;
+    visibleNav = visibleNav.filter((item) => {
+        const feature = FEATURE_GATED_NAV[item.href];
+        return !feature || features?.[feature] !== false;
+    });
 
     const sidebar = (
         <div className="flex h-full flex-col bg-secondary text-white">

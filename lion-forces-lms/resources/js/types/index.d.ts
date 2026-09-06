@@ -52,4 +52,5 @@ export type PageProps<
     nav: SiteNav;
     announcement: Announcement | null;
     unreadNotificationsCount: number;
+    features: Record<string, boolean>;
 };

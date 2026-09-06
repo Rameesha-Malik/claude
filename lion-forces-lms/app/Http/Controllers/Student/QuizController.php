@@ -102,6 +102,10 @@ class QuizController extends Controller
             'passed' => $percentage >= 50, // same soft benchmark as practice tests -- quizzes are low-stakes too
         ]);
 
+        if (\App\Support\NotificationSettings::enabled('quiz_submitted')) {
+            \App\Models\User::notifyAdmins('Quiz submitted', "{$user->name} submitted \"{$quiz->title}\" ({$percentage}%).", '/admin/reports');
+        }
+
         return redirect()->route('student.attempts.show', $attempt);
     }
 

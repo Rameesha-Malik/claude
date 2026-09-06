@@ -67,15 +67,28 @@ class Enrollment extends Model
     // setting `status: 'active'` by hand, which previously left expires_at
     // permanently null: the "180 days access" shown on pricing cards was
     // never actually being enforced anywhere.
+    //
+    // When the package itself has no validity_days, falls back to the
+    // global "Courses expire after (days)" setting (Settings > Courses)
+    // instead of leaving access unlimited by default.
     public function activate(): void
     {
+        $wasAlreadyActive = $this->status === 'active';
         $activatedAt = $this->activated_at ?? now();
-        $validityDays = $this->package?->validity_days;
+        $validityDays = $this->package?->validity_days ?? \App\Models\Setting::get('course_expiry_days');
 
         $this->update([
             'status' => 'active',
             'activated_at' => $activatedAt,
-            'expires_at' => $validityDays ? $activatedAt->copy()->addDays($validityDays) : null,
+            'expires_at' => $validityDays ? $activatedAt->copy()->addDays((int) $validityDays) : null,
         ]);
+
+        if (! $wasAlreadyActive && \App\Support\NotificationSettings::enabled('new_enrollment')) {
+            \App\Models\User::notifyAdmins(
+                'New enrollment activated',
+                "{$this->user?->name} was enrolled in \"{$this->course?->title}\".",
+                '/admin/enrollments',
+            );
+        }
     }
 }

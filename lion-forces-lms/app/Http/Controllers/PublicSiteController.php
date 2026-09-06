@@ -172,6 +172,8 @@ class PublicSiteController extends Controller
 
     public function notes(Request $request): Response
     {
+        abort_unless(\App\Support\FeatureFlags::enabled('notes'), 404);
+
         $unlockedNoteIds = $this->unlockedNoteIds($request);
 
         $notes = \App\Models\NotesBank::with('subject:id,name', 'courses:id,title,slug')
@@ -189,6 +191,7 @@ class PublicSiteController extends Controller
 
     public function noteDetail(Request $request, \App\Models\NotesBank $note): Response
     {
+        abort_unless(\App\Support\FeatureFlags::enabled('notes'), 404);
         abort_unless($note->is_published, 404);
 
         $unlockedNoteIds = $this->unlockedNoteIds($request);
