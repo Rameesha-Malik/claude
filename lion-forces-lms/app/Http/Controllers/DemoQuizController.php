@@ -21,16 +21,23 @@ class DemoQuizController extends Controller
 {
     public function show(): Response
     {
-        $quiz = DemoQuiz::where('is_active', true)->withCount('questions')->latest()->first();
+        // Multiple active demo quizzes -- e.g. one per subject -- show as
+        // category cards to pick from; exactly one active quiz keeps the
+        // original direct "here's the quiz, start it" layout unchanged.
+        $activeQuizzes = DemoQuiz::where('is_active', true)->with('subject:id,name')->withCount('questions')->latest()->get();
 
         return Inertia::render('Public/DemoQuiz/Intro', [
-            'quiz' => $quiz,
+            'quiz' => $activeQuizzes->count() === 1 ? $activeQuizzes->first() : null,
+            'quizzes' => $activeQuizzes->count() > 1 ? $activeQuizzes->values() : [],
         ]);
     }
 
     public function start(Request $request)
     {
-        $quiz = DemoQuiz::where('is_active', true)->latest()->firstOrFail();
+        $quizId = $request->input('quiz_id');
+        $quiz = $quizId
+            ? DemoQuiz::where('is_active', true)->findOrFail($quizId)
+            : DemoQuiz::where('is_active', true)->latest()->firstOrFail();
 
         $guestToken = $request->session()->get('demo_quiz_guest_token') ?? (string) Str::uuid();
         $request->session()->put('demo_quiz_guest_token', $guestToken);

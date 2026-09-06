@@ -20,7 +20,7 @@ class DemoQuizController extends Controller
     public function index(): Response
     {
         return Inertia::render('Admin/DemoQuiz/Index', [
-            'quizzes' => DemoQuiz::withCount(['questions', 'attempts'])->latest()->get(),
+            'quizzes' => DemoQuiz::with('subject:id,name')->withCount(['questions', 'attempts'])->latest()->get(),
         ]);
     }
 
@@ -83,6 +83,7 @@ class DemoQuizController extends Controller
     {
         return $request->validate([
             'title' => 'required|string|max:255',
+            'subject_id' => 'nullable|exists:subjects,id',
             'duration_minutes' => 'required|integer|min:1',
             'shuffle_questions' => 'boolean',
             'is_active' => 'boolean',

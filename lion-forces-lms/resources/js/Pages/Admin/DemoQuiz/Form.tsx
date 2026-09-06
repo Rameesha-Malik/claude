@@ -5,7 +5,7 @@ import AdminLayout from '@/Layouts/AdminLayout';
 interface Subject { id: number; name: string }
 interface QuestionRow { id: number; subject_id: number | null; question_text: string; difficulty: string }
 interface DemoQuiz {
-    id: number; title: string; duration_minutes: number; shuffle_questions: boolean; is_active: boolean;
+    id: number; title: string; subject_id: number | null; duration_minutes: number; shuffle_questions: boolean; is_active: boolean;
     questions: QuestionRow[];
 }
 interface Props { demoQuiz?: DemoQuiz; subjects: Subject[]; questionBank: QuestionRow[] }
@@ -19,6 +19,7 @@ export default function DemoQuizForm({ demoQuiz, subjects, questionBank }: Props
 
     const form = useForm({
         title: demoQuiz?.title ?? 'Free Demo Quiz',
+        subject_id: demoQuiz?.subject_id ?? ('' as number | ''),
         duration_minutes: demoQuiz?.duration_minutes ?? 15,
         shuffle_questions: demoQuiz?.shuffle_questions ?? true,
         is_active: demoQuiz?.is_active ?? true,
@@ -49,6 +50,17 @@ export default function DemoQuizForm({ demoQuiz, subjects, questionBank }: Props
                     <div>
                         <label className={labelClass}>Title</label>
                         <input className={inputClass} value={form.data.title} onChange={(e) => form.setData('title', e.target.value)} />
+                    </div>
+                    <div>
+                        <label className={labelClass}>Category</label>
+                        <select
+                            className={inputClass}
+                            value={form.data.subject_id}
+                            onChange={(e) => form.setData('subject_id', e.target.value ? Number(e.target.value) : '')}
+                        >
+                            <option value="">No category (not grouped on the public page)</option>
+                            {subjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                        </select>
                     </div>
                     <div>
                         <label className={labelClass}>Duration (minutes)</label>
