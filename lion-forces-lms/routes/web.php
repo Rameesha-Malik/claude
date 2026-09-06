@@ -36,6 +36,7 @@ use App\Http\Controllers\Admin\WebsiteController as AdminWebsiteController;
 use App\Http\Controllers\DemoQuizController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicSiteController;
+use App\Http\Controllers\QuestionCheckController;
 use App\Http\Controllers\Student\AssignmentController as StudentAssignmentController;
 use App\Http\Controllers\Student\AttemptController as StudentAttemptController;
 use App\Http\Controllers\Student\BundleCheckoutController as StudentBundleCheckoutController;
@@ -70,6 +71,11 @@ Route::post('/demo-quiz/start', [DemoQuizController::class, 'start'])->name('dem
 Route::get('/demo-quiz/{attempt}', [DemoQuizController::class, 'take'])->name('demo-quiz.take');
 Route::post('/demo-quiz/{attempt}/submit', [DemoQuizController::class, 'submit'])->name('demo-quiz.submit');
 Route::get('/demo-quiz/{attempt}/result', [DemoQuizController::class, 'result'])->name('demo-quiz.result');
+
+// Instant per-question feedback shared by every attempt flow via
+// QuestionRunner -- public (no auth) since the demo quiz above is a guest
+// flow too; see QuestionCheckController for why this is a single endpoint.
+Route::post('/questions/{question}/check-answer', [QuestionCheckController::class, 'check'])->name('questions.check-answer');
 
 // Neutral post-login landing: AuthenticatedSessionController always
 // redirects here regardless of role, so it can't itself be gated to one

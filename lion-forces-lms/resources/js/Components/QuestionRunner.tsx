@@ -1,7 +1,9 @@
+import axios from 'axios';
 import { ReactNode, useEffect, useState } from 'react';
 
 interface RunnerOption { id: number; option_text: string }
 interface RunnerQuestion { id: number; question_text: string; image_path: string | null; options: RunnerOption[] }
+interface QuestionFeedback { correctOptionId: number | null; explanation: string | null }
 
 interface Props {
     questions: RunnerQuestion[];
@@ -72,6 +74,13 @@ function BadgeIcon() {
         </svg>
     );
 }
+function XCircleIcon() {
+    return (
+        <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M15 9l-6 6m0-6l6 6m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+    );
+}
 
 const LEGEND = [
     { label: 'Current', className: 'bg-primary' },
@@ -85,18 +94,22 @@ const LEGEND = [
  * puts a candidate through a list of MCQs (demo quiz, practice tests,
  * quizzes, staged-test stages, mock-exam sections) -- previously each of
  * those rendered every question in one long scroll with no way to move
- * between them individually. Client feedback iterated this twice further:
- * (1) call out skipped questions by their actual number, clickable; (2) a
- * reference screenshot of a fuller exam-style layout (question
- * navigator + legend + live stat tiles) to redesign this toward.
+ * between them individually. Client feedback iterated this several times
+ * further: (1) call out skipped questions by their actual number,
+ * clickable; (2) a reference exam-style layout (question navigator +
+ * legend + live stat tiles); (3) show instant right/wrong feedback (with
+ * the correct answer + explanation) the moment a candidate picks an
+ * option, everywhere, instead of only revealing correctness on the
+ * results page after final submit.
  *
- * One thing deliberately NOT copied from that reference: it showed live
- * "Correct"/"Wrong" counters during the attempt. Options never carry
- * is_correct to the client here (see the practice-test controller comment)
- * -- correctness is graded server-side at submit, precisely so a candidate
- * can't inspect it mid-attempt. The stat tiles below show Answered/
- * Skipped/Not Visited/Progress instead -- real numbers this component
- * actually has, not a faked pass/fail signal.
+ * (3) reverses an earlier, deliberate anti-cheat decision documented in
+ * this comment previously -- the client explicitly asked for instant
+ * feedback across every test type, so submit-time grading is no longer
+ * the only place correctness is revealed. Per-question correctness is
+ * fetched lazily from QuestionCheckController (one shared endpoint, not
+ * duplicated per test type) the first time a question is answered, then
+ * cached locally so re-picking an option on the same question needs no
+ * extra request.
  */
 export default function QuestionRunner({
     questions,
@@ -113,6 +126,32 @@ export default function QuestionRunner({
 }: Props) {
     const [currentIndex, setCurrentIndex] = useState(0);
     const [visited, setVisited] = useState<Set<number>>(() => new Set(questions.length ? [0] : []));
+    const [feedback, setFeedback] = useState<Record<number, QuestionFeedback | 'loading'>>({});
+
+    // Instant feedback: fire once per question, the first time it's
+    // answered -- the response's correct_option_id is cached and reused
+    // for every subsequent option change on that same question, so
+    // switching an answer never needs a second request.
+    function handleSelect(questionId: number, optionId: number) {
+        onSelect(questionId, optionId);
+        if (feedback[questionId] !== undefined) return;
+        setFeedback((prev) => ({ ...prev, [questionId]: 'loading' }));
+        axios
+            .post(`/questions/${questionId}/check-answer`, { option_id: optionId })
+            .then(({ data }) => {
+                setFeedback((prev) => ({
+                    ...prev,
+                    [questionId]: { correctOptionId: data.correct_option_id ?? null, explanation: data.explanation ?? null },
+                }));
+            })
+            .catch(() => {
+                setFeedback((prev) => {
+                    const next = { ...prev };
+                    delete next[questionId];
+                    return next;
+                });
+            });
+    }
 
     // A new stage/section swaps in a fresh `questions` array -- start that
     // list from question 1 again rather than keeping whatever index the
@@ -138,6 +177,19 @@ export default function QuestionRunner({
         return acc;
     }, []);
 
+    // Live correct/wrong counts -- only counts questions where feedback has
+    // actually come back (not still 'loading'), compared against whatever
+    // option is currently selected.
+    let correctCount = 0;
+    let wrongCount = 0;
+    for (const q of questions) {
+        const fb = feedback[q.id];
+        const selected = answers[q.id];
+        if (!fb || fb === 'loading' || selected === null || selected === undefined) continue;
+        if (selected === fb.correctOptionId) correctCount += 1;
+        else wrongCount += 1;
+    }
+
     function goTo(index: number) {
         const clamped = Math.max(0, Math.min(total - 1, index));
         setCurrentIndex(clamped);
@@ -155,11 +207,19 @@ export default function QuestionRunner({
     const current = questions[currentIndex];
 
     const statTiles = [
-        { label: 'Answered', value: answeredCount, icon: <CheckCircleIcon />, tone: 'border-success bg-success-bg text-success' },
+        { label: 'Correct', value: correctCount, icon: <CheckCircleIcon />, tone: 'border-success bg-success-bg text-success' },
+        { label: 'Wrong', value: wrongCount, icon: <XCircleIcon />, tone: 'border-danger bg-danger-bg text-danger' },
+        { label: 'Answered', value: answeredCount, icon: <BadgeIcon />, tone: 'border-primary bg-primary-subtle text-primary' },
         { label: 'Skipped', value: skippedIndexes.length, icon: <FlagIcon />, tone: 'border-warning bg-warning-bg text-warning' },
         { label: 'Not Visited', value: notVisitedCount, icon: <CircleIcon />, tone: 'border-border bg-surface-sunken text-text-muted' },
         { label: 'Progress', value: `${progressPercent}%`, icon: <BadgeIcon />, tone: 'border-primary bg-primary-subtle text-primary' },
     ];
+
+    const currentFeedback = feedback[current.id];
+    const currentFeedbackReady = currentFeedback && currentFeedback !== 'loading' ? currentFeedback : null;
+    const selectedOptionId = answers[current.id];
+    const hasAnswered = selectedOptionId !== null && selectedOptionId !== undefined;
+    const isCurrentCorrect = currentFeedbackReady && hasAnswered ? selectedOptionId === currentFeedbackReady.correctOptionId : null;
 
     return (
         <div>
@@ -254,23 +314,50 @@ export default function QuestionRunner({
                             <img src={`/storage/${current.image_path}`} alt="" className="mb-3 max-h-64 rounded-lg border border-border" />
                         )}
                         <div className="space-y-2">
-                            {current.options.map((opt) => (
-                                <label
-                                    key={opt.id}
-                                    className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 text-sm transition-colors ${
-                                        answers[current.id] === opt.id ? 'border-primary bg-primary-subtle' : 'border-border hover:border-primary'
-                                    }`}
-                                >
-                                    <input
-                                        type="radio"
-                                        name={`question-${current.id}`}
-                                        checked={answers[current.id] === opt.id}
-                                        onChange={() => onSelect(current.id, opt.id)}
-                                    />
-                                    <span className="text-text">{opt.option_text}</span>
-                                </label>
-                            ))}
+                            {current.options.map((opt) => {
+                                const isSelected = selectedOptionId === opt.id;
+                                const isRevealedCorrect = currentFeedbackReady !== null && opt.id === currentFeedbackReady.correctOptionId;
+                                let classes = isSelected ? 'border-primary bg-primary-subtle' : 'border-border hover:border-primary';
+                                if (currentFeedbackReady && hasAnswered) {
+                                    if (isRevealedCorrect) classes = 'border-success bg-success-bg';
+                                    else if (isSelected) classes = 'border-danger bg-danger-bg';
+                                    else classes = 'border-border';
+                                }
+                                return (
+                                    <label
+                                        key={opt.id}
+                                        className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 text-sm transition-colors ${classes}`}
+                                    >
+                                        <input
+                                            type="radio"
+                                            name={`question-${current.id}`}
+                                            checked={isSelected}
+                                            onChange={() => handleSelect(current.id, opt.id)}
+                                        />
+                                        <span className="text-text">{opt.option_text}</span>
+                                        {currentFeedbackReady && hasAnswered && isRevealedCorrect && (
+                                            <span className="ml-auto text-xs font-bold uppercase text-success">Correct answer</span>
+                                        )}
+                                    </label>
+                                );
+                            })}
                         </div>
+
+                        {hasAnswered && currentFeedback === 'loading' && (
+                            <p className="mt-3 text-xs font-semibold text-text-muted">Checking…</p>
+                        )}
+                        {currentFeedbackReady && hasAnswered && (
+                            <div
+                                className={`mt-4 rounded-lg border p-3 text-sm ${
+                                    isCurrentCorrect ? 'border-success bg-success-bg text-success' : 'border-danger bg-danger-bg text-danger'
+                                }`}
+                            >
+                                <p className="font-bold uppercase tracking-wide">{isCurrentCorrect ? 'Correct!' : 'Incorrect'}</p>
+                                {currentFeedbackReady.explanation && (
+                                    <p className="mt-1 font-normal text-text-secondary">{currentFeedbackReady.explanation}</p>
+                                )}
+                            </div>
+                        )}
                     </div>
 
                     <div className="flex flex-wrap items-center justify-between gap-3">
