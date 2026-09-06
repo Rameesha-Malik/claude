@@ -57,4 +57,16 @@ class NotesBank extends Model
     {
         return $this->hasMany(NoteAssignment::class, 'note_id');
     }
+
+    // FAQs/testimonials shown on this note's public detail page -- the same
+    // Faq/Testimonial models used site-wide, just scoped to this note.
+    public function faqs(): HasMany
+    {
+        return $this->hasMany(Faq::class, 'note_id')->orderBy('order');
+    }
+
+    public function testimonials(): HasMany
+    {
+        return $this->hasMany(Testimonial::class, 'note_id')->orderBy('order');
+    }
 }

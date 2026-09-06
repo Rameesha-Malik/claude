@@ -3,10 +3,12 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\Faq;
 use App\Models\NoteAssignment;
 use App\Models\NotePurchase;
 use App\Models\NotesBank;
 use App\Models\Subject;
+use App\Models\Testimonial;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -85,5 +87,26 @@ class GuaranteedNotesController extends Controller
         ]);
 
         return back()->with('success', 'Purchase rejected.');
+    }
+
+    // Testimonials/FAQs assigned to a note, shown on that note's public
+    // detail page. Both reuse the site-wide Faq/Testimonial models (scoped
+    // by note_id) and WebsiteController's existing store/update/destroy
+    // endpoints -- these two index pages are just a note-focused view onto
+    // the same data.
+    public function testimonials(Request $request): Response
+    {
+        return Inertia::render('Admin/GuaranteedNotes/Testimonials', [
+            'testimonials' => Testimonial::whereNotNull('note_id')->with('note:id,title')->orderBy('order')->get(),
+            'notes' => NotesBank::orderBy('title')->get(['id', 'title']),
+        ]);
+    }
+
+    public function faqs(Request $request): Response
+    {
+        return Inertia::render('Admin/GuaranteedNotes/Faqs', [
+            'faqs' => Faq::whereNotNull('note_id')->with('note:id,title')->orderBy('order')->get(),
+            'notes' => NotesBank::orderBy('title')->get(['id', 'title']),
+        ]);
     }
 }

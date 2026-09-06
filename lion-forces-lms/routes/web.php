@@ -12,6 +12,7 @@ use App\Http\Controllers\Admin\ContentManagerController as AdminContentManagerCo
 use App\Http\Controllers\Admin\CourseController as AdminCourseController;
 use App\Http\Controllers\Admin\CourseQuestionController as AdminCourseQuestionController;
 use App\Http\Controllers\Admin\EnrollmentController as AdminEnrollmentController;
+use App\Http\Controllers\Admin\FavouriteQuestionController as AdminFavouriteQuestionController;
 use App\Http\Controllers\Admin\LeaderboardController as AdminLeaderboardController;
 use App\Http\Controllers\Admin\PerformanceController as AdminPerformanceController;
 use App\Http\Controllers\Admin\DashboardController as AdminDashboardController;
@@ -25,6 +26,7 @@ use App\Http\Controllers\Admin\AlertController as AdminAlertController;
 use App\Http\Controllers\Admin\NotificationController as AdminNotificationController;
 use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
 use App\Http\Controllers\Admin\PracticeTestController as AdminPracticeTestController;
+use App\Http\Controllers\Admin\QuestionReportController as AdminQuestionReportController;
 use App\Http\Controllers\Admin\QuizController as AdminQuizController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
 use App\Http\Controllers\Admin\ResourceController as AdminResourceController;
@@ -63,6 +65,7 @@ Route::get('/resources', [PublicSiteController::class, 'resources'])->name('reso
 Route::get('/how-to-buy', [PublicSiteController::class, 'howToBuy'])->name('how-to-buy');
 Route::get('/practice-tests', [PublicSiteController::class, 'practiceTests'])->name('practice-tests');
 Route::get('/notes', [PublicSiteController::class, 'notes'])->name('notes');
+Route::get('/notes/{note}', [PublicSiteController::class, 'noteDetail'])->name('notes.show');
 Route::get('/bundles', [PublicSiteController::class, 'bundles'])->name('bundles');
 Route::get('/bundles/{bundle:slug}', [PublicSiteController::class, 'bundleDetail'])->name('bundles.show');
 
@@ -76,6 +79,8 @@ Route::get('/demo-quiz/{attempt}/result', [DemoQuizController::class, 'result'])
 // QuestionRunner -- public (no auth) since the demo quiz above is a guest
 // flow too; see QuestionCheckController for why this is a single endpoint.
 Route::post('/questions/{question}/check-answer', [QuestionCheckController::class, 'check'])->name('questions.check-answer');
+Route::post('/questions/{question}/report', [QuestionCheckController::class, 'report'])->name('questions.report');
+Route::post('/questions/{question}/favourite', [QuestionCheckController::class, 'toggleFavourite'])->name('questions.favourite');
 
 // Neutral post-login landing: AuthenticatedSessionController always
 // redirects here regardless of role, so it can't itself be gated to one
@@ -274,6 +279,20 @@ Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->nam
     Route::prefix('guaranteed-notes')->name('guaranteed-notes.')->group(function () {
         Route::get('/', [AdminGuaranteedNotesController::class, 'index'])->name('index');
 
+        // Reuses WebsiteController's Faq/Testimonial CRUD (note-scoped --
+        // see storeFaq/storeTestimonial) under this prefix rather than
+        // /admin/website's, so content managers (who can already manage
+        // notes but not the site-wide Website page) can manage these too.
+        Route::get('/testimonials', [AdminGuaranteedNotesController::class, 'testimonials'])->name('testimonials');
+        Route::post('/testimonials', [AdminWebsiteController::class, 'storeTestimonial'])->name('testimonials.store');
+        Route::put('/testimonials/{testimonial}', [AdminWebsiteController::class, 'updateTestimonial'])->name('testimonials.update');
+        Route::delete('/testimonials/{testimonial}', [AdminWebsiteController::class, 'destroyTestimonial'])->name('testimonials.destroy');
+
+        Route::get('/faqs', [AdminGuaranteedNotesController::class, 'faqs'])->name('faqs');
+        Route::post('/faqs', [AdminWebsiteController::class, 'storeFaq'])->name('faqs.store');
+        Route::put('/faqs/{faq}', [AdminWebsiteController::class, 'updateFaq'])->name('faqs.update');
+        Route::delete('/faqs/{faq}', [AdminWebsiteController::class, 'destroyFaq'])->name('faqs.destroy');
+
         // Purchase verification is money-handling, same as Payments --
         // stays owner/staff-only even though a content manager can
         // otherwise manage the notes themselves as content.
@@ -377,6 +396,14 @@ Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->nam
         Route::post('/{review}/hide', [AdminReviewController::class, 'hide'])->name('hide');
         Route::delete('/{review}', [AdminReviewController::class, 'destroy'])->name('destroy');
     });
+
+    Route::prefix('reported-questions')->name('reported-questions.')->group(function () {
+        Route::get('/', [AdminQuestionReportController::class, 'index'])->name('index');
+        Route::post('/{report}/resolve', [AdminQuestionReportController::class, 'resolve'])->name('resolve');
+        Route::post('/{report}/dismiss', [AdminQuestionReportController::class, 'dismiss'])->name('dismiss');
+    });
+
+    Route::get('/favourite-questions', [AdminFavouriteQuestionController::class, 'index'])->name('favourite-questions.index');
 
     Route::prefix('demo-quiz')->name('demo-quiz.')->group(function () {
         Route::get('/', [AdminDemoQuizController::class, 'index'])->name('index');

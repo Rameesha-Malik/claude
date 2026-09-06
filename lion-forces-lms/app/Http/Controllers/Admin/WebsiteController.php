@@ -163,26 +163,36 @@ class WebsiteController extends Controller
     }
 
     // --- FAQs ---
+    // `note_id` scopes a FAQ to a Guaranteed Note's detail page instead of
+    // a site `page` -- same Faq model/table for both (see the migration
+    // that added note_id), so this one pair of endpoints serves both the
+    // site Website page and the admin Note FAQs page.
     public function storeFaq(Request $request)
     {
         $data = $request->validate([
-            'page' => 'required|string|max:50',
+            'page' => 'required_without:note_id|nullable|string|max:50',
+            'note_id' => 'nullable|exists:notes_bank,id',
             'question' => 'required|string|max:255',
             'answer' => 'required|string|max:2000',
         ]);
-        Faq::create($data + ['order' => Faq::where('page', $data['page'])->max('order') + 1, 'is_active' => true]);
+        $data['page'] = $data['note_id'] ?? null ? 'note' : ($data['page'] ?? 'home');
+        $order = Faq::where('note_id', $data['note_id'] ?? null)->when(empty($data['note_id']), fn ($q) => $q->where('page', $data['page']))->max('order') + 1;
+        Faq::create($data + ['order' => $order, 'is_active' => true]);
 
         return back()->with('success', 'FAQ added.');
     }
 
     public function updateFaq(Request $request, Faq $faq)
     {
-        $faq->update($request->validate([
-            'page' => 'required|string|max:50',
+        $data = $request->validate([
+            'page' => 'required_without:note_id|nullable|string|max:50',
+            'note_id' => 'nullable|exists:notes_bank,id',
             'question' => 'required|string|max:255',
             'answer' => 'required|string|max:2000',
             'is_active' => 'boolean',
-        ]));
+        ]);
+        $data['page'] = $data['note_id'] ?? null ? 'note' : ($data['page'] ?? 'home');
+        $faq->update($data);
 
         return back()->with('success', 'FAQ updated.');
     }
@@ -195,9 +205,15 @@ class WebsiteController extends Controller
     }
 
     // --- Testimonials ---
+    // `note_id` scopes a testimonial to a Guaranteed Note's detail page
+    // instead of (or alongside) a `course_id` -- same reuse as storeFaq
+    // above, serving both the site Website page and the admin Note
+    // Testimonials page.
     public function storeTestimonial(Request $request)
     {
         $data = $request->validate([
+            'course_id' => 'nullable|exists:courses,id',
+            'note_id' => 'nullable|exists:notes_bank,id',
             'student_name' => 'required|string|max:150',
             'testimonial_text' => 'required|string|max:1000',
             'rating' => 'nullable|integer|min:1|max:5',
@@ -211,6 +227,8 @@ class WebsiteController extends Controller
     public function updateTestimonial(Request $request, Testimonial $testimonial)
     {
         $testimonial->update($request->validate([
+            'course_id' => 'nullable|exists:courses,id',
+            'note_id' => 'nullable|exists:notes_bank,id',
             'student_name' => 'required|string|max:150',
             'testimonial_text' => 'required|string|max:1000',
             'rating' => 'nullable|integer|min:1|max:5',

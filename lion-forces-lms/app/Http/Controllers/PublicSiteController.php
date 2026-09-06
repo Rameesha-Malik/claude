@@ -172,14 +172,7 @@ class PublicSiteController extends Controller
 
     public function notes(Request $request): Response
     {
-        $userId = $request->user()?->id;
-
-        // Access = free, or already granted via a purchase/package
-        // assignment (App\Models\NoteAssignment -- the same tier-2
-        // "Guaranteed Notes" mechanism used for package-based access).
-        $unlockedNoteIds = $userId
-            ? \App\Models\NoteAssignment::where('assignable_type', \App\Models\User::class)->where('assignable_id', $userId)->pluck('note_id')
-            : collect();
+        $unlockedNoteIds = $this->unlockedNoteIds($request);
 
         $notes = \App\Models\NotesBank::with('subject:id,name', 'courses:id,title,slug')
             ->where('is_published', true)
@@ -192,6 +185,40 @@ class PublicSiteController extends Controller
             ]);
 
         return Inertia::render('Public/Notes', ['notes' => $notes]);
+    }
+
+    public function noteDetail(Request $request, \App\Models\NotesBank $note): Response
+    {
+        abort_unless($note->is_published, 404);
+
+        $unlockedNoteIds = $this->unlockedNoteIds($request);
+        $unlocked = ! $note->isPaid() || $unlockedNoteIds->contains($note->id);
+
+        $note->load('subject:id,name', 'courses:id,title,slug');
+
+        return Inertia::render('Public/NoteDetail', [
+            'note' => [
+                ...$note->only('id', 'subject_id', 'title', 'content', 'file_path', 'price', 'subject', 'courses'),
+                'is_paid' => $note->isPaid(),
+                'unlocked' => $unlocked,
+            ],
+            'faqs' => $note->faqs()->where('is_active', true)->get(['id', 'question', 'answer']),
+            'testimonials' => $note->testimonials()->get(['id', 'student_name', 'photo_path', 'testimonial_text', 'rating']),
+        ]);
+    }
+
+    // Access = free, or already granted via a purchase/package assignment
+    // (App\Models\NoteAssignment -- the same tier-2 "Guaranteed Notes"
+    // mechanism used for package-based access). Shared by notes() and
+    // noteDetail() so the unlock rule can't drift between the listing and
+    // the detail page.
+    private function unlockedNoteIds(Request $request)
+    {
+        $userId = $request->user()?->id;
+
+        return $userId
+            ? \App\Models\NoteAssignment::where('assignable_type', \App\Models\User::class)->where('assignable_id', $userId)->pluck('note_id')
+            : collect();
     }
 
     public function bundles(): Response

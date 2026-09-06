@@ -1,5 +1,7 @@
+import { usePage } from '@inertiajs/react';
 import axios from 'axios';
 import { ReactNode, useEffect, useState } from 'react';
+import { PageProps } from '@/types';
 
 interface RunnerOption { id: number; option_text: string }
 interface RunnerQuestion { id: number; question_text: string; image_path: string | null; options: RunnerOption[] }
@@ -81,6 +83,20 @@ function XCircleIcon() {
         </svg>
     );
 }
+function StarIcon({ filled }: { filled: boolean }) {
+    return (
+        <svg className="h-3.5 w-3.5" fill={filled ? 'currentColor' : 'none'} stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+        </svg>
+    );
+}
+function FlagOutlineIcon() {
+    return (
+        <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3 3v18M3 4h11l-2 4 2 4H3" />
+        </svg>
+    );
+}
 
 const LEGEND = [
     { label: 'Current', className: 'bg-primary' },
@@ -124,9 +140,42 @@ export default function QuestionRunner({
     emptyMessage = 'No questions are available yet.',
     resetKey,
 }: Props) {
+    const { auth } = usePage<PageProps>().props;
+    const isAuthenticated = !!auth?.user;
+
     const [currentIndex, setCurrentIndex] = useState(0);
     const [visited, setVisited] = useState<Set<number>>(() => new Set(questions.length ? [0] : []));
     const [feedback, setFeedback] = useState<Record<number, QuestionFeedback | 'loading'>>({});
+    const [favouritedIds, setFavouritedIds] = useState<Set<number>>(new Set());
+    const [favouriteBusy, setFavouriteBusy] = useState(false);
+    const [reportOpenFor, setReportOpenFor] = useState<number | null>(null);
+    const [reportReason, setReportReason] = useState('');
+    const [reportedIds, setReportedIds] = useState<Set<number>>(new Set());
+
+    function toggleFavourite(questionId: number) {
+        if (favouriteBusy) return;
+        setFavouriteBusy(true);
+        axios
+            .post(`/questions/${questionId}/favourite`)
+            .then(({ data }) => {
+                setFavouritedIds((prev) => {
+                    const next = new Set(prev);
+                    if (data.favourited) next.add(questionId);
+                    else next.delete(questionId);
+                    return next;
+                });
+            })
+            .finally(() => setFavouriteBusy(false));
+    }
+
+    function submitReport(questionId: number) {
+        if (!reportReason.trim()) return;
+        axios.post(`/questions/${questionId}/report`, { reason: reportReason.trim() }).then(() => {
+            setReportedIds((prev) => new Set(prev).add(questionId));
+            setReportOpenFor(null);
+            setReportReason('');
+        });
+    }
 
     // Instant feedback: fire once per question, the first time it's
     // answered -- the response's correct_option_id is cached and reused
@@ -306,10 +355,54 @@ export default function QuestionRunner({
                     </div>
 
                     <div className="rounded-2xl border border-border bg-surface p-5">
-                        <p className="mb-3 font-semibold text-text">
-                            <span className="mr-2 text-text-muted">Q{currentIndex + 1}.</span>
-                            {current.question_text}
-                        </p>
+                        <div className="mb-3 flex items-start justify-between gap-3">
+                            <p className="font-semibold text-text">
+                                <span className="mr-2 text-text-muted">Q{currentIndex + 1}.</span>
+                                {current.question_text}
+                            </p>
+                            <div className="flex flex-shrink-0 items-center gap-3 text-xs">
+                                {isAuthenticated && (
+                                    <button
+                                        type="button"
+                                        onClick={() => toggleFavourite(current.id)}
+                                        disabled={favouriteBusy}
+                                        className={`inline-flex items-center gap-1 font-bold uppercase tracking-wide ${favouritedIds.has(current.id) ? 'text-warning' : 'text-text-muted hover:text-warning'}`}
+                                    >
+                                        <StarIcon filled={favouritedIds.has(current.id)} /> Favourite
+                                    </button>
+                                )}
+                                {reportedIds.has(current.id) ? (
+                                    <span className="font-bold uppercase tracking-wide text-success">Reported</span>
+                                ) : (
+                                    <button
+                                        type="button"
+                                        onClick={() => setReportOpenFor(reportOpenFor === current.id ? null : current.id)}
+                                        className="inline-flex items-center gap-1 font-bold uppercase tracking-wide text-text-muted hover:text-danger"
+                                    >
+                                        <FlagOutlineIcon /> Report
+                                    </button>
+                                )}
+                            </div>
+                        </div>
+                        {reportOpenFor === current.id && (
+                            <div className="mb-3 flex gap-2">
+                                <input
+                                    autoFocus
+                                    value={reportReason}
+                                    onChange={(e) => setReportReason(e.target.value)}
+                                    placeholder="What's wrong with this question?"
+                                    className="flex-1 rounded-lg border border-border px-3 py-2 text-sm"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => submitReport(current.id)}
+                                    disabled={!reportReason.trim()}
+                                    className="rounded-lg bg-danger px-4 py-2 text-xs font-bold uppercase text-white disabled:opacity-50"
+                                >
+                                    Submit
+                                </button>
+                            </div>
+                        )}
                         {current.image_path && (
                             <img src={`/storage/${current.image_path}`} alt="" className="mb-3 max-h-64 rounded-lg border border-border" />
                         )}

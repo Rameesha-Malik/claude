@@ -45,7 +45,7 @@ export default function Notes({ notes }: { notes: NoteItem[] }) {
                                         </span>
                                     )}
                                 </div>
-                                <h3 className="mt-3 font-bold text-text group-hover:text-primary">{n.title}</h3>
+                                <Link href={`/notes/${n.id}`} className="mt-3 block font-bold text-text group-hover:text-primary">{n.title}</Link>
                                 {n.content && <p className="mt-1 line-clamp-3 text-sm text-text-secondary">{n.content}</p>}
                                 {n.is_paid && !n.unlocked && (
                                     <Link

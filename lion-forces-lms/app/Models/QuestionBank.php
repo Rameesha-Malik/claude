@@ -42,4 +42,14 @@ class QuestionBank extends Model
     {
         return $this->hasMany(QuestionOption::class, 'question_id')->where('is_correct', true);
     }
+
+    public function reports(): HasMany
+    {
+        return $this->hasMany(QuestionReport::class, 'question_id');
+    }
+
+    public function savedBy(): HasMany
+    {
+        return $this->hasMany(SavedQuestion::class, 'question_id');
+    }
 }
