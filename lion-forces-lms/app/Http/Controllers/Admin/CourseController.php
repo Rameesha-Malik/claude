@@ -189,6 +189,19 @@ class CourseController extends Controller
 
     // --- Packages --- pricing/access terms, kept owner/staff-only even
     // for a content manager assigned to this course.
+    // "Packages" (admin reference screenshot) as a standalone top-level
+    // page -- packages already have full CRUD nested in each course's edit
+    // page (storePackage/updatePackage/destroyPackage below); this is just
+    // an aggregate view across every course, reusing those same endpoints
+    // rather than duplicating package CRUD logic.
+    public function packagesIndex(): Response
+    {
+        return Inertia::render('Admin/Packages/Index', [
+            'packages' => CoursePackage::with('course:id,title')->orderByDesc('id')->get(),
+            'courses' => Course::orderBy('title')->get(['id', 'title']),
+        ]);
+    }
+
     public function storePackage(Request $request, Course $course)
     {
         abort_if($request->user()->hasRole('content_manager'), 403);

@@ -12,18 +12,28 @@ interface QuestionItem {
     replies: Reply[];
 }
 interface Paginated<T> { data: T[]; links: { url: string | null; label: string; active: boolean }[] }
-interface Props { questions: Paginated<QuestionItem>; status: string; unansweredCount: number }
+interface Props { questions: Paginated<QuestionItem>; status: string; type: 'lecture' | 'course' | 'all'; unansweredCount: number }
 
-export default function QAIndex({ questions, status, unansweredCount }: Props) {
+const TYPE_META = {
+    lecture: { header: 'Lecture Q&A', description: 'View and answer student questions on lectures.', empty: 'No lecture questions yet.' },
+    course: { header: 'Course Q&A', description: 'Student questions about enrolled courses. Reply from the thread below.', empty: 'No questions yet. Students can ask questions from their Q&A page for enrolled courses.' },
+    all: { header: 'Q&A', description: 'Every student question, on lectures and courses alike.', empty: 'Nothing here.' },
+};
+
+export default function QAIndex({ questions, status, type, unansweredCount }: Props) {
+    const meta = TYPE_META[type];
+
     return (
-        <AdminLayout header="Q&A">
-            <Head title="Q&A" />
+        <AdminLayout header={meta.header}>
+            <Head title={meta.header} />
+
+            <p className="mb-4 text-sm text-text-secondary">{meta.description}</p>
 
             <div className="mb-6 flex flex-wrap gap-2">
                 {(['unanswered', 'answered', 'all'] as const).map((s) => (
                     <Link
                         key={s}
-                        href={`/admin/qa?status=${s}`}
+                        href={`/admin/qa?type=${type}&status=${s}`}
                         className={`rounded-full px-4 py-2 text-sm font-bold uppercase tracking-wide transition-colors ${
                             status === s ? 'bg-primary text-on-primary' : 'border border-border text-text-secondary hover:border-primary hover:text-primary'
                         }`}
@@ -39,7 +49,7 @@ export default function QAIndex({ questions, status, unansweredCount }: Props) {
                 ))}
                 {questions.data.length === 0 && (
                     <div className="rounded-2xl border border-dashed border-border bg-surface p-10 text-center text-text-secondary">
-                        Nothing here.
+                        {meta.empty}
                     </div>
                 )}
             </div>

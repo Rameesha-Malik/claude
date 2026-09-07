@@ -22,10 +22,12 @@ use App\Http\Controllers\Admin\HallOfFameController as AdminHallOfFameController
 use App\Http\Controllers\Admin\InstructorController as AdminInstructorController;
 use App\Http\Controllers\Admin\MockExamController as AdminMockExamController;
 use App\Http\Controllers\Admin\NewsController as AdminNewsController;
+use App\Http\Controllers\Admin\PageController as AdminPageController;
 use App\Http\Controllers\Admin\AlertController as AdminAlertController;
 use App\Http\Controllers\Admin\NotificationController as AdminNotificationController;
 use App\Http\Controllers\Admin\PaymentController as AdminPaymentController;
 use App\Http\Controllers\Admin\PracticeTestController as AdminPracticeTestController;
+use App\Http\Controllers\Admin\QuestionNoteController as AdminQuestionNoteController;
 use App\Http\Controllers\Admin\QuestionReportController as AdminQuestionReportController;
 use App\Http\Controllers\Admin\QuizController as AdminQuizController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
@@ -69,6 +71,7 @@ Route::get('/notes', [PublicSiteController::class, 'notes'])->name('notes');
 Route::get('/notes/{note}', [PublicSiteController::class, 'noteDetail'])->name('notes.show');
 Route::get('/bundles', [PublicSiteController::class, 'bundles'])->name('bundles');
 Route::get('/bundles/{bundle:slug}', [PublicSiteController::class, 'bundleDetail'])->name('bundles.show');
+Route::get('/pages/{slug}', [PublicSiteController::class, 'page'])->name('pages.show');
 
 Route::get('/demo-quiz', [DemoQuizController::class, 'show'])->name('demo-quiz.show');
 Route::post('/demo-quiz/start', [DemoQuizController::class, 'start'])->name('demo-quiz.start');
@@ -82,6 +85,7 @@ Route::get('/demo-quiz/{attempt}/result', [DemoQuizController::class, 'result'])
 Route::post('/questions/{question}/check-answer', [QuestionCheckController::class, 'check'])->name('questions.check-answer');
 Route::post('/questions/{question}/report', [QuestionCheckController::class, 'report'])->name('questions.report');
 Route::post('/questions/{question}/favourite', [QuestionCheckController::class, 'toggleFavourite'])->name('questions.favourite');
+Route::post('/questions/{question}/note', [QuestionCheckController::class, 'saveNote'])->name('questions.note');
 
 Route::get('/robots.txt', [\App\Http\Controllers\SeoController::class, 'robots'])->name('robots');
 Route::get('/llms.txt', [\App\Http\Controllers\SeoController::class, 'llms'])->name('llms');
@@ -193,6 +197,8 @@ Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->nam
         Route::put('/{category}', [AdminCategoryController::class, 'update'])->name('update');
         Route::delete('/{category}', [AdminCategoryController::class, 'destroy'])->name('destroy');
     });
+
+    Route::middleware('not.content_manager')->get('/packages', [AdminCourseController::class, 'packagesIndex'])->name('packages.index');
 
     Route::prefix('courses')->name('courses.')->group(function () {
         Route::get('/', [AdminCourseController::class, 'index'])->name('index');
@@ -402,6 +408,7 @@ Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->nam
 
     Route::prefix('reviews')->name('reviews.')->group(function () {
         Route::get('/', [AdminReviewController::class, 'index'])->name('index');
+        Route::post('/', [AdminReviewController::class, 'store'])->name('store');
         Route::post('/{review}/approve', [AdminReviewController::class, 'approve'])->name('approve');
         Route::post('/{review}/hide', [AdminReviewController::class, 'hide'])->name('hide');
         Route::delete('/{review}', [AdminReviewController::class, 'destroy'])->name('destroy');
@@ -414,6 +421,7 @@ Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->nam
     });
 
     Route::get('/favourite-questions', [AdminFavouriteQuestionController::class, 'index'])->name('favourite-questions.index');
+    Route::get('/student-question-notes', [AdminQuestionNoteController::class, 'index'])->name('student-question-notes.index');
 
     Route::prefix('demo-quiz')->name('demo-quiz.')->group(function () {
         Route::get('/', [AdminDemoQuizController::class, 'index'])->name('index');
@@ -443,6 +451,13 @@ Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->nam
         Route::put('/courses', [AdminSettingsController::class, 'updateCourses'])->name('courses.update');
         Route::put('/quizzes', [AdminSettingsController::class, 'updateQuizzes'])->name('quizzes.update');
         Route::put('/features', [AdminSettingsController::class, 'updateFeatures'])->name('features.update');
+    });
+
+    Route::middleware('not.content_manager')->prefix('pages')->name('pages.')->group(function () {
+        Route::get('/', [AdminPageController::class, 'index'])->name('index');
+        Route::post('/', [AdminPageController::class, 'store'])->name('store');
+        Route::put('/{page}', [AdminPageController::class, 'update'])->name('update');
+        Route::delete('/{page}', [AdminPageController::class, 'destroy'])->name('destroy');
     });
 
     Route::middleware('not.content_manager')->prefix('content-managers')->name('content-managers.')->group(function () {

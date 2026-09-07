@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\QuestionBank;
+use App\Models\QuestionNote;
 use App\Models\QuestionReport;
 use App\Models\SavedQuestion;
 use Illuminate\Http\Request;
@@ -90,5 +91,31 @@ class QuestionCheckController extends Controller
         SavedQuestion::create(['user_id' => $user->id, 'question_id' => $question->id]);
 
         return response()->json(['favourited' => true]);
+    }
+
+    // "Student MCQ notes" (admin reference screenshot): a private free-text
+    // note a student writes on a question, separate from favouriting/
+    // reporting. Requires an account, same as favourite -- a note only
+    // means something per-user. Saving again replaces the note rather
+    // than keeping a history.
+    public function saveNote(Request $request, QuestionBank $question)
+    {
+        $user = $request->user();
+        abort_unless($user, 401);
+
+        $data = $request->validate(['note_text' => 'nullable|string|max:2000']);
+
+        if (trim($data['note_text'] ?? '') === '') {
+            QuestionNote::where('user_id', $user->id)->where('question_id', $question->id)->delete();
+
+            return response()->json(['saved' => true, 'note_text' => null]);
+        }
+
+        QuestionNote::updateOrCreate(
+            ['user_id' => $user->id, 'question_id' => $question->id],
+            ['note_text' => $data['note_text']],
+        );
+
+        return response()->json(['saved' => true, 'note_text' => $data['note_text']]);
     }
 }

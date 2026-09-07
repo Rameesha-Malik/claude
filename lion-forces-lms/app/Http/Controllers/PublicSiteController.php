@@ -241,4 +241,13 @@ class PublicSiteController extends Controller
 
         return Inertia::render('Public/BundleDetail', ['bundle' => $bundle]);
     }
+
+    // Static CMS pages (Privacy Policy, Terms & Conditions, etc.) --
+    // see Admin\PageController.
+    public function page(string $slug): Response
+    {
+        $page = \App\Models\Page::where('slug', $slug)->where('is_published', true)->firstOrFail();
+
+        return Inertia::render('Public/Page', ['page' => $page->only('title', 'content')]);
+    }
 }

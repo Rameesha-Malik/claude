@@ -97,6 +97,13 @@ function FlagOutlineIcon() {
         </svg>
     );
 }
+function NoteIcon() {
+    return (
+        <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+        </svg>
+    );
+}
 
 const LEGEND = [
     { label: 'Current', className: 'bg-primary' },
@@ -151,6 +158,22 @@ export default function QuestionRunner({
     const [reportOpenFor, setReportOpenFor] = useState<number | null>(null);
     const [reportReason, setReportReason] = useState('');
     const [reportedIds, setReportedIds] = useState<Set<number>>(new Set());
+    const [noteOpenFor, setNoteOpenFor] = useState<number | null>(null);
+    const [noteDrafts, setNoteDrafts] = useState<Record<number, string>>({});
+    const [noteSavedIds, setNoteSavedIds] = useState<Set<number>>(new Set());
+    const [noteSaving, setNoteSaving] = useState(false);
+
+    function saveNote(questionId: number) {
+        if (noteSaving) return;
+        setNoteSaving(true);
+        axios
+            .post(`/questions/${questionId}/note`, { note_text: noteDrafts[questionId] ?? '' })
+            .then(() => {
+                setNoteSavedIds((prev) => new Set(prev).add(questionId));
+                setNoteOpenFor(null);
+            })
+            .finally(() => setNoteSaving(false));
+    }
 
     function toggleFavourite(questionId: number) {
         if (favouriteBusy) return;
@@ -382,8 +405,37 @@ export default function QuestionRunner({
                                         <FlagOutlineIcon /> Report
                                     </button>
                                 )}
+                                {isAuthenticated && (
+                                    <button
+                                        type="button"
+                                        onClick={() => setNoteOpenFor(noteOpenFor === current.id ? null : current.id)}
+                                        className={`inline-flex items-center gap-1 font-bold uppercase tracking-wide ${noteSavedIds.has(current.id) ? 'text-primary' : 'text-text-muted hover:text-primary'}`}
+                                    >
+                                        <NoteIcon /> {noteSavedIds.has(current.id) ? 'Note saved' : 'Note'}
+                                    </button>
+                                )}
                             </div>
                         </div>
+                        {noteOpenFor === current.id && (
+                            <div className="mb-3 flex gap-2">
+                                <textarea
+                                    autoFocus
+                                    rows={2}
+                                    value={noteDrafts[current.id] ?? ''}
+                                    onChange={(e) => setNoteDrafts((prev) => ({ ...prev, [current.id]: e.target.value }))}
+                                    placeholder="Write a personal note on this question (only you and admins can see it)…"
+                                    className="flex-1 rounded-lg border border-border px-3 py-2 text-sm"
+                                />
+                                <button
+                                    type="button"
+                                    onClick={() => saveNote(current.id)}
+                                    disabled={noteSaving}
+                                    className="self-start rounded-lg bg-primary px-4 py-2 text-xs font-bold uppercase text-on-primary disabled:opacity-50"
+                                >
+                                    Save
+                                </button>
+                            </div>
+                        )}
                         {reportOpenFor === current.id && (
                             <div className="mb-3 flex gap-2">
                                 <input
