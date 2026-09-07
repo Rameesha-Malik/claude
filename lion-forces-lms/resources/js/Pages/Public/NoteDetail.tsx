@@ -1,5 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
 import { useState } from 'react';
+import LiteMarkdown from '@/Components/LiteMarkdown';
 import PublicLayout from '@/Layouts/PublicLayout';
 
 interface NoteRecord {
@@ -21,7 +22,7 @@ function FaqRow({ faq }: { faq: FaqItem }) {
                 {faq.question}
                 <span className={`flex-shrink-0 text-text-muted transition-transform ${open ? 'rotate-45' : ''}`}>+</span>
             </button>
-            {open && <p className="border-t border-border p-4 text-sm text-text-secondary">{faq.answer}</p>}
+            {open && <LiteMarkdown text={faq.answer} className="border-t border-border p-4 text-sm text-text-secondary" />}
         </div>
     );
 }
@@ -55,7 +56,7 @@ export default function NoteDetail({ note, faqs, testimonials }: Props) {
                     <div className="rounded-2xl border border-border bg-surface p-6">
                         {note.unlocked ? (
                             <>
-                                {note.content && <p className="whitespace-pre-line text-text-secondary">{note.content}</p>}
+                                {note.content && <LiteMarkdown text={note.content} className="text-text-secondary" />}
                                 {note.file_path && (
                                     <a
                                         href={`/storage/${note.file_path}`}
@@ -118,7 +119,7 @@ export default function NoteDetail({ note, faqs, testimonials }: Props) {
                             {testimonials.map((t) => (
                                 <div key={t.id} className="rounded-2xl border border-border bg-surface p-5">
                                     {t.rating && <p className="text-xs text-warning">{'★'.repeat(t.rating)}{'☆'.repeat(5 - t.rating)}</p>}
-                                    <p className="mt-2 text-sm italic text-text-secondary">&ldquo;{t.testimonial_text}&rdquo;</p>
+                                    <LiteMarkdown text={t.testimonial_text} className="mt-2 text-sm italic text-text-secondary" />
                                     <p className="mt-3 text-sm font-bold text-text">{t.student_name}</p>
                                 </div>
                             ))}

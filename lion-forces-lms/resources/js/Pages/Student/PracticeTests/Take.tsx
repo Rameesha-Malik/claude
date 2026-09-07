@@ -1,5 +1,6 @@
 import { Head, router } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
+import LiteMarkdown from '@/Components/LiteMarkdown';
 import QuestionRunner from '@/Components/QuestionRunner';
 import StudentLayout from '@/Layouts/StudentLayout';
 
@@ -59,7 +60,7 @@ export default function TakePracticeTest({ practiceTest, questions, quizRules }:
             {quizRules && (
                 <div className="mb-4 rounded-2xl border border-border bg-surface-sunken p-4 text-sm text-text-secondary">
                     <p className="mb-1 text-xs font-bold uppercase tracking-wide text-text-muted">Instructions</p>
-                    {quizRules}
+                    <LiteMarkdown text={quizRules} />
                 </div>
             )}
 

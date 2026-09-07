@@ -1,5 +1,6 @@
 import { Head, router } from '@inertiajs/react';
 import GradientMesh from '@/Components/GradientMesh';
+import LiteMarkdown from '@/Components/LiteMarkdown';
 import SectionKicker from '@/Components/SectionKicker';
 import WaveRibbon from '@/Components/WaveRibbon';
 import PublicLayout from '@/Layouts/PublicLayout';
@@ -72,7 +73,7 @@ export default function DemoQuizIntro({ quiz, quizzes, pageContent }: Props) {
                     <h1 className="font-display text-4xl uppercase tracking-wide sm:text-5xl">
                         {hasMultiple ? pageContent.title : quiz ? quiz.title : pageContent.title}
                     </h1>
-                    <p className="mt-4 text-teal-200">{pageContent.subtitle}</p>
+                    <LiteMarkdown text={pageContent.subtitle} className="mt-4 text-teal-200" />
                 </div>
             </section>
 

@@ -1,5 +1,6 @@
 import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
+import { LiteMarkdownInline } from '@/Components/LiteMarkdown';
 import RevealOnScroll from '@/Components/RevealOnScroll';
 import StudentLayout from '@/Layouts/StudentLayout';
 
@@ -30,7 +31,7 @@ function FavouriteCard({ item }: { item: Favourite }) {
                             {item.question.subject.name}
                         </span>
                     )}
-                    <p className="font-semibold text-text">{item.question.question_text}</p>
+                    <p className="font-semibold text-text"><LiteMarkdownInline text={item.question.question_text} /></p>
                 </div>
                 <button
                     onClick={remove}
@@ -57,7 +58,7 @@ function FavouriteCard({ item }: { item: Favourite }) {
                     {item.question.explanation && (
                         <div className="mt-3 rounded-2xl bg-primary-subtle p-3 text-sm text-text">
                             <span className="font-bold text-primary">Explanation: </span>
-                            {item.question.explanation}
+                            <LiteMarkdownInline text={item.question.explanation} />
                         </div>
                     )}
                 </>

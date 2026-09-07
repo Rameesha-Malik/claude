@@ -2,6 +2,7 @@ import { Head, Link } from '@inertiajs/react';
 import AnimatedCounter from '@/Components/AnimatedCounter';
 import FaqAccordionItem from '@/Components/FaqAccordionItem';
 import GradientMesh from '@/Components/GradientMesh';
+import LiteMarkdown from '@/Components/LiteMarkdown';
 import RevealOnScroll from '@/Components/RevealOnScroll';
 import SectionKicker from '@/Components/SectionKicker';
 import ShieldMark from '@/Components/ShieldMark';
@@ -783,7 +784,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                                             />
                                         )}
                                         <div className="flex-1">
-                                            <p className="text-sm italic leading-relaxed text-text-secondary">&ldquo;{t.testimonial_text}&rdquo;</p>
+                                            <LiteMarkdown text={t.testimonial_text} className="text-sm italic leading-relaxed text-text-secondary" />
                                             <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
                                                 <div className="font-semibold text-text">{t.student_name}</div>
                                                 {t.rating && (

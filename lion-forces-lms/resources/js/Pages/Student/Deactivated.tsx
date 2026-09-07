@@ -1,4 +1,5 @@
 import { Head, Link, usePage } from '@inertiajs/react';
+import LiteMarkdown from '@/Components/LiteMarkdown';
 import SiteLogo from '@/Components/SiteLogo';
 import { PageProps } from '@/types';
 
@@ -15,7 +16,7 @@ export default function Deactivated({ message }: { message: string }) {
                     </svg>
                 </div>
                 <h1 className="mt-4 font-display text-2xl text-text">Account Deactivated</h1>
-                <p className="mt-2 text-sm text-text-secondary">{message}</p>
+                <LiteMarkdown text={message} className="mt-2 text-sm text-text-secondary" />
                 <Link
                     href="/logout"
                     method="post"

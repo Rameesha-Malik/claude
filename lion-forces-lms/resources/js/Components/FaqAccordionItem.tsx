@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import LiteMarkdown from '@/Components/LiteMarkdown';
 
 // Shared accordion row for FAQ lists (Home + Contact) -- single open/close
 // state per item, no shared "only one open at a time" behavior since each
@@ -22,7 +23,7 @@ export default function FaqAccordionItem({ question, answer }: { question: strin
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                 </svg>
             </button>
-            {open && <div className="px-6 pb-5 text-sm text-text-secondary">{answer}</div>}
+            {open && <LiteMarkdown text={answer} className="px-6 pb-5 text-sm text-text-secondary" />}
         </div>
     );
 }

@@ -1,5 +1,7 @@
 import { Head, router, useForm } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
+import LiteMarkdown from '@/Components/LiteMarkdown';
+import RichTextArea from '@/Components/RichTextArea';
 import AdminLayout from '@/Layouts/AdminLayout';
 
 interface Review {
@@ -52,11 +54,11 @@ function AddReviewModal({ courses, onClose }: { courses: CourseOption[]; onClose
                     <select value={form.data.rating} onChange={(e) => form.setData('rating', Number(e.target.value))} className="w-full rounded-lg border border-border px-3 py-2 text-sm">
                         {[5, 4, 3, 2, 1].map((r) => <option key={r} value={r}>{r} star{r > 1 ? 's' : ''}</option>)}
                     </select>
-                    <textarea
+                    <RichTextArea
                         rows={3}
                         placeholder="Review text"
                         value={form.data.review_text}
-                        onChange={(e) => form.setData('review_text', e.target.value)}
+                        onChange={(v) => form.setData('review_text', v)}
                         className="w-full rounded-lg border border-border px-3 py-2 text-sm"
                     />
                     <button type="submit" disabled={form.processing} className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-bold uppercase text-on-primary hover:bg-primary-hover disabled:opacity-50">
@@ -118,7 +120,7 @@ export default function ReviewsIndex({ reviews, courses }: Props) {
                                     <span className={`rounded-full px-2 py-0.5 text-xs font-bold uppercase ${STATUS_STYLES[r.status]}`}>{r.status}</span>
                                 </div>
                                 <p className="mt-1 text-sm font-semibold text-text">{r.course?.title ?? 'Unknown course'} · {r.user?.name ?? 'Unknown student'}</p>
-                                {r.review_text && <p className="mt-2 text-sm text-text-secondary">{r.review_text}</p>}
+                                {r.review_text && <LiteMarkdown text={r.review_text} className="mt-2 text-sm text-text-secondary" />}
                                 <p className="mt-2 text-xs text-text-muted">{new Date(r.created_at).toLocaleString()}</p>
                             </div>
                             <div className="flex gap-3">

@@ -1,5 +1,7 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
+import LiteMarkdown from '@/Components/LiteMarkdown';
+import RichTextArea from '@/Components/RichTextArea';
 import AdminLayout from '@/Layouts/AdminLayout';
 
 interface NoteOption { id: number; title: string }
@@ -33,7 +35,7 @@ function FaqModal({ faq, notes, onClose }: { faq: FaqRow | null; notes: NoteOpti
                     </select>
                     <input placeholder="Question" value={form.data.question} onChange={(e) => form.setData('question', e.target.value)} className="w-full rounded-lg border border-border px-3 py-2 text-sm" />
                     {form.errors.question && <p className="text-xs text-danger">{form.errors.question}</p>}
-                    <textarea rows={3} placeholder="Answer" value={form.data.answer} onChange={(e) => form.setData('answer', e.target.value)} className="w-full rounded-lg border border-border px-3 py-2 text-sm" />
+                    <RichTextArea rows={3} placeholder="Answer" value={form.data.answer} onChange={(v) => form.setData('answer', v)} className="w-full rounded-lg border border-border px-3 py-2 text-sm" />
                     {form.errors.answer && <p className="text-xs text-danger">{form.errors.answer}</p>}
                     <label className="flex items-center gap-2 text-sm text-text">
                         <input type="checkbox" checked={form.data.is_active} onChange={(e) => form.setData('is_active', e.target.checked)} />
@@ -92,7 +94,7 @@ export default function NoteFaqsIndex({ faqs, notes }: Props) {
                                         {f.note?.title ?? 'Unassigned'}
                                     </span>
                                     <p className="mt-2 font-semibold text-text">{f.question}</p>
-                                    <p className="mt-1 text-sm text-text-secondary">{f.answer}</p>
+                                    <LiteMarkdown text={f.answer} className="mt-1 text-sm text-text-secondary" />
                                 </div>
                                 <div className="flex flex-shrink-0 items-center gap-3">
                                     <span className={`rounded-full px-2 py-0.5 text-xs font-bold uppercase ${f.is_active ? 'bg-success-bg text-success' : 'bg-surface-sunken text-text-muted'}`}>

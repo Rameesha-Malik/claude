@@ -94,7 +94,7 @@ export default function CourseDetail({ course }: { course: Course }) {
                                             <Stars rating={r.rating} />
                                             <span className="text-sm font-semibold text-text">{r.user?.name ?? 'Student'}</span>
                                         </div>
-                                        {r.review_text && <p className="mt-2 text-sm text-text-secondary">{r.review_text}</p>}
+                                        {r.review_text && <LiteMarkdown text={r.review_text} className="mt-2 text-sm text-text-secondary" />}
                                     </div>
                                 ))}
                             </div>

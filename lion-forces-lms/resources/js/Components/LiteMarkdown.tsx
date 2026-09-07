@@ -25,6 +25,17 @@ function renderInline(text: string, keyPrefix: string): ReactNode[] {
     });
 }
 
+// Inline-only variant -- same **bold**/*italic*/++underline++ patterns,
+// but stays a single `<span>` with no block wrapper (no headings/bullets/
+// paragraph breaks). For spots where the surrounding layout depends on
+// the content staying inline -- a quiz question stem sitting next to its
+// "Q1." number, an explanation line, a quote flanked by decorative quote
+// marks -- where LiteMarkdown's block-level <div> would force it onto its
+// own line.
+export function LiteMarkdownInline({ text, className = '' }: { text: string; className?: string }) {
+    return <span className={className}>{renderInline(text, 'inline')}</span>;
+}
+
 export default function LiteMarkdown({ text, className = '' }: { text: string; className?: string }) {
     const lines = text.split('\n');
     const blocks: ReactNode[] = [];

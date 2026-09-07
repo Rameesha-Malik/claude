@@ -1,4 +1,5 @@
 import { Head, Link, usePage } from '@inertiajs/react';
+import LiteMarkdown from '@/Components/LiteMarkdown';
 import RevealOnScroll from '@/Components/RevealOnScroll';
 import SectionKicker from '@/Components/SectionKicker';
 import PublicLayout from '@/Layouts/PublicLayout';
@@ -188,7 +189,7 @@ export default function HowToBuy({ hero, packages, paymentMethods, faqs }: { her
                             {faqs.map((faq, i) => (
                                 <div key={i} className="px-6 py-5">
                                     <div className="font-semibold text-text">{faq.question}</div>
-                                    <div className="mt-1 text-sm text-text-secondary">{faq.answer}</div>
+                                    <LiteMarkdown text={faq.answer} className="mt-1 text-sm text-text-secondary" />
                                 </div>
                             ))}
                         </div>

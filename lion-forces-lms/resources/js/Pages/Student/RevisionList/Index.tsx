@@ -1,5 +1,6 @@
 import { Head } from '@inertiajs/react';
 import { useState } from 'react';
+import { LiteMarkdownInline } from '@/Components/LiteMarkdown';
 import RevealOnScroll from '@/Components/RevealOnScroll';
 import StudentLayout from '@/Layouts/StudentLayout';
 
@@ -18,7 +19,7 @@ function RevisionCard({ item }: { item: RevisionItem }) {
     return (
         <div className="rounded-3xl border border-border bg-surface p-5">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                <p className="font-semibold text-text">{item.question.question_text}</p>
+                <p className="font-semibold text-text"><LiteMarkdownInline text={item.question.question_text} /></p>
                 <span className="flex-shrink-0 rounded-full bg-warning-bg px-2.5 py-0.5 text-xs font-bold uppercase text-warning">
                     Missed {item.times_wrong}×
                 </span>
@@ -40,7 +41,7 @@ function RevisionCard({ item }: { item: RevisionItem }) {
                     {item.question.explanation && (
                         <div className="mt-3 rounded-2xl bg-primary-subtle p-3 text-sm text-text">
                             <span className="font-bold text-primary">Explanation: </span>
-                            {item.question.explanation}
+                            <LiteMarkdownInline text={item.question.explanation} />
                         </div>
                     )}
                 </>

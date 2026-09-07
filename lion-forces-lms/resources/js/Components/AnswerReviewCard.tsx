@@ -1,3 +1,5 @@
+import { LiteMarkdownInline } from '@/Components/LiteMarkdown';
+
 interface Option { id: number; option_text: string; is_correct: boolean }
 interface Question { id: number; question_text: string; explanation: string | null; options: Option[] }
 interface Answer {
@@ -17,7 +19,7 @@ export default function AnswerReviewCard({ a, index }: { a: Answer; index: numbe
         <div className="rounded-3xl border border-border bg-surface p-5 transition-shadow duration-normal hover:shadow-md">
             <p className="mb-3 font-semibold text-text">
                 <span className="mr-2 text-text-muted">Q{index + 1}.</span>
-                {a.question.question_text}
+                <LiteMarkdownInline text={a.question.question_text} />
             </p>
             <div className="space-y-2">
                 {a.question.options.map((opt) => {
@@ -44,7 +46,7 @@ export default function AnswerReviewCard({ a, index }: { a: Answer; index: numbe
             {a.question.explanation && (
                 <div className="mt-3 rounded-2xl bg-primary-subtle p-3 text-sm text-text">
                     <span className="font-bold text-primary">Explanation: </span>
-                    {a.question.explanation}
+                    <LiteMarkdownInline text={a.question.explanation} />
                 </div>
             )}
             {a.marks_awarded !== undefined && <p className="mt-2 text-xs text-text-muted">Marks awarded: {a.marks_awarded}</p>}

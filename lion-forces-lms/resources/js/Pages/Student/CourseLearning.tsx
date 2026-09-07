@@ -1,5 +1,6 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import { useState } from 'react';
+import LiteMarkdown from '@/Components/LiteMarkdown';
 import RevealOnScroll from '@/Components/RevealOnScroll';
 import RichTextArea from '@/Components/RichTextArea';
 import StudentLayout from '@/Layouts/StudentLayout';
@@ -372,7 +373,7 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
                                 {course.shared_notes.map((note) => (
                                     <div key={note.id} className="rounded-2xl border border-border bg-surface p-5 transition-shadow duration-normal hover:shadow-md">
                                         <h4 className="font-semibold text-text">{note.title}</h4>
-                                        <p className="mt-2 whitespace-pre-line text-sm text-text-secondary">{note.content}</p>
+                                        <LiteMarkdown text={note.content ?? ''} className="mt-2 text-sm text-text-secondary" />
                                     </div>
                                 ))}
                             </RevealOnScroll>
@@ -386,7 +387,7 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
                                 {personalNotes.map((note) => (
                                     <div key={note.id} className="rounded-2xl border-2 border-primary bg-surface p-5 transition-shadow duration-normal hover:shadow-md">
                                         <h4 className="font-semibold text-text">{note.title}</h4>
-                                        <p className="mt-2 whitespace-pre-line text-sm text-text-secondary">{note.content}</p>
+                                        <LiteMarkdown text={note.content ?? ''} className="mt-2 text-sm text-text-secondary" />
                                     </div>
                                 ))}
                             </RevealOnScroll>
@@ -745,7 +746,7 @@ function AssignmentCard({ assignment }: { assignment: AssignmentItem }) {
                 </span>
             </div>
 
-            {assignment.instructions && <p className="mt-3 whitespace-pre-line text-sm text-text-secondary">{assignment.instructions}</p>}
+            {assignment.instructions && <LiteMarkdown text={assignment.instructions} className="mt-3 text-sm text-text-secondary" />}
 
             {submission?.status === 'graded' && (
                 <div className="mt-4 rounded-2xl bg-success-bg p-4">

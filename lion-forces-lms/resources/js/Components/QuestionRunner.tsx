@@ -1,6 +1,7 @@
 import { usePage } from '@inertiajs/react';
 import axios from 'axios';
 import { ReactNode, useEffect, useState } from 'react';
+import { LiteMarkdownInline } from '@/Components/LiteMarkdown';
 import { PageProps } from '@/types';
 
 interface RunnerOption { id: number; option_text: string }
@@ -381,7 +382,7 @@ export default function QuestionRunner({
                         <div className="mb-3 flex items-start justify-between gap-3">
                             <p className="font-semibold text-text">
                                 <span className="mr-2 text-text-muted">Q{currentIndex + 1}.</span>
-                                {current.question_text}
+                                <LiteMarkdownInline text={current.question_text} />
                             </p>
                             <div className="flex flex-shrink-0 items-center gap-3 text-xs">
                                 {isAuthenticated && (
@@ -499,7 +500,7 @@ export default function QuestionRunner({
                             >
                                 <p className="font-bold uppercase tracking-wide">{isCurrentCorrect ? 'Correct!' : 'Incorrect'}</p>
                                 {currentFeedbackReady.explanation && (
-                                    <p className="mt-1 font-normal text-text-secondary">{currentFeedbackReady.explanation}</p>
+                                    <p className="mt-1 font-normal text-text-secondary"><LiteMarkdownInline text={currentFeedbackReady.explanation} /></p>
                                 )}
                             </div>
                         )}

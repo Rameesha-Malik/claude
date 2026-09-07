@@ -1,5 +1,6 @@
 import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
+import { LiteMarkdownInline } from '@/Components/LiteMarkdown';
 import RevealOnScroll from '@/Components/RevealOnScroll';
 import StudentLayout from '@/Layouts/StudentLayout';
 
@@ -39,7 +40,7 @@ function NoteCard({ item }: { item: NoteItem }) {
                             {item.question.subject.name}
                         </span>
                     )}
-                    <p className="font-semibold text-text">{item.question.question_text}</p>
+                    <p className="font-semibold text-text"><LiteMarkdownInline text={item.question.question_text} /></p>
                 </div>
                 <div className="flex flex-shrink-0 gap-3">
                     <button onClick={() => setEditing((v) => !v)} className="text-xs font-bold uppercase text-primary hover:underline">

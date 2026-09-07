@@ -379,7 +379,7 @@ function SecurityTab({ security }: { security: Props['security'] }) {
                     <Toggle checked={form.data.maintenance_mode} onChange={(v) => form.setData('maintenance_mode', v)} label="Maintenance mode" hint="When enabled, only admins can access the site. Everyone else sees a maintenance message." />
 
                     <Field label="Deactivated student message" hint="Shown to students whose account has been de-activated. They can still log in but will only see this message and a sign-out option.">
-                        <textarea rows={3} className={inputClass} value={form.data.deactivated_student_message} onChange={(e) => form.setData('deactivated_student_message', e.target.value)} />
+                        <RichTextArea rows={3} className={inputClass} value={form.data.deactivated_student_message} onChange={(v) => form.setData('deactivated_student_message', v)} />
                     </Field>
 
                     <button type="submit" disabled={form.processing} className={btnClass}>Save Security</button>
@@ -450,7 +450,7 @@ function QuizzesTab({ quizSettings }: { quizSettings: Props['quizSettings'] }) {
                     </Field>
                 </div>
                 <Field label="Default quiz rules (global)" hint="Shown to students as an Instructions panel when taking a practice test.">
-                    <textarea rows={3} className={inputClass} placeholder="e.g. Read each question carefully. No external resources allowed." value={form.data.default_quiz_rules} onChange={(e) => form.setData('default_quiz_rules', e.target.value)} />
+                    <RichTextArea rows={3} className={inputClass} placeholder="e.g. Read each question carefully. No external resources allowed." value={form.data.default_quiz_rules} onChange={(v) => form.setData('default_quiz_rules', v)} />
                 </Field>
                 <Field label="Quiz set retake limit (global)" hint="Stored for reference; applied per-test where repeatable tests are configured.">
                     <input type="number" min={1} className={inputClass} placeholder="e.g. 3" value={form.data.quiz_retake_limit} onChange={(e) => form.setData('quiz_retake_limit', e.target.value ? Number(e.target.value) : '')} />

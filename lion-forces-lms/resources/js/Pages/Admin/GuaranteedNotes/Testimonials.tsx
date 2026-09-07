@@ -1,5 +1,7 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
+import LiteMarkdown from '@/Components/LiteMarkdown';
+import RichTextArea from '@/Components/RichTextArea';
 import AdminLayout from '@/Layouts/AdminLayout';
 
 interface NoteOption { id: number; title: string }
@@ -36,7 +38,7 @@ function TestimonialModal({ testimonial, notes, onClose }: { testimonial: Testim
                     </select>
                     <input placeholder="Student name" value={form.data.student_name} onChange={(e) => form.setData('student_name', e.target.value)} className="w-full rounded-lg border border-border px-3 py-2 text-sm" />
                     {form.errors.student_name && <p className="text-xs text-danger">{form.errors.student_name}</p>}
-                    <textarea rows={3} placeholder="Testimonial" value={form.data.testimonial_text} onChange={(e) => form.setData('testimonial_text', e.target.value)} className="w-full rounded-lg border border-border px-3 py-2 text-sm" />
+                    <RichTextArea rows={3} placeholder="Testimonial" value={form.data.testimonial_text} onChange={(v) => form.setData('testimonial_text', v)} className="w-full rounded-lg border border-border px-3 py-2 text-sm" />
                     {form.errors.testimonial_text && <p className="text-xs text-danger">{form.errors.testimonial_text}</p>}
                     <div>
                         <label className="mb-1 block text-xs font-bold uppercase text-text-muted">Rating</label>
@@ -103,7 +105,7 @@ export default function NoteTestimonialsIndex({ testimonials, notes }: Props) {
                             </div>
                             <p className="mt-2 font-bold text-text">{t.student_name}</p>
                             {t.rating && <p className="text-xs text-warning">{'★'.repeat(t.rating)}{'☆'.repeat(5 - t.rating)}</p>}
-                            <p className="mt-2 text-sm text-text-secondary">{t.testimonial_text}</p>
+                            <LiteMarkdown text={t.testimonial_text} className="mt-2 text-sm text-text-secondary" />
                             <div className="mt-3 flex gap-3">
                                 <button onClick={() => setModalTestimonial(t)} className="text-xs font-bold uppercase text-primary hover:underline">Edit</button>
                                 <button onClick={() => destroy(t)} className="text-xs font-bold uppercase text-danger hover:underline">Delete</button>

@@ -1,4 +1,6 @@
 import { Head, Link, useForm } from '@inertiajs/react';
+import LiteMarkdown from '@/Components/LiteMarkdown';
+import RichTextArea from '@/Components/RichTextArea';
 import AdminLayout from '@/Layouts/AdminLayout';
 
 interface Props {
@@ -55,9 +57,9 @@ export default function DemoQuizPageContent({ content, totalQuestions }: Props) 
 
                 <div className="mb-2">
                     <label className="mb-1 block text-sm font-medium text-text">Subtitle / description</label>
-                    <textarea
+                    <RichTextArea
                         value={form.data.subtitle}
-                        onChange={(e) => form.setData('subtitle', e.target.value)}
+                        onChange={(v) => form.setData('subtitle', v)}
                         rows={3}
                         className="w-full rounded-lg border border-border px-3 py-2.5 text-sm focus:border-primary focus:outline-none"
                     />
@@ -76,7 +78,7 @@ export default function DemoQuizPageContent({ content, totalQuestions }: Props) 
                 <p className="mb-4 flex items-center gap-1.5 font-bold text-text">👁 Preview</p>
                 <div className="rounded-2xl bg-gradient-to-br from-teal-700 via-teal-800 to-teal-950 p-10 text-center text-white">
                     <h3 className="font-display text-2xl uppercase tracking-wide">{form.data.title || 'Free Demo Quizzes'}</h3>
-                    <p className="mx-auto mt-3 max-w-lg text-sm text-teal-200">{form.data.subtitle}</p>
+                    <LiteMarkdown text={form.data.subtitle} className="mx-auto mt-3 max-w-lg text-sm text-teal-200" />
                     <p className="mt-4 text-xs text-teal-300">{totalQuestions} questions across active demo quizzes</p>
                 </div>
             </div>
