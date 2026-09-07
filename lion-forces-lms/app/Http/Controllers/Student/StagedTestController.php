@@ -142,17 +142,63 @@ class StagedTestController extends Controller
         }
 
         $stagePercentage = $stageTotal > 0 ? round(max($stageScore, 0) / $stageTotal * 100, 1) : 0;
-        $stagePassed = $stagePercentage >= (float) $stage->pass_threshold_percent;
 
-        StagedTestAttemptStage::updateOrCreate(
-            ['attempt_id' => $attempt->id, 'stage_id' => $stage->id],
-            ['score' => $stageScore, 'total_marks' => $stageTotal, 'passed' => $stagePassed, 'completed_at' => now()],
-        );
+        // Ungrouped: pass/fail is decided on this stage alone, same as
+        // before "stage groups" existed. Grouped: this stage's own
+        // threshold doesn't apply on its own -- record its raw score now,
+        // then resolve pass/fail (for every stage in the group at once)
+        // once the LAST stage in the group has been attempted.
+        if (! $stage->stage_group_id) {
+            $stagePassed = $stagePercentage >= (float) $stage->pass_threshold_percent;
 
-        // The gate: failing a stage ends the attempt right here with
-        // whatever's been scored so far -- later stages are never unlocked.
-        if (! $stagePassed) {
-            return $this->finalizeAttempt($attempt);
+            StagedTestAttemptStage::updateOrCreate(
+                ['attempt_id' => $attempt->id, 'stage_id' => $stage->id],
+                ['score' => $stageScore, 'total_marks' => $stageTotal, 'passed' => $stagePassed, 'completed_at' => now()],
+            );
+
+            // The gate: failing a stage ends the attempt right here with
+            // whatever's been scored so far -- later stages are never
+            // unlocked.
+            if (! $stagePassed) {
+                return $this->finalizeAttempt($attempt);
+            }
+        } else {
+            // Placeholder result, `passed` resolved below once the group
+            // is complete -- keeps this row's presence meaning "attempted"
+            // consistently with the ungrouped branch, for nextStageFor().
+            StagedTestAttemptStage::updateOrCreate(
+                ['attempt_id' => $attempt->id, 'stage_id' => $stage->id],
+                ['score' => $stageScore, 'total_marks' => $stageTotal, 'passed' => false, 'completed_at' => now()],
+            );
+
+            $group = $stage->stageGroup;
+            $groupStageIds = $group->stages()->pluck('id');
+            $isLastInGroup = $stage->id === $groupStageIds->last();
+
+            if (! $isLastInGroup) {
+                $stages = $stagedTest->stages()->orderBy('order')->get();
+                $next = $this->stageAfter($stages, $stage);
+
+                return $next
+                    ? redirect()->route('student.staged-tests.stage', [$stagedTest, $attempt, $next])
+                    : $this->finalizeAttempt($attempt);
+            }
+
+            // Last stage in the group -- resolve the whole group's
+            // pass/fail on the combined score across all its stages, and
+            // stamp that same result onto every stage row in the group
+            // (finalizeAttempt()'s `every(passed)` check stays untouched).
+            $groupResults = StagedTestAttemptStage::where('attempt_id', $attempt->id)->whereIn('stage_id', $groupStageIds)->get();
+            $combinedScore = $groupResults->sum('score');
+            $combinedTotal = $groupResults->sum('total_marks');
+            $combinedPercentage = $combinedTotal > 0 ? round(max($combinedScore, 0) / $combinedTotal * 100, 1) : 0;
+            $groupPassed = $combinedPercentage >= (float) $group->pass_threshold_percent;
+
+            StagedTestAttemptStage::where('attempt_id', $attempt->id)->whereIn('stage_id', $groupStageIds)->update(['passed' => $groupPassed]);
+
+            if (! $groupPassed) {
+                return $this->finalizeAttempt($attempt);
+            }
         }
 
         $stages = $stagedTest->stages()->orderBy('order')->get();
@@ -204,6 +250,14 @@ class StagedTestController extends Controller
 
     private function authorizeEnrollment(Request $request, StagedTest $stagedTest): void
     {
+        // "Full Test config" (Settings > Features reference screenshot)
+        // lets a test have no course at all -- a standalone assessment,
+        // open to any logged-in student rather than gated by enrollment
+        // in a course that may not exist for it.
+        if (! $stagedTest->course_id) {
+            return;
+        }
+
         $enrolled = $request->user()->enrollments()
             ->where('course_id', $stagedTest->course_id)
             ->active()

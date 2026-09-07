@@ -7,38 +7,43 @@ use App\Models\Course;
 use App\Models\QuestionBank;
 use App\Models\StagedTest;
 use App\Models\StagedTestStage;
+use App\Models\StagedTestStageGroup;
 use App\Models\Subject;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
 
+/**
+ * "Full Test config" (admin reference screenshot, client-specified
+ * special requirement): staged tests as a standalone top-level page --
+ * previously only reachable nested inside a specific course's edit page
+ * (course_id was required). Course is now an optional field on the test
+ * itself, picked from a dropdown, rather than a URL segment -- one
+ * controller, no parallel nested/top-level CRUD.
+ *
+ * Also adds "Stage groups": merge several stages so a candidate attempts
+ * all of them before being gated on their COMBINED score, instead of each
+ * stage individually -- see submitStage() in the student controller for
+ * where that's actually enforced; this controller only manages the
+ * group/stage records themselves.
+ */
 class StagedTestController extends Controller
 {
-    public function index(Course $course): Response
+    public function index(): Response
     {
-        return Inertia::render('Admin/StagedTests/Index', [
-            'course' => $course->only('id', 'title'),
-            'tests' => $course->stagedTests()->withCount('stages')->get(),
+        return Inertia::render('Admin/FullTestConfig/Index', [
+            'tests' => StagedTest::with('course:id,title')->withCount('stages')->latest()->get(),
+            'courses' => Course::orderBy('title')->get(['id', 'title']),
         ]);
     }
 
-    public function create(Course $course): Response
+    public function edit(StagedTest $stagedTest): Response
     {
-        return $this->form($course);
-    }
+        $stagedTest->load(['stages.questions', 'stageGroups']);
 
-    public function edit(Course $course, StagedTest $stagedTest): Response
-    {
-        $stagedTest->load('stages.questions');
-
-        return $this->form($course, $stagedTest);
-    }
-
-    private function form(Course $course, ?StagedTest $stagedTest = null): Response
-    {
-        return Inertia::render('Admin/StagedTests/Form', [
-            'course' => $course->only('id', 'title'),
+        return Inertia::render('Admin/FullTestConfig/Edit', [
             'stagedTest' => $stagedTest,
+            'courses' => Course::orderBy('title')->get(['id', 'title']),
             'subjects' => Subject::orderBy('name')->get(['id', 'name']),
             'questionBank' => QuestionBank::select('id', 'subject_id', 'question_text', 'difficulty')
                 ->orderByDesc('id')
@@ -47,32 +52,32 @@ class StagedTestController extends Controller
         ]);
     }
 
-    public function store(Request $request, Course $course)
+    public function store(Request $request)
     {
-        $data = $this->validated($request);
-        $test = $course->stagedTests()->create($data);
+        $test = StagedTest::create($this->validated($request));
 
-        return redirect()->route('admin.courses.staged-tests.edit', [$course, $test])->with('success', 'Staged test created. Now add stages.');
+        return redirect()->route('admin.full-test-config.edit', $test)->with('success', 'Test created. Now add stages.');
     }
 
-    public function update(Request $request, Course $course, StagedTest $stagedTest)
+    public function update(Request $request, StagedTest $stagedTest)
     {
         $stagedTest->update($this->validated($request));
 
-        return back()->with('success', 'Staged test updated.');
+        return back()->with('success', 'Test updated.');
     }
 
-    public function destroy(Course $course, StagedTest $stagedTest)
+    public function destroy(StagedTest $stagedTest)
     {
         $stagedTest->delete();
 
-        return redirect()->route('admin.courses.staged-tests.index', $course)->with('success', 'Staged test removed.');
+        return redirect()->route('admin.full-test-config.index')->with('success', 'Test removed.');
     }
 
     private function validated(Request $request): array
     {
         return $request->validate([
             'title' => 'required|string|max:255',
+            'course_id' => 'nullable|exists:courses,id',
             'target_exam_name' => 'nullable|string|max:255',
             'is_active' => 'boolean',
         ]);
@@ -80,7 +85,7 @@ class StagedTestController extends Controller
 
     // --- Stages ---
 
-    public function storeStage(Request $request, Course $course, StagedTest $stagedTest)
+    public function storeStage(Request $request, StagedTest $stagedTest)
     {
         $data = $this->stageValidated($request);
         $questionIds = $data['question_ids'] ?? [];
@@ -93,7 +98,7 @@ class StagedTestController extends Controller
         return back()->with('success', 'Stage added.');
     }
 
-    public function updateStage(Request $request, Course $course, StagedTest $stagedTest, StagedTestStage $stage)
+    public function updateStage(Request $request, StagedTest $stagedTest, StagedTestStage $stage)
     {
         $data = $this->stageValidated($request);
         $questionIds = $data['question_ids'] ?? [];
@@ -105,7 +110,7 @@ class StagedTestController extends Controller
         return back()->with('success', 'Stage updated.');
     }
 
-    public function destroyStage(Course $course, StagedTest $stagedTest, StagedTestStage $stage)
+    public function destroyStage(StagedTest $stagedTest, StagedTestStage $stage)
     {
         $stage->delete();
 
@@ -116,6 +121,7 @@ class StagedTestController extends Controller
     {
         return $request->validate([
             'name' => 'required|string|max:255',
+            'stage_group_id' => 'nullable|exists:staged_test_stage_groups,id',
             'duration_minutes' => 'nullable|integer|min:1',
             'pass_threshold_percent' => 'required|numeric|min:0|max:100',
             'marks_per_question' => 'required|numeric|min:0',
@@ -132,5 +138,48 @@ class StagedTestController extends Controller
             $sync[$id] = ['order' => $i + 1];
         }
         $stage->questions()->sync($sync);
+    }
+
+    // --- Stage groups ("Merge stages") ---
+
+    public function storeGroup(Request $request, StagedTest $stagedTest)
+    {
+        $data = $request->validate([
+            'name' => 'nullable|string|max:255',
+            'pass_threshold_percent' => 'required|numeric|min:0|max:100',
+            'stage_ids' => 'required|array|min:2',
+            'stage_ids.*' => 'exists:staged_test_stages,id',
+        ]);
+
+        $group = $stagedTest->stageGroups()->create([
+            'name' => $data['name'] ?? null,
+            'pass_threshold_percent' => $data['pass_threshold_percent'],
+            'order' => $stagedTest->stageGroups()->count() + 1,
+        ]);
+
+        $stagedTest->stages()->whereIn('id', $data['stage_ids'])->update(['stage_group_id' => $group->id]);
+
+        return back()->with('success', 'Stages merged into a group.');
+    }
+
+    public function updateGroup(Request $request, StagedTest $stagedTest, StagedTestStageGroup $group)
+    {
+        $data = $request->validate([
+            'name' => 'nullable|string|max:255',
+            'pass_threshold_percent' => 'required|numeric|min:0|max:100',
+        ]);
+
+        $group->update($data);
+
+        return back()->with('success', 'Group updated.');
+    }
+
+    public function destroyGroup(StagedTest $stagedTest, StagedTestStageGroup $group)
+    {
+        // Ungroups its stages (nullOnDelete on stage_group_id) rather than
+        // deleting them -- "unmerge", not "remove these stages".
+        $group->delete();
+
+        return back()->with('success', 'Group removed -- its stages now pass individually again.');
     }
 }

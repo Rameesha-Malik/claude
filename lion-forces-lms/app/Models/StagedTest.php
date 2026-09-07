@@ -29,6 +29,11 @@ class StagedTest extends Model
         return $this->hasMany(StagedTestStage::class)->orderBy('order');
     }
 
+    public function stageGroups(): HasMany
+    {
+        return $this->hasMany(StagedTestStageGroup::class)->orderBy('order');
+    }
+
     public function attempts(): MorphMany
     {
         return $this->morphMany(TestAttempt::class, 'attemptable');

@@ -200,6 +200,21 @@ Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->nam
 
     Route::middleware('not.content_manager')->get('/packages', [AdminCourseController::class, 'packagesIndex'])->name('packages.index');
 
+    // "Full Test config" -- see StagedTestController's own comment.
+    Route::prefix('full-test-config')->name('full-test-config.')->group(function () {
+        Route::get('/', [AdminStagedTestController::class, 'index'])->name('index');
+        Route::post('/', [AdminStagedTestController::class, 'store'])->name('store');
+        Route::get('/{stagedTest}/edit', [AdminStagedTestController::class, 'edit'])->name('edit');
+        Route::put('/{stagedTest}', [AdminStagedTestController::class, 'update'])->name('update');
+        Route::delete('/{stagedTest}', [AdminStagedTestController::class, 'destroy'])->name('destroy');
+        Route::post('/{stagedTest}/stages', [AdminStagedTestController::class, 'storeStage'])->name('stages.store');
+        Route::put('/{stagedTest}/stages/{stage}', [AdminStagedTestController::class, 'updateStage'])->name('stages.update');
+        Route::delete('/{stagedTest}/stages/{stage}', [AdminStagedTestController::class, 'destroyStage'])->name('stages.destroy');
+        Route::post('/{stagedTest}/groups', [AdminStagedTestController::class, 'storeGroup'])->name('groups.store');
+        Route::put('/{stagedTest}/groups/{group}', [AdminStagedTestController::class, 'updateGroup'])->name('groups.update');
+        Route::delete('/{stagedTest}/groups/{group}', [AdminStagedTestController::class, 'destroyGroup'])->name('groups.destroy');
+    });
+
     Route::prefix('courses')->name('courses.')->group(function () {
         Route::get('/', [AdminCourseController::class, 'index'])->name('index');
         Route::get('/create', [AdminCourseController::class, 'create'])->name('create');
@@ -268,17 +283,6 @@ Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->nam
             Route::delete('/{mockExam}/sections/{section}', [AdminMockExamController::class, 'destroySection'])->name('sections.destroy');
         });
 
-        Route::prefix('{course}/staged-tests')->name('staged-tests.')->group(function () {
-            Route::get('/', [AdminStagedTestController::class, 'index'])->name('index');
-            Route::get('/create', [AdminStagedTestController::class, 'create'])->name('create');
-            Route::post('/', [AdminStagedTestController::class, 'store'])->name('store');
-            Route::get('/{stagedTest}/edit', [AdminStagedTestController::class, 'edit'])->name('edit');
-            Route::put('/{stagedTest}', [AdminStagedTestController::class, 'update'])->name('update');
-            Route::delete('/{stagedTest}', [AdminStagedTestController::class, 'destroy'])->name('destroy');
-            Route::post('/{stagedTest}/stages', [AdminStagedTestController::class, 'storeStage'])->name('stages.store');
-            Route::put('/{stagedTest}/stages/{stage}', [AdminStagedTestController::class, 'updateStage'])->name('stages.update');
-            Route::delete('/{stagedTest}/stages/{stage}', [AdminStagedTestController::class, 'destroyStage'])->name('stages.destroy');
-        });
     });
 
     Route::prefix('content-library')->name('content-library.')->group(function () {
