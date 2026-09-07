@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 #[Fillable([
-    'course_id', 'title', 'question_selection_mode', 'subject_id', 'auto_question_count',
+    'course_id', 'section_id', 'title', 'question_selection_mode', 'subject_id', 'auto_question_count',
     'shuffle_questions', 'marks_per_question', 'negative_marking', 'is_repeatable', 'is_active', 'order',
 ])]
 class Quiz extends Model
@@ -31,6 +31,15 @@ class Quiz extends Model
     public function course(): BelongsTo
     {
         return $this->belongsTo(Course::class);
+    }
+
+    // The Topic this quiz shows under in the Curriculum panel / student
+    // Course Content sidebar, if the admin assigned one -- optional,
+    // separate from the Quizzes tab where every quiz is always listed
+    // regardless.
+    public function section(): BelongsTo
+    {
+        return $this->belongsTo(CourseSection::class, 'section_id');
     }
 
     public function subject(): BelongsTo

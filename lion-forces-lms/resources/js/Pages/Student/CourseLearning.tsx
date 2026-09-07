@@ -17,7 +17,7 @@ interface PracticeTestSummary {
 }
 interface QuizSummary {
     id: number; title: string; question_selection_mode: string; auto_question_count: number | null; questions_count: number;
-    latest_attempt_id: number | null;
+    latest_attempt_id: number | null; section_id: number | null;
 }
 interface FlashcardItem { id: number; front_text: string; back_text: string; subject: { id: number; name: string } | null }
 interface MockExamSummary {
@@ -319,6 +319,9 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
                                                         onClick={() => selectLesson(lesson)}
                                                     />
                                                 ))}
+                                                {course.quizzes.filter((q) => q.section_id === section.id).map((quiz) => (
+                                                    <QuizListItem key={`quiz-${quiz.id}`} quiz={quiz} />
+                                                ))}
                                             </div>
                                         </div>
                                     ))}
@@ -561,6 +564,28 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
 
             {tab === 'Q&A' && <QaPanel course={course} questions={questions} />}
         </StudentLayout>
+    );
+}
+
+// A quiz the admin assigned to this topic (Quiz > Topic field) --
+// same clickable-row treatment as a lesson, so "Topic -> click -> Quiz"
+// works without a student having to know the separate Quizzes tab exists.
+function QuizListItem({ quiz }: { quiz: QuizSummary }) {
+    return (
+        <Link
+            href={`/portal/quizzes/${quiz.id}`}
+            className="flex w-full items-center gap-3 rounded-2xl border border-dashed border-primary px-3 py-3 text-left text-sm transition-all duration-fast hover:bg-primary-subtle"
+        >
+            <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-primary-subtle text-primary">
+                <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+            </span>
+            <span className="min-w-0 flex-1 truncate font-medium text-text">{quiz.title}</span>
+            <span className="flex-shrink-0 text-xs font-bold uppercase tracking-wide text-primary">
+                {quiz.latest_attempt_id ? 'Retake Quiz' : 'Start Quiz'}
+            </span>
+        </Link>
     );
 }
 

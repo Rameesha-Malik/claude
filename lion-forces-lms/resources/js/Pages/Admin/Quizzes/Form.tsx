@@ -3,10 +3,11 @@ import { useState } from 'react';
 import AdminLayout from '@/Layouts/AdminLayout';
 
 interface Subject { id: number; name: string }
+interface Section { id: number; title: string }
 interface Option { id: number; option_text: string; is_correct: boolean }
 interface QuestionRow { id: number; subject_id: number | null; question_text: string; difficulty: string; options: Option[] }
 interface QuizRecord {
-    id: number; title: string;
+    id: number; title: string; section_id: number | null;
     question_selection_mode: string; subject_id: number | null; auto_question_count: number | null;
     shuffle_questions: boolean; marks_per_question: string; negative_marking: string;
     is_repeatable: boolean; is_active: boolean; questions: QuestionRow[];
@@ -14,6 +15,7 @@ interface QuizRecord {
 interface Props {
     course: { id: number; title: string };
     quiz?: QuizRecord;
+    sections: Section[];
     subjects: Subject[];
     questionBank: QuestionRow[];
 }
@@ -21,12 +23,13 @@ interface Props {
 const inputClass = 'w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:shadow-glow focus:outline-none';
 const labelClass = 'mb-1 block text-sm font-medium text-text';
 
-export default function QuizForm({ course, quiz, subjects, questionBank }: Props) {
+export default function QuizForm({ course, quiz, sections, subjects, questionBank }: Props) {
     const isEdit = !!quiz;
     const [subjectFilter, setSubjectFilter] = useState<string>('');
 
     const form = useForm({
         title: quiz?.title ?? '',
+        section_id: quiz?.section_id ?? ('' as number | ''),
         question_selection_mode: quiz?.question_selection_mode ?? 'manual',
         subject_id: quiz?.subject_id ?? '',
         auto_question_count: quiz?.auto_question_count ?? '',
@@ -62,6 +65,18 @@ export default function QuizForm({ course, quiz, subjects, questionBank }: Props
                     <div>
                         <label className={labelClass}>Title</label>
                         <input className={inputClass} value={form.data.title} onChange={(e) => form.setData('title', e.target.value)} />
+                    </div>
+
+                    <div>
+                        <label className={labelClass}>Topic (optional)</label>
+                        {/* Client: "quiz topic - click - quiz" -- lets this quiz
+                            also show as a clickable row under a Topic in the
+                            student's Course Content sidebar, not just in the
+                            Quizzes tab. */}
+                        <select className={inputClass} value={form.data.section_id} onChange={(e) => form.setData('section_id', e.target.value ? Number(e.target.value) : '')}>
+                            <option value="">Not tied to a topic (Quizzes tab only)</option>
+                            {sections.map((s) => <option key={s.id} value={s.id}>{s.title}</option>)}
+                        </select>
                     </div>
 
                     <div>

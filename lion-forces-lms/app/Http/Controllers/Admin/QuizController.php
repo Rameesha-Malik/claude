@@ -38,6 +38,7 @@ class QuizController extends Controller
         return Inertia::render('Admin/Quizzes/Form', [
             'course' => $course->only('id', 'title'),
             'quiz' => $quiz,
+            'sections' => $course->sections()->orderBy('order')->get(['id', 'title']),
             'subjects' => Subject::orderBy('name')->get(['id', 'name']),
             'questionBank' => QuestionBank::with('options:id,question_id,option_text,is_correct')
                 ->select('id', 'subject_id', 'question_text', 'difficulty')
@@ -82,6 +83,7 @@ class QuizController extends Controller
     {
         return $request->validate([
             'title' => 'required|string|max:255',
+            'section_id' => 'nullable|exists:course_sections,id',
             'question_selection_mode' => 'required|in:manual,auto',
             'subject_id' => 'nullable|exists:subjects,id',
             'auto_question_count' => 'nullable|integer|min:1',
