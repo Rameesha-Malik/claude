@@ -50,6 +50,7 @@ use App\Http\Controllers\Student\MockExamController as StudentMockExamController
 use App\Http\Controllers\Student\NotificationController as StudentNotificationController;
 use App\Http\Controllers\Student\PracticeTestController as StudentPracticeTestController;
 use App\Http\Controllers\Student\RevisionListController as StudentRevisionListController;
+use App\Http\Controllers\Student\CustomQuizController as StudentCustomQuizController;
 use App\Http\Controllers\Student\QuizController as StudentQuizController;
 use App\Http\Controllers\Student\StagedTestController as StudentStagedTestController;
 use Illuminate\Support\Facades\Route;
@@ -125,6 +126,11 @@ Route::middleware(['auth', 'verified', 'user_type:student', 'check.active'])->pr
     Route::post('/practice-tests/{practiceTest}/submit', [StudentPracticeTestController::class, 'submit'])->name('student.practice-tests.submit');
     Route::get('/quizzes/{quiz}', [StudentQuizController::class, 'show'])->name('student.quizzes.show');
     Route::post('/quizzes/{quiz}/submit', [StudentQuizController::class, 'submit'])->name('student.quizzes.submit');
+
+    Route::get('/custom-quiz', [StudentCustomQuizController::class, 'create'])->name('student.custom-quiz.create');
+    Route::post('/custom-quiz', [StudentCustomQuizController::class, 'store'])->name('student.custom-quiz.store');
+    Route::get('/custom-quiz/{config}', [StudentCustomQuizController::class, 'show'])->name('student.custom-quiz.show');
+    Route::post('/custom-quiz/{config}/submit', [StudentCustomQuizController::class, 'submit'])->name('student.custom-quiz.submit');
     Route::get('/attempts/{attempt}', [StudentAttemptController::class, 'show'])->name('student.attempts.show');
 
     Route::get('/mock-exams/{mockExam}', [StudentMockExamController::class, 'show'])->name('student.mock-exams.show');

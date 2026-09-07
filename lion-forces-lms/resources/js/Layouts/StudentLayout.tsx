@@ -17,18 +17,20 @@ function Icon({ d }: { d: string }) {
     );
 }
 
-const NAV: NavEntry[] = [
+const NAV: (NavEntry & { feature?: string })[] = [
     { label: 'Dashboard', href: '/portal', icon: <Icon d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" /> },
     { label: 'My Courses', href: '/portal/my-courses', icon: <Icon d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /> },
+    { label: 'Custom Quiz', href: '/portal/custom-quiz', feature: 'custom_quiz', icon: <Icon d="M9.879 7.519c1.171-1.025 3.071-1.025 4.242 0 1.172 1.025 1.172 2.687 0 3.712-.203.179-.43.326-.67.442-.745.361-1.45.999-1.45 1.827v.75M21 12a9 9 0 11-18 0 9 9 0 0118 0zm-9 5.25h.008v.008H12v-.008z" /> },
     { label: 'Revision List', href: '/portal/revision-list', icon: <Icon d="M3 21v-4a4 4 0 014-4h5m3-10l4 4-9.5 9.5L5 21l.5-4.5L15 7z" /> },
     { label: 'Profile', href: '/profile', icon: <Icon d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /> },
 ];
 
 export default function StudentLayout({ children, header }: PropsWithChildren<{ header?: string }>) {
-    const { site, auth, unreadNotificationsCount } = usePage<PageProps>().props;
+    const { site, auth, unreadNotificationsCount, features } = usePage<PageProps>().props;
     const { url } = usePage();
     const [mobileOpen, setMobileOpen] = useState(false);
     const [menuOpen, setMenuOpen] = useState(false);
+    const visibleNav = NAV.filter((item) => !item.feature || features?.[item.feature] !== false);
 
     const sidebar = (
         <div className="flex h-full flex-col bg-secondary text-white">
@@ -37,7 +39,7 @@ export default function StudentLayout({ children, header }: PropsWithChildren<{ 
                 <span className="truncate">{site.name}</span>
             </Link>
             <nav className="flex-1 space-y-1.5 px-3 py-4">
-                {NAV.map((item) => {
+                {visibleNav.map((item) => {
                     const active = url === item.href || (item.href !== '/portal' && url.startsWith(item.href));
                     return (
                         <Link

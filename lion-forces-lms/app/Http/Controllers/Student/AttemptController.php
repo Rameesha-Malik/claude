@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
+use App\Models\CustomQuizConfig;
 use App\Models\MockExam;
 use App\Models\PracticeTest;
 use App\Models\Quiz;
@@ -28,8 +29,28 @@ class AttemptController extends Controller
             MockExam::class => $this->mockExamResult($attempt),
             StagedTest::class => $this->stagedTestResult($attempt),
             Quiz::class => $this->quizResult($attempt),
+            CustomQuizConfig::class => $this->customQuizResult($attempt),
             default => $this->practiceTestResult($attempt),
         };
+    }
+
+    // Reuses Quizzes/Result.tsx as-is -- not routed through quizResult()
+    // itself because that assumes a real Quiz record ($quiz->title,
+    // ->is_repeatable) which a CustomQuizConfig doesn't have; isRepeatable:
+    // false / quizId: null here just means that page's "Retake Quiz" link
+    // doesn't render (a custom quiz has no single fixed id to retake).
+    private function customQuizResult(TestAttempt $attempt): Response
+    {
+        $attempt->load(['answers.question.options', 'answers.selectedOption']);
+        $config = $attempt->attemptable()->with('subject')->first();
+        $title = $config?->subject?->name ? "Custom Quiz — {$config->subject->name}" : 'Custom Quiz';
+
+        return Inertia::render('Student/Quizzes/Result', [
+            'attempt' => $attempt,
+            'quizTitle' => $title,
+            'isRepeatable' => false,
+            'quizId' => null,
+        ]);
     }
 
     private function practiceTestResult(TestAttempt $attempt): Response
