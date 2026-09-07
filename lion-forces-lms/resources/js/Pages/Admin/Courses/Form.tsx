@@ -103,7 +103,17 @@ export default function CourseForm({ course, categories, instructors }: Props) {
             <div className="grid grid-cols-3 gap-4">
                 <div>
                     <label className={labelClass}>Level</label>
-                    <input className={inputClass} value={form.data.level} onChange={(e) => form.setData('level', e.target.value)} />
+                    {/* Was a free-text input -- test/placeholder values typed in
+                        here (e.g. "2") rendered as-is in the level badge students
+                        see on the course page. A fixed list keeps that badge
+                        always meaningful. */}
+                    <select className={inputClass} value={form.data.level} onChange={(e) => form.setData('level', e.target.value)}>
+                        <option value="">— None —</option>
+                        <option value="Beginner">Beginner</option>
+                        <option value="Intermediate">Intermediate</option>
+                        <option value="Advanced">Advanced</option>
+                        <option value="All Levels">All Levels</option>
+                    </select>
                 </div>
                 <div>
                     <label className={labelClass}>Hours</label>

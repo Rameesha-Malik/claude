@@ -64,6 +64,32 @@ function youtubeEmbedUrl(url: string): string | null {
     return match ? `https://www.youtube.com/embed/${match[1]}` : null;
 }
 
+// Small type indicator on each sidebar row -- "make it better" feedback on
+// this page: the list was just a number circle + title, no hint of what
+// kind of content it is before clicking. Same lesson types the admin
+// Curriculum panel offers (video_youtube/video_upload/pdf/audio/document/
+// link), just one glyph each here rather than a label.
+const LESSON_TYPE_LABELS: Record<string, string> = {
+    video_youtube: 'Video Lecture', video_upload: 'Video Lecture', pdf: 'PDF', audio: 'Audio', document: 'Document', link: 'Link',
+};
+
+function LessonTypeIcon({ type }: { type: string }) {
+    const d = {
+        video_youtube: 'M15.75 10.5l4.72-2.72a.75.75 0 011.13.65v7.14a.75.75 0 01-1.13.65l-4.72-2.72M4.5 6.75h9a1.5 1.5 0 011.5 1.5v7.5a1.5 1.5 0 01-1.5 1.5h-9a1.5 1.5 0 01-1.5-1.5v-7.5a1.5 1.5 0 011.5-1.5z',
+        video_upload: 'M15.75 10.5l4.72-2.72a.75.75 0 011.13.65v7.14a.75.75 0 01-1.13.65l-4.72-2.72M4.5 6.75h9a1.5 1.5 0 011.5 1.5v7.5a1.5 1.5 0 01-1.5 1.5h-9a1.5 1.5 0 01-1.5-1.5v-7.5a1.5 1.5 0 011.5-1.5z',
+        pdf: 'M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z',
+        document: 'M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z',
+        audio: 'M9 9v10.5a3 3 0 11-1.5-2.599M9 9V3.545c0-.376.153-.735.424-.996.271-.26.639-.4 1.021-.388l9 .273a1.406 1.406 0 011.355 1.404v6.99M9 9l11-.667',
+        link: 'M13.19 8.688a4.5 4.5 0 011.242 7.244l-4.5 4.5a4.5 4.5 0 01-6.364-6.364l1.757-1.757m13.35-.622l1.757-1.757a4.5 4.5 0 00-6.364-6.364l-4.5 4.5a4.5 4.5 0 001.242 7.244',
+    }[type] ?? 'M9 12.75L11.25 15 15 9.75';
+
+    return (
+        <svg className="h-3.5 w-3.5 flex-shrink-0" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" d={d} />
+        </svg>
+    );
+}
+
 function LessonPlayer({ lesson }: { lesson: Lesson }) {
     const fileUrl = lesson.file_path ? `/storage/${lesson.file_path}` : null;
 
@@ -215,7 +241,10 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
             {tab === 'Lectures' && (
                 <div className="grid gap-6 lg:grid-cols-3">
                     <div className="lg:col-span-1">
-                        <h3 className="mb-3 font-bold text-text">Course Content</h3>
+                        <h3 className="mb-3 font-bold text-text">
+                            Course Content
+                            {totalLessons > 0 && <span className="ml-1.5 font-normal text-text-muted">({totalLessons} lesson{totalLessons === 1 ? '' : 's'})</span>}
+                        </h3>
                         {course.sections.length === 0 ? (
                             <div className="space-y-2 rounded-3xl border border-border bg-surface p-2">
                                 {course.lessons.map((lesson, i) => (
@@ -277,13 +306,17 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
                     </div>
                     <div className="lg:col-span-2">
                         {activeLesson ? (
-                            <div className="overflow-hidden rounded-3xl border border-border bg-surface">
+                            <div className="overflow-hidden rounded-3xl border border-border bg-surface shadow-sm">
                                 <div className="bg-secondary p-3">
                                     <LessonPlayer lesson={activeLesson} />
                                 </div>
                                 <div className="p-6">
-                                    <h3 className="font-bold text-text">{activeLesson.title}</h3>
-                                    {activeLesson.description && <p className="mt-2 text-sm text-text-secondary">{activeLesson.description}</p>}
+                                    <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-primary">
+                                        <LessonTypeIcon type={activeLesson.type} />
+                                        {LESSON_TYPE_LABELS[activeLesson.type] ?? 'Lesson'}
+                                    </div>
+                                    <h3 className="mt-1 font-display text-xl text-text">{activeLesson.title}</h3>
+                                    {activeLesson.description && <p className="mt-2 text-sm leading-relaxed text-text-secondary">{activeLesson.description}</p>}
 
                                     <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-border pt-5">
                                         <button
@@ -320,7 +353,9 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
                                 </div>
                             </div>
                         ) : (
-                            <p className="text-text-secondary">No lectures yet.</p>
+                            <div className="flex h-full min-h-[16rem] items-center justify-center rounded-3xl border border-dashed border-border bg-surface p-8 text-center">
+                                <p className="text-sm text-text-secondary">No lectures yet.</p>
+                            </div>
                         )}
                     </div>
                 </div>
@@ -502,7 +537,10 @@ function LessonListItem({
             >
                 {isDone ? '✓' : number}
             </span>
-            <span className={`font-medium ${isActive ? 'text-primary' : 'text-text'}`}>{lesson.title}</span>
+            <span className={`flex-shrink-0 ${isActive ? 'text-primary' : 'text-text-muted'}`}>
+                <LessonTypeIcon type={lesson.type} />
+            </span>
+            <span className={`min-w-0 truncate font-medium ${isActive ? 'text-primary' : 'text-text'}`}>{lesson.title}</span>
         </button>
     );
 }
@@ -524,22 +562,34 @@ function CourseMetaBar({
     totalLessons: number;
     progressPct: number;
 }) {
+    // "Level" is a free-text admin field (Course > Details), so a course
+    // set up with test/placeholder data ("2", "asdf", ...) used to render
+    // that raw junk as a badge here. Only show it when it's actually one
+    // of the real level words -- garbage values just don't render a badge
+    // at all, same as if the field were left empty.
+    const KNOWN_LEVELS = ['beginner', 'intermediate', 'advanced', 'all levels'];
+    const validLevel = level && KNOWN_LEVELS.includes(level.trim().toLowerCase()) ? level : null;
+
     return (
-        <div className="mb-4 flex flex-wrap items-center gap-x-6 gap-y-3 rounded-3xl border border-border bg-surface p-5">
-            {reviewCount > 0 && (
-                <div className="flex items-center gap-1.5 text-sm">
-                    <span className="text-gold-500">{'★'.repeat(Math.round(avgRating))}{'☆'.repeat(5 - Math.round(avgRating))}</span>
-                    <span className="text-text-secondary">
-                        {avgRating.toFixed(1)} ({reviewCount} review{reviewCount === 1 ? '' : 's'})
-                    </span>
-                </div>
-            )}
-            {level && (
-                <span className="rounded-full bg-primary-subtle px-3 py-1 text-xs font-bold uppercase tracking-wide text-primary">{level}</span>
-            )}
-            <span className="text-sm text-text-secondary">
-                <span className="font-semibold text-text">{enrolledCount}</span> enrolled
-            </span>
+        <div className="mb-4 flex flex-wrap items-center gap-x-5 gap-y-3 rounded-3xl border border-border bg-surface p-5">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm">
+                {reviewCount > 0 && (
+                    <div className="flex items-center gap-1.5">
+                        <span className="text-gold-500">{'★'.repeat(Math.round(avgRating))}{'☆'.repeat(5 - Math.round(avgRating))}</span>
+                        <span className="text-text-secondary">
+                            {avgRating.toFixed(1)} ({reviewCount} review{reviewCount === 1 ? '' : 's'})
+                        </span>
+                    </div>
+                )}
+                {reviewCount > 0 && (validLevel || enrolledCount > 0) && <span className="text-text-muted">•</span>}
+                {validLevel && (
+                    <span className="rounded-full bg-primary-subtle px-3 py-1 text-xs font-bold uppercase tracking-wide text-primary">{validLevel}</span>
+                )}
+                {validLevel && enrolledCount > 0 && <span className="text-text-muted">•</span>}
+                <span className="text-text-secondary">
+                    <span className="font-semibold text-text">{enrolledCount}</span> enrolled
+                </span>
+            </div>
             <div className="ml-auto min-w-[200px] flex-1 sm:flex-none">
                 <div className="mb-1.5 flex items-center justify-between text-xs font-semibold text-text-secondary">
                     <span>Course Progress</span>
