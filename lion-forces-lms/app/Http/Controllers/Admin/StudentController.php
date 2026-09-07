@@ -128,6 +128,10 @@ class StudentController extends Controller
             'cnic' => 'nullable|string|max:30',
             'education' => 'nullable|string|max:150',
             'address' => 'nullable|string|max:500',
+            'test_center' => 'nullable|string|max:150',
+            'matric_marks_percentage' => 'nullable|integer|min:0|max:100',
+            'fsc_marks_percentage' => 'nullable|integer|min:0|max:100',
+            'graduation_gpa' => 'nullable|numeric|min:0|max:4',
         ]);
 
         $student->update($data);

@@ -5,6 +5,17 @@ export interface User {
     email_verified_at?: string;
     /** True only for accounts with the 'content_manager' role -- drives which admin nav links render. */
     isContentManager?: boolean;
+    // Rest of the model is spread onto this prop too (see
+    // HandleInertiaRequests) -- the fields the self-service Profile page
+    // and its Biodata section actually read/write.
+    phone?: string | null;
+    avatar_path?: string | null;
+    address?: string | null;
+    test_center?: string | null;
+    target_exam_name?: string | null;
+    matric_marks_percentage?: number | null;
+    fsc_marks_percentage?: number | null;
+    graduation_gpa?: string | null;
 }
 
 export interface SiteSettings {

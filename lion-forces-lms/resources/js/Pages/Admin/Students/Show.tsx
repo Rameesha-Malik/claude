@@ -15,8 +15,9 @@ interface Review { id: number; course: { id: number; title: string } | null; rat
 interface LoginLogRow { id: number; ip_address: string | null; device: string | null; browser: string | null; created_at: string }
 interface Stats { enrollments: number; quiz_attempts: number; reviews: number; lectures_done: number }
 interface Student {
-    id: number; name: string; email: string; phone: string | null; is_active: boolean;
+    id: number; name: string; email: string; phone: string | null; is_active: boolean; avatar_path: string | null;
     father_name: string | null; cnic: string | null; education: string | null; address: string | null;
+    test_center: string | null; matric_marks_percentage: number | null; fsc_marks_percentage: number | null; graduation_gpa: string | null;
     email_verified_at: string | null; created_at: string; enrollments: Enrollment[];
 }
 interface Course { id: number; title: string }
@@ -105,8 +106,12 @@ function ProfileHeader({ student }: { student: Student }) {
         <div className="mb-6 overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-secondary to-teal-950 p-6 text-white sm:p-8">
             <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
-                    <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center rounded-2xl bg-white/10 text-xl font-bold">
-                        {student.name.charAt(0).toUpperCase()}
+                    <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-white/10 text-xl font-bold">
+                        {student.avatar_path ? (
+                            <img src={`/storage/${student.avatar_path}`} alt="" className="h-full w-full object-cover" />
+                        ) : (
+                            student.name.charAt(0).toUpperCase()
+                        )}
                     </div>
                     <div>
                         {student.email_verified_at && (
@@ -197,7 +202,9 @@ function BiodataPanel({ student }: { student: Student }) {
     const [editing, setEditing] = useState(false);
     const form = useForm({
         phone: student.phone ?? '', father_name: student.father_name ?? '', cnic: student.cnic ?? '',
-        education: student.education ?? '', address: student.address ?? '',
+        education: student.education ?? '', address: student.address ?? '', test_center: student.test_center ?? '',
+        matric_marks_percentage: student.matric_marks_percentage ?? '', fsc_marks_percentage: student.fsc_marks_percentage ?? '',
+        graduation_gpa: student.graduation_gpa ?? '',
     });
 
     function submit(e: React.FormEvent) {
@@ -234,6 +241,22 @@ function BiodataPanel({ student }: { student: Student }) {
                         <label className={labelClass}>Address</label>
                         <input className={inputClass} value={form.data.address} onChange={(e) => form.setData('address', e.target.value)} />
                     </div>
+                    <div>
+                        <label className={labelClass}>Test Center</label>
+                        <input className={inputClass} value={form.data.test_center} onChange={(e) => form.setData('test_center', e.target.value)} />
+                    </div>
+                    <div>
+                        <label className={labelClass}>Graduation GPA</label>
+                        <input type="number" step="0.01" min={0} max={4} className={inputClass} value={form.data.graduation_gpa} onChange={(e) => form.setData('graduation_gpa', e.target.value)} />
+                    </div>
+                    <div>
+                        <label className={labelClass}>Matric Marks %</label>
+                        <input type="number" min={0} max={100} className={inputClass} value={form.data.matric_marks_percentage} onChange={(e) => form.setData('matric_marks_percentage', e.target.value)} />
+                    </div>
+                    <div>
+                        <label className={labelClass}>FSc Marks %</label>
+                        <input type="number" min={0} max={100} className={inputClass} value={form.data.fsc_marks_percentage} onChange={(e) => form.setData('fsc_marks_percentage', e.target.value)} />
+                    </div>
                     <div className="sm:col-span-2">
                         <button type="submit" disabled={form.processing} className="rounded-lg bg-primary px-5 py-2 text-sm font-bold uppercase text-on-primary hover:bg-primary-hover">Save</button>
                     </div>
@@ -245,6 +268,10 @@ function BiodataPanel({ student }: { student: Student }) {
                     <BioField label="Mobile" value={student.phone} />
                     <BioField label="Education" value={student.education} />
                     <div className="sm:col-span-2"><BioField label="Address" value={student.address} /></div>
+                    <BioField label="Test Center" value={student.test_center} />
+                    <BioField label="Graduation GPA" value={student.graduation_gpa} />
+                    <BioField label="Matric Marks %" value={student.matric_marks_percentage ? `${student.matric_marks_percentage}%` : null} />
+                    <BioField label="FSc Marks %" value={student.fsc_marks_percentage ? `${student.fsc_marks_percentage}%` : null} />
                 </div>
             )}
         </SectionCard>

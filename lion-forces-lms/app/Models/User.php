@@ -18,6 +18,7 @@ use Spatie\Permission\Traits\HasRoles;
     'user_type', 'name', 'email', 'password', 'phone', 'avatar_path',
     'is_active', 'suspended_at', 'notification_preferences', 'target_exam_name', 'target_exam_date',
     'email_verified_at', 'father_name', 'cnic', 'education', 'address',
+    'test_center', 'matric_marks_percentage', 'fsc_marks_percentage', 'graduation_gpa',
 ])]
 #[Hidden(['password', 'remember_token'])]
 // Implements the verification contract now that Settings > Security >
@@ -38,6 +39,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'is_active' => 'boolean',
             'suspended_at' => 'datetime',
             'notification_preferences' => 'array',
+            'graduation_gpa' => 'decimal:2',
             'target_exam_date' => 'date',
         ];
     }

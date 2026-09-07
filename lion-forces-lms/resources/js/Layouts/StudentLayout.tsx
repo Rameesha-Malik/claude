@@ -109,8 +109,12 @@ export default function StudentLayout({ children, header }: PropsWithChildren<{ 
                                 onClick={() => setMenuOpen((v) => !v)}
                                 className="flex items-center gap-2.5 rounded-full py-1 pl-1 pr-3 transition-colors duration-fast hover:bg-surface-sunken"
                             >
-                                <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary-subtle text-sm font-bold text-primary">
-                                    {auth.user?.name?.charAt(0).toUpperCase()}
+                                <div className="flex h-9 w-9 flex-shrink-0 items-center justify-center overflow-hidden rounded-full bg-primary-subtle text-sm font-bold text-primary">
+                                    {auth.user?.avatar_path ? (
+                                        <img src={`/storage/${auth.user.avatar_path}`} alt="" className="h-full w-full object-cover" />
+                                    ) : (
+                                        auth.user?.name?.charAt(0).toUpperCase()
+                                    )}
                                 </div>
                                 <span className="hidden text-sm font-medium text-text-secondary sm:block">{auth.user?.name}</span>
                                 <svg className={`h-4 w-4 text-text-muted transition-transform duration-fast ${menuOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">

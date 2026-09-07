@@ -44,6 +44,49 @@ class ProfileController extends Controller
         return Redirect::route('profile.edit');
     }
 
+    // Client (WhatsApp): profile pic, test center, course, address, mobile
+    // number, FSc/Matric marks %, graduation GPA -- "not compulsory
+    // optional." Self-service counterpart to the admin's Student Profile
+    // Biodata panel (same fields, same nullable/no-required-rule
+    // approach) so a student can fill these in themselves rather than
+    // only an admin being able to. Student-only in the UI (the Profile
+    // page is shared with admin/staff accounts, who have no use for
+    // exam marks), but not enforced server-side since there's no harm in
+    // an admin account technically having these columns set.
+    public function updateBiodata(Request $request): RedirectResponse
+    {
+        $data = $request->validate([
+            'phone' => 'nullable|string|max:30',
+            'address' => 'nullable|string|max:500',
+            'test_center' => 'nullable|string|max:150',
+            'target_exam_name' => 'nullable|string|max:150',
+            'matric_marks_percentage' => 'nullable|integer|min:0|max:100',
+            'fsc_marks_percentage' => 'nullable|integer|min:0|max:100',
+            'graduation_gpa' => 'nullable|numeric|min:0|max:4',
+        ]);
+
+        $request->user()->update($data);
+
+        return Redirect::route('profile.edit');
+    }
+
+    public function updateAvatar(Request $request): RedirectResponse
+    {
+        $request->validate(['avatar' => 'required|image|max:2048']);
+
+        $user = $request->user();
+        $old = $user->avatar_path;
+
+        $path = $request->file('avatar')->store('avatars', 'public');
+        $user->update(['avatar_path' => $path]);
+
+        if ($old) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($old);
+        }
+
+        return Redirect::route('profile.edit');
+    }
+
     /**
      * Delete the user's account.
      */
