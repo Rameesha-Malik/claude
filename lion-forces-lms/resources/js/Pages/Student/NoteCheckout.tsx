@@ -26,7 +26,7 @@ export default function NoteCheckout({ note, alreadyRequested, payment }: Props)
                     <p className="mt-2 text-sm text-text-secondary">
                         {alreadyRequested === 'verified'
                             ? `You already have access to "${note.title}".`
-                            : `We've received your payment for "${note.title}" and it's awaiting verification, usually within a day.`}
+                            : `We've received your payment for "${note.title}" and it's awaiting verification, usually within 1 hour.`}
                     </p>
                     <Link href="/notes" className="mt-6 inline-block rounded-lg bg-primary px-6 py-2.5 text-sm font-bold uppercase tracking-wide text-on-primary hover:bg-primary-hover">
                         Back to Notes

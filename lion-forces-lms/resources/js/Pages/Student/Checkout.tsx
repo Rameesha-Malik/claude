@@ -29,7 +29,7 @@ export default function Checkout({ alreadyEnrolled, course, packages = [], selec
                     <p className="mt-2 text-sm text-text-secondary">
                         {alreadyEnrolled === 'active'
                             ? `You already have active access to ${course.title}.`
-                            : `We've received your payment for ${course.title} and it's awaiting verification, usually within a day.`}
+                            : `We've received your payment for ${course.title} and it's awaiting verification, usually within 1 hour.`}
                     </p>
                     <Link
                         href={alreadyEnrolled === 'active' ? `/portal/my-courses/${course.slug}` : '/portal/my-courses'}

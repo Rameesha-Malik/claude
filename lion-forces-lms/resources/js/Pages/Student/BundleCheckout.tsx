@@ -28,7 +28,7 @@ export default function BundleCheckout({ alreadyEnrolled, bundle, courses = [], 
                     <p className="mt-2 text-sm text-text-secondary">
                         {alreadyEnrolled === 'active'
                             ? `You already have active access to every course in ${bundle.title}.`
-                            : `We've received your payment for ${bundle.title} and it's awaiting verification, usually within a day.`}
+                            : `We've received your payment for ${bundle.title} and it's awaiting verification, usually within 1 hour.`}
                     </p>
                     <Link href="/portal/my-courses" className="mt-6 inline-block rounded-lg bg-primary px-6 py-2.5 text-sm font-bold uppercase tracking-wide text-on-primary hover:bg-primary-hover">
                         View My Courses

@@ -79,6 +79,6 @@ class NotePurchaseController extends Controller
             );
         }
 
-        return redirect()->route('notes')->with('success', 'Purchase submitted! We\'ll verify it and unlock the note, usually within a day.');
+        return redirect()->route('notes')->with('success', 'Purchase submitted! We\'ll verify it and unlock the note, usually within 1 hour.');
     }
 }

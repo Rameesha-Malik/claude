@@ -98,6 +98,6 @@ class CheckoutController extends Controller
             );
         }
 
-        return redirect()->route('student.courses')->with('success', 'Payment submitted! We\'ll verify it and activate your course, usually within a day.');
+        return redirect()->route('student.courses')->with('success', 'Payment submitted! We\'ll verify it and activate your course, usually within 1 hour.');
     }
 }

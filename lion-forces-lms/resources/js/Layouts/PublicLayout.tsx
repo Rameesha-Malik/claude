@@ -215,7 +215,8 @@ export default function PublicLayout({ children }: PropsWithChildren) {
                     </div>
 
                     <div className="mt-10 border-t border-teal-800 pt-6 text-center text-xs text-teal-300">
-                        {site.copyrightText}
+                        <p>{site.copyrightText}</p>
+                        <p className="mt-1 text-teal-400">Developed by CODE SAVIOURS (SMC-PRIVATE) LIMITED</p>
                     </div>
                 </div>
             </footer>

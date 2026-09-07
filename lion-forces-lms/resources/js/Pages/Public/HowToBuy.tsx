@@ -37,9 +37,9 @@ const STEPS = [
         ur: 'اپنی ادائیگی کی رسید کا اسکرین شاٹ ہمیں واٹس ایپ پر بھیجیں۔',
     },
     {
-        title: 'Verified in ~3 Hours',
-        en: 'We confirm your payment and activate your access, usually within about 3 hours.',
-        ur: 'ہم آپ کی ادائیگی کی تصدیق کر کے تقریباً 3 گھنٹوں میں آپ کی رسائی فعال کر دیتے ہیں۔',
+        title: 'Verified in 1 Hour',
+        en: 'We confirm your payment and activate your access, usually within 1 hour.',
+        ur: 'ہم آپ کی ادائیگی کی تصدیق کر کے 1 گھنٹے میں آپ کی رسائی فعال کر دیتے ہیں۔',
     },
     {
         title: 'Start Preparing',

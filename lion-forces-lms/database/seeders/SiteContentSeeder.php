@@ -37,6 +37,15 @@ class SiteContentSeeder extends Seeder
         Setting::set('primary_color', '#04A79D'); // client brand swatch
         Setting::set('secondary_color', '#054F4C'); // client brand swatch
 
+        // --- Payment accounts (Settings > Payment Settings) -- REAL,
+        // pasted verbatim from the client's own WhatsApp payment-options
+        // message. These feed both Checkout/BundleCheckout/NoteCheckout
+        // (Setting::get('payment_*') in those controllers) and the "Payment
+        // Methods" cards on the public How to Buy page. ---
+        Setting::set('payment_bank_details', "Allied Bank\nAccount No: 0123-0010077805860010\nAccount Name: Sadeed Ahsan"); // REAL
+        Setting::set('payment_easypaisa_number', "0348-1154174\nAccount Name: Sadeed Ahsan"); // REAL
+        Setting::set('payment_jazzcash_number', "0321-7646526\nAccount Name: Sadeed Ihsan"); // REAL — client's own spelling ("Ihsan") for this account, as given
+
         // --- Announcement bar (off by default — admin activates per SRS §2.2) ---
         AnnouncementBar::updateOrCreate(['id' => 1], [
             'message' => 'Lady Cadet Course open — apply before the deadline.', // PLACEHOLDER
@@ -168,9 +177,9 @@ class SiteContentSeeder extends Seeder
             ],
         ]);
 
-        PaymentMethod::updateOrCreate(['name' => 'Bank Transfer'], ['description' => 'Transfer to our academy account and share the receipt.', 'order' => 1]); // REAL — client's confirmed process
-        PaymentMethod::updateOrCreate(['name' => 'Easypaisa'], ['description' => 'Send payment directly via the Easypaisa app.', 'order' => 2]);
-        PaymentMethod::updateOrCreate(['name' => 'JazzCash'], ['description' => 'Send payment directly via the JazzCash app.', 'order' => 3]);
+        PaymentMethod::updateOrCreate(['name' => 'Allied Bank'], ['description' => 'Account No: 0123-0010077805860010 — Account Name: Sadeed Ahsan', 'order' => 1]); // REAL — client's own WhatsApp payment-options message
+        PaymentMethod::updateOrCreate(['name' => 'Easypaisa'], ['description' => '0348-1154174 — Account Name: Sadeed Ahsan', 'order' => 2]); // REAL
+        PaymentMethod::updateOrCreate(['name' => 'JazzCash'], ['description' => '0321-7646526 — Account Name: Sadeed Ihsan', 'order' => 3]); // REAL
 
         // --- FAQs — REAL question from the old site's Contact page, the
         // rest PLACEHOLDER pending the full FAQ page content ---

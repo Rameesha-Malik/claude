@@ -146,7 +146,7 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
                     </h2>
                     <p className="mt-2 text-sm text-text-secondary">
                         {enrollmentStatus === 'pending'
-                            ? "We've received your payment and it's awaiting verification, usually within a day."
+                            ? "We've received your payment and it's awaiting verification, usually within 1 hour."
                             : enrollmentStatus === null
                               ? "You haven't enrolled in this course yet."
                               : 'Your access to this course is not currently active. Contact us if you think this is a mistake.'}
