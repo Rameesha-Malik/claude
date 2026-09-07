@@ -27,15 +27,15 @@ export default function AlertsIndex({ notifications }: Props) {
     const hasUnread = notifications.data.some((n) => !n.read_at);
 
     return (
-        <AdminLayout header="Notifications">
-            <Head title="Notifications" />
+        <AdminLayout header="My Alerts">
+            <Head title="My Alerts" />
 
             <div className="mb-6 flex flex-wrap items-start justify-between gap-4 rounded-3xl border border-border bg-gradient-to-br from-primary-subtle to-surface p-6 sm:p-8">
                 <div>
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-surface px-3 py-1 text-xs font-bold uppercase tracking-wide text-primary shadow-sm">
                         🔔 Inbox
                     </span>
-                    <h1 className="mt-4 font-display text-3xl text-text">Notifications</h1>
+                    <h1 className="mt-4 font-display text-3xl text-text">My Alerts</h1>
                     <p className="mt-2 max-w-xl text-sm text-text-secondary">
                         Your latest alerts and updates. Click any notification to go to the relevant page.
                     </p>

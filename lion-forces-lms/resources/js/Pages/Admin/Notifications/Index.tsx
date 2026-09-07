@@ -38,8 +38,8 @@ export default function NotificationsIndex({ broadcasts, courses, packages }: Pr
     }
 
     return (
-        <AdminLayout header="Notifications">
-            <Head title="Notifications" />
+        <AdminLayout header="Broadcasts">
+            <Head title="Broadcasts" />
 
             <div className="grid gap-6 lg:grid-cols-3">
                 <form onSubmit={submit} className="space-y-4 rounded-2xl border border-border bg-surface p-6 lg:col-span-1">
