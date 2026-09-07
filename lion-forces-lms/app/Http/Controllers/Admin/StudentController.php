@@ -5,9 +5,11 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Course;
 use App\Models\Enrollment;
+use App\Models\Payment;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Str;
 use Illuminate\Validation\Rules;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -78,11 +80,114 @@ class StudentController extends Controller
         abort_unless($student->user_type === 'student', 404);
 
         $student->load(['enrollments.course.category', 'enrollments.package', 'enrollments.payments']);
+        $student->loadCount(['enrollments', 'testAttempts', 'courseReviews']);
 
         return Inertia::render('Admin/Students/Show', [
             'student' => $student,
             'courses' => Course::where('status', 'published')->orderBy('title')->get(['id', 'title']),
+            'stats' => [
+                'enrollments' => $student->enrollments_count,
+                'quiz_attempts' => $student->test_attempts_count,
+                'reviews' => $student->course_reviews_count,
+                'lectures_done' => $student->lessonProgress()->where('is_completed', true)->count(),
+            ],
+            'quizAttempts' => $student->testAttempts()
+                ->latest('submitted_at')
+                ->limit(10)
+                ->get(['id', 'attemptable_type', 'status', 'score', 'total_marks', 'percentage', 'passed', 'submitted_at'])
+                ->map(fn ($a) => [
+                    'id' => $a->id,
+                    'type' => class_basename($a->attemptable_type),
+                    'status' => $a->status,
+                    'score' => $a->score,
+                    'total_marks' => $a->total_marks,
+                    'percentage' => $a->percentage,
+                    'passed' => $a->passed,
+                    'submitted_at' => $a->submitted_at,
+                ]),
+            'reviews' => $student->courseReviews()->with('course:id,title')->latest()->limit(10)
+                ->get(['id', 'course_id', 'rating', 'review_text', 'status', 'created_at']),
+            'loginLogs' => $student->loginLogs()->latest('created_at')->limit(10)->get(),
+            'payments' => Payment::whereHas('enrollment', fn ($q) => $q->where('user_id', $student->id))
+                ->with('enrollment.course:id,title')
+                ->latest()
+                ->limit(15)
+                ->get(),
         ]);
+    }
+
+    // Biodata panel (Student Profile reference) -- father name/CNIC/
+    // education/address didn't exist on the account at all before.
+    public function updateBiodata(Request $request, User $student)
+    {
+        abort_unless($student->user_type === 'student', 404);
+
+        $data = $request->validate([
+            'phone' => 'nullable|string|max:30',
+            'father_name' => 'nullable|string|max:150',
+            'cnic' => 'nullable|string|max:30',
+            'education' => 'nullable|string|max:150',
+            'address' => 'nullable|string|max:500',
+        ]);
+
+        $student->update($data);
+
+        return back()->with('success', 'Biodata updated.');
+    }
+
+    // The "Password" action on the reference -- support staff regularly
+    // field "I forgot my password" over WhatsApp for this client, so a
+    // direct admin-set password (rather than only an email reset link, no
+    // SMTP dependency) is what actually gets used.
+    public function updatePassword(Request $request, User $student)
+    {
+        abort_unless($student->user_type === 'student', 404);
+
+        $data = $request->validate(['password' => ['required', 'confirmed', Rules\Password::defaults()]]);
+
+        $student->update(['password' => Hash::make($data['password'])]);
+
+        return back()->with('success', "{$student->name}'s password was updated.");
+    }
+
+    // Manual "Add Payment" (reference form: Course / Amount / Transaction
+    // ID / Notes / Status) -- for bank transfers/Easypaisa/JazzCash the
+    // admin confirms outside the system (WhatsApp screenshot) and records
+    // it here. Reuses the same Payment model/table the automated checkout
+    // flow writes to, so it shows up in Transactions and Reports exactly
+    // like any other payment; marking it "verified" activates the
+    // enrollment the same way PaymentController::verify() does.
+    public function addPayment(Request $request, User $student)
+    {
+        abort_unless($student->user_type === 'student', 404);
+
+        $data = $request->validate([
+            'course_id' => 'required|exists:courses,id',
+            'amount' => 'required|numeric|min:0',
+            'reference_number' => 'nullable|string|max:100',
+            'notes' => 'nullable|string|max:1000',
+            'status' => 'required|in:pending,verified,rejected,refunded',
+        ]);
+
+        $enrollment = $student->enrollments()->where('course_id', $data['course_id'])->first();
+        abort_unless($enrollment, 422, 'This student is not enrolled in that course yet — enroll them first.');
+
+        Payment::create([
+            'enrollment_id' => $enrollment->id,
+            'amount' => $data['amount'],
+            'method' => 'other',
+            'status' => $data['status'],
+            'reference_number' => $data['reference_number'] ?: ('TXN-'.strtoupper(Str::random(8))),
+            'notes' => $data['notes'] ?? null,
+            'verified_by' => $data['status'] === 'verified' ? $request->user()->id : null,
+            'verified_at' => $data['status'] === 'verified' ? now() : null,
+        ]);
+
+        if ($data['status'] === 'verified') {
+            $enrollment->activate();
+        }
+
+        return back()->with('success', 'Payment recorded.');
     }
 
     public function toggleSuspend(User $student)

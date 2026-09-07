@@ -191,6 +191,9 @@ Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->nam
         Route::get('/{student}', [AdminStudentController::class, 'show'])->name('show');
         Route::post('/{student}/toggle-suspend', [AdminStudentController::class, 'toggleSuspend'])->name('toggle-suspend');
         Route::post('/{student}/enroll', [AdminStudentController::class, 'enroll'])->name('enroll');
+        Route::put('/{student}/biodata', [AdminStudentController::class, 'updateBiodata'])->name('biodata.update');
+        Route::put('/{student}/password', [AdminStudentController::class, 'updatePassword'])->name('password.update');
+        Route::post('/{student}/payments', [AdminStudentController::class, 'addPayment'])->name('payments.store');
         Route::delete('/{student}', [AdminStudentController::class, 'destroy'])->name('destroy');
         Route::put('/enrollments/{enrollment}/status', [AdminStudentController::class, 'updateEnrollmentStatus'])->name('enrollments.status');
     });

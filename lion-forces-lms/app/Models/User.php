@@ -17,7 +17,7 @@ use Spatie\Permission\Traits\HasRoles;
 #[Fillable([
     'user_type', 'name', 'email', 'password', 'phone', 'avatar_path',
     'is_active', 'suspended_at', 'notification_preferences', 'target_exam_name', 'target_exam_date',
-    'email_verified_at',
+    'email_verified_at', 'father_name', 'cnic', 'education', 'address',
 ])]
 #[Hidden(['password', 'remember_token'])]
 // Implements the verification contract now that Settings > Security >
@@ -134,5 +134,10 @@ class User extends Authenticatable implements MustVerifyEmail
     public function courseQuestions(): HasMany
     {
         return $this->hasMany(CourseQuestion::class);
+    }
+
+    public function loginLogs(): HasMany
+    {
+        return $this->hasMany(LoginLog::class);
     }
 }

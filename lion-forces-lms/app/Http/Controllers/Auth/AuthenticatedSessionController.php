@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Auth\LoginRequest;
+use App\Models\LoginLog;
 use App\Models\Setting;
 use App\Models\UserDevice;
 use Illuminate\Http\RedirectResponse;
@@ -37,10 +38,43 @@ class AuthenticatedSessionController extends Controller
         $request->authenticate();
 
         $this->enforceDeviceRestriction($request);
+        $this->recordLogin($request);
 
         $request->session()->regenerate();
 
         return redirect()->intended(route('dashboard', absolute: false));
+    }
+
+    // Student Profile > Login History (admin panel). Deliberately not a
+    // raw user-agent dump -- Device/Browser are parsed down to what that
+    // table actually shows. No geo-IP lookup here (no such service wired
+    // up in this stack), so Location stays blank in the admin UI, same as
+    // the reference screenshot itself shows "—" there.
+    private function recordLogin(Request $request): void
+    {
+        $user = Auth::user();
+        if ($user->user_type !== 'student') {
+            return;
+        }
+
+        $ua = (string) $request->userAgent();
+        $device = preg_match('/Mobi|Android|iPhone|iPad/i', $ua) ? 'Mobile' : 'Desktop';
+        $browser = match (true) {
+            (bool) preg_match('/Edg\//i', $ua) => 'Edge',
+            (bool) preg_match('/OPR\/|Opera/i', $ua) => 'Opera',
+            (bool) preg_match('/Chrome\//i', $ua) => 'Chrome',
+            (bool) preg_match('/Firefox\//i', $ua) => 'Firefox',
+            (bool) preg_match('/Safari\//i', $ua) => 'Safari',
+            default => 'Unknown',
+        };
+
+        LoginLog::create([
+            'user_id' => $user->id,
+            'ip_address' => $request->ip(),
+            'device' => $device,
+            'browser' => $browser,
+            'created_at' => now(),
+        ]);
     }
 
     // "Restrict students to primary device only" / "Max device login"
