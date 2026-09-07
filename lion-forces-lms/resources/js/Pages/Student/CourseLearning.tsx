@@ -60,9 +60,19 @@ interface Props {
 const TABS = ['Lectures', 'Notes', 'Quizzes', 'Flashcards', 'Tests', 'Assignments', 'Q&A'] as const;
 type Tab = (typeof TABS)[number];
 
+// Client: lectures must play inside the platform, not act as a doorway to
+// browsing YouTube -- no related-videos-from-other-channels, no
+// annotations/cards, minimal branding. youtube-nocookie.com (YouTube's own
+// privacy-enhanced embed domain) + rel=0 (limits "related videos" at the
+// end to this same channel) + modestbranding=1 (smaller logo) +
+// iv_load_policy=3 (no annotation overlays) + fs=1 (explicit fullscreen
+// button, requested separately). One thing no embed parameter can remove:
+// the YouTube logo/watermark and its link out -- that's baked into every
+// YouTube embed everywhere by YouTube's own terms, not something a site
+// embedding it can opt out of.
 function youtubeEmbedUrl(url: string): string | null {
     const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{6,})/);
-    return match ? `https://www.youtube.com/embed/${match[1]}` : null;
+    return match ? `https://www.youtube-nocookie.com/embed/${match[1]}?rel=0&modestbranding=1&iv_load_policy=3&fs=1` : null;
 }
 
 // Small type indicator on each sidebar row -- "make it better" feedback on
@@ -99,7 +109,13 @@ function LessonPlayer({ lesson }: { lesson: Lesson }) {
             const embed = lesson.external_url ? youtubeEmbedUrl(lesson.external_url) : null;
             return embed ? (
                 <div className="aspect-video w-full overflow-hidden rounded-xl bg-black">
-                    <iframe src={embed} className="h-full w-full" allowFullScreen title={lesson.title} />
+                    <iframe
+                        src={embed}
+                        className="h-full w-full"
+                        allow="fullscreen; encrypted-media; picture-in-picture"
+                        allowFullScreen
+                        title={lesson.title}
+                    />
                 </div>
             ) : (
                 <p className="rounded-xl bg-surface-sunken p-6 text-sm text-text-muted">Video link not set yet.</p>
@@ -153,6 +169,17 @@ function LessonPlayer({ lesson }: { lesson: Lesson }) {
 export default function CourseLearning({ course: courseProp, personalNotes = [], lessonProgress = {}, questions = [], myReview = null, enrollmentStatus }: Props) {
     const [tab, setTab] = useState<Tab>('Lectures');
     const [activeLesson, setActiveLesson] = useState<Lesson | null>((courseProp as Course).lessons?.[0] ?? null);
+    // Client: "course content show when sidebar click then minimize and
+    // make size of lecture bit large to view" -- picking a lesson
+    // collapses the list down to a slim toggle rail so the video gets the
+    // freed-up width; a click on that rail (or the header button) brings
+    // it back.
+    const [sidebarOpen, setSidebarOpen] = useState(true);
+
+    function selectLesson(lesson: Lesson) {
+        setActiveLesson(lesson);
+        setSidebarOpen(false);
+    }
 
     // `enrollmentStatus` is only ever included in the payload at all for the
     // guard branch (undefined here means the controller sent the full
@@ -240,72 +267,98 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
             <ReviewWidget course={course} myReview={myReview} />
 
             {tab === 'Lectures' && (
-                <div className="grid gap-6 lg:grid-cols-3">
-                    <div className="lg:col-span-1">
-                        <h3 className="mb-3 font-bold text-text">
-                            Course Content
-                            {totalLessons > 0 && <span className="ml-1.5 font-normal text-text-muted">({totalLessons} lesson{totalLessons === 1 ? '' : 's'})</span>}
-                        </h3>
-                        {course.sections.length === 0 ? (
-                            <div className="space-y-2 rounded-3xl border border-border bg-surface p-2">
-                                {course.lessons.map((lesson, i) => (
-                                    <LessonListItem
-                                        key={lesson.id}
-                                        lesson={lesson}
-                                        number={i + 1}
-                                        isActive={activeLesson?.id === lesson.id}
-                                        isDone={!!lessonProgress[lesson.id]?.is_completed}
-                                        onClick={() => setActiveLesson(lesson)}
-                                    />
-                                ))}
-                                {course.lessons.length === 0 && (
-                                    <p className="p-4 text-sm text-text-secondary">No lectures yet.</p>
-                                )}
+                <div className={`grid gap-4 ${sidebarOpen ? 'lg:grid-cols-3 lg:gap-6' : 'lg:grid-cols-[3.5rem_1fr]'}`}>
+                    {sidebarOpen ? (
+                        <div className="lg:col-span-1">
+                            <div className="mb-3 flex items-center justify-between">
+                                <h3 className="font-bold text-text">
+                                    Course Content
+                                    {totalLessons > 0 && <span className="ml-1.5 font-normal text-text-muted">({totalLessons} lesson{totalLessons === 1 ? '' : 's'})</span>}
+                                </h3>
+                                <button
+                                    onClick={() => setSidebarOpen(false)}
+                                    title="Minimize"
+                                    className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg border border-border text-text-secondary hover:border-primary hover:text-primary"
+                                >
+                                    <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />
+                                    </svg>
+                                </button>
                             </div>
-                        ) : (
-                            <div className="space-y-3">
-                                {course.sections.map((section) => (
-                                    <div key={section.id} className="overflow-hidden rounded-3xl border border-border bg-surface">
-                                        <div className="border-b border-border bg-surface-sunken px-4 py-2.5 text-sm font-bold text-text">
-                                            {section.title}
+                            {course.sections.length === 0 ? (
+                                <div className="space-y-2 rounded-3xl border border-border bg-surface p-2">
+                                    {course.lessons.map((lesson, i) => (
+                                        <LessonListItem
+                                            key={lesson.id}
+                                            lesson={lesson}
+                                            number={i + 1}
+                                            isActive={activeLesson?.id === lesson.id}
+                                            isDone={!!lessonProgress[lesson.id]?.is_completed}
+                                            onClick={() => selectLesson(lesson)}
+                                        />
+                                    ))}
+                                    {course.lessons.length === 0 && (
+                                        <p className="p-4 text-sm text-text-secondary">No lectures yet.</p>
+                                    )}
+                                </div>
+                            ) : (
+                                <div className="space-y-3">
+                                    {course.sections.map((section) => (
+                                        <div key={section.id} className="overflow-hidden rounded-3xl border border-border bg-surface">
+                                            <div className="border-b border-border bg-surface-sunken px-4 py-2.5 text-sm font-bold text-text">
+                                                {section.title}
+                                            </div>
+                                            <div className="space-y-1 p-2">
+                                                {section.lessons.map((lesson, i) => (
+                                                    <LessonListItem
+                                                        key={lesson.id}
+                                                        lesson={lesson}
+                                                        number={i + 1}
+                                                        isActive={activeLesson?.id === lesson.id}
+                                                        isDone={!!lessonProgress[lesson.id]?.is_completed}
+                                                        onClick={() => selectLesson(lesson)}
+                                                    />
+                                                ))}
+                                            </div>
                                         </div>
-                                        <div className="space-y-1 p-2">
-                                            {section.lessons.map((lesson, i) => (
-                                                <LessonListItem
-                                                    key={lesson.id}
-                                                    lesson={lesson}
-                                                    number={i + 1}
-                                                    isActive={activeLesson?.id === lesson.id}
-                                                    isDone={!!lessonProgress[lesson.id]?.is_completed}
-                                                    onClick={() => setActiveLesson(lesson)}
-                                                />
-                                            ))}
+                                    ))}
+                                    {course.lessons.some((l) => l.section_id === null) && (
+                                        <div className="overflow-hidden rounded-3xl border border-border bg-surface">
+                                            <div className="border-b border-border bg-surface-sunken px-4 py-2.5 text-sm font-bold text-text">
+                                                Other Lessons
+                                            </div>
+                                            <div className="space-y-1 p-2">
+                                                {course.lessons.filter((l) => l.section_id === null).map((lesson, i) => (
+                                                    <LessonListItem
+                                                        key={lesson.id}
+                                                        lesson={lesson}
+                                                        number={i + 1}
+                                                        isActive={activeLesson?.id === lesson.id}
+                                                        isDone={!!lessonProgress[lesson.id]?.is_completed}
+                                                        onClick={() => selectLesson(lesson)}
+                                                    />
+                                                ))}
+                                            </div>
                                         </div>
-                                    </div>
-                                ))}
-                                {course.lessons.some((l) => l.section_id === null) && (
-                                    <div className="overflow-hidden rounded-3xl border border-border bg-surface">
-                                        <div className="border-b border-border bg-surface-sunken px-4 py-2.5 text-sm font-bold text-text">
-                                            Other Lessons
-                                        </div>
-                                        <div className="space-y-1 p-2">
-                                            {course.lessons.filter((l) => l.section_id === null).map((lesson, i) => (
-                                                <LessonListItem
-                                                    key={lesson.id}
-                                                    lesson={lesson}
-                                                    number={i + 1}
-                                                    isActive={activeLesson?.id === lesson.id}
-                                                    isDone={!!lessonProgress[lesson.id]?.is_completed}
-                                                    onClick={() => setActiveLesson(lesson)}
-                                                />
-                                            ))}
-                                        </div>
-                                    </div>
-                                )}
-                            </div>
-                        )}
-                    </div>
-                    <div className="lg:col-span-2">
+                                    )}
+                                </div>
+                            )}
+                        </div>
+                    ) : (
+                        <button
+                            onClick={() => setSidebarOpen(true)}
+                            title="Show Course Content"
+                            className="flex h-fit w-14 flex-col items-center gap-2 rounded-2xl border border-border bg-surface px-2 py-4 text-text-secondary hover:border-primary hover:text-primary"
+                        >
+                            <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
+                            </svg>
+                            <span className="text-[0.65rem] font-bold uppercase tracking-wide" style={{ writingMode: 'vertical-rl' }}>
+                                Course Content
+                            </span>
+                        </button>
+                    )}
+                    <div className={sidebarOpen ? 'lg:col-span-2' : 'lg:col-span-1'}>
                         {activeLesson ? (
                             <div className="overflow-hidden rounded-3xl border border-border bg-surface shadow-sm">
                                 <div className="bg-secondary p-3">
