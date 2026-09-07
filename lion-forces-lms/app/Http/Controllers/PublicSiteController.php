@@ -141,12 +141,19 @@ class PublicSiteController extends Controller
 
     public function howToBuy(): Response
     {
+        $hero = \App\Models\HomeSection::where('section_key', 'how_to_buy_hero')->first();
+
         return Inertia::render('Public/HowToBuy', [
+            'hero' => [
+                'headline' => $hero?->content['headline'] ?? 'How to Buy',
+                'subheading' => $hero?->content['subheading'] ?? 'Simple steps from registration to your first lesson.',
+            ],
             'packages' => \App\Models\CoursePackage::with('course:id,title')
                 ->where('is_active', true)
                 ->orderBy('price')
                 ->limit(12)
                 ->get(['id', 'course_id', 'name', 'description', 'price', 'validity_days']),
+            'paymentMethods' => \App\Models\PaymentMethod::orderBy('order')->get(['name', 'description']),
             'faqs' => Faq::where('page', 'how_to_buy')->where('is_active', true)->orderBy('order')->get(['question', 'answer']),
         ]);
     }

@@ -6,6 +6,7 @@ use App\Models\AnnouncementBar;
 use App\Models\Faq;
 use App\Models\HomeSection;
 use App\Models\NavItem;
+use App\Models\PaymentMethod;
 use App\Models\ServiceCard;
 use App\Models\Setting;
 use App\Models\StatsItem;
@@ -155,6 +156,21 @@ class SiteContentSeeder extends Seeder
         ServiceCard::updateOrCreate(['title' => 'Navy & Air Force'], ['icon' => 'anchor', 'description' => 'Structured courses for Navy and PAF recruitment exams.', 'order' => 2]);
         ServiceCard::updateOrCreate(['title' => 'ISSB & Intelligence'], ['icon' => 'brain', 'description' => 'ISSB-pattern practice and IQ test preparation.', 'order' => 3]);
         ServiceCard::updateOrCreate(['title' => 'Lady Cadet Course'], ['icon' => 'star', 'description' => 'Dedicated LCC preparation track for female candidates.', 'order' => 4]);
+
+        // --- How to Buy page (hero + payment method cards) ---
+        HomeSection::updateOrCreate(['section_key' => 'how_to_buy_hero'], [
+            'title' => 'How to Buy Hero',
+            'order' => 0,
+            'is_enabled' => true,
+            'content' => [
+                'headline' => 'How to Buy',
+                'subheading' => 'Simple steps from registration to your first lesson.',
+            ],
+        ]);
+
+        PaymentMethod::updateOrCreate(['name' => 'Bank Transfer'], ['description' => 'Transfer to our academy account and share the receipt.', 'order' => 1]); // REAL — client's confirmed process
+        PaymentMethod::updateOrCreate(['name' => 'Easypaisa'], ['description' => 'Send payment directly via the Easypaisa app.', 'order' => 2]);
+        PaymentMethod::updateOrCreate(['name' => 'JazzCash'], ['description' => 'Send payment directly via the JazzCash app.', 'order' => 3]);
 
         // --- FAQs — REAL question from the old site's Contact page, the
         // rest PLACEHOLDER pending the full FAQ page content ---

@@ -13,6 +13,7 @@ interface Announcement { id?: number; message: string; link_url: string | null; 
 interface HomeSection { id: number; title: string; content: Record<string, any> }
 interface StatsItem { id: number; icon: string | null; number: string; label: string }
 interface ServiceCard { id: number; icon: string | null; title: string; description: string | null }
+interface PaymentMethod { id: number; icon: string | null; name: string; description: string | null }
 interface Faq { id: number; page: string; question: string; answer: string; is_active: boolean }
 interface Testimonial { id: number; student_name: string; testimonial_text: string; rating: number | null; is_featured: boolean }
 interface Props {
@@ -21,13 +22,15 @@ interface Props {
     announcement: Announcement | null;
     heroSection: HomeSection;
     ctaSection: HomeSection;
+    howToBuyHeroSection: HomeSection;
     statsItems: StatsItem[];
     serviceCards: ServiceCard[];
+    paymentMethods: PaymentMethod[];
     faqs: Faq[];
     testimonials: Testimonial[];
 }
 
-const TABS = ['Settings', 'Home Page', 'Stats', 'Services', 'FAQs', 'Testimonials'] as const;
+const TABS = ['Settings', 'Home Page', 'How to Buy', 'Stats', 'Services', 'FAQs', 'Testimonials'] as const;
 type Tab = (typeof TABS)[number];
 
 const inputClass = 'w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:shadow-glow focus:outline-none';
@@ -58,6 +61,7 @@ export default function WebsiteIndex(props: Props) {
 
             {tab === 'Settings' && <SettingsPanel settings={props.settings} logoPath={props.logoPath} announcement={props.announcement} />}
             {tab === 'Home Page' && <HomePagePanel hero={props.heroSection} cta={props.ctaSection} />}
+            {tab === 'How to Buy' && <HowToBuyPanel hero={props.howToBuyHeroSection} paymentMethods={props.paymentMethods} />}
             {tab === 'Stats' && <StatsPanel items={props.statsItems} />}
             {tab === 'Services' && <ServicesPanel items={props.serviceCards} />}
             {tab === 'FAQs' && <FaqsPanel items={props.faqs} />}
@@ -332,6 +336,58 @@ function HomePagePanel({ hero, cta }: { hero: HomeSection; cta: HomeSection }) {
                         </div>
                     </div>
                     <button type="submit" disabled={ctaForm.processing} className={btnClass}>Save CTA Banner</button>
+                </form>
+            </Panel>
+        </div>
+    );
+}
+
+function HowToBuyPanel({ hero, paymentMethods }: { hero: HomeSection; paymentMethods: PaymentMethod[] }) {
+    const heroForm = useForm({ ...hero.content });
+    const addForm = useForm({ icon: '', name: '', description: '' });
+
+    return (
+        <div className="space-y-6">
+            <Panel>
+                <h2 className="mb-4 font-bold text-text">How to Buy — Hero</h2>
+                <form
+                    onSubmit={(e) => { e.preventDefault(); router.put(`/admin/website/home-sections/${hero.id}`, { content: heroForm.data }); }}
+                    className="space-y-4"
+                >
+                    <div>
+                        <label className={labelClass}>Headline</label>
+                        <input className={inputClass} value={heroForm.data.headline ?? ''} onChange={(e) => heroForm.setData('headline', e.target.value)} />
+                    </div>
+                    <div>
+                        <label className={labelClass}>Subheading</label>
+                        <RichTextArea rows={2} className={inputClass} value={heroForm.data.subheading ?? ''} onChange={(v) => heroForm.setData('subheading', v)} />
+                    </div>
+                    <button type="submit" disabled={heroForm.processing} className={btnClass}>Save Hero</button>
+                </form>
+            </Panel>
+
+            <Panel>
+                <h2 className="mb-4 font-bold text-text">Payment Methods</h2>
+                <div className="mb-6 space-y-2">
+                    {paymentMethods.map((item) => (
+                        <EditableRow key={item.id} onDelete={() => router.delete(`/admin/website/payment-methods/${item.id}`)}>
+                            <InlineEditFields
+                                initial={{ name: item.name, description: item.description ?? '', icon: item.icon ?? '' }}
+                                onSave={(data) => router.put(`/admin/website/payment-methods/${item.id}`, data)}
+                                fields={[{ key: 'name', placeholder: 'Name' }, { key: 'description', placeholder: 'Description' }]}
+                            />
+                        </EditableRow>
+                    ))}
+                </div>
+                <h3 className="mb-2 text-xs font-bold uppercase tracking-wide text-text-muted">Add New</h3>
+                <form
+                    onSubmit={(e) => { e.preventDefault(); addForm.post('/admin/website/payment-methods', { onSuccess: () => addForm.reset() }); }}
+                    className="flex flex-wrap gap-2"
+                >
+                    <input className={inputClass} placeholder="Name (e.g. Easypaisa)" value={addForm.data.name} onChange={(e) => addForm.setData('name', e.target.value)} />
+                    <input className={inputClass} placeholder="Description" value={addForm.data.description} onChange={(e) => addForm.setData('description', e.target.value)} />
+                    <button type="submit" disabled={addForm.processing} className={btnClass}>Add</button>
+                    <FormErrors errors={addForm.errors} />
                 </form>
             </Panel>
         </div>

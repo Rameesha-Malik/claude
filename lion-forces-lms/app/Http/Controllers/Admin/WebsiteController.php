@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\AnnouncementBar;
 use App\Models\Faq;
 use App\Models\HomeSection;
+use App\Models\PaymentMethod;
 use App\Models\ServiceCard;
 use App\Models\Setting;
 use App\Models\StatsItem;
@@ -35,8 +36,16 @@ class WebsiteController extends Controller
             'announcement' => AnnouncementBar::first(),
             'heroSection' => HomeSection::where('section_key', 'hero')->first(),
             'ctaSection' => HomeSection::where('section_key', 'cta_footer')->first(),
+            'howToBuyHeroSection' => HomeSection::firstOrCreate(
+                ['section_key' => 'how_to_buy_hero'],
+                ['title' => 'How to Buy Hero', 'order' => 0, 'is_enabled' => true, 'content' => [
+                    'headline' => 'How to Buy',
+                    'subheading' => 'Simple steps from registration to your first lesson.',
+                ]],
+            ),
             'statsItems' => StatsItem::orderBy('order')->get(),
             'serviceCards' => ServiceCard::orderBy('order')->get(),
+            'paymentMethods' => PaymentMethod::orderBy('order')->get(),
             'faqs' => Faq::orderBy('page')->orderBy('order')->get(),
             'testimonials' => Testimonial::orderBy('order')->get(),
         ]);
@@ -160,6 +169,29 @@ class WebsiteController extends Controller
         $service->delete();
 
         return back()->with('success', 'Service removed.');
+    }
+
+    // --- Payment methods (How to Buy page) ---
+    public function storePaymentMethod(Request $request)
+    {
+        $data = $request->validate(['icon' => 'nullable|string|max:50', 'name' => 'required|string|max:100', 'description' => 'nullable|string|max:500']);
+        PaymentMethod::create($data + ['order' => PaymentMethod::max('order') + 1]);
+
+        return back()->with('success', 'Payment method added.');
+    }
+
+    public function updatePaymentMethod(Request $request, PaymentMethod $paymentMethod)
+    {
+        $paymentMethod->update($request->validate(['icon' => 'nullable|string|max:50', 'name' => 'required|string|max:100', 'description' => 'nullable|string|max:500']));
+
+        return back()->with('success', 'Payment method updated.');
+    }
+
+    public function destroyPaymentMethod(PaymentMethod $paymentMethod)
+    {
+        $paymentMethod->delete();
+
+        return back()->with('success', 'Payment method removed.');
     }
 
     // --- FAQs ---

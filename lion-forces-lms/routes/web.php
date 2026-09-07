@@ -171,6 +171,10 @@ Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->nam
         Route::put('/services/{service}', [AdminWebsiteController::class, 'updateService'])->name('services.update');
         Route::delete('/services/{service}', [AdminWebsiteController::class, 'destroyService'])->name('services.destroy');
 
+        Route::post('/payment-methods', [AdminWebsiteController::class, 'storePaymentMethod'])->name('payment-methods.store');
+        Route::put('/payment-methods/{paymentMethod}', [AdminWebsiteController::class, 'updatePaymentMethod'])->name('payment-methods.update');
+        Route::delete('/payment-methods/{paymentMethod}', [AdminWebsiteController::class, 'destroyPaymentMethod'])->name('payment-methods.destroy');
+
         Route::post('/faqs', [AdminWebsiteController::class, 'storeFaq'])->name('faqs.store');
         Route::put('/faqs/{faq}', [AdminWebsiteController::class, 'updateFaq'])->name('faqs.update');
         Route::delete('/faqs/{faq}', [AdminWebsiteController::class, 'destroyFaq'])->name('faqs.destroy');

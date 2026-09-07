@@ -48,11 +48,8 @@ const STEPS = [
     },
 ];
 
-const PAYMENT_METHODS = [
-    { name: 'Bank Transfer', description: 'Transfer to our academy account and share the receipt.' },
-    { name: 'Easypaisa', description: 'Send payment directly via the Easypaisa app.' },
-    { name: 'JazzCash', description: 'Send payment directly via the JazzCash app.' },
-];
+interface PaymentMethodItem { name: string; description: string | null }
+interface HeroContent { headline: string; subheading: string }
 
 function CheckIcon() {
     return (
@@ -62,7 +59,7 @@ function CheckIcon() {
     );
 }
 
-export default function HowToBuy({ packages, faqs }: { packages: PackageItem[]; faqs: FaqItem[] }) {
+export default function HowToBuy({ hero, packages, paymentMethods, faqs }: { hero: HeroContent; packages: PackageItem[]; paymentMethods: PaymentMethodItem[]; faqs: FaqItem[] }) {
     const { site } = usePage<PageProps>().props;
 
     return (
@@ -72,9 +69,9 @@ export default function HowToBuy({ packages, faqs }: { packages: PackageItem[]; 
             <section className="relative overflow-hidden bg-gradient-to-br from-secondary to-teal-950 py-20 text-center text-white">
                 <div className="relative mx-auto max-w-container px-4 sm:px-6 lg:px-8">
                     <SectionKicker dark><span className="mx-auto">Get Started</span></SectionKicker>
-                    <h1 className="font-display text-5xl uppercase tracking-wide sm:text-6xl">How to Buy</h1>
+                    <h1 className="font-display text-5xl uppercase tracking-wide sm:text-6xl">{hero.headline}</h1>
                     <p className="mx-auto mt-4 max-w-xl text-teal-200">
-                        Simple steps from registration to your first lesson.
+                        {hero.subheading}
                     </p>
                     <Link
                         href="/register"
@@ -167,7 +164,7 @@ export default function HowToBuy({ packages, faqs }: { packages: PackageItem[]; 
                     <h2 className="font-display text-4xl uppercase tracking-wide text-text sm:text-5xl">Payment Methods</h2>
                 </RevealOnScroll>
                 <RevealOnScroll className="grid gap-6 sm:grid-cols-3">
-                    {PAYMENT_METHODS.map((method, i) => (
+                    {paymentMethods.map((method, i) => (
                         <div key={i} className="rounded-2xl border border-border bg-surface p-6 text-center">
                             <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-primary-subtle text-primary">
                                 <svg className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
