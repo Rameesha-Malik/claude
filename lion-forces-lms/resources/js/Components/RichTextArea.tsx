@@ -40,17 +40,18 @@ function prefixLine(el: HTMLTextAreaElement, prefix: string) {
 
 /**
  * A plain <textarea> with a lightweight formatting toolbar (bold, italic,
- * underline, heading, bullet list) -- client feedback: "add text editor in
- * all places of website where it used to input text like bold italic
- * underline font etc." Deliberately not a full WYSIWYG (no new dependency,
- * no arbitrary-HTML storage/XSS surface): it writes simple markdown-like
- * syntax (**bold**, *italic*, ++underline++, ## Heading, "- " bullets) into
- * the same plain-text field these forms already save, and LiteMarkdown.tsx
- * renders just those patterns back out safely wherever this content is
- * displayed. "Font" wasn't taken literally as a font-family picker -- that
- * would mean storing arbitrary style data for a formatting model built
- * entirely around safe, fixed markdown patterns; happy to add if a specific
- * need for it comes up.
+ * underline, heading, sub heading, bullet list) -- client feedback: "add
+ * text editor in all places of website where it used to input text like
+ * bold italic underline font etc," and later, explicitly, "Heading / Sub
+ * heading / Bold." Deliberately not a full WYSIWYG (no new dependency, no
+ * arbitrary-HTML storage/XSS surface): it writes simple markdown-like
+ * syntax (**bold**, *italic*, ++underline++, ## Heading, ### Sub heading,
+ * "- " bullets) into the same plain-text field these forms already save,
+ * and LiteMarkdown.tsx renders just those patterns back out safely
+ * wherever this content is displayed. "Font" wasn't taken literally as a
+ * font-family picker -- that would mean storing arbitrary style data for a
+ * formatting model built entirely around safe, fixed markdown patterns;
+ * happy to add if a specific need for it comes up.
  */
 export default function RichTextArea({ value, onChange, rows = 4, className = '', placeholder }: Props) {
     const ref = useRef<HTMLTextAreaElement>(null);
@@ -74,6 +75,9 @@ export default function RichTextArea({ value, onChange, rows = 4, className = ''
                 </button>
                 <button type="button" title="Heading" onClick={() => apply((el) => prefixLine(el, '## '))} className={toolbarBtn}>
                     H
+                </button>
+                <button type="button" title="Sub heading" onClick={() => apply((el) => prefixLine(el, '### '))} className={toolbarBtn}>
+                    H<sub>2</sub>
                 </button>
                 <button type="button" title="Bullet list item" onClick={() => apply((el) => prefixLine(el, '- '))} className={toolbarBtn}>
                     •

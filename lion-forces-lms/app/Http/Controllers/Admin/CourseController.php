@@ -302,7 +302,7 @@ class CourseController extends Controller
     {
         abort_unless($request->user()->canManageCourse($course), 403);
 
-        $data = $request->validate(['title' => 'required|string|max:150']);
+        $data = $request->validate(['title' => 'required|string|max:150', 'description' => 'nullable|string|max:2000']);
 
         $section = $course->sections()->create($data + ['order' => $course->sections()->max('order') + 1]);
         ActivityLog::record('added', 'Topic', $section->id, "Topic \"{$section->title}\" was added.", $course->id);
@@ -314,7 +314,7 @@ class CourseController extends Controller
     {
         abort_unless($request->user()->canManageCourse($section->course), 403);
 
-        $section->update($request->validate(['title' => 'required|string|max:150']));
+        $section->update($request->validate(['title' => 'required|string|max:150', 'description' => 'nullable|string|max:2000']));
         ActivityLog::record('edited', 'Topic', $section->id, "Topic \"{$section->title}\" was updated.", $section->course_id);
 
         return back()->with('success', 'Section updated.');
