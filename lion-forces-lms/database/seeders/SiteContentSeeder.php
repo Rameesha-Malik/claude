@@ -192,7 +192,7 @@ class SiteContentSeeder extends Seeder
         // --- Testimonials — PLACEHOLDER only. Per the client's explicit
         // instruction, real testimonials must be admin-created real
         // stories; none are invented here beyond a clearly fake sample. ---
-        Testimonial::updateOrCreate(['student_name' => 'Sample Testimonial — replace me'], [
+        Testimonial::updateOrCreate(['student_name' => 'Sample Testimonial'], [
             'testimonial_text' => 'Replace this with a real, admin-entered success story before launch.',
             'rating' => 5,
             'is_featured' => false,

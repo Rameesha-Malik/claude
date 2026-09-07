@@ -47,17 +47,17 @@ class NewsResourceSeeder extends Seeder
             'is_active' => true,
         ]);
 
-        Resource::updateOrCreate(['title' => 'PMA Syllabus Overview — replace me'], [
+        Resource::updateOrCreate(['title' => 'PMA Syllabus Overview'], [
             'category' => 'Syllabus',
             'description' => 'Official PMA test pattern and subject breakdown.',
         ]);
 
-        Resource::updateOrCreate(['title' => 'ISSB Preparation Guide — replace me'], [
+        Resource::updateOrCreate(['title' => 'ISSB Preparation Guide'], [
             'category' => 'Guide',
             'description' => 'A general overview of the ISSB testing process and what to expect.',
         ]);
 
-        Resource::updateOrCreate(['title' => 'Physical Fitness Standards — replace me'], [
+        Resource::updateOrCreate(['title' => 'Physical Fitness Standards'], [
             'category' => 'Fitness',
             'description' => 'Reference standards for the 1.6km run, push-ups, and sit-ups.',
         ]);

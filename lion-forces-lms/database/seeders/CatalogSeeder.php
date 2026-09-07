@@ -40,7 +40,7 @@ class CatalogSeeder extends Seeder
             $name => Subject::updateOrCreate(['slug' => Str::slug($name)], ['name' => $name]),
         ]);
 
-        $instructor = Instructor::updateOrCreate(['name' => 'Lead Instructor — replace me'], [
+        $instructor = Instructor::updateOrCreate(['name' => 'Lead Instructor'], [
             'qualification' => 'M.Phil, Ex-Services', // PLACEHOLDER
             'experience' => '10+ years training academy candidates', // PLACEHOLDER
             'bio' => 'Placeholder instructor profile — replace with real faculty details via Admin -> Instructors.',
@@ -126,7 +126,7 @@ class CatalogSeeder extends Seeder
             ['option_text' => '3156', 'is_correct' => true, 'order' => 4],
         ]);
 
-        NotesBank::updateOrCreate(['title' => 'English Grammar Essentials — replace me'], [
+        NotesBank::updateOrCreate(['title' => 'English Grammar Essentials'], [
             'subject_id' => $subjects['English']->id,
             'content' => 'Placeholder notes content. Replace via Admin -> Content Library -> Notes Bank.',
         ]);

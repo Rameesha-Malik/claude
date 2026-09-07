@@ -31,9 +31,8 @@ use Illuminate\Database\Seeder;
  * question bank only had 1 question (so every test/quiz feature was
  * unusable), and Practice Tests / Mock Exams / Staged Tests / Demo Quiz /
  * Hall of Fame / most reviews had zero rows anywhere. Everything here is
- * placeholder content clearly marked as such (same "— replace me"
- * convention as CatalogSeeder/SiteContentSeeder) and is safe to re-run
- * (updateOrCreate throughout).
+ * placeholder content (same demo-data approach as CatalogSeeder/
+ * SiteContentSeeder) and is safe to re-run (updateOrCreate throughout).
  */
 class DemoContentSeeder extends Seeder
 {
@@ -122,9 +121,9 @@ class DemoContentSeeder extends Seeder
     private function seedInstructors($courses): \Illuminate\Support\Collection
     {
         $roster = [
-            'Lead Instructor — replace me' => ['qualification' => 'M.Phil, Ex-Services', 'experience' => '10+ years training academy candidates'],
-            'English Faculty — replace me' => ['qualification' => 'MA English Literature', 'experience' => '8 years teaching verbal & written English'],
-            'Mathematics Faculty — replace me' => ['qualification' => 'MSc Mathematics', 'experience' => '6 years teaching quantitative aptitude'],
+            'Lead Instructor' => ['qualification' => 'M.Phil, Ex-Services', 'experience' => '10+ years training academy candidates'],
+            'English Faculty' => ['qualification' => 'MA English Literature', 'experience' => '8 years teaching verbal & written English'],
+            'Mathematics Faculty' => ['qualification' => 'MSc Mathematics', 'experience' => '6 years teaching quantitative aptitude'],
         ];
 
         $instructors = collect();
@@ -151,11 +150,11 @@ class DemoContentSeeder extends Seeder
     private function seedNotesBank($subjects, $courses): \Illuminate\Support\Collection
     {
         $notes = [
-            ['English Grammar Essentials — replace me', 'English', 'Placeholder notes content. Replace via Admin -> Content Library -> Notes Bank.'],
-            ['Verbal & Non-Verbal Reasoning Shortcuts — replace me', 'Intelligence / IQ', 'Placeholder notes content covering common reasoning patterns and shortcuts.'],
-            ['Quick Math Formulas — replace me', 'Mathematics', 'Placeholder notes content with commonly-used formulas for quick revision.'],
-            ['Pakistan Studies Key Facts — replace me', 'Pakistan Studies', 'Placeholder notes content summarizing key dates, figures, and facts.'],
-            ['Current Affairs Digest — replace me', 'Current Affairs', 'Placeholder notes content — replace with a real, regularly-updated digest.'],
+            ['English Grammar Essentials', 'English', 'Placeholder notes content. Replace via Admin -> Content Library -> Notes Bank.'],
+            ['Verbal & Non-Verbal Reasoning Shortcuts', 'Intelligence / IQ', 'Placeholder notes content covering common reasoning patterns and shortcuts.'],
+            ['Quick Math Formulas', 'Mathematics', 'Placeholder notes content with commonly-used formulas for quick revision.'],
+            ['Pakistan Studies Key Facts', 'Pakistan Studies', 'Placeholder notes content summarizing key dates, figures, and facts.'],
+            ['Current Affairs Digest', 'Current Affairs', 'Placeholder notes content — replace with a real, regularly-updated digest.'],
         ];
 
         $created = collect();
@@ -355,7 +354,7 @@ class DemoContentSeeder extends Seeder
      */
     private function seedDemoReviewers(): \Illuminate\Support\Collection
     {
-        $names = ['Ayesha Khan — replace me', 'Bilal Raza — replace me', 'Sana Malik — replace me'];
+        $names = ['Ayesha Khan', 'Bilal Raza', 'Sana Malik'];
 
         return collect($names)->map(function ($name, $i) {
             $user = User::updateOrCreate(
@@ -394,10 +393,10 @@ class DemoContentSeeder extends Seeder
     private function seedTestimonials($courses, $reviewers): void
     {
         $testimonials = [
-            ['Ayesha Khan — replace me', 'lcc-complete-prep', 5, 'This platform made my LCC preparation so much easier. The guaranteed notes were a lifesaver before the test.'],
-            ['Bilal Raza — replace me', 'pma-complete-prep', 5, 'Cleared my PMA test on the first attempt thanks to the structured mock exams here.'],
-            ['Sana Malik — replace me', 'issb-complete-prep', 4, 'Great question bank and very responsive support team whenever I had questions.'],
-            ['Ali Hassan — replace me', 'navy-complete-prep', 5, 'The staged tests helped me identify exactly where I was weak before the real exam.'],
+            ['Ayesha Khan', 'lcc-complete-prep', 5, 'This platform made my LCC preparation so much easier. The guaranteed notes were a lifesaver before the test.'],
+            ['Bilal Raza', 'pma-complete-prep', 5, 'Cleared my PMA test on the first attempt thanks to the structured mock exams here.'],
+            ['Sana Malik', 'issb-complete-prep', 4, 'Great question bank and very responsive support team whenever I had questions.'],
+            ['Ali Hassan', 'navy-complete-prep', 5, 'The staged tests helped me identify exactly where I was weak before the real exam.'],
         ];
 
         foreach ($testimonials as $i => [$name, $slug, $rating, $text]) {
@@ -406,7 +405,7 @@ class DemoContentSeeder extends Seeder
                 'testimonial_text' => $text,
                 'rating' => $rating,
                 'is_featured' => $i < 2,
-                'order' => $i + 2, // +2 to sit after the original "Sample Testimonial — replace me"
+                'order' => $i + 2, // +2 to sit after the original "Sample Testimonial"
             ]);
         }
     }
@@ -414,10 +413,10 @@ class DemoContentSeeder extends Seeder
     private function seedHallOfFame($courses): void
     {
         $entries = [
-            ['Ayesha Khan — replace me', 'lcc-complete-prep', 'Selected for Lady Cadet Course, 2025 batch.'],
-            ['Bilal Raza — replace me', 'pma-complete-prep', 'Cleared PMA Long Course entry test on first attempt.'],
-            ['Sana Malik — replace me', 'issb-complete-prep', 'Recommended by ISSB board after structured preparation.'],
-            ['Ali Hassan — replace me', 'navy-complete-prep', 'Selected for Pakistan Navy commission entry.'],
+            ['Ayesha Khan', 'lcc-complete-prep', 'Selected for Lady Cadet Course, 2025 batch.'],
+            ['Bilal Raza', 'pma-complete-prep', 'Cleared PMA Long Course entry test on first attempt.'],
+            ['Sana Malik', 'issb-complete-prep', 'Recommended by ISSB board after structured preparation.'],
+            ['Ali Hassan', 'navy-complete-prep', 'Selected for Pakistan Navy commission entry.'],
         ];
 
         foreach ($entries as $i => [$name, $slug, $achievement]) {
