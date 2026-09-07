@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Course;
 use App\Models\Flashcard;
+use App\Models\Subject;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -15,13 +16,15 @@ class FlashcardController extends Controller
     {
         return Inertia::render('Admin/Flashcards/Index', [
             'course' => $course->only('id', 'title'),
-            'flashcards' => $course->flashcards()->orderByDesc('created_at')->get(),
+            'flashcards' => $course->flashcards()->with('subject:id,name')->orderByDesc('created_at')->get(),
+            'subjects' => Subject::orderBy('name')->get(['id', 'name']),
         ]);
     }
 
     public function store(Request $request, Course $course)
     {
         $data = $request->validate([
+            'subject_id' => 'nullable|exists:subjects,id',
             'front_text' => 'required|string|max:1000',
             'back_text' => 'required|string|max:1000',
         ]);
@@ -43,6 +46,7 @@ class FlashcardController extends Controller
     public function update(Request $request, Course $course, Flashcard $flashcard)
     {
         $flashcard->update($request->validate([
+            'subject_id' => 'nullable|exists:subjects,id',
             'front_text' => 'required|string|max:1000',
             'back_text' => 'required|string|max:1000',
         ]));

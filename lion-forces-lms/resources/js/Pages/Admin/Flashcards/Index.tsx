@@ -2,18 +2,20 @@ import { Head, router, useForm } from '@inertiajs/react';
 import RichTextArea from '@/Components/RichTextArea';
 import AdminLayout from '@/Layouts/AdminLayout';
 
+interface Subject { id: number; name: string }
 interface FlashcardRow {
-    id: number; front_text: string; back_text: string; status: string; is_auto_generated: boolean;
+    id: number; front_text: string; back_text: string; status: string; is_auto_generated: boolean; subject: Subject | null;
 }
 interface Props {
     course: { id: number; title: string };
     flashcards: FlashcardRow[];
+    subjects: Subject[];
 }
 
 const inputClass = 'w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:shadow-glow focus:outline-none';
 
-export default function FlashcardsIndex({ course, flashcards }: Props) {
-    const form = useForm({ front_text: '', back_text: '' });
+export default function FlashcardsIndex({ course, flashcards, subjects }: Props) {
+    const form = useForm({ subject_id: '' as number | '', front_text: '', back_text: '' });
 
     function submit(e: React.FormEvent) {
         e.preventDefault();
@@ -27,6 +29,13 @@ export default function FlashcardsIndex({ course, flashcards }: Props) {
             <div className="grid gap-6 lg:grid-cols-3">
                 <form onSubmit={submit} className="space-y-4 rounded-2xl border border-border bg-surface p-6 lg:col-span-1">
                     <h3 className="font-bold text-text">Add a Flashcard</h3>
+                    <div>
+                        <label className="mb-1 block text-sm font-medium text-text">Category</label>
+                        <select className={inputClass} value={form.data.subject_id} onChange={(e) => form.setData('subject_id', e.target.value ? Number(e.target.value) : '')}>
+                            <option value="">No category (shown under &quot;General&quot;)</option>
+                            {subjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                        </select>
+                    </div>
                     <div>
                         <label className="mb-1 block text-sm font-medium text-text">Front (question / prompt)</label>
                         <RichTextArea rows={3} className={inputClass} value={form.data.front_text} onChange={(v) => form.setData('front_text', v)} />
@@ -47,6 +56,9 @@ export default function FlashcardsIndex({ course, flashcards }: Props) {
                         <div key={f.id} className="rounded-2xl border border-border bg-surface p-5">
                             <div className="flex items-start justify-between gap-3">
                                 <div className="min-w-0 flex-1">
+                                    <span className="mb-1 inline-block rounded-full bg-primary-subtle px-2 py-0.5 text-[0.65rem] font-bold uppercase tracking-wide text-primary">
+                                        {f.subject?.name ?? 'General'}
+                                    </span>
                                     <p className="text-xs font-bold uppercase tracking-wide text-text-muted">Front</p>
                                     <p className="text-sm text-text">{f.front_text}</p>
                                     <p className="mt-2 text-xs font-bold uppercase tracking-wide text-text-muted">Back</p>

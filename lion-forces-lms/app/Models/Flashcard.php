@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 #[Fillable([
-    'course_id', 'source_note_id', 'source_lesson_id', 'front_text',
+    'course_id', 'subject_id', 'source_note_id', 'source_lesson_id', 'front_text',
     'back_text', 'is_auto_generated', 'status', 'reviewed_by', 'reviewed_at',
 ])]
 class Flashcard extends Model
@@ -23,6 +23,11 @@ class Flashcard extends Model
     public function course(): BelongsTo
     {
         return $this->belongsTo(Course::class);
+    }
+
+    public function subject(): BelongsTo
+    {
+        return $this->belongsTo(Subject::class);
     }
 
     public function sourceNote(): BelongsTo

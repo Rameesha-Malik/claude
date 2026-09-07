@@ -19,7 +19,7 @@ interface QuizSummary {
     id: number; title: string; question_selection_mode: string; auto_question_count: number | null; questions_count: number;
     latest_attempt_id: number | null;
 }
-interface FlashcardItem { id: number; front_text: string; back_text: string }
+interface FlashcardItem { id: number; front_text: string; back_text: string; subject: { id: number; name: string } | null }
 interface MockExamSummary {
     id: number; title: string; target_exam_name: string | null; total_duration_minutes: number | null; sections_count: number;
     latest_attempt_id: number | null;
@@ -701,7 +701,16 @@ function TestCard({
     );
 }
 
+// Client: "Flashcards should be categorized, and proper UI, shown One by
+// one." Previously every card in the course showed at once as a grid of
+// flip-tiles; now cards group by subject (category chips, skipped
+// entirely when there's only one category to choose from) and study one
+// card at a time with Prev/Next, the way a real flashcard deck works.
 function FlashcardsPanel({ cards }: { cards: FlashcardItem[] }) {
+    const categories = Array.from(new Set(cards.map((c) => c.subject?.name ?? 'General')));
+    const [category, setCategory] = useState<string | null>(categories[0] ?? null);
+    const [index, setIndex] = useState(0);
+
     if (cards.length === 0) {
         return (
             <div className="rounded-3xl border border-dashed border-border bg-surface p-8 text-center text-text-secondary">
@@ -710,12 +719,60 @@ function FlashcardsPanel({ cards }: { cards: FlashcardItem[] }) {
         );
     }
 
+    const deck = category ? cards.filter((c) => (c.subject?.name ?? 'General') === category) : cards;
+    const card = deck[index];
+
+    function selectCategory(name: string) {
+        setCategory(name);
+        setIndex(0);
+    }
+
     return (
-        <RevealOnScroll staggerMs={40} className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
-            {cards.map((card) => (
-                <FlashcardTile key={card.id} card={card} />
-            ))}
-        </RevealOnScroll>
+        <div>
+            {categories.length > 1 && (
+                <div className="mb-6 flex flex-wrap gap-2">
+                    {categories.map((name) => (
+                        <button
+                            key={name}
+                            onClick={() => selectCategory(name)}
+                            className={`rounded-full px-4 py-2 text-sm font-bold uppercase tracking-wide transition-colors ${
+                                category === name ? 'bg-primary text-on-primary' : 'bg-surface-sunken text-text-secondary hover:bg-primary-subtle'
+                            }`}
+                        >
+                            {name} <span className="opacity-70">({cards.filter((c) => (c.subject?.name ?? 'General') === name).length})</span>
+                        </button>
+                    ))}
+                </div>
+            )}
+
+            {card && (
+                <div className="mx-auto max-w-xl">
+                    <p className="mb-3 text-center text-sm font-semibold text-text-secondary">
+                        Card {index + 1} of {deck.length}
+                    </p>
+                    <FlashcardTile key={card.id} card={card} />
+                    <div className="mt-5 flex items-center justify-between gap-3">
+                        <button
+                            onClick={() => setIndex((i) => Math.max(0, i - 1))}
+                            disabled={index === 0}
+                            className="rounded-full border border-border px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-text transition-all duration-fast hover:-translate-y-0.5 hover:border-primary hover:text-primary disabled:opacity-40 disabled:hover:translate-y-0"
+                        >
+                            &larr; Previous
+                        </button>
+                        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-surface-sunken">
+                            <div className="h-full rounded-full bg-primary transition-all duration-normal" style={{ width: `${((index + 1) / deck.length) * 100}%` }} />
+                        </div>
+                        <button
+                            onClick={() => setIndex((i) => Math.min(deck.length - 1, i + 1))}
+                            disabled={index === deck.length - 1}
+                            className="rounded-full bg-primary px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-on-primary shadow-sm transition-all duration-fast hover:-translate-y-0.5 hover:bg-primary-hover disabled:opacity-40 disabled:hover:translate-y-0"
+                        >
+                            Next &rarr;
+                        </button>
+                    </div>
+                </div>
+            )}
+        </div>
     );
 }
 
@@ -726,7 +783,7 @@ function FlashcardTile({ card }: { card: FlashcardItem }) {
         <button
             type="button"
             onClick={() => setFlipped((v) => !v)}
-            className="group block h-44 w-full text-left transition-transform duration-normal hover:-translate-y-1"
+            className="group block h-64 w-full text-left transition-transform duration-normal hover:-translate-y-1"
             style={{ perspective: '1000px' }}
             aria-label="Flip flashcard"
         >
@@ -735,20 +792,20 @@ function FlashcardTile({ card }: { card: FlashcardItem }) {
                 style={{ transformStyle: 'preserve-3d', transform: flipped ? 'rotateY(180deg)' : 'none' }}
             >
                 <div
-                    className="absolute inset-0 flex flex-col justify-between rounded-3xl border border-border bg-surface p-5 shadow-sm transition-shadow duration-normal group-hover:shadow-lg"
+                    className="absolute inset-0 flex flex-col justify-between rounded-3xl border border-border bg-surface p-6 shadow-sm transition-shadow duration-normal group-hover:shadow-lg"
                     style={{ backfaceVisibility: 'hidden' }}
                 >
                     <span className="text-xs font-bold uppercase tracking-wide text-primary">Question</span>
-                    <p className="line-clamp-4 text-sm font-semibold text-text">{card.front_text}</p>
-                    <span className="text-xs text-text-muted">Tap to flip</span>
+                    <p className="line-clamp-6 text-center text-lg font-semibold text-text">{card.front_text}</p>
+                    <span className="text-center text-xs text-text-muted">Tap to flip</span>
                 </div>
                 <div
-                    className="absolute inset-0 flex flex-col justify-between rounded-3xl border border-primary bg-primary-subtle p-5 shadow-sm transition-shadow duration-normal group-hover:shadow-lg"
+                    className="absolute inset-0 flex flex-col justify-between rounded-3xl border border-primary bg-primary-subtle p-6 shadow-sm transition-shadow duration-normal group-hover:shadow-lg"
                     style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
                 >
                     <span className="text-xs font-bold uppercase tracking-wide text-primary">Answer</span>
-                    <p className="line-clamp-4 text-sm text-text">{card.back_text}</p>
-                    <span className="text-xs text-text-muted">Tap to flip back</span>
+                    <p className="line-clamp-6 text-center text-base text-text">{card.back_text}</p>
+                    <span className="text-center text-xs text-text-muted">Tap to flip back</span>
                 </div>
             </div>
         </button>

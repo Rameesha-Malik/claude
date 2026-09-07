@@ -55,7 +55,7 @@ class CourseController extends Controller
             'quizzes' => fn ($q) => $q->where('is_active', true)->withCount('questions'),
             'mockExams' => fn ($q) => $q->where('is_active', true)->withCount('sections'),
             'stagedTests' => fn ($q) => $q->where('is_active', true)->withCount('stages'),
-            'flashcards' => fn ($q) => $q->where('status', 'approved'),
+            'flashcards' => fn ($q) => $q->where('status', 'approved')->with('subject:id,name'),
             'assignments' => fn ($q) => $q->where('is_active', true)->with(['submissions' => fn ($q2) => $q2->where('user_id', $user->id)]),
             'approvedReviews',
         ]);
