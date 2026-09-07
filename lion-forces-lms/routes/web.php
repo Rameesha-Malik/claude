@@ -51,6 +51,8 @@ use App\Http\Controllers\Student\DashboardController as StudentDashboardControll
 use App\Http\Controllers\Student\MockExamController as StudentMockExamController;
 use App\Http\Controllers\Student\NotificationController as StudentNotificationController;
 use App\Http\Controllers\Student\PracticeTestController as StudentPracticeTestController;
+use App\Http\Controllers\Student\FavouriteQuestionController as StudentFavouriteQuestionController;
+use App\Http\Controllers\Student\QuestionNoteController as StudentQuestionNoteController;
 use App\Http\Controllers\Student\RevisionListController as StudentRevisionListController;
 use App\Http\Controllers\Student\CustomQuizController as StudentCustomQuizController;
 use App\Http\Controllers\Student\QuizController as StudentQuizController;
@@ -113,6 +115,8 @@ Route::get('/dashboard', function () {
 Route::middleware(['auth', 'verified', 'user_type:student', 'check.active'])->prefix('portal')->group(function () {
     Route::get('/', [StudentDashboardController::class, 'index'])->name('student.dashboard');
     Route::get('/revision-list', [StudentRevisionListController::class, 'index'])->name('student.revision-list');
+    Route::get('/favourite-questions', [StudentFavouriteQuestionController::class, 'index'])->name('student.favourite-questions');
+    Route::get('/mcq-notes', [StudentQuestionNoteController::class, 'index'])->name('student.mcq-notes');
     Route::get('/my-courses', [StudentCourseController::class, 'index'])->name('student.courses');
     Route::get('/my-courses/{course:slug}', [StudentCourseController::class, 'show'])->name('student.courses.show');
     Route::get('/courses/{course:slug}/checkout', [StudentCheckoutController::class, 'create'])->name('student.checkout.create');
@@ -372,6 +376,7 @@ Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->nam
     });
     Route::get('/leaderboard', [AdminLeaderboardController::class, 'index'])->name('leaderboard.index');
     Route::get('/performance', [AdminPerformanceController::class, 'index'])->name('performance.index');
+    Route::get('/performance/{student}/report', [AdminPerformanceController::class, 'report'])->name('performance.report');
     Route::get('/activity', [AdminActivityController::class, 'index'])->name('activity.index');
 
     Route::prefix('bundles')->name('bundles.')->group(function () {

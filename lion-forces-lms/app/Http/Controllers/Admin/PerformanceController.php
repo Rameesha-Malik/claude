@@ -9,6 +9,7 @@ use App\Models\TestAttempt;
 use App\Models\TestAttemptAnswer;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -28,13 +29,37 @@ class PerformanceController extends Controller
         $studentId = (int) ($request->student_id ?? $students->first()?->id ?? 0);
         $student = $students->firstWhere('id', $studentId);
 
-        if (! $student) {
-            return Inertia::render('Admin/Performance/Index', [
-                'students' => $students,
-                'selectedStudentId' => null,
-                'data' => null,
-            ]);
-        }
+        return Inertia::render('Admin/Performance/Index', [
+            'students' => $students,
+            'selectedStudentId' => $student?->id,
+            'data' => $student ? $this->buildReportData($student, $students) : null,
+        ]);
+    }
+
+    // Client (WhatsApp): "...so that i can share with parents, if pdf
+    // import [export] option" -- every number a parent would want was
+    // already computed in index() above, just no way to hand it to
+    // someone outside the admin panel. Rather than add a PDF-generation
+    // dependency (dompdf etc. -- extra composer package, font/Urdu-text
+    // quirks, one more thing to keep working), this renders a standalone
+    // print-formatted page with no admin chrome; "Print / Save as PDF"
+    // is the browser's own native print-to-PDF, which every browser
+    // already does reliably.
+    public function report(Request $request, User $student): Response
+    {
+        abort_unless($student->user_type === 'student', 404);
+
+        $students = User::where('user_type', 'student')->orderBy('name')->get(['id', 'name', 'email']);
+
+        return Inertia::render('Admin/Performance/Report', [
+            'data' => $this->buildReportData($student, $students),
+            'generatedAt' => now()->toDayDateTimeString(),
+        ]);
+    }
+
+    private function buildReportData(User $student, Collection $students): array
+    {
+        $studentId = $student->id;
 
         $attempts = TestAttempt::where('user_id', $studentId)->where('status', 'submitted')
             ->with('attemptable.course:id,title')
@@ -107,32 +132,28 @@ class PerformanceController extends Controller
         $percentile = $total > 1 ? round(($total - $rank) / ($total - 1) * 100, 1) : 0;
         $systemAverage = round(TestAttempt::where('status', 'submitted')->avg('percentage') ?? 0, 1);
 
-        return Inertia::render('Admin/Performance/Index', [
-            'students' => $students,
-            'selectedStudentId' => $studentId,
-            'data' => [
-                'student' => $student,
-                'overall_score' => $overallScore,
-                'avg_score' => $avgScore,
-                'pass_rate' => $passRate,
-                'lecture_percent' => $lecturePercent,
-                'course_completion_percent' => $courseCompletionPercent,
-                'rank' => $rank,
-                'total_students' => $total,
-                'percentile' => $percentile,
-                'system_average' => $systemAverage,
-                'quiz_score_trend' => $attempts->map(fn ($a) => ['date' => $a->created_at->format('M j'), 'score' => (float) $a->percentage])->values(),
-                'score_by_course' => $scoreByCourse,
-                'course_completion' => ['completed' => $completedCourses, 'in_progress' => $coursesEnrolled - $completedCourses],
-                'lectures' => ['completed' => $completedLessons, 'total' => $totalLessons],
-                'attempts_per_week' => $attemptsPerWeek,
-                'quizzes_attempted' => $attempts->count(),
-                'courses_enrolled' => $coursesEnrolled,
-                'courses_completed' => $completedCourses,
-                'strong_points' => $strongPoints,
-                'weak_points' => $weakPoints,
-            ],
-        ]);
+        return [
+            'student' => $student,
+            'overall_score' => $overallScore,
+            'avg_score' => $avgScore,
+            'pass_rate' => $passRate,
+            'lecture_percent' => $lecturePercent,
+            'course_completion_percent' => $courseCompletionPercent,
+            'rank' => $rank,
+            'total_students' => $total,
+            'percentile' => $percentile,
+            'system_average' => $systemAverage,
+            'quiz_score_trend' => $attempts->map(fn ($a) => ['date' => $a->created_at->format('M j'), 'score' => (float) $a->percentage])->values(),
+            'score_by_course' => $scoreByCourse,
+            'course_completion' => ['completed' => $completedCourses, 'in_progress' => $coursesEnrolled - $completedCourses],
+            'lectures' => ['completed' => $completedLessons, 'total' => $totalLessons],
+            'attempts_per_week' => $attemptsPerWeek,
+            'quizzes_attempted' => $attempts->count(),
+            'courses_enrolled' => $coursesEnrolled,
+            'courses_completed' => $completedCourses,
+            'strong_points' => $strongPoints,
+            'weak_points' => $weakPoints,
+        ];
     }
 
     private function overallScoreFor(int $userId): float

@@ -3,7 +3,7 @@ import AdminLayout from '@/Layouts/AdminLayout';
 
 interface Quiz {
     id: number; title: string; is_active: boolean; duration_minutes: number;
-    questions_count: number; attempts_count: number; subject: { name: string } | null;
+    questions_count: number; attempts_count: number; subject: { name: string } | null; category: { name: string } | null;
 }
 
 export default function DemoQuizIndex({ quizzes }: { quizzes: Quiz[] }) {
@@ -60,8 +60,11 @@ export default function DemoQuizIndex({ quizzes }: { quizzes: Quiz[] }) {
                                 <div>
                                     <div className="flex flex-wrap items-center gap-2">
                                         <h3 className="font-bold text-text">{q.title}</h3>
+                                        {q.category && (
+                                            <span className="rounded-full bg-primary-subtle px-2 py-0.5 text-[0.65rem] font-bold uppercase text-primary">{q.category.name}</span>
+                                        )}
                                         {q.subject && (
-                                            <span className="rounded-full bg-primary-subtle px-2 py-0.5 text-[0.65rem] font-bold uppercase text-primary">{q.subject.name}</span>
+                                            <span className="rounded-full bg-surface-sunken px-2 py-0.5 text-[0.65rem] font-bold uppercase text-text-secondary">{q.subject.name}</span>
                                         )}
                                         <span className={`rounded-full px-2 py-0.5 text-[0.65rem] font-bold uppercase ${q.is_active ? 'bg-success-bg text-success' : 'bg-surface-sunken text-text-muted'}`}>
                                             {q.is_active ? 'Active' : 'Inactive'}

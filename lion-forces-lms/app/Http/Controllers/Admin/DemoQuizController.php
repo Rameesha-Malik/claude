@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\CourseCategory;
 use App\Models\DemoQuiz;
 use App\Models\QuestionBank;
 use App\Models\Setting;
@@ -21,7 +22,7 @@ class DemoQuizController extends Controller
     public function index(): Response
     {
         return Inertia::render('Admin/DemoQuiz/Index', [
-            'quizzes' => DemoQuiz::with('subject:id,name')->withCount(['questions', 'attempts'])->latest()->get(),
+            'quizzes' => DemoQuiz::with(['subject:id,name', 'category:id,name'])->withCount(['questions', 'attempts'])->latest()->get(),
         ]);
     }
 
@@ -42,6 +43,7 @@ class DemoQuizController extends Controller
         return Inertia::render('Admin/DemoQuiz/Form', [
             'demoQuiz' => $demoQuiz,
             'subjects' => Subject::orderBy('name')->get(['id', 'name']),
+            'categories' => CourseCategory::orderBy('order')->orderBy('name')->get(['id', 'name']),
             'questionBank' => QuestionBank::select('id', 'subject_id', 'question_text', 'difficulty')
                 ->orderByDesc('id')
                 ->limit(300)
@@ -85,6 +87,7 @@ class DemoQuizController extends Controller
         return $request->validate([
             'title' => 'required|string|max:255',
             'subject_id' => 'nullable|exists:subjects,id',
+            'category_id' => 'nullable|exists:course_categories,id',
             'duration_minutes' => 'required|integer|min:1',
             'shuffle_questions' => 'boolean',
             'is_active' => 'boolean',

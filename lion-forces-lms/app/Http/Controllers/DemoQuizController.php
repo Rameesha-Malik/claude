@@ -22,10 +22,11 @@ class DemoQuizController extends Controller
 {
     public function show(): Response
     {
-        // Multiple active demo quizzes -- e.g. one per subject -- show as
-        // category cards to pick from; exactly one active quiz keeps the
-        // original direct "here's the quiz, start it" layout unchanged.
-        $activeQuizzes = DemoQuiz::where('is_active', true)->with('subject:id,name')->withCount('questions')->latest()->get();
+        // Multiple active demo quizzes -- e.g. one per exam category
+        // (LCC, PMA, Navy, ...) -- show grouped under that category;
+        // exactly one active quiz keeps the original direct "here's the
+        // quiz, start it" layout unchanged.
+        $activeQuizzes = DemoQuiz::where('is_active', true)->with(['subject:id,name', 'category:id,name'])->withCount('questions')->latest()->get();
 
         return Inertia::render('Public/DemoQuiz/Intro', [
             'quiz' => $activeQuizzes->count() === 1 ? $activeQuizzes->first() : null,

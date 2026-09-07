@@ -1,4 +1,4 @@
-import { Head, router } from '@inertiajs/react';
+import { Head, Link, router } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 
 interface StudentOpt { id: number; name: string; email: string }
@@ -102,17 +102,28 @@ export default function PerformanceIndex({ students, selectedStudentId, data }: 
                 <p className="mt-1 text-sm text-text-secondary">View algorithm-based performance, charts, and suggestions for any student.</p>
             </div>
 
-            <div className="mb-6 rounded-3xl border border-border bg-surface p-5">
-                <label className="mb-2 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-text-muted">
-                    🎓 Select student
-                </label>
-                <select
-                    value={selectedStudentId ?? ''}
-                    onChange={(e) => changeStudent(e.target.value)}
-                    className="w-full max-w-md rounded-lg border border-border px-3 py-2.5 text-sm"
-                >
-                    {students.map((s) => <option key={s.id} value={s.id}>{s.name} ({s.email})</option>)}
-                </select>
+            <div className="mb-6 flex flex-wrap items-end justify-between gap-4 rounded-3xl border border-border bg-surface p-5">
+                <div className="min-w-[220px] flex-1">
+                    <label className="mb-2 flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-text-muted">
+                        🎓 Select student
+                    </label>
+                    <select
+                        value={selectedStudentId ?? ''}
+                        onChange={(e) => changeStudent(e.target.value)}
+                        className="w-full max-w-md rounded-lg border border-border px-3 py-2.5 text-sm"
+                    >
+                        {students.map((s) => <option key={s.id} value={s.id}>{s.name} ({s.email})</option>)}
+                    </select>
+                </div>
+                {data && (
+                    <Link
+                        href={`/admin/performance/${data.student.id}/report`}
+                        target="_blank"
+                        className="flex-shrink-0 rounded-lg border border-primary px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-primary hover:bg-primary-subtle"
+                    >
+                        🖨️ Print Report (PDF)
+                    </Link>
+                )}
             </div>
 
             {!data ? (

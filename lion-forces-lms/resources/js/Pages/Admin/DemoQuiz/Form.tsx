@@ -3,23 +3,25 @@ import { useState } from 'react';
 import AdminLayout from '@/Layouts/AdminLayout';
 
 interface Subject { id: number; name: string }
+interface Category { id: number; name: string }
 interface QuestionRow { id: number; subject_id: number | null; question_text: string; difficulty: string }
 interface DemoQuiz {
-    id: number; title: string; subject_id: number | null; duration_minutes: number; shuffle_questions: boolean; is_active: boolean;
+    id: number; title: string; subject_id: number | null; category_id: number | null; duration_minutes: number; shuffle_questions: boolean; is_active: boolean;
     questions: QuestionRow[];
 }
-interface Props { demoQuiz?: DemoQuiz; subjects: Subject[]; questionBank: QuestionRow[] }
+interface Props { demoQuiz?: DemoQuiz; subjects: Subject[]; categories: Category[]; questionBank: QuestionRow[] }
 
 const inputClass = 'w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:shadow-glow focus:outline-none';
 const labelClass = 'mb-1 block text-sm font-medium text-text';
 
-export default function DemoQuizForm({ demoQuiz, subjects, questionBank }: Props) {
+export default function DemoQuizForm({ demoQuiz, subjects, categories, questionBank }: Props) {
     const isEdit = !!demoQuiz;
     const [subjectFilter, setSubjectFilter] = useState('');
 
     const form = useForm({
         title: demoQuiz?.title ?? 'Free Demo Quiz',
         subject_id: demoQuiz?.subject_id ?? ('' as number | ''),
+        category_id: demoQuiz?.category_id ?? ('' as number | ''),
         duration_minutes: demoQuiz?.duration_minutes ?? 15,
         shuffle_questions: demoQuiz?.shuffle_questions ?? true,
         is_active: demoQuiz?.is_active ?? true,
@@ -52,13 +54,27 @@ export default function DemoQuizForm({ demoQuiz, subjects, questionBank }: Props
                         <input className={inputClass} value={form.data.title} onChange={(e) => form.setData('title', e.target.value)} />
                     </div>
                     <div>
-                        <label className={labelClass}>Category</label>
+                        <label className={labelClass}>Category (exam track)</label>
+                        {/* This is what groups quizzes into sections on the
+                            public Demo Quiz page (e.g. "LCC", "PMA", "Navy") --
+                            same categories Courses use. */}
+                        <select
+                            className={inputClass}
+                            value={form.data.category_id}
+                            onChange={(e) => form.setData('category_id', e.target.value ? Number(e.target.value) : '')}
+                        >
+                            <option value="">No category (shown ungrouped)</option>
+                            {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
+                        </select>
+                    </div>
+                    <div>
+                        <label className={labelClass}>Subject</label>
                         <select
                             className={inputClass}
                             value={form.data.subject_id}
                             onChange={(e) => form.setData('subject_id', e.target.value ? Number(e.target.value) : '')}
                         >
-                            <option value="">No category (not grouped on the public page)</option>
+                            <option value="">No subject</option>
                             {subjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
                         </select>
                     </div>

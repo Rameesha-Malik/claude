@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['title', 'subject_id', 'duration_minutes', 'shuffle_questions', 'is_active'])]
+#[Fillable(['title', 'subject_id', 'category_id', 'duration_minutes', 'shuffle_questions', 'is_active'])]
 class DemoQuiz extends Model
 {
     use HasFactory;
@@ -19,11 +19,20 @@ class DemoQuiz extends Model
         return ['shuffle_questions' => 'boolean', 'is_active' => 'boolean'];
     }
 
-    // The "category" a demo quiz is grouped under on the public page --
-    // reuses Subject rather than a parallel category concept.
+    // Which subject the questions are drawn from (English, Math, ...) --
+    // separate from category() below, which is what the public page
+    // actually groups quizzes under.
     public function subject(): BelongsTo
     {
         return $this->belongsTo(Subject::class);
+    }
+
+    // The exam-track category (LCC, PMA, Navy, Air Force, ...) a demo quiz
+    // is grouped under on the public Demo Quiz page -- same
+    // CourseCategory every Course is already grouped under.
+    public function category(): BelongsTo
+    {
+        return $this->belongsTo(CourseCategory::class, 'category_id');
     }
 
     public function questions(): BelongsToMany
