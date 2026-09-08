@@ -437,7 +437,7 @@ function ServicesPanel({ items }: { items: ServiceCard[] }) {
                         <InlineEditFields
                             initial={{ title: item.title, description: item.description ?? '', icon: item.icon ?? '' }}
                             onSave={(data) => router.put(`/admin/website/services/${item.id}`, data)}
-                            fields={[{ key: 'title', placeholder: 'Title' }, { key: 'description', placeholder: 'Description' }]}
+                            fields={[{ key: 'title', placeholder: 'Title' }, { key: 'description', placeholder: 'Description', richText: true }]}
                         />
                     </EditableRow>
                 ))}
@@ -448,7 +448,9 @@ function ServicesPanel({ items }: { items: ServiceCard[] }) {
                 className="flex flex-wrap gap-2"
             >
                 <input className={inputClass} placeholder="Title" value={addForm.data.title} onChange={(e) => addForm.setData('title', e.target.value)} />
-                <input className={inputClass} placeholder="Description" value={addForm.data.description} onChange={(e) => addForm.setData('description', e.target.value)} />
+                <div className="w-full">
+                    <RichTextArea rows={2} className={inputClass} placeholder="Description" value={addForm.data.description} onChange={(v) => addForm.setData('description', v)} />
+                </div>
                 <button type="submit" disabled={addForm.processing} className={btnClass}>Add</button>
                 <FormErrors errors={addForm.errors} />
             </form>
@@ -475,7 +477,7 @@ function FaqsPanel({ items }: { items: Faq[] }) {
                                 <InlineEditFields
                                     initial={{ page: faq.page, question: faq.question, answer: faq.answer }}
                                     onSave={(data) => router.put(`/admin/website/faqs/${faq.id}`, data)}
-                                    fields={[{ key: 'question', placeholder: 'Question' }, { key: 'answer', placeholder: 'Answer' }]}
+                                    fields={[{ key: 'question', placeholder: 'Question' }, { key: 'answer', placeholder: 'Answer', richText: true }]}
                                 />
                             </EditableRow>
                         ))}
@@ -491,7 +493,9 @@ function FaqsPanel({ items }: { items: Faq[] }) {
                     {['home', 'contact', 'how_to_buy'].map((p) => <option key={p} value={p}>{p}</option>)}
                 </select>
                 <input className={inputClass} placeholder="Question" value={addForm.data.question} onChange={(e) => addForm.setData('question', e.target.value)} />
-                <input className={inputClass} placeholder="Answer" value={addForm.data.answer} onChange={(e) => addForm.setData('answer', e.target.value)} />
+                <div className="w-full">
+                    <RichTextArea rows={2} className={inputClass} placeholder="Answer" value={addForm.data.answer} onChange={(v) => addForm.setData('answer', v)} />
+                </div>
                 <button type="submit" disabled={addForm.processing} className={btnClass}>Add</button>
                 <FormErrors errors={addForm.errors} />
             </form>
@@ -512,7 +516,7 @@ function TestimonialsPanel({ items }: { items: Testimonial[] }) {
                         <InlineEditFields
                             initial={{ student_name: item.student_name, testimonial_text: item.testimonial_text }}
                             onSave={(data) => router.put(`/admin/website/testimonials/${item.id}`, data)}
-                            fields={[{ key: 'student_name', placeholder: 'Student Name' }, { key: 'testimonial_text', placeholder: 'Testimonial' }]}
+                            fields={[{ key: 'student_name', placeholder: 'Student Name' }, { key: 'testimonial_text', placeholder: 'Testimonial', richText: true }]}
                         />
                     </EditableRow>
                 ))}
@@ -523,7 +527,9 @@ function TestimonialsPanel({ items }: { items: Testimonial[] }) {
                 className="flex flex-wrap gap-2"
             >
                 <input className={inputClass} placeholder="Student Name" value={addForm.data.student_name} onChange={(e) => addForm.setData('student_name', e.target.value)} />
-                <input className={inputClass} placeholder="Testimonial" value={addForm.data.testimonial_text} onChange={(e) => addForm.setData('testimonial_text', e.target.value)} />
+                <div className="w-full">
+                    <RichTextArea rows={2} className={inputClass} placeholder="Testimonial" value={addForm.data.testimonial_text} onChange={(v) => addForm.setData('testimonial_text', v)} />
+                </div>
                 <button type="submit" disabled={addForm.processing} className={btnClass}>Add</button>
                 <FormErrors errors={addForm.errors} />
             </form>
@@ -540,22 +546,47 @@ function EditableRow({ children, onDelete }: { children: React.ReactNode; onDele
     );
 }
 
-function InlineEditFields({ initial, fields, onSave }: { initial: Record<string, string>; fields: { key: string; placeholder: string }[]; onSave: (data: Record<string, string>) => void }) {
+// `richText` fields (FAQ answers, testimonial text -- real prose shown on
+// the live site) get the same RichTextArea toolbar every other content
+// field in the app has; they're wrapped `w-full` so the toolbar+textarea
+// block drops to its own line instead of squeezing into this row's
+// otherwise-compact fixed-width inputs.
+function InlineEditFields({
+    initial,
+    fields,
+    onSave,
+}: {
+    initial: Record<string, string>;
+    fields: { key: string; placeholder: string; richText?: boolean }[];
+    onSave: (data: Record<string, string>) => void;
+}) {
     const [data, setData] = useState(initial);
     const [dirty, setDirty] = useState(false);
 
     return (
         <div className="flex flex-wrap items-center gap-2">
-            {fields.map((f) => (
-                <input
-                    key={f.key}
-                    className={inputClass}
-                    style={{ maxWidth: 220 }}
-                    placeholder={f.placeholder}
-                    value={data[f.key] ?? ''}
-                    onChange={(e) => { setData({ ...data, [f.key]: e.target.value }); setDirty(true); }}
-                />
-            ))}
+            {fields.map((f) =>
+                f.richText ? (
+                    <div key={f.key} className="w-full">
+                        <RichTextArea
+                            rows={2}
+                            className={inputClass}
+                            placeholder={f.placeholder}
+                            value={data[f.key] ?? ''}
+                            onChange={(v) => { setData({ ...data, [f.key]: v }); setDirty(true); }}
+                        />
+                    </div>
+                ) : (
+                    <input
+                        key={f.key}
+                        className={inputClass}
+                        style={{ maxWidth: 220 }}
+                        placeholder={f.placeholder}
+                        value={data[f.key] ?? ''}
+                        onChange={(e) => { setData({ ...data, [f.key]: e.target.value }); setDirty(true); }}
+                    />
+                ),
+            )}
             {dirty && (
                 <button onClick={() => { onSave(data); setDirty(false); }} className="text-xs font-bold uppercase text-primary hover:underline">
                     Save

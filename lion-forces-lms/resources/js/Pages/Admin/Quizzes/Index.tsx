@@ -1,7 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 
-interface QuizRow { id: number; title: string; is_active: boolean; question_selection_mode: string; questions_count: number }
+interface QuizRow { id: number; title: string; is_active: boolean; question_selection_mode: string; questions_count: number; section: { id: number; title: string } | null }
 
 export default function QuizzesIndex({ course, quizzes }: { course: { id: number; title: string }; quizzes: QuizRow[] }) {
     return (
@@ -18,7 +18,12 @@ export default function QuizzesIndex({ course, quizzes }: { course: { id: number
                 {quizzes.map((q) => (
                     <div key={q.id} className="flex items-center justify-between rounded-2xl border border-border bg-surface p-5">
                         <div>
-                            <h3 className="font-semibold text-text">{q.title}</h3>
+                            <div className="flex flex-wrap items-center gap-2">
+                                <h3 className="font-semibold text-text">{q.title}</h3>
+                                <span className="rounded-full bg-primary-subtle px-2 py-0.5 text-[0.65rem] font-bold uppercase tracking-wide text-primary">
+                                    {q.section?.title ?? 'No topic'}
+                                </span>
+                            </div>
                             <p className="text-sm text-text-secondary">
                                 {q.question_selection_mode === 'manual' ? `${q.questions_count} questions (manual)` : 'Auto-selected questions'}
                             </p>

@@ -17,7 +17,7 @@ class QuizController extends Controller
     {
         return Inertia::render('Admin/Quizzes/Index', [
             'course' => $course->only('id', 'title'),
-            'quizzes' => $course->quizzes()->withCount('questions')->get(),
+            'quizzes' => $course->quizzes()->with('section:id,title')->withCount('questions')->get(),
         ]);
     }
 
