@@ -6,7 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['title', 'description', 'organization', 'category_id', 'deadline_date', 'application_link', 'is_pinned', 'is_active'])]
+#[Fillable(['title', 'description', 'organization', 'image_path', 'category_id', 'deadline_date', 'application_link', 'is_pinned', 'is_active'])]
 class NewsAnnouncement extends Model
 {
     protected function casts(): array

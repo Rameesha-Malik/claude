@@ -2,7 +2,7 @@ import { Head, router } from '@inertiajs/react';
 import PublicLayout from '@/Layouts/PublicLayout';
 
 interface NewsItem {
-    id: number; title: string; description: string | null; organization: string | null;
+    id: number; title: string; description: string | null; organization: string | null; image_path: string | null;
     deadline_date: string | null; application_link: string | null;
     category: { name: string } | null;
 }
@@ -31,26 +31,31 @@ export default function News({ announcements }: Props) {
                     {announcements.data.map((item) => {
                         const days = daysRemaining(item.deadline_date);
                         return (
-                            <div key={item.id} className="rounded-2xl border border-border bg-surface p-6 shadow-sm">
-                                <div className="mb-3 flex flex-wrap items-center gap-2">
-                                    {item.organization && (
-                                        <span className="rounded-full bg-primary-subtle px-3 py-1 text-xs font-semibold text-primary">
-                                            {item.organization}
-                                        </span>
-                                    )}
-                                    {days !== null && (
-                                        <span className="rounded-full bg-warning-bg px-3 py-1 text-xs font-semibold text-warning">
-                                            {days} days remaining
-                                        </span>
+                            <div key={item.id} className="overflow-hidden rounded-2xl border border-border bg-surface shadow-sm">
+                                {item.image_path && (
+                                    <img src={`/storage/${item.image_path}`} alt="" className="h-40 w-full object-cover" />
+                                )}
+                                <div className="p-6">
+                                    <div className="mb-3 flex flex-wrap items-center gap-2">
+                                        {item.organization && (
+                                            <span className="rounded-full bg-primary-subtle px-3 py-1 text-xs font-semibold text-primary">
+                                                {item.organization}
+                                            </span>
+                                        )}
+                                        {days !== null && (
+                                            <span className="rounded-full bg-warning-bg px-3 py-1 text-xs font-semibold text-warning">
+                                                {days} days remaining
+                                            </span>
+                                        )}
+                                    </div>
+                                    <h3 className="font-semibold text-text">{item.title}</h3>
+                                    <p className="mt-1 text-sm text-text-secondary">{item.description}</p>
+                                    {item.application_link && (
+                                        <a href={item.application_link} className="mt-3 inline-block text-sm font-semibold text-primary hover:underline">
+                                            Apply now &rarr;
+                                        </a>
                                     )}
                                 </div>
-                                <h3 className="font-semibold text-text">{item.title}</h3>
-                                <p className="mt-1 text-sm text-text-secondary">{item.description}</p>
-                                {item.application_link && (
-                                    <a href={item.application_link} className="mt-3 inline-block text-sm font-semibold text-primary hover:underline">
-                                        Apply now &rarr;
-                                    </a>
-                                )}
                             </div>
                         );
                     })}
