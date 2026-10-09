@@ -54,6 +54,7 @@ export default function DemoQuizTake({ quiz, attemptId, questions }: Props) {
                     submitting={submitting}
                     submitLabel="Submit Quiz"
                     emptyMessage="This demo quiz has no questions yet."
+                    compact
                     timerNode={
                         <div className={`rounded-lg px-4 py-1.5 text-sm font-bold ${secondsLeft <= 60 ? 'bg-danger-bg text-danger' : 'bg-primary-subtle text-primary'}`}>
                             Time left: {formatTime(secondsLeft)}

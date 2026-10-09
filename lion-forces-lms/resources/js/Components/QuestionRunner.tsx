@@ -25,6 +25,16 @@ interface Props {
     emptyMessage?: string;
     /** Changing this (e.g. a stage/section id) resets which question is showing back to the first one. */
     resetKey?: string | number;
+    /**
+     * Client: the demo quiz should fit "in one screen without scroll" and
+     * still show favourites + the wrong-answer explanation -- the full
+     * exam-style layout (question navigator grid, skipped-question list,
+     * 6-tile stat sidebar) is the right call for a real timed/graded
+     * attempt but is exactly what makes a quick teaser quiz scroll. Demo
+     * quiz is the only caller that sets this; every real attempt type
+     * keeps the full layout unchanged.
+     */
+    compact?: boolean;
 }
 
 function BackIcon() {
@@ -147,6 +157,7 @@ export default function QuestionRunner({
     allowBack = true,
     emptyMessage = 'No questions are available yet.',
     resetKey,
+    compact = false,
 }: Props) {
     const { auth } = usePage<PageProps>().props;
     const isAuthenticated = !!auth?.user;
@@ -176,7 +187,15 @@ export default function QuestionRunner({
             .finally(() => setNoteSaving(false));
     }
 
+    // Favouriting only means something per-user (QuestionCheckController
+    // rejects an anonymous request with 401) -- shown to everyone,
+    // including a demo guest, but a guest clicking it is sent to sign up
+    // rather than silently failing.
     function toggleFavourite(questionId: number) {
+        if (!isAuthenticated) {
+            window.location.href = '/register';
+            return;
+        }
         if (favouriteBusy) return;
         setFavouriteBusy(true);
         axios
@@ -298,85 +317,95 @@ export default function QuestionRunner({
         <div>
             <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-surface p-4 shadow-sm">
                 <div className="text-sm text-text-secondary">{headerExtra}</div>
-                <div className="flex items-center gap-3">
+                <div className="flex flex-1 items-center gap-3">
                     {timerNode}
                     <span className="text-sm font-semibold text-text-secondary">
                         Question <span className="font-bold text-text">{currentIndex + 1}</span> of {total}
                     </span>
-                </div>
-            </div>
-
-            <div className="grid gap-6 lg:grid-cols-3">
-                <div className="space-y-6 lg:col-span-2">
-                    <div className="rounded-2xl border border-border bg-surface p-5">
-                        <div className="flex flex-wrap items-center gap-2">
-                            <span className="rounded-full bg-primary-subtle px-3 py-1 text-xs font-bold text-primary">
-                                Q {currentIndex + 1}/{total}
-                            </span>
-                            <span className="rounded-full bg-surface-sunken px-3 py-1 text-xs font-bold text-text-muted">ID: {current.id}</span>
-                        </div>
-
-                        <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-surface-sunken">
+                    {compact && (
+                        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-surface-sunken">
                             <div
                                 className="h-full rounded-full bg-gradient-to-r from-secondary to-primary transition-all duration-normal"
                                 style={{ width: `${progressPercent}%` }}
                             />
                         </div>
+                    )}
+                </div>
+            </div>
 
-                        <div className="mt-5 flex items-center justify-between">
-                            <p className="text-xs font-bold uppercase tracking-wide text-text-muted">Question Navigator</p>
-                            <span className="text-xs text-text-muted">{total} Total</span>
-                        </div>
-
-                        <div className="mt-2 flex flex-wrap gap-1.5">
-                            {questions.map((q, i) => {
-                                const isCurrent = i === currentIndex;
-                                const isAnswered = answers[q.id] !== null && answers[q.id] !== undefined;
-                                const isSkipped = !isAnswered && visited.has(i) && !isCurrent;
-                                let classes = 'border-border bg-surface text-text-muted hover:border-primary';
-                                if (isCurrent) classes = 'border-primary bg-primary text-on-primary shadow-sm';
-                                else if (isAnswered) classes = 'border-success bg-success-bg text-success';
-                                else if (isSkipped) classes = 'border-warning bg-warning-bg text-warning';
-                                return (
-                                    <button
-                                        key={q.id}
-                                        type="button"
-                                        onClick={() => goTo(i)}
-                                        aria-current={isCurrent}
-                                        aria-label={`Go to question ${i + 1}`}
-                                        className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg border text-xs font-bold transition-colors ${classes}`}
-                                    >
-                                        {i + 1}
-                                    </button>
-                                );
-                            })}
-                        </div>
-
-                        <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 border-t border-border pt-3 text-xs text-text-muted">
-                            {LEGEND.map((l) => (
-                                <span key={l.label} className="inline-flex items-center gap-1.5">
-                                    <span className={`h-2.5 w-2.5 rounded-full ${l.className}`} />
-                                    {l.label}
+            <div className={compact ? 'space-y-6' : 'grid gap-6 lg:grid-cols-3'}>
+                <div className={compact ? 'space-y-6' : 'space-y-6 lg:col-span-2'}>
+                    {!compact && (
+                        <div className="rounded-2xl border border-border bg-surface p-5">
+                            <div className="flex flex-wrap items-center gap-2">
+                                <span className="rounded-full bg-primary-subtle px-3 py-1 text-xs font-bold text-primary">
+                                    Q {currentIndex + 1}/{total}
                                 </span>
-                            ))}
-                        </div>
+                                <span className="rounded-full bg-surface-sunken px-3 py-1 text-xs font-bold text-text-muted">ID: {current.id}</span>
+                            </div>
 
-                        {skippedIndexes.length > 0 && (
-                            <div className="mt-3 flex flex-wrap items-center gap-1.5 text-sm">
-                                <span className="text-text-secondary">Skipped:</span>
-                                {skippedIndexes.map((i) => (
-                                    <button
-                                        key={i}
-                                        type="button"
-                                        onClick={() => goTo(i)}
-                                        className="rounded-full border border-warning bg-warning-bg px-2.5 py-0.5 text-xs font-bold text-warning transition-transform hover:-translate-y-0.5"
-                                    >
-                                        Q{i + 1}
-                                    </button>
+                            <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-surface-sunken">
+                                <div
+                                    className="h-full rounded-full bg-gradient-to-r from-secondary to-primary transition-all duration-normal"
+                                    style={{ width: `${progressPercent}%` }}
+                                />
+                            </div>
+
+                            <div className="mt-5 flex items-center justify-between">
+                                <p className="text-xs font-bold uppercase tracking-wide text-text-muted">Question Navigator</p>
+                                <span className="text-xs text-text-muted">{total} Total</span>
+                            </div>
+
+                            <div className="mt-2 flex flex-wrap gap-1.5">
+                                {questions.map((q, i) => {
+                                    const isCurrent = i === currentIndex;
+                                    const isAnswered = answers[q.id] !== null && answers[q.id] !== undefined;
+                                    const isSkipped = !isAnswered && visited.has(i) && !isCurrent;
+                                    let classes = 'border-border bg-surface text-text-muted hover:border-primary';
+                                    if (isCurrent) classes = 'border-primary bg-primary text-on-primary shadow-sm';
+                                    else if (isAnswered) classes = 'border-success bg-success-bg text-success';
+                                    else if (isSkipped) classes = 'border-warning bg-warning-bg text-warning';
+                                    return (
+                                        <button
+                                            key={q.id}
+                                            type="button"
+                                            onClick={() => goTo(i)}
+                                            aria-current={isCurrent}
+                                            aria-label={`Go to question ${i + 1}`}
+                                            className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg border text-xs font-bold transition-colors ${classes}`}
+                                        >
+                                            {i + 1}
+                                        </button>
+                                    );
+                                })}
+                            </div>
+
+                            <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 border-t border-border pt-3 text-xs text-text-muted">
+                                {LEGEND.map((l) => (
+                                    <span key={l.label} className="inline-flex items-center gap-1.5">
+                                        <span className={`h-2.5 w-2.5 rounded-full ${l.className}`} />
+                                        {l.label}
+                                    </span>
                                 ))}
                             </div>
-                        )}
-                    </div>
+
+                            {skippedIndexes.length > 0 && (
+                                <div className="mt-3 flex flex-wrap items-center gap-1.5 text-sm">
+                                    <span className="text-text-secondary">Skipped:</span>
+                                    {skippedIndexes.map((i) => (
+                                        <button
+                                            key={i}
+                                            type="button"
+                                            onClick={() => goTo(i)}
+                                            className="rounded-full border border-warning bg-warning-bg px-2.5 py-0.5 text-xs font-bold text-warning transition-transform hover:-translate-y-0.5"
+                                        >
+                                            Q{i + 1}
+                                        </button>
+                                    ))}
+                                </div>
+                            )}
+                        </div>
+                    )}
 
                     <div className="rounded-2xl border border-border bg-surface p-5">
                         <div className="mb-3 flex items-start justify-between gap-3">
@@ -385,16 +414,15 @@ export default function QuestionRunner({
                                 <LiteMarkdownInline text={current.question_text} />
                             </p>
                             <div className="flex flex-shrink-0 items-center gap-3 text-xs">
-                                {isAuthenticated && (
-                                    <button
-                                        type="button"
-                                        onClick={() => toggleFavourite(current.id)}
-                                        disabled={favouriteBusy}
-                                        className={`inline-flex items-center gap-1 font-bold uppercase tracking-wide ${favouritedIds.has(current.id) ? 'text-warning' : 'text-text-muted hover:text-warning'}`}
-                                    >
-                                        <StarIcon filled={favouritedIds.has(current.id)} /> Favourite
-                                    </button>
-                                )}
+                                <button
+                                    type="button"
+                                    onClick={() => toggleFavourite(current.id)}
+                                    disabled={favouriteBusy}
+                                    title={isAuthenticated ? undefined : 'Sign up to save favourites'}
+                                    className={`inline-flex items-center gap-1 font-bold uppercase tracking-wide ${favouritedIds.has(current.id) ? 'text-warning' : 'text-text-muted hover:text-warning'}`}
+                                >
+                                    <StarIcon filled={favouritedIds.has(current.id)} /> Favourite
+                                </button>
                                 {reportedIds.has(current.id) ? (
                                     <span className="font-bold uppercase tracking-wide text-success">Reported</span>
                                 ) : (
@@ -568,15 +596,17 @@ export default function QuestionRunner({
                     )}
                 </div>
 
-                <div className="grid grid-cols-2 gap-3 lg:grid-cols-1">
-                    {statTiles.map((t) => (
-                        <div key={t.label} className={`rounded-2xl border p-4 ${t.tone}`}>
-                            {t.icon}
-                            <p className="mt-2 text-xl font-bold">{t.value}</p>
-                            <p className="text-xs font-bold uppercase tracking-wide opacity-80">{t.label}</p>
-                        </div>
-                    ))}
-                </div>
+                {!compact && (
+                    <div className="grid grid-cols-2 gap-3 lg:grid-cols-1">
+                        {statTiles.map((t) => (
+                            <div key={t.label} className={`rounded-2xl border p-4 ${t.tone}`}>
+                                {t.icon}
+                                <p className="mt-2 text-xl font-bold">{t.value}</p>
+                                <p className="text-xs font-bold uppercase tracking-wide opacity-80">{t.label}</p>
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
         </div>
     );
