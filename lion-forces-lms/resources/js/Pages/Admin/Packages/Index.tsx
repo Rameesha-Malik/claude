@@ -30,7 +30,13 @@ function AddPackageModal({ courses, onClose }: { courses: CourseOption[]; onClos
                     </select>
                     <input placeholder="Package Name" value={form.data.name} onChange={(e) => form.setData('name', e.target.value)} className="w-full rounded-lg border border-border px-3 py-2 text-sm" />
                     {form.errors.name && <p className="text-xs text-danger">{form.errors.name}</p>}
-                    <input placeholder="Description (optional)" value={form.data.description} onChange={(e) => form.setData('description', e.target.value)} className="w-full rounded-lg border border-border px-3 py-2 text-sm" />
+                    <textarea
+                        placeholder={'One feature per line (optional), e.g.\nComplete Notes\nVerbal Intelligence Live Lectures'}
+                        rows={4}
+                        value={form.data.description}
+                        onChange={(e) => form.setData('description', e.target.value)}
+                        className="w-full rounded-lg border border-border px-3 py-2 text-sm"
+                    />
                     <div className="flex gap-2">
                         <input type="number" placeholder="Price" value={form.data.price} onChange={(e) => form.setData('price', e.target.value)} className="w-full rounded-lg border border-border px-3 py-2 text-sm" />
                         <input type="number" placeholder="Validity (days)" value={form.data.validity_days} onChange={(e) => form.setData('validity_days', e.target.value)} className="w-full rounded-lg border border-border px-3 py-2 text-sm" />
@@ -44,22 +50,90 @@ function AddPackageModal({ courses, onClose }: { courses: CourseOption[]; onClos
     );
 }
 
-export default function PackagesIndex({ packages, courses }: Props) {
-    const [modalOpen, setModalOpen] = useState(false);
+// The only UI trigger for packages.update was missing (same gap as the
+// Flashcards list had) -- an admin could add/delete but never fix a
+// placeholder price or feature list, or flip a package active/inactive,
+// without opening its owning course. Description is a textarea now, not
+// a single-line input: it's rendered as a checkmarked feature list
+// wherever packages are shown publicly (one feature per line), so a
+// single-line input made that impossible to enter properly.
+function PackageRow({ pkg }: { pkg: PackageRow }) {
+    const [editing, setEditing] = useState(false);
+    const form = useForm({
+        name: pkg.name, description: pkg.description ?? '', price: pkg.price, validity_days: pkg.validity_days ?? '', is_active: pkg.is_active,
+    });
 
-    function destroy(pkg: PackageRow) {
+    function submit(e: FormEvent) {
+        e.preventDefault();
+        form.put(`/admin/courses/packages/${pkg.id}`, { preserveScroll: true, onSuccess: () => setEditing(false) });
+    }
+
+    function destroy() {
         if (confirm(`Delete "${pkg.name}"?`)) {
             router.delete(`/admin/courses/packages/${pkg.id}`, { preserveScroll: true });
         }
     }
+
+    if (editing) {
+        return (
+            <tr>
+                <td colSpan={6} className="px-5 py-4">
+                    <form onSubmit={submit} className="grid gap-3 sm:grid-cols-2">
+                        <input value={form.data.name} onChange={(e) => form.setData('name', e.target.value)} placeholder="Package Name" className="rounded-lg border border-border px-3 py-2 text-sm sm:col-span-2" />
+                        <textarea
+                            value={form.data.description}
+                            onChange={(e) => form.setData('description', e.target.value)}
+                            placeholder={'One feature per line, e.g.\nComplete Notes\nVerbal Intelligence Live Lectures'}
+                            rows={4}
+                            className="rounded-lg border border-border px-3 py-2 text-sm sm:col-span-2"
+                        />
+                        <input type="number" value={form.data.price} onChange={(e) => form.setData('price', e.target.value)} placeholder="Price" className="rounded-lg border border-border px-3 py-2 text-sm" />
+                        <input type="number" value={form.data.validity_days} onChange={(e) => form.setData('validity_days', e.target.value)} placeholder="Validity (days)" className="rounded-lg border border-border px-3 py-2 text-sm" />
+                        <label className="flex items-center gap-2 text-sm text-text-secondary sm:col-span-2">
+                            <input type="checkbox" checked={form.data.is_active} onChange={(e) => form.setData('is_active', e.target.checked)} />
+                            Active (shown publicly)
+                        </label>
+                        <div className="flex gap-2 sm:col-span-2">
+                            <button type="submit" disabled={form.processing} className="rounded-lg bg-primary px-4 py-2 text-xs font-bold uppercase text-on-primary hover:bg-primary-hover">Save</button>
+                            <button type="button" onClick={() => setEditing(false)} className="rounded-lg border border-border px-4 py-2 text-xs font-bold uppercase text-text-secondary hover:border-primary">Cancel</button>
+                        </div>
+                    </form>
+                </td>
+            </tr>
+        );
+    }
+
+    return (
+        <tr>
+            <td className="px-5 py-3">
+                <div className="font-medium text-text">{pkg.name}</div>
+                {pkg.description && <div className="whitespace-pre-line text-xs text-text-muted">{pkg.description}</div>}
+            </td>
+            <td className="px-5 py-3 text-text-secondary">{pkg.course?.title ?? '—'}</td>
+            <td className="px-5 py-3 font-semibold text-text">Rs. {Number(pkg.price).toLocaleString()}</td>
+            <td className="px-5 py-3 text-text-secondary">{pkg.validity_days ? `${pkg.validity_days} days` : 'Lifetime'}</td>
+            <td className="px-5 py-3">
+                <span className={`rounded-full px-2 py-0.5 text-xs font-bold uppercase ${pkg.is_active ? 'bg-success-bg text-success' : 'bg-surface-sunken text-text-muted'}`}>
+                    {pkg.is_active ? 'Active' : 'Inactive'}
+                </span>
+            </td>
+            <td className="px-5 py-3 text-right">
+                <button onClick={() => setEditing(true)} className="mr-3 text-xs font-bold uppercase text-primary hover:underline">Edit</button>
+                <button onClick={destroy} className="text-xs font-bold uppercase text-danger hover:underline">Delete</button>
+            </td>
+        </tr>
+    );
+}
+
+export default function PackagesIndex({ packages, courses }: Props) {
+    const [modalOpen, setModalOpen] = useState(false);
 
     return (
         <AdminLayout header="Packages">
             <Head title="Packages" />
 
             <p className="mb-4 text-sm text-text-secondary">
-                Every pricing package across all courses. To edit a package's price/validity in detail, open the owning
-                course.
+                Every pricing package across all courses. Only packages marked Active show on the public pricing pages.
             </p>
 
             <div className="mb-4">
@@ -81,25 +155,7 @@ export default function PackagesIndex({ packages, courses }: Props) {
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-border">
-                        {packages.map((p) => (
-                            <tr key={p.id}>
-                                <td className="px-5 py-3">
-                                    <div className="font-medium text-text">{p.name}</div>
-                                    {p.description && <div className="text-xs text-text-muted">{p.description}</div>}
-                                </td>
-                                <td className="px-5 py-3 text-text-secondary">{p.course?.title ?? '—'}</td>
-                                <td className="px-5 py-3 font-semibold text-text">Rs. {Number(p.price).toLocaleString()}</td>
-                                <td className="px-5 py-3 text-text-secondary">{p.validity_days ? `${p.validity_days} days` : 'Lifetime'}</td>
-                                <td className="px-5 py-3">
-                                    <span className={`rounded-full px-2 py-0.5 text-xs font-bold uppercase ${p.is_active ? 'bg-success-bg text-success' : 'bg-surface-sunken text-text-muted'}`}>
-                                        {p.is_active ? 'Active' : 'Inactive'}
-                                    </span>
-                                </td>
-                                <td className="px-5 py-3 text-right">
-                                    <button onClick={() => destroy(p)} className="text-xs font-bold uppercase text-danger hover:underline">Delete</button>
-                                </td>
-                            </tr>
-                        ))}
+                        {packages.map((p) => <PackageRow key={p.id} pkg={p} />)}
                     </tbody>
                 </table>
             </div>

@@ -257,4 +257,27 @@ class PublicSiteController extends Controller
 
         return Inertia::render('Public/Page', ['page' => $page->only('title', 'content')]);
     }
+
+    // Footer "Privacy Policy" / "Terms & Conditions" links point at these
+    // clean paths rather than /pages/{slug} -- same CMS Page records
+    // underneath, editable from Admin > Pages like any other.
+    public function privacyPolicy(): Response
+    {
+        return $this->page('privacy-policy');
+    }
+
+    public function terms(): Response
+    {
+        return $this->page('terms');
+    }
+
+    // Consolidated FAQ page (footer "FAQ" link) -- every FAQ entered
+    // anywhere in the admin (home/contact/how-to-buy/etc.) in one place,
+    // instead of only being visible on the specific page it was added to.
+    public function faq(): Response
+    {
+        return Inertia::render('Public/Faq', [
+            'faqs' => Faq::where('is_active', true)->whereNull('note_id')->orderBy('page')->orderBy('order')->get(['question', 'answer']),
+        ]);
+    }
 }

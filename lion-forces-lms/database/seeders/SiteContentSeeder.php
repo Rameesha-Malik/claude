@@ -8,6 +8,7 @@ use App\Models\HomeSection;
 use App\Models\NavItem;
 use App\Models\PaymentMethod;
 use App\Models\ServiceCard;
+use App\Models\Page;
 use App\Models\Setting;
 use App\Models\StatsItem;
 use App\Models\Testimonial;
@@ -199,18 +200,23 @@ class SiteContentSeeder extends Seeder
             'is_active' => true,
         ]);
         Faq::updateOrCreate(['question' => 'What is your refund policy?', 'page' => 'how_to_buy'], [
-            'answer' => 'Contact support within 3 days of purchase if you have not started the course.', // PLACEHOLDER, confirm wording
+            'answer' => 'All purchases are non-refundable. Please review a course\'s details and try the free demo quiz before buying.', // REAL — client instruction
             'order' => 1,
             'is_active' => true,
         ]);
         Faq::updateOrCreate(['question' => 'How long do I have access after payment?', 'page' => 'how_to_buy'], [
-            'answer' => 'Access duration depends on the package you choose — see validity on each package above.', // PLACEHOLDER
+            'answer' => 'Access duration depends on the package you choose — see validity on each package above.',
             'order' => 2,
             'is_active' => true,
         ]);
         Faq::updateOrCreate(['question' => 'What happens after I pay?', 'page' => 'how_to_buy'], [
-            'answer' => 'Our team verifies your payment and activates your access, usually within a day.', // PLACEHOLDER
+            'answer' => 'Our team verifies your payment and activates your access, usually within 1 hour.',
             'order' => 3,
+            'is_active' => true,
+        ]);
+        Faq::updateOrCreate(['question' => 'Can I download the course material?', 'page' => 'how_to_buy'], [
+            'answer' => 'No — everything (lectures, notes and practice questions) is available online inside your account only. There is no downloadable or printed (hard copy) material.', // REAL — client instruction
+            'order' => 4,
             'is_active' => true,
         ]);
 
@@ -222,6 +228,50 @@ class SiteContentSeeder extends Seeder
             'rating' => 5,
             'is_featured' => false,
             'order' => 1,
+        ]);
+
+        // --- Legal pages — footer "Privacy Policy" / "Terms & Conditions"
+        // links 404'd with nothing behind them. Baseline, editable content
+        // (Admin > Pages) built around the real policy facts the client
+        // gave (online-only access, no downloads, non-refundable) — not a
+        // substitute for the client's own legal review before launch. ---
+        Page::updateOrCreate(['slug' => 'privacy-policy'], [
+            'title' => 'Privacy Policy',
+            'is_published' => true,
+            'content' => <<<'MD'
+## What we collect
+When you register or buy a course on Lion Forces Academy, we collect the details you provide — name, contact number, email and the biodata fields on your profile (father's name, CNIC, education, address, etc., where you choose to fill them in) — along with your course progress, quiz attempts and payment confirmation details.
+
+## How we use it
+Your information is used only to run your account, track your course progress and results, verify payments, and contact you about your enrollment. We do not sell your information to third parties.
+
+## Payments
+Payments are verified manually against the bank/EasyPaisa/JazzCash details shown at checkout. We store a record of your payment confirmation for verification purposes only.
+
+## Your content
+Course videos, notes and questions remain the property of Lion Forces Academy / Code Saviours (SMC-Private) Limited and are licensed to you for personal study only, for the access period of your package.
+
+## Contact
+Questions about this policy can be sent through the Contact Us page.
+MD,
+        ]);
+
+        Page::updateOrCreate(['slug' => 'terms'], [
+            'title' => 'Terms & Conditions',
+            'is_published' => true,
+            'content' => <<<'MD'
+## Access
+A course purchase gives you **online access only**, for the validity period shown on the package you bought. There is nothing to download — all lectures, notes and practice questions are viewed inside your account, and no PDF or printed (hard copy) material is provided.
+
+## Payments
+All payments are **non-refundable**. Please check a course's details and try the free demo quiz before purchasing. Access is activated after your payment is verified, usually within 1 hour.
+
+## Account use
+Your login is for your personal use only. Sharing your account, or redistributing any video, note or question outside the platform, is not permitted and may result in your access being suspended.
+
+## Changes
+These terms may be updated from time to time; the current version always applies.
+MD,
         ]);
     }
 }

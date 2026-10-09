@@ -499,21 +499,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                                                     </div>
                                                 </>
                                             )}
-                                            {/* darken-on-hover so the badges below stay legible over any thumbnail */}
                                             <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 transition-opacity duration-normal group-hover:opacity-100" />
-
-                                            <div className="absolute left-3 top-3 flex flex-wrap gap-1.5">
-                                                {course.category && (
-                                                    <span className="rounded-full bg-surface/95 px-2.5 py-1 text-[0.65rem] font-bold uppercase tracking-wide text-secondary shadow-sm">
-                                                        {course.category.name}
-                                                    </span>
-                                                )}
-                                                {course.level && (
-                                                    <span className="rounded-full bg-primary-subtle px-2.5 py-1 text-[0.65rem] font-bold uppercase tracking-wide text-primary shadow-sm">
-                                                        {course.level}
-                                                    </span>
-                                                )}
-                                            </div>
                                         </div>
 
                                         <div className="flex flex-1 flex-col p-5">

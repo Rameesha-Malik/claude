@@ -74,6 +74,9 @@ Route::get('/notes/{note}', [PublicSiteController::class, 'noteDetail'])->name('
 Route::get('/bundles', [PublicSiteController::class, 'bundles'])->name('bundles');
 Route::get('/bundles/{bundle:slug}', [PublicSiteController::class, 'bundleDetail'])->name('bundles.show');
 Route::get('/pages/{slug}', [PublicSiteController::class, 'page'])->name('pages.show');
+Route::get('/privacy-policy', [PublicSiteController::class, 'privacyPolicy'])->name('privacy-policy');
+Route::get('/terms', [PublicSiteController::class, 'terms'])->name('terms');
+Route::get('/faq', [PublicSiteController::class, 'faq'])->name('faq');
 
 Route::get('/demo-quiz', [DemoQuizController::class, 'show'])->name('demo-quiz.show');
 Route::post('/demo-quiz/start', [DemoQuizController::class, 'start'])->name('demo-quiz.start');

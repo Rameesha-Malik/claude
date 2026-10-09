@@ -78,23 +78,66 @@ class CatalogSeeder extends Seeder
             // firstOrCreate, not updateOrCreate: this placeholder pricing is
             // meant to be replaced with real content once, in the admin --
             // updateOrCreate would silently overwrite that real content
-            // (including re-flipping is_active back to true on a package an
-            // admin deliberately deactivated) every time this seeder runs
-            // again, e.g. if SEED_ON_BOOT is left on in a deploy environment.
+            // every time this seeder runs again, e.g. if SEED_ON_BOOT is
+            // left on in a deploy environment.
+            //
+            // is_active: false -- these are fake PLACEHOLDER prices for 8
+            // demo courses, not something that should ever be live pricing
+            // a real visitor sees. On a fresh deploy, Laravel runs every
+            // migration before any seeder, so the migration that adds the
+            // one course's real package content (and deactivates
+            // everything else) ran first and no-opped -- the course it
+            // targets didn't exist yet. These placeholders would otherwise
+            // be the only "packages" a fresh install ever shows: a page
+            // full of fake pricing across every demo course at once,
+            // exactly the "packages are a mess" complaint.
             CoursePackage::firstOrCreate(['course_id' => $course->id, 'name' => 'Standard'], [
                 'description' => 'Full course access, lectures, notes, and practice tests.',
                 'price' => 5000, // PLACEHOLDER
                 'validity_days' => 180,
                 'order' => 1,
-                'is_active' => true,
+                'is_active' => false,
             ]);
             CoursePackage::firstOrCreate(['course_id' => $course->id, 'name' => "{$short} Guaranteed Package"], [
                 'description' => 'Everything in Standard, plus guaranteed notes and mock exams.',
                 'price' => 7500, // PLACEHOLDER
                 'validity_days' => 365,
                 'order' => 2,
-                'is_active' => true,
+                'is_active' => false,
             ]);
+
+            // Real priced packages (client WhatsApp paste, "Initial Test
+            // Preparation 2026") for the AFNS course specifically -- moved
+            // here from a migration (2026_09_04_000003) because that
+            // migration ran before this seeder created the course it
+            // targets, so it silently did nothing on a fresh deploy. Kept
+            // idempotent the same way: firstOrCreate so an admin's later
+            // edits to these aren't overwritten by a re-seed.
+            if ($short === 'AFNS') {
+                $fscPackages = [
+                    ['name' => 'FSc — Notes + App Access', 'price' => 6000, 'features' => [
+                        'Android App Access', 'Verbal Intelligence Notes', 'Non-Verbal Intelligence Notes',
+                        'Academic Notes', 'Past Papers', 'Teacher Support',
+                    ]],
+                    ['name' => 'FSc — Crash Course Classes', 'price' => 11000, 'features' => [
+                        'Complete Notes', 'Verbal Intelligence Live Lectures', 'Non-Verbal Intelligence Live Lectures',
+                        'Guess Papers', 'Teacher Support',
+                    ]],
+                    ['name' => 'FSc — Full Online Classes', 'price' => 16000, 'features' => [
+                        'Complete Notes', 'Verbal + Non-Verbal Lectures', 'Academic Lectures',
+                        'Past Paper Lectures', 'Practice MCQs',
+                    ]],
+                ];
+                foreach ($fscPackages as $i => $p) {
+                    CoursePackage::firstOrCreate(['course_id' => $course->id, 'name' => $p['name']], [
+                        'description' => implode("\n", $p['features']),
+                        'price' => $p['price'],
+                        'validity_days' => 180,
+                        'order' => $i + 3,
+                        'is_active' => true,
+                    ]);
+                }
+            }
 
             foreach (['Introduction & Test Pattern', 'Core Concepts', 'Practice Strategy'] as $i => $lessonTitle) {
                 Lesson::updateOrCreate(['course_id' => $course->id, 'title' => $lessonTitle], [
