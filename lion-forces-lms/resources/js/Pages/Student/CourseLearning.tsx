@@ -108,7 +108,7 @@ function LessonPlayer({ lesson }: { lesson: Lesson }) {
         case 'video_youtube': {
             const embed = lesson.external_url ? youtubeEmbedUrl(lesson.external_url) : null;
             return embed ? (
-                <div className="aspect-video w-full overflow-hidden rounded-xl bg-black">
+                <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-black">
                     <iframe
                         src={embed}
                         className="h-full w-full"
@@ -116,6 +116,31 @@ function LessonPlayer({ lesson }: { lesson: Lesson }) {
                         allowFullScreen
                         title={lesson.title}
                     />
+                    {/* Client: a student clicking YouTube's own branding (the
+                        watermark logo during playback, or the title/channel
+                        name link shown on the paused/end screen) landed on
+                        the academy's real YouTube channel, giving away where
+                        the video lives and letting them browse off-platform.
+                        The iframe is cross-origin, so its contents can't be
+                        hidden or read from here -- a plain transparent div
+                        sitting on top of just that screen region can
+                        intercept the click before it reaches the link
+                        underneath, though. Both overlays are kept to the TOP
+                        corners deliberately: every native playback control
+                        (play, scrubber, volume, captions, settings, PiP,
+                        theater, fullscreen) lives in the BOTTOM control bar,
+                        so a bottom overlay risks silently breaking one of
+                        those -- the fullscreen button most of all, which was
+                        explicitly requested and already verified working.
+                        Top corners are where the watermark/title branding
+                        actually appears and nothing else is ever there. Like
+                        any overlay here, this is a sibling of the iframe, so
+                        it doesn't follow the iframe into native fullscreen --
+                        there's no way to intercept that from outside a
+                        cross-origin iframe -- but it fully covers the normal
+                        (non-fullscreen) player, which is where this is seen. */}
+                    <div className="absolute left-0 top-0 h-10 w-2/5 max-w-[14rem]" />
+                    <div className="absolute right-0 top-0 h-10 w-24" />
                 </div>
             ) : (
                 <p className="rounded-xl bg-surface-sunken p-6 text-sm text-text-muted">Video link not set yet.</p>
