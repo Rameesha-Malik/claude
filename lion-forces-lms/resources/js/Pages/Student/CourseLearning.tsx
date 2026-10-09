@@ -553,6 +553,18 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
 
             {tab === 'Quizzes' && (
                 <RevealOnScroll staggerMs={50} className="space-y-3">
+                    {/* Client: custom-quiz generation should be reachable
+                        "direct from" the specific course a student bought,
+                        not just a disconnected nav link -- entering with
+                        ?course_id ties the generated quiz's access check to
+                        this exact enrollment. */}
+                    <a
+                        href={`/portal/custom-quiz?course_id=${course.id}`}
+                        className="flex items-center justify-between rounded-2xl border border-dashed border-primary bg-primary-subtle px-5 py-4 text-sm font-semibold text-primary transition-colors hover:bg-primary/10"
+                    >
+                        Build a Custom Quiz from the Question Bank
+                        <span aria-hidden>&rarr;</span>
+                    </a>
                     {course.quizzes.map((q) => (
                         <TestCard
                             key={q.id}

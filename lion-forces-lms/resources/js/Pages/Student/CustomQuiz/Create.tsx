@@ -1,22 +1,47 @@
-import { Head, useForm } from '@inertiajs/react';
+import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEvent } from 'react';
 import StudentLayout from '@/Layouts/StudentLayout';
 
 interface SubjectOption { id: number; name: string; questions_count: number }
-interface Props { subjects: SubjectOption[] }
+interface CourseInfo { id: number; title: string }
+interface Props { subjects: SubjectOption[]; locked?: boolean; course?: CourseInfo | null }
 
 const inputClass = 'w-full rounded-lg border border-border px-3 py-2.5 text-sm focus:border-primary focus:shadow-glow focus:outline-none';
 
-export default function CreateCustomQuiz({ subjects }: Props) {
+export default function CreateCustomQuiz({ subjects, locked = false, course = null }: Props) {
     const form = useForm({
         subject_id: '' as number | '',
         difficulty: '' as '' | 'easy' | 'medium' | 'hard',
         question_count: 10,
+        course_id: course?.id ?? ('' as number | ''),
     });
 
     function submit(e: FormEvent) {
         e.preventDefault();
         form.post('/portal/custom-quiz');
+    }
+
+    if (locked) {
+        return (
+            <StudentLayout header="Custom Quiz">
+                <Head title="Custom Quiz" />
+
+                <div className="mx-auto max-w-lg rounded-3xl border border-dashed border-border bg-surface p-8 text-center">
+                    <h1 className="font-display text-2xl text-text">Custom Quiz is Locked</h1>
+                    <p className="mt-2 text-sm text-text-secondary">
+                        {course
+                            ? `Buy "${course.title}" (with quiz access) to build custom quizzes from its question bank.`
+                            : 'Buy a course that includes quiz access to build your own random quizzes from the question bank.'}
+                    </p>
+                    <Link
+                        href={course ? `/courses/${course.id}` : '/courses'}
+                        className="mt-6 inline-block rounded-full bg-primary px-6 py-2.5 text-sm font-bold uppercase tracking-wide text-on-primary shadow-sm hover:bg-primary-hover"
+                    >
+                        {course ? 'View Course' : 'Browse Courses'}
+                    </Link>
+                </div>
+            </StudentLayout>
+        );
     }
 
     return (
@@ -26,7 +51,7 @@ export default function CreateCustomQuiz({ subjects }: Props) {
             <div className="mx-auto max-w-lg rounded-3xl border border-border bg-surface p-6 sm:p-8">
                 <h1 className="font-display text-2xl text-text">Build Your Own Quiz</h1>
                 <p className="mt-1 text-sm text-text-secondary">
-                    Pick a subject, difficulty, and how many questions -- we'll pull a fresh random set from the
+                    {course ? `For "${course.title}" -- ` : ''}Pick a subject, difficulty, and how many questions -- we'll pull a fresh random set from the
                     question bank.
                 </p>
 

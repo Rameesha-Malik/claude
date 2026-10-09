@@ -13,8 +13,8 @@ use App\Models\Setting;
  * "master switch", the course fields stay the fine-grained per-course
  * layer.
  *
- * `custom_quiz` is stored/toggleable here but has no feature behind it yet
- * in this codebase -- flagged separately, not built as part of this pass.
+ * `custom_quiz` gates Student\CustomQuizController (see that class for the
+ * enrollment-based access rule layered on top of this master switch).
  */
 class FeatureFlags
 {

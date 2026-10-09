@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Student;
 
 use App\Http\Controllers\Controller;
+use App\Models\Course;
 use App\Models\CustomQuizConfig;
 use App\Models\QuestionBank;
 use App\Models\RevisionListItem;
@@ -22,6 +23,16 @@ use Inertia\Response;
  * pattern (1 mark per question, no negative marking, no time limit --
  * the simplest version of that same flow); results reuse
  * Student/Quizzes/Result.tsx as-is (see AttemptController).
+ *
+ * Client: this should only be usable "when a student buys a quiz [module]
+ * of that course" -- originally reachable by any logged-in student
+ * regardless of what they'd paid for. Gated the same way every other
+ * question-bank assessment already is: an active (non-expired) enrollment
+ * in a course whose quiz module is actually enabled. Reached either from
+ * the generic nav link (any qualifying course counts) or, more precisely,
+ * from inside one specific purchased course's Quizzes tab (?course_id=…),
+ * which checks that exact course and remembers it so results lead back
+ * there.
  */
 class CustomQuizController extends Controller
 {
@@ -29,9 +40,20 @@ class CustomQuizController extends Controller
     {
         abort_unless(FeatureFlags::enabled('custom_quiz'), 404);
 
+        $course = $request->integer('course_id') ? Course::find($request->integer('course_id')) : null;
+        $hasAccess = $this->hasQuizAccess($request, $course);
+
+        if (! $hasAccess) {
+            return Inertia::render('Student/CustomQuiz/Create', ['subjects' => [], 'locked' => true, 'course' => $course?->only('id', 'title')]);
+        }
+
         $subjects = Subject::withCount('questions')->having('questions_count', '>', 0)->orderBy('name')->get(['id', 'name']);
 
-        return Inertia::render('Student/CustomQuiz/Create', ['subjects' => $subjects]);
+        return Inertia::render('Student/CustomQuiz/Create', [
+            'subjects' => $subjects,
+            'locked' => false,
+            'course' => $course?->only('id', 'title'),
+        ]);
     }
 
     public function store(Request $request)
@@ -42,7 +64,11 @@ class CustomQuizController extends Controller
             'subject_id' => 'nullable|exists:subjects,id',
             'difficulty' => 'nullable|in:easy,medium,hard',
             'question_count' => 'required|integer|min:1|max:50',
+            'course_id' => 'nullable|exists:courses,id',
         ]);
+
+        $course = ! empty($data['course_id']) ? Course::find($data['course_id']) : null;
+        abort_unless($this->hasQuizAccess($request, $course), 403, 'Buy a course with quiz access to use Custom Quiz.');
 
         $questionIds = QuestionBank::query()
             ->when($data['subject_id'] ?? null, fn ($q, $id) => $q->where('subject_id', $id))
@@ -153,5 +179,24 @@ class CustomQuizController extends Controller
         }
 
         return redirect()->route('student.attempts.show', $attempt);
+    }
+
+    // Same "active, non-expired enrollment" rule QuizController/
+    // PracticeTestController/MockExamController/StagedTestController all
+    // already use to gate access to their course's own assessments --
+    // except Custom Quiz isn't tied to one course, so with no $course
+    // given (the generic nav entry) any enrollment that unlocks a
+    // quizzes-enabled course is enough; with $course given (entered from
+    // that course's Quizzes tab) it must be an active enrollment in that
+    // exact course.
+    private function hasQuizAccess(Request $request, ?Course $course): bool
+    {
+        $query = $request->user()->enrollments()->active()->whereHas('course', fn ($q) => $q->where('quizzes_enabled', true));
+
+        if ($course) {
+            $query->where('course_id', $course->id);
+        }
+
+        return $query->exists();
     }
 }
