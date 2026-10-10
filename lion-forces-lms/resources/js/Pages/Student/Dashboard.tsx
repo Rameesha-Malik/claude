@@ -10,8 +10,13 @@ interface EnrollmentCard {
     progress: number; target_exam_name: string | null; target_exam_date: string | null;
 }
 interface Broadcast { title: string; body: string; sent_at: string | null }
+interface Performance {
+    questions_attempted: number; correct: number; incorrect: number; accuracy: number | null;
+    favourites: number; sessions: number; last_test_percentage: string | null;
+}
 interface Props {
     enrollments: EnrollmentCard[];
+    performance: Performance;
     revisionCount: number;
     unreadNotifications: { id: string; data: { message?: string }; created_at: string }[];
     recentBroadcasts: Broadcast[];
@@ -32,6 +37,8 @@ const ICONS = {
     chart: 'M4 20V10m6.67 10V4M17.33 20v-7',
     arrow: 'M11.3 3.3a1 1 0 011.4 0l5 5a1 1 0 010 1.4l-5 5a1 1 0 11-1.4-1.4L14.6 10H4a1 1 0 010-2h10.6l-3.3-3.3a1 1 0 010-1.4z',
     megaphone: 'M3 11l18-5v12L3 13v-2zm0 0v6a2 2 0 002 2h1a1 1 0 001-1v-5',
+    star: 'M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z',
+    check: 'M9 12.75L11.25 15 15 9.75m6 2.25a9 9 0 11-18 0 9 9 0 0118 0z',
 };
 
 function greeting(): string {
@@ -73,7 +80,7 @@ function CourseCountdown({ course }: { course: EnrollmentCard }) {
     );
 }
 
-export default function Dashboard({ enrollments, revisionCount, unreadNotifications, recentBroadcasts }: Props) {
+export default function Dashboard({ enrollments, performance, revisionCount, unreadNotifications, recentBroadcasts }: Props) {
     const { auth } = usePage<PageProps>().props;
     const firstName = auth.user?.name?.split(' ')[0] ?? 'there';
     const overallProgress = Math.round(enrollments.reduce((a, c) => a + c.progress, 0) / (enrollments.length || 1));
@@ -121,6 +128,29 @@ export default function Dashboard({ enrollments, revisionCount, unreadNotificati
                     badgeTone={overallProgress >= 50 ? 'success' : 'warning'}
                 />
             </RevealOnScroll>
+
+            {/* Client, from a UWorld QBank reference shown in a meeting:
+                the dashboard should show a student "what they need to
+                know" -- their own accuracy across every quiz/test they've
+                taken, not just how far through a course they've clicked. */}
+            {performance.questions_attempted > 0 && (
+                <div className="mt-6 rounded-3xl border border-border bg-surface p-5">
+                    <h2 className="mb-4 font-bold text-text">Your Performance</h2>
+                    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
+                        <PerfStat label="Attempted" value={performance.questions_attempted} />
+                        <PerfStat label="Correct" value={performance.correct} tone="success" />
+                        <PerfStat label="Incorrect" value={performance.incorrect} tone="danger" />
+                        <PerfStat label="Accuracy" value={performance.accuracy !== null ? `${performance.accuracy}%` : '—'} />
+                        <PerfStat label="Favourites" value={performance.favourites} icon={<Icon d={ICONS.star} className="h-4 w-4" />} />
+                        <PerfStat label="Sessions" value={performance.sessions} />
+                    </div>
+                    {performance.last_test_percentage !== null && (
+                        <p className="mt-4 text-sm text-text-secondary">
+                            Last test score: <span className="font-bold text-text">{Number(performance.last_test_percentage)}%</span>
+                        </p>
+                    )}
+                </div>
+            )}
 
             <div className="mt-8 grid gap-6 lg:grid-cols-3">
                 <div className="lg:col-span-2">
@@ -248,5 +278,28 @@ function SummaryCard({
             </div>
             <div className="mt-1 text-sm text-text-secondary">{label}</div>
         </Wrapper>
+    );
+}
+
+function PerfStat({
+    label,
+    value,
+    tone = 'default',
+    icon,
+}: {
+    label: string;
+    value: string | number;
+    tone?: 'default' | 'success' | 'danger';
+    icon?: ReactNode;
+}) {
+    const valueClass = tone === 'success' ? 'text-success' : tone === 'danger' ? 'text-danger' : 'text-text';
+    return (
+        <div>
+            <div className={`flex items-center gap-1.5 font-display text-2xl ${valueClass}`}>
+                {icon}
+                {value}
+            </div>
+            <div className="mt-0.5 text-xs font-bold uppercase tracking-wide text-text-muted">{label}</div>
+        </div>
     );
 }

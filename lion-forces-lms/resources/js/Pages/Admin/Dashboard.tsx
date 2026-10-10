@@ -9,10 +9,14 @@ interface Stats {
     total_courses: number; total_enrollments: number; recent_payments_total: number;
     pending_payments: number; recent_attempts: number;
 }
+interface QuestionBankStats { total_questions: number; platform_accuracy: number | null; total_answered: number }
+interface MissedQuestion { question_text: string; wrong_count: number }
 interface Enrollment { id: number; status: string; user: { name: string } | null; course: { title: string } | null; created_at: string }
 interface Payment { id: number; amount: string; method: string; status: string; enrollment: { user: { name: string } | null } | null; created_at: string }
 interface Props {
     stats: Stats;
+    questionBank: QuestionBankStats;
+    mostMissedQuestions: MissedQuestion[];
     recentEnrollments: Enrollment[];
     recentPayments: Payment[];
     popularCourses: { title: string; enrollments: number }[];
@@ -35,9 +39,11 @@ const ICONS = {
     cash: 'M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z',
     clock: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',
     chart: 'M4 20V10m6.67 10V4M17.33 20v-7',
+    bank: 'M3.75 21h16.5M4.5 10.5h15M5.25 10.5V21m13.5-10.5V21M9 21V13.5h6V21M4.5 10.5L12 3.75l7.5 6.75',
+    target: 'M12 9v6m-3-3h6m6 0a9 9 0 11-18 0 9 9 0 0118 0z',
 };
 
-export default function Dashboard({ stats, recentEnrollments, recentPayments, popularCourses }: Props) {
+export default function Dashboard({ stats, questionBank, mostMissedQuestions, recentEnrollments, recentPayments, popularCourses }: Props) {
     return (
         <AdminLayout header="Dashboard">
             <Head title="Admin Dashboard" />
@@ -64,6 +70,52 @@ export default function Dashboard({ stats, recentEnrollments, recentPayments, po
                 />
                 <Stat label="Test Attempts (7d)" value={stats.recent_attempts} icon={<Icon d={ICONS.chart} />} />
             </RevealOnScroll>
+
+            {/* Client, from a UWorld QBank reference shown in a meeting: a
+                dashboard should surface "important things," not just
+                enrollment/revenue -- for admin that's whether the question
+                bank is actually being used (size + platform-wide accuracy)
+                and an actionable signal (which specific questions keep
+                getting missed, worth a second look for a wording problem). */}
+            <div className="mt-6 grid gap-6 lg:grid-cols-3">
+                <div className="rounded-3xl border border-border bg-surface p-5 lg:col-span-1">
+                    <h2 className="mb-4 font-bold text-text">Question Bank</h2>
+                    <div className="space-y-4">
+                        <div>
+                            <div className="font-display text-3xl text-text">
+                                <AnimatedCounter value={String(questionBank.total_questions)} />
+                            </div>
+                            <div className="text-sm text-text-secondary">Questions in bank</div>
+                        </div>
+                        <div>
+                            <div className="font-display text-3xl text-text">
+                                {questionBank.platform_accuracy !== null ? `${questionBank.platform_accuracy}%` : '—'}
+                            </div>
+                            <div className="text-sm text-text-secondary">
+                                Platform-wide accuracy{questionBank.total_answered > 0 ? ` (${questionBank.total_answered.toLocaleString()} answers)` : ''}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div className="rounded-3xl border border-border bg-surface p-5 lg:col-span-2 min-w-0">
+                    <h2 className="mb-4 font-bold text-text">Most-Missed Questions</h2>
+                    {mostMissedQuestions.length === 0 ? (
+                        <p className="text-sm text-text-secondary">No wrong answers recorded yet.</p>
+                    ) : (
+                        <div className="space-y-3">
+                            {mostMissedQuestions.map((q, i) => (
+                                <div key={i} className="flex items-start justify-between gap-3 text-sm">
+                                    <span className="min-w-0 flex-1 truncate text-text">{q.question_text}</span>
+                                    <span className="flex-shrink-0 rounded-full bg-danger-bg px-2.5 py-0.5 text-xs font-bold text-danger">
+                                        Missed {q.wrong_count}&times;
+                                    </span>
+                                </div>
+                            ))}
+                        </div>
+                    )}
+                </div>
+            </div>
 
             <div className="mt-8 grid gap-6 lg:grid-cols-3">
                 <div className="rounded-3xl border border-border bg-surface p-5 lg:col-span-2 min-w-0">
