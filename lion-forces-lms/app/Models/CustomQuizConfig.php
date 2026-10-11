@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['user_id', 'subject_id', 'difficulty', 'question_count', 'question_ids'])]
+#[Fillable(['user_id', 'subject_id', 'topic_id', 'difficulty', 'question_count', 'question_ids'])]
 class CustomQuizConfig extends Model
 {
     use HasFactory;
@@ -25,6 +25,11 @@ class CustomQuizConfig extends Model
     public function subject(): BelongsTo
     {
         return $this->belongsTo(Subject::class);
+    }
+
+    public function topic(): BelongsTo
+    {
+        return $this->belongsTo(Topic::class);
     }
 
     // The actual questions, in the frozen order they were picked --

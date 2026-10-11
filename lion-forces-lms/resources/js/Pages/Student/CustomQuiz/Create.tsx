@@ -3,18 +3,24 @@ import { FormEvent } from 'react';
 import StudentLayout from '@/Layouts/StudentLayout';
 
 interface SubjectOption { id: number; name: string; questions_count: number }
+interface TopicOption { id: number; subject_id: number; name: string }
 interface CourseInfo { id: number; title: string }
-interface Props { subjects: SubjectOption[]; locked?: boolean; course?: CourseInfo | null }
+interface Props { subjects: SubjectOption[]; topics: TopicOption[]; locked?: boolean; course?: CourseInfo | null }
 
 const inputClass = 'w-full rounded-lg border border-border px-3 py-2.5 text-sm focus:border-primary focus:shadow-glow focus:outline-none';
 
-export default function CreateCustomQuiz({ subjects, locked = false, course = null }: Props) {
+export default function CreateCustomQuiz({ subjects, topics, locked = false, course = null }: Props) {
     const form = useForm({
         subject_id: '' as number | '',
+        topic_id: '' as number | '',
         difficulty: '' as '' | 'easy' | 'medium' | 'hard',
         question_count: 10,
         course_id: course?.id ?? ('' as number | ''),
     });
+
+    // Topic is scoped to a subject -- only offer topics under whichever
+    // subject is currently picked, same reasoning as the admin form.
+    const availableTopics = topics.filter((t) => t.subject_id === form.data.subject_id);
 
     function submit(e: FormEvent) {
         e.preventDefault();
@@ -51,20 +57,36 @@ export default function CreateCustomQuiz({ subjects, locked = false, course = nu
             <div className="mx-auto max-w-lg rounded-3xl border border-border bg-surface p-6 sm:p-8">
                 <h1 className="font-display text-2xl text-text">Build Your Own Quiz</h1>
                 <p className="mt-1 text-sm text-text-secondary">
-                    {course ? `For "${course.title}" -- ` : ''}Pick a subject, difficulty, and how many questions -- we'll pull a fresh random set from the
-                    question bank.
+                    {course ? `For "${course.title}" -- ` : ''}Pick a subject (and optionally a topic within it), difficulty, and how many questions -- we'll
+                    pull a fresh random set from the question bank.
                 </p>
 
                 <form onSubmit={submit} className="mt-6 space-y-4">
                     <div>
                         <label className="mb-1 block text-sm font-medium text-text">Subject</label>
-                        <select className={inputClass} value={form.data.subject_id} onChange={(e) => form.setData('subject_id', e.target.value ? Number(e.target.value) : '')}>
+                        <select
+                            className={inputClass}
+                            value={form.data.subject_id}
+                            onChange={(e) => form.setData((prev) => ({ ...prev, subject_id: e.target.value ? Number(e.target.value) : '', topic_id: '' }))}
+                        >
                             <option value="">Any subject</option>
                             {subjects.map((s) => (
                                 <option key={s.id} value={s.id}>{s.name} ({s.questions_count} questions)</option>
                             ))}
                         </select>
                     </div>
+
+                    {availableTopics.length > 0 && (
+                        <div>
+                            <label className="mb-1 block text-sm font-medium text-text">Topic</label>
+                            <select className={inputClass} value={form.data.topic_id} onChange={(e) => form.setData('topic_id', e.target.value ? Number(e.target.value) : '')}>
+                                <option value="">Any topic in this subject</option>
+                                {availableTopics.map((t) => (
+                                    <option key={t.id} value={t.id}>{t.name}</option>
+                                ))}
+                            </select>
+                        </div>
+                    )}
 
                     <div>
                         <label className="mb-1 block text-sm font-medium text-text">Difficulty</label>

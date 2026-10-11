@@ -9,6 +9,7 @@ use App\Models\QuestionBank;
 use App\Models\RevisionListItem;
 use App\Models\Subject;
 use App\Models\TestAttempt;
+use App\Models\Topic;
 use App\Support\FeatureFlags;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -44,13 +45,19 @@ class CustomQuizController extends Controller
         $hasAccess = $this->hasQuizAccess($request, $course);
 
         if (! $hasAccess) {
-            return Inertia::render('Student/CustomQuiz/Create', ['subjects' => [], 'locked' => true, 'course' => $course?->only('id', 'title')]);
+            return Inertia::render('Student/CustomQuiz/Create', ['subjects' => [], 'topics' => [], 'locked' => true, 'course' => $course?->only('id', 'title')]);
         }
 
         $subjects = Subject::withCount('questions')->having('questions_count', '>', 0)->orderBy('name')->get(['id', 'name']);
 
+        // Every topic with at least one question -- the picker filters
+        // this down client-side to whichever subject the student chose,
+        // same pattern as the admin question form's topic dropdown.
+        $topics = Topic::withCount('questions')->having('questions_count', '>', 0)->orderBy('name')->get(['id', 'subject_id', 'name']);
+
         return Inertia::render('Student/CustomQuiz/Create', [
             'subjects' => $subjects,
+            'topics' => $topics,
             'locked' => false,
             'course' => $course?->only('id', 'title'),
         ]);
@@ -62,6 +69,7 @@ class CustomQuizController extends Controller
 
         $data = $request->validate([
             'subject_id' => 'nullable|exists:subjects,id',
+            'topic_id' => 'nullable|exists:topics,id',
             'difficulty' => 'nullable|in:easy,medium,hard',
             'question_count' => 'required|integer|min:1|max:50',
             'course_id' => 'nullable|exists:courses,id',
@@ -72,6 +80,7 @@ class CustomQuizController extends Controller
 
         $questionIds = QuestionBank::query()
             ->when($data['subject_id'] ?? null, fn ($q, $id) => $q->where('subject_id', $id))
+            ->when($data['topic_id'] ?? null, fn ($q, $id) => $q->where('topic_id', $id))
             ->when($data['difficulty'] ?? null, fn ($q, $d) => $q->where('difficulty', $d))
             ->inRandomOrder()
             ->limit($data['question_count'])
@@ -79,11 +88,12 @@ class CustomQuizController extends Controller
             ->values()
             ->all();
 
-        abort_if(count($questionIds) === 0, 422, 'No questions match those filters yet -- try a different subject or difficulty.');
+        abort_if(count($questionIds) === 0, 422, 'No questions match those filters yet -- try a different subject, topic, or difficulty.');
 
         $config = CustomQuizConfig::create([
             'user_id' => $request->user()->id,
             'subject_id' => $data['subject_id'] ?? null,
+            'topic_id' => $data['topic_id'] ?? null,
             'difficulty' => $data['difficulty'] ?? null,
             'question_count' => count($questionIds),
             'question_ids' => $questionIds,
@@ -107,6 +117,7 @@ class CustomQuizController extends Controller
         return Inertia::render('Student/CustomQuiz/Take', [
             'config' => $config->only('id', 'question_count'),
             'subjectName' => $config->subject?->name,
+            'topicName' => $config->topic?->name,
             'questions' => $questions,
         ]);
     }

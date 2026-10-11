@@ -6,9 +6,9 @@ import StudentLayout from '@/Layouts/StudentLayout';
 interface Option { id: number; option_text: string }
 interface Question { id: number; question_text: string; image_path: string | null; options: Option[] }
 interface Config { id: number; question_count: number }
-interface Props { config: Config; subjectName: string | null; questions: Question[] }
+interface Props { config: Config; subjectName: string | null; topicName: string | null; questions: Question[] }
 
-export default function TakeCustomQuiz({ config, subjectName, questions }: Props) {
+export default function TakeCustomQuiz({ config, subjectName, topicName, questions }: Props) {
     const [answers, setAnswers] = useState<Record<number, number | null>>({});
     const [submitting, setSubmitting] = useState(false);
 
@@ -24,7 +24,8 @@ export default function TakeCustomQuiz({ config, subjectName, questions }: Props
         setAnswers((prev) => ({ ...prev, [questionId]: optionId }));
     }
 
-    const title = subjectName ? `Custom Quiz — ${subjectName}` : 'Custom Quiz';
+    const scope = [subjectName, topicName].filter(Boolean).join(' — ');
+    const title = scope ? `Custom Quiz — ${scope}` : 'Custom Quiz';
 
     return (
         <StudentLayout header={title}>

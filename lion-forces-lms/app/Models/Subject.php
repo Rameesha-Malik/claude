@@ -17,6 +17,11 @@ class Subject extends Model
         return $this->hasMany(QuestionBank::class, 'subject_id');
     }
 
+    public function topics(): HasMany
+    {
+        return $this->hasMany(Topic::class);
+    }
+
     public function notes(): HasMany
     {
         return $this->hasMany(NotesBank::class, 'subject_id');

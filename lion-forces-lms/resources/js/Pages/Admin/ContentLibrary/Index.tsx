@@ -4,22 +4,24 @@ import RichTextArea from '@/Components/RichTextArea';
 import AdminLayout from '@/Layouts/AdminLayout';
 
 interface Subject { id: number; name: string }
+interface Topic { id: number; subject_id: number; name: string }
 interface Option { id?: number; option_text: string; is_correct: boolean }
-interface Question { id: number; question_text: string; explanation: string | null; difficulty: string; subject: Subject | null; options: Option[] }
+interface Question { id: number; question_text: string; explanation: string | null; difficulty: string; subject: Subject | null; topic: Topic | null; options: Option[] }
 interface Note { id: number; title: string; content: string | null; subject: Subject | null }
 interface Paginated<T> { data: T[]; links: { url: string | null; label: string; active: boolean }[] }
 interface Props {
     questions: Paginated<Question>;
     notes: Paginated<Note>;
     subjects: Subject[];
+    topics: Topic[];
     filters: { subject_id?: string };
 }
 
 const inputClass = 'w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:shadow-glow focus:outline-none';
 const btnClass = 'rounded-lg bg-primary px-4 py-2 text-sm font-bold uppercase tracking-wide text-on-primary hover:bg-primary-hover disabled:opacity-50';
 
-export default function ContentLibraryIndex({ questions, notes, subjects, filters }: Props) {
-    const [tab, setTab] = useState<'Questions' | 'Notes' | 'Subjects'>('Questions');
+export default function ContentLibraryIndex({ questions, notes, subjects, topics, filters }: Props) {
+    const [tab, setTab] = useState<'Questions' | 'Notes' | 'Subjects' | 'Topics'>('Questions');
 
     return (
         <AdminLayout header="Content Library">
@@ -30,7 +32,7 @@ export default function ContentLibraryIndex({ questions, notes, subjects, filter
             </p>
 
             <div className="mb-6 flex gap-2 border-b border-border">
-                {(['Questions', 'Notes', 'Subjects'] as const).map((t) => (
+                {(['Questions', 'Notes', 'Subjects', 'Topics'] as const).map((t) => (
                     <button
                         key={t}
                         onClick={() => setTab(t)}
@@ -41,14 +43,15 @@ export default function ContentLibraryIndex({ questions, notes, subjects, filter
                 ))}
             </div>
 
-            {tab === 'Questions' && <QuestionsPanel questions={questions} subjects={subjects} filters={filters} />}
+            {tab === 'Questions' && <QuestionsPanel questions={questions} subjects={subjects} topics={topics} filters={filters} />}
             {tab === 'Notes' && <NotesPanel notes={notes} subjects={subjects} />}
             {tab === 'Subjects' && <SubjectsPanel subjects={subjects} />}
+            {tab === 'Topics' && <TopicsPanel subjects={subjects} topics={topics} />}
         </AdminLayout>
     );
 }
 
-function QuestionsPanel({ questions, subjects, filters }: { questions: Paginated<Question>; subjects: Subject[]; filters: { subject_id?: string } }) {
+function QuestionsPanel({ questions, subjects, topics, filters }: { questions: Paginated<Question>; subjects: Subject[]; topics: Topic[]; filters: { subject_id?: string } }) {
     const [showAdd, setShowAdd] = useState(false);
 
     return (
@@ -66,7 +69,7 @@ function QuestionsPanel({ questions, subjects, filters }: { questions: Paginated
                 <button onClick={() => setShowAdd((v) => !v)} className={btnClass}>{showAdd ? 'Cancel' : '+ Add Question'}</button>
             </div>
 
-            {showAdd && <QuestionForm subjects={subjects} onDone={() => setShowAdd(false)} />}
+            {showAdd && <QuestionForm subjects={subjects} topics={topics} onDone={() => setShowAdd(false)} />}
 
             <div className="space-y-3">
                 {questions.data.map((q) => (
@@ -75,6 +78,7 @@ function QuestionsPanel({ questions, subjects, filters }: { questions: Paginated
                             <div className="flex-1">
                                 <div className="mb-2 flex gap-2">
                                     {q.subject && <span className="rounded-full bg-primary-subtle px-2 py-0.5 text-xs font-bold text-primary">{q.subject.name}</span>}
+                                    {q.topic && <span className="rounded-full bg-surface-sunken px-2 py-0.5 text-xs font-bold text-text-secondary">{q.topic.name}</span>}
                                     <span className="rounded-full bg-surface-sunken px-2 py-0.5 text-xs font-bold uppercase text-text-muted">{q.difficulty}</span>
                                 </div>
                                 <p className="font-medium text-text">{q.question_text}</p>
@@ -98,14 +102,20 @@ function QuestionsPanel({ questions, subjects, filters }: { questions: Paginated
     );
 }
 
-function QuestionForm({ subjects, onDone }: { subjects: Subject[]; onDone: () => void }) {
+function QuestionForm({ subjects, topics, onDone }: { subjects: Subject[]; topics: Topic[]; onDone: () => void }) {
     const form = useForm({
         subject_id: '',
+        topic_id: '',
         question_text: '',
         explanation: '',
         difficulty: 'medium',
         options: [{ option_text: '', is_correct: true }, { option_text: '', is_correct: false }, { option_text: '', is_correct: false }, { option_text: '', is_correct: false }],
     });
+
+    // Topic is scoped to a subject -- only show topics belonging to
+    // whichever subject is currently picked, and clear a stale topic_id
+    // if the subject changes out from under it.
+    const availableTopics = topics.filter((t) => String(t.subject_id) === form.data.subject_id);
 
     function setOption(i: number, field: 'option_text' | 'is_correct', value: string | boolean) {
         const options = [...form.data.options];
@@ -125,7 +135,11 @@ function QuestionForm({ subjects, onDone }: { subjects: Subject[]; onDone: () =>
     return (
         <form onSubmit={submit} className="mb-6 space-y-3 rounded-2xl border border-border bg-surface p-5">
             <div className="grid grid-cols-2 gap-3">
-                <select className={inputClass} value={form.data.subject_id} onChange={(e) => form.setData('subject_id', e.target.value)}>
+                <select
+                    className={inputClass}
+                    value={form.data.subject_id}
+                    onChange={(e) => form.setData((prev) => ({ ...prev, subject_id: e.target.value, topic_id: '' }))}
+                >
                     <option value="">No subject</option>
                     {subjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
                 </select>
@@ -133,6 +147,15 @@ function QuestionForm({ subjects, onDone }: { subjects: Subject[]; onDone: () =>
                     {['easy', 'medium', 'hard'].map((d) => <option key={d} value={d}>{d}</option>)}
                 </select>
             </div>
+            <select
+                className={inputClass}
+                value={form.data.topic_id}
+                onChange={(e) => form.setData('topic_id', e.target.value)}
+                disabled={!form.data.subject_id}
+            >
+                <option value="">{form.data.subject_id ? 'No topic' : 'Pick a subject first to choose a topic'}</option>
+                {availableTopics.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
+            </select>
             <RichTextArea rows={2} className={inputClass} placeholder="Question text" value={form.data.question_text} onChange={(v) => form.setData('question_text', v)} />
             {form.data.options.map((opt, i) => (
                 <div key={i} className="flex items-center gap-2">
@@ -203,6 +226,42 @@ function SubjectsPanel({ subjects }: { subjects: Subject[] }) {
                 className="flex gap-2"
             >
                 <input className={inputClass} placeholder="New subject name" value={addForm.data.name} onChange={(e) => addForm.setData('name', e.target.value)} />
+                <button type="submit" disabled={addForm.processing} className={btnClass}>Add</button>
+            </form>
+            {Object.values(addForm.errors).map((m, i) => <div key={i} className="mt-1 text-sm text-danger">{String(m)}</div>)}
+        </div>
+    );
+}
+
+function TopicsPanel({ subjects, topics }: { subjects: Subject[]; topics: Topic[] }) {
+    const addForm = useForm({ subject_id: subjects[0]?.id ?? ('' as number | ''), name: '' });
+
+    return (
+        <div className="max-w-md">
+            {subjects.map((s) => {
+                const subjectTopics = topics.filter((t) => t.subject_id === s.id);
+                if (subjectTopics.length === 0) return null;
+                return (
+                    <div key={s.id} className="mb-4">
+                        <p className="mb-1.5 text-xs font-bold uppercase tracking-wide text-text-muted">{s.name}</p>
+                        <div className="flex flex-wrap gap-2">
+                            {subjectTopics.map((t) => (
+                                <span key={t.id} className="rounded-full bg-surface-sunken px-3 py-1 text-sm text-text">{t.name}</span>
+                            ))}
+                        </div>
+                    </div>
+                );
+            })}
+            {topics.length === 0 && <p className="mb-4 text-sm text-text-secondary">No topics yet.</p>}
+
+            <form
+                onSubmit={(e) => { e.preventDefault(); addForm.post('/admin/content-library/topics', { onSuccess: () => addForm.setData('name', '') }); }}
+                className="flex gap-2"
+            >
+                <select className={inputClass} style={{ width: 160 }} value={addForm.data.subject_id} onChange={(e) => addForm.setData('subject_id', Number(e.target.value))}>
+                    {subjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                </select>
+                <input className={inputClass} placeholder="New topic name" value={addForm.data.name} onChange={(e) => addForm.setData('name', e.target.value)} />
                 <button type="submit" disabled={addForm.processing} className={btnClass}>Add</button>
             </form>
             {Object.values(addForm.errors).map((m, i) => <div key={i} className="mt-1 text-sm text-danger">{String(m)}</div>)}

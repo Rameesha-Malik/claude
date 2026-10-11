@@ -7,6 +7,7 @@ use App\Models\ActivityLog;
 use App\Models\NotesBank;
 use App\Models\QuestionBank;
 use App\Models\Subject;
+use App\Models\Topic;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -16,7 +17,7 @@ class ContentLibraryController extends Controller
     public function index(Request $request): Response
     {
         return Inertia::render('Admin/ContentLibrary/Index', [
-            'questions' => QuestionBank::with(['subject', 'options'])
+            'questions' => QuestionBank::with(['subject', 'topic', 'options'])
                 ->when($request->subject_id, fn ($q, $s) => $q->where('subject_id', $s))
                 ->latest()
                 ->paginate(10, ['*'], 'questions_page')
@@ -26,6 +27,11 @@ class ContentLibraryController extends Controller
                 ->paginate(10, ['*'], 'notes_page')
                 ->withQueryString(),
             'subjects' => Subject::orderBy('name')->get(),
+            // All topics, each carrying its subject_id -- the frontend
+            // filters this client-side to whichever subject is picked in
+            // the question form, same as it already does with Subjects
+            // for the question list filter.
+            'topics' => Topic::orderBy('name')->get(['id', 'subject_id', 'name']),
             'filters' => $request->only(['subject_id']),
         ]);
     }
@@ -38,11 +44,23 @@ class ContentLibraryController extends Controller
         return back()->with('success', 'Subject added.');
     }
 
+    public function storeTopic(Request $request)
+    {
+        $data = $request->validate([
+            'subject_id' => 'required|exists:subjects,id',
+            'name' => 'required|string|max:100',
+        ]);
+        Topic::create($data);
+
+        return back()->with('success', 'Topic added.');
+    }
+
     // --- Question Bank ---
     public function storeQuestion(Request $request)
     {
         $data = $request->validate([
             'subject_id' => 'nullable|exists:subjects,id',
+            'topic_id' => 'nullable|exists:topics,id',
             'question_text' => 'required|string|max:2000',
             'explanation' => 'nullable|string|max:2000',
             'difficulty' => 'required|in:easy,medium,hard',
@@ -73,6 +91,7 @@ class ContentLibraryController extends Controller
     {
         $data = $request->validate([
             'subject_id' => 'nullable|exists:subjects,id',
+            'topic_id' => 'nullable|exists:topics,id',
             'question_text' => 'required|string|max:2000',
             'explanation' => 'nullable|string|max:2000',
             'difficulty' => 'required|in:easy,medium,hard',
