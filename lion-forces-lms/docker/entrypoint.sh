@@ -1,6 +1,17 @@
 #!/bin/sh
 set -e
 
+# Some free/no-database-included hosts (e.g. Render's free tier, which has
+# no free managed MySQL) run this same image with DB_CONNECTION=sqlite
+# instead of mysql -- Laravel needs the database FILE to already exist
+# before `migrate` will touch it, unlike a real DB server which Laravel
+# just connects to. Harmless no-op everywhere else (DB_CONNECTION=mysql
+# skips this entirely).
+if [ "$DB_CONNECTION" = "sqlite" ]; then
+    mkdir -p database
+    touch database/database.sqlite
+fi
+
 # Idempotent -- safe to run on every boot/redeploy. Migrations that already
 # ran are skipped by Laravel's migration table, so this never re-runs work.
 php artisan config:clear
