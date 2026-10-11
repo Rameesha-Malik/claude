@@ -58,16 +58,16 @@ function SkipIcon() {
         </svg>
     );
 }
-function CheckCircleIcon() {
+function CheckCircleIcon({ className = 'h-5 w-5' }: { className?: string }) {
     return (
-        <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+        <svg className={className} fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
     );
 }
-function FlagIcon() {
+function FlagIcon({ className = 'h-5 w-5' }: { className?: string }) {
     return (
-        <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+        <svg className={className} fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M5 3v18M5 4h11l-2 4 2 4H5" />
         </svg>
     );
@@ -79,17 +79,17 @@ function CircleIcon() {
         </svg>
     );
 }
-function BadgeIcon() {
+function BadgeIcon({ className = 'h-5 w-5' }: { className?: string }) {
     return (
-        <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+        <svg className={className} fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
             <circle cx="12" cy="8" r="5" />
             <path strokeLinecap="round" strokeLinejoin="round" d="M8.5 12.5L7 21l5-2.5L17 21l-1.5-8.5" />
         </svg>
     );
 }
-function XCircleIcon() {
+function XCircleIcon({ className = 'h-5 w-5' }: { className?: string }) {
     return (
-        <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+        <svg className={className} fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" d="M15 9l-6 6m0-6l6 6m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
         </svg>
     );
@@ -315,22 +315,49 @@ export default function QuestionRunner({
 
     return (
         <div>
-            <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-border bg-surface p-4 shadow-sm">
-                <div className="text-sm text-text-secondary">{headerExtra}</div>
-                <div className="flex flex-1 items-center gap-3">
-                    {timerNode}
-                    <span className="text-sm font-semibold text-text-secondary">
-                        Question <span className="font-bold text-text">{currentIndex + 1}</span> of {total}
-                    </span>
-                    {compact && (
-                        <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-surface-sunken">
-                            <div
-                                className="h-full rounded-full bg-gradient-to-r from-secondary to-primary transition-all duration-normal"
-                                style={{ width: `${progressPercent}%` }}
-                            />
-                        </div>
-                    )}
+            <div className="mb-6 rounded-2xl border border-border bg-surface p-4 shadow-sm">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                    <div className="text-sm text-text-secondary">{headerExtra}</div>
+                    <div className="flex flex-1 items-center gap-3">
+                        {timerNode}
+                        <span className="text-sm font-semibold text-text-secondary">
+                            Question <span className="font-bold text-text">{currentIndex + 1}</span> of {total}
+                        </span>
+                        {compact && (
+                            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-surface-sunken">
+                                <div
+                                    className="h-full rounded-full bg-gradient-to-r from-secondary to-primary transition-all duration-normal"
+                                    style={{ width: `${progressPercent}%` }}
+                                />
+                            </div>
+                        )}
+                    </div>
                 </div>
+                {/* Client: the full stat sidebar (Correct/Wrong/Answered/
+                    Skipped/Not Visited/Progress) was dropped entirely for
+                    compact mode to kill the scroll -- too much; the client
+                    still wants those counts visible, just folded into the
+                    header instead of a separate section, so nothing a
+                    student relies on mid-quiz (their running score, how
+                    many they've skipped) goes missing. */}
+                {compact && (
+                    <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-border pt-3 text-xs">
+                        <span className="inline-flex items-center gap-1 rounded-full border border-success bg-success-bg px-2.5 py-1 font-bold text-success">
+                            <CheckCircleIcon className="h-3.5 w-3.5" /> {correctCount} Correct
+                        </span>
+                        <span className="inline-flex items-center gap-1 rounded-full border border-danger bg-danger-bg px-2.5 py-1 font-bold text-danger">
+                            <XCircleIcon className="h-3.5 w-3.5" /> {wrongCount} Wrong
+                        </span>
+                        <span className="inline-flex items-center gap-1 rounded-full border border-primary bg-primary-subtle px-2.5 py-1 font-bold text-primary">
+                            <BadgeIcon className="h-3.5 w-3.5" /> {answeredCount} Answered
+                        </span>
+                        {skippedIndexes.length > 0 && (
+                            <span className="inline-flex items-center gap-1 rounded-full border border-warning bg-warning-bg px-2.5 py-1 font-bold text-warning">
+                                <FlagIcon className="h-3.5 w-3.5" /> {skippedIndexes.length} Skipped
+                            </span>
+                        )}
+                    </div>
+                )}
             </div>
 
             <div className={compact ? 'space-y-6' : 'grid gap-6 lg:grid-cols-3'}>
