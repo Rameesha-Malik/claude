@@ -51,8 +51,13 @@ export default function News({ announcements }: Props) {
                                     <h3 className="font-semibold text-text">{item.title}</h3>
                                     <p className="mt-1 text-sm text-text-secondary">{item.description}</p>
                                     {item.application_link && (
-                                        <a href={item.application_link} className="mt-3 inline-block text-sm font-semibold text-primary hover:underline">
-                                            Apply now &rarr;
+                                        <a
+                                            href={item.application_link}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="mt-4 inline-flex items-center gap-1.5 rounded-full bg-primary px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-on-primary shadow-sm transition-all duration-fast hover:-translate-y-0.5 hover:bg-primary-hover hover:shadow-md"
+                                        >
+                                            Apply Now &rarr;
                                         </a>
                                     )}
                                 </div>
