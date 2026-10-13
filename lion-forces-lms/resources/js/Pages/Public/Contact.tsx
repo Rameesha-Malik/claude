@@ -6,7 +6,6 @@ import FaqAccordionItem from '@/Components/FaqAccordionItem';
 import GradientMesh from '@/Components/GradientMesh';
 import IconTextInput from '@/Components/IconTextInput';
 import RevealOnScroll from '@/Components/RevealOnScroll';
-import RichTextArea from '@/Components/RichTextArea';
 import SectionKicker from '@/Components/SectionKicker';
 import PublicLayout from '@/Layouts/PublicLayout';
 import { PageProps } from '@/types';
@@ -190,12 +189,13 @@ export default function Contact({ faqs }: { faqs: FaqItem[] }) {
                                 </Field>
                             </div>
                             <Field label="Message" error={errors.message}>
-                                {/* No left-icon overlay here (unlike the other fields) -- the
-                                    formatting toolbar above the textarea took that visual slot. */}
-                                <RichTextArea
+                                {/* Client: the Bold/Italic/Heading toolbar made sense for site
+                                    content an admin writes, not a one-off inquiry a visitor is
+                                    typing here -- plain textarea only for this field. */}
+                                <textarea
                                     rows={4}
                                     value={data.message}
-                                    onChange={(v) => setData('message', v)}
+                                    onChange={(e) => setData('message', e.target.value)}
                                     className="w-full rounded-lg border-border bg-surface py-3 px-4 text-sm text-text shadow-xs transition-shadow duration-fast focus:border-primary focus:shadow-glow focus:outline-none"
                                 />
                             </Field>
