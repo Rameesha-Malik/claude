@@ -71,7 +71,7 @@ export default function Contact({ faqs }: { faqs: FaqItem[] }) {
                                 </span>
                                 <div>
                                     <p className="text-[0.65rem] uppercase tracking-wide text-teal-300">Email Us</p>
-                                    <p className="max-w-[10rem] truncate text-xs font-semibold text-white">{site.supportEmail}</p>
+                                    <p className="text-xs font-semibold text-white">{site.supportEmail}</p>
                                 </div>
                             </div>
                         )}
