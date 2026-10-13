@@ -88,7 +88,16 @@ export default function Contact({ faqs }: { faqs: FaqItem[] }) {
             </section>
 
             <section className="mx-auto max-w-container px-4 py-20 sm:px-6 lg:px-8">
-                <div className="grid gap-10 lg:grid-cols-[0.85fr_1.15fr]">
+                {/* Client: a large dead gap was opening up below "Send Message"
+                    -- the two columns sat in a CSS grid, which stretches both
+                    items to match the taller one by default, and the left
+                    column was artificially tall because the whole FAQ list
+                    was stuffed inside its narrow 0.85fr width. Moved FAQs out
+                    to their own full-width section below (also just reads
+                    better wider than squeezed into a sidebar), and items-start
+                    stops any remaining height mismatch from stretching either
+                    card. */}
+                <div className="grid items-start gap-10 lg:grid-cols-[0.85fr_1.15fr]">
                     <RevealOnScroll className="min-w-0">
                         <SectionKicker>Reach Us Directly</SectionKicker>
                         <h2 className="font-display text-3xl uppercase tracking-wide text-text">Contact Details</h2>
@@ -147,18 +156,6 @@ export default function Contact({ faqs }: { faqs: FaqItem[] }) {
                                 </a>
                             )}
                         </div>
-
-                        {faqs.length > 0 && (
-                            <div className="mt-10">
-                                <SectionKicker>Common Questions</SectionKicker>
-                                <h2 className="font-display text-3xl uppercase tracking-wide text-text">FAQs</h2>
-                                <div className="mt-4 divide-y divide-border rounded-2xl border border-border bg-surface">
-                                    {faqs.map((faq, i) => (
-                                        <FaqAccordionItem key={i} question={faq.question} answer={faq.answer} />
-                                    ))}
-                                </div>
-                            </div>
-                        )}
                     </RevealOnScroll>
 
                     <RevealOnScroll className="min-w-0 rounded-3xl border border-border bg-surface p-6 shadow-xl sm:p-8">
@@ -210,6 +207,22 @@ export default function Contact({ faqs }: { faqs: FaqItem[] }) {
                     </RevealOnScroll>
                 </div>
             </section>
+
+            {faqs.length > 0 && (
+                <section className="bg-surface-sunken py-20">
+                    <div className="mx-auto max-w-container px-4 sm:px-6 lg:px-8">
+                        <RevealOnScroll className="mx-auto mb-10 max-w-2xl text-center">
+                            <SectionKicker>Common Questions</SectionKicker>
+                            <h2 className="font-display text-4xl uppercase tracking-wide text-text sm:text-5xl">FAQs</h2>
+                        </RevealOnScroll>
+                        <RevealOnScroll className="mx-auto max-w-3xl divide-y divide-border rounded-2xl border border-border bg-surface">
+                            {faqs.map((faq, i) => (
+                                <FaqAccordionItem key={i} question={faq.question} answer={faq.answer} />
+                            ))}
+                        </RevealOnScroll>
+                    </div>
+                </section>
+            )}
         </PublicLayout>
     );
 }
