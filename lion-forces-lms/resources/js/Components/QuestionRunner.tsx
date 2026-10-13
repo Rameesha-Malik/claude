@@ -315,7 +315,7 @@ export default function QuestionRunner({
 
     return (
         <div>
-            <div className="mb-6 rounded-2xl border border-border bg-surface p-4 shadow-sm">
+            <div className={`${compact ? 'mb-3' : 'mb-6'} rounded-2xl border border-border bg-surface p-4 shadow-sm`}>
                 <div className="flex flex-wrap items-center justify-between gap-3">
                     <div className="text-sm text-text-secondary">{headerExtra}</div>
                     <div className="flex flex-1 items-center gap-3">
@@ -341,7 +341,7 @@ export default function QuestionRunner({
                     student relies on mid-quiz (their running score, how
                     many they've skipped) goes missing. */}
                 {compact && (
-                    <div className="mt-3 flex flex-wrap items-center gap-2 border-t border-border pt-3 text-xs">
+                    <div className="mt-2 flex flex-wrap items-center gap-2 border-t border-border pt-2 text-xs">
                         <span className="inline-flex items-center gap-1 rounded-full border border-success bg-success-bg px-2.5 py-1 font-bold text-success">
                             <CheckCircleIcon className="h-3.5 w-3.5" /> {correctCount} Correct
                         </span>
@@ -360,8 +360,8 @@ export default function QuestionRunner({
                 )}
             </div>
 
-            <div className={compact ? 'space-y-6' : 'grid gap-6 lg:grid-cols-3'}>
-                <div className={compact ? 'space-y-6' : 'space-y-6 lg:col-span-2'}>
+            <div className={compact ? 'space-y-3' : 'grid gap-6 lg:grid-cols-3'}>
+                <div className={compact ? 'space-y-3' : 'space-y-6 lg:col-span-2'}>
                     {!compact && (
                         <div className="rounded-2xl border border-border bg-surface p-5">
                             <div className="flex flex-wrap items-center gap-2">
@@ -434,7 +434,7 @@ export default function QuestionRunner({
                         </div>
                     )}
 
-                    <div className="rounded-2xl border border-border bg-surface p-5">
+                    <div className={`rounded-2xl border border-border bg-surface ${compact ? 'p-4' : 'p-5'}`}>
                         <div className="mb-3 flex items-start justify-between gap-3">
                             <p className="font-semibold text-text">
                                 <span className="mr-2 text-text-muted">Q{currentIndex + 1}.</span>
@@ -514,7 +514,7 @@ export default function QuestionRunner({
                         {current.image_path && (
                             <img src={`/storage/${current.image_path}`} alt="" className="mb-3 max-h-64 rounded-lg border border-border" />
                         )}
-                        <div className="space-y-2">
+                        <div className={compact ? 'space-y-1.5' : 'space-y-2'}>
                             {current.options.map((opt) => {
                                 const isSelected = selectedOptionId === opt.id;
                                 const isRevealedCorrect = currentFeedbackReady !== null && opt.id === currentFeedbackReady.correctOptionId;
@@ -527,7 +527,7 @@ export default function QuestionRunner({
                                 return (
                                     <label
                                         key={opt.id}
-                                        className={`flex cursor-pointer items-center gap-3 rounded-lg border p-3 text-sm transition-colors ${classes}`}
+                                        className={`flex cursor-pointer items-center gap-3 rounded-lg border text-sm transition-colors ${compact ? 'p-2.5' : 'p-3'} ${classes}`}
                                     >
                                         <input
                                             type="radio"
@@ -568,7 +568,7 @@ export default function QuestionRunner({
                                     type="button"
                                     onClick={() => goTo(currentIndex - 1)}
                                     disabled={currentIndex === 0}
-                                    className="inline-flex items-center gap-1.5 rounded-lg border border-border px-5 py-3 text-sm font-bold uppercase tracking-wide text-text transition-colors hover:border-primary hover:text-primary disabled:opacity-40 disabled:hover:border-border disabled:hover:text-text"
+                                    className={`inline-flex items-center gap-1.5 rounded-lg border border-border px-5 text-sm font-bold uppercase tracking-wide text-text transition-colors hover:border-primary hover:text-primary disabled:opacity-40 disabled:hover:border-border disabled:hover:text-text ${compact ? 'py-2' : 'py-3'}`}
                                 >
                                     <BackIcon /> Previous
                                 </button>
@@ -577,7 +577,7 @@ export default function QuestionRunner({
                                 <button
                                     type="button"
                                     onClick={() => goTo(currentIndex + 1)}
-                                    className="inline-flex items-center gap-1.5 rounded-lg border border-border px-5 py-3 text-sm font-bold uppercase tracking-wide text-text-secondary transition-colors hover:border-warning hover:text-warning"
+                                    className={`inline-flex items-center gap-1.5 rounded-lg border border-border px-5 text-sm font-bold uppercase tracking-wide text-text-secondary transition-colors hover:border-warning hover:text-warning ${compact ? 'py-2' : 'py-3'}`}
                                 >
                                     <SkipIcon /> Skip MCQ
                                 </button>
@@ -589,7 +589,7 @@ export default function QuestionRunner({
                                 <button
                                     type="button"
                                     onClick={() => goTo(currentIndex + 1)}
-                                    className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-8 py-3 text-sm font-bold uppercase tracking-wide text-on-primary hover:bg-primary-hover"
+                                    className={`inline-flex items-center gap-1.5 rounded-lg bg-primary px-8 text-sm font-bold uppercase tracking-wide text-on-primary hover:bg-primary-hover ${compact ? 'py-2' : 'py-3'}`}
                                 >
                                     Submit &amp; Next <ForwardIcon />
                                 </button>
@@ -599,7 +599,7 @@ export default function QuestionRunner({
                                     type="button"
                                     onClick={onSubmit}
                                     disabled={submitting}
-                                    className="rounded-lg bg-primary px-8 py-3 text-sm font-bold uppercase tracking-wide text-on-primary hover:bg-primary-hover disabled:opacity-50"
+                                    className={`rounded-lg bg-primary px-8 text-sm font-bold uppercase tracking-wide text-on-primary hover:bg-primary-hover disabled:opacity-50 ${compact ? 'py-2' : 'py-3'}`}
                                 >
                                     {submitting ? 'Submitting…' : submitLabel}
                                 </button>

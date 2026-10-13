@@ -45,7 +45,11 @@ export default function DemoQuizTake({ quiz, attemptId, questions }: Props) {
         <PublicLayout>
             <Head title={quiz.title} />
 
-            <div className="mx-auto max-w-3xl px-4 py-10 sm:px-6 lg:px-8">
+            {/* Client: the full public py-10 top/bottom padding (fine for a
+                marketing page) was itself eating into the "all in one
+                screen, no scroll" budget for a timed demo quiz -- cut down
+                to just enough to not look cramped against the navbar. */}
+            <div className="mx-auto max-w-3xl px-4 py-4 sm:px-6 lg:px-8">
                 <QuestionRunner
                     questions={questions}
                     answers={answers}
