@@ -166,6 +166,10 @@ export default function CourseForm({ course, categories, instructors }: Props) {
                         </label>
                     ))}
                 </div>
+                <p className="mt-1 text-xs text-text-muted">
+                    "Quizzes" also gates Custom Quiz -- a student enrolled in this course can only build/take a
+                    Custom Quiz (Admin &rarr; Custom Quiz) while this is checked.
+                </p>
             </div>
 
             <button type="submit" disabled={form.processing} className={btnClass}>
