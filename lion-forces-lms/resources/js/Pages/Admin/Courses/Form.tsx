@@ -15,7 +15,7 @@ interface Course {
     short_description: string | null; description: string | null; syllabus: string | null;
     level: string | null; hours: number | null; base_price: string | null; status: string;
     quizzes_enabled: boolean; flashcards_enabled: boolean; tests_enabled: boolean; assignments_enabled: boolean;
-    target_exam_name: string | null; target_exam_date: string | null;
+    target_exam_name: string | null; target_exam_date: string | null; thumbnail_path: string | null;
     packages: Package[]; lessons: Lesson[]; sections: Section[]; tags: Tag[];
 }
 interface Props { course?: Course; categories: Category[]; instructors: Instructor[] }
@@ -53,6 +53,7 @@ export default function CourseForm({ course, categories, instructors }: Props) {
         target_exam_name: course?.target_exam_name ?? '',
         target_exam_date: course?.target_exam_date ?? '',
         tags: course?.tags.map((t) => t.name).join(', ') ?? '',
+        thumbnail: null as File | null,
     });
 
     const [tab, setTab] = useState<EditTab>('Details');
@@ -69,6 +70,25 @@ export default function CourseForm({ course, categories, instructors }: Props) {
                 <label className={labelClass}>Title</label>
                 <input className={inputClass} value={form.data.title} onChange={(e) => form.setData('title', e.target.value)} />
                 {form.errors.title && <div className="mt-1 text-sm text-danger">{form.errors.title}</div>}
+            </div>
+
+            <div>
+                <label className={labelClass}>Video Thumbnail</label>
+                <div className="flex items-center gap-4">
+                    {course?.thumbnail_path && (
+                        <img src={`/storage/${course.thumbnail_path}`} alt="" className="h-16 w-28 rounded-lg border border-border object-cover" />
+                    )}
+                    <input
+                        type="file"
+                        accept="image/*"
+                        className={inputClass}
+                        onChange={(e) => form.setData('thumbnail', e.target.files?.[0] ?? null)}
+                    />
+                </div>
+                <p className="mt-1 text-xs text-text-muted">
+                    Shown on the course card on the Courses page and homepage. Leave empty to keep the current one.
+                </p>
+                {form.errors.thumbnail && <div className="mt-1 text-sm text-danger">{form.errors.thumbnail}</div>}
             </div>
 
             <div className="grid grid-cols-2 gap-4">

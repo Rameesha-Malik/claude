@@ -80,7 +80,8 @@ class CourseController extends Controller
         $data = $this->validateCourse($request);
         $data['slug'] = $this->uniqueSlug($data['title']);
         $tags = $data['tags'] ?? '';
-        unset($data['tags']);
+        unset($data['tags'], $data['thumbnail']);
+        $data['thumbnail_path'] = $request->hasFile('thumbnail') ? $request->file('thumbnail')->store('courses', 'public') : null;
 
         $course = Course::create($data);
         $this->syncTags($course, $tags);
@@ -113,7 +114,14 @@ class CourseController extends Controller
 
         $data = $this->validateCourse($request);
         $tags = $data['tags'] ?? '';
-        unset($data['tags']);
+        unset($data['tags'], $data['thumbnail']);
+
+        if ($request->hasFile('thumbnail')) {
+            if ($course->thumbnail_path) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($course->thumbnail_path);
+            }
+            $data['thumbnail_path'] = $request->file('thumbnail')->store('courses', 'public');
+        }
 
         $course->update($data);
         $this->syncTags($course, $tags);
@@ -172,6 +180,7 @@ class CourseController extends Controller
             'target_exam_name' => 'nullable|string|max:100',
             'target_exam_date' => 'nullable|date',
             'tags' => 'nullable|string|max:500',
+            'thumbnail' => 'nullable|image|max:2048',
         ]);
     }
 
