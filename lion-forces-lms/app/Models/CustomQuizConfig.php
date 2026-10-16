@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Attributes\Fillable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 #[Fillable(['user_id', 'subject_id', 'topic_id', 'difficulty', 'question_count', 'question_ids'])]
 class CustomQuizConfig extends Model
@@ -30,6 +31,13 @@ class CustomQuizConfig extends Model
     public function topic(): BelongsTo
     {
         return $this->belongsTo(Topic::class);
+    }
+
+    // Same morphMany pattern Quiz::attempts() already uses -- lets admin
+    // see each config's result (score/percentage) without a new table.
+    public function attempts(): MorphMany
+    {
+        return $this->morphMany(TestAttempt::class, 'attemptable');
     }
 
     // The actual questions, in the frozen order they were picked --

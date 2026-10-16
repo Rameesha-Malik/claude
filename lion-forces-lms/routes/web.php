@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\BundlePurchaseController as AdminBundlePurchaseCo
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\ContactInboxController as AdminContactInboxController;
 use App\Http\Controllers\Admin\ContentLibraryController as AdminContentLibraryController;
+use App\Http\Controllers\Admin\CustomQuizController as AdminCustomQuizController;
 use App\Http\Controllers\Admin\GuaranteedNotesController as AdminGuaranteedNotesController;
 use App\Http\Controllers\Admin\ContentManagerController as AdminContentManagerController;
 use App\Http\Controllers\Admin\CourseController as AdminCourseController;
@@ -453,6 +454,8 @@ Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->nam
         Route::put('/{demoQuiz}', [AdminDemoQuizController::class, 'update'])->name('update');
         Route::delete('/{demoQuiz}', [AdminDemoQuizController::class, 'destroy'])->name('destroy');
     });
+
+    Route::get('/custom-quiz', [AdminCustomQuizController::class, 'index'])->name('custom-quiz.index');
 
     Route::middleware('not.content_manager')->prefix('settings')->name('settings.')->group(function () {
         Route::get('/', [AdminSettingsController::class, 'index'])->name('index');

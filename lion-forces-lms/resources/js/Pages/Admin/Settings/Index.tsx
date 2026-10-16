@@ -463,7 +463,7 @@ function QuizzesTab({ quizSettings }: { quizSettings: Props['quizSettings'] }) {
 
 const FEATURE_FIELDS: { key: 'flashcards' | 'custom_quiz' | 'full_test' | 'notes'; label: string; hint: string }[] = [
     { key: 'flashcards', label: 'Flashcards', hint: 'Revision flashcards from course topics or flagged questions.' },
-    { key: 'custom_quiz', label: 'Custom quiz', hint: 'Students build and take custom quizzes from the question bank. (Toggle only -- not yet built.)' },
+    { key: 'custom_quiz', label: 'Custom quiz', hint: 'Students build and take custom quizzes from the question bank. See Admin > Custom Quiz for usage and setup.' },
     { key: 'full_test', label: 'Full test', hint: 'Full-length mock exams / staged tests / exam-style assessments.' },
     { key: 'notes', label: 'Notes', hint: 'Guaranteed Notes catalog and individual note purchases.' },
 ];
