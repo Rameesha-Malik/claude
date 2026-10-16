@@ -7,6 +7,7 @@ use App\Models\Course;
 use App\Models\QuestionBank;
 use App\Models\Quiz;
 use App\Models\Subject;
+use App\Models\Topic;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 use Inertia\Response;
@@ -40,11 +41,16 @@ class QuizController extends Controller
             'quiz' => $quiz,
             'sections' => $course->sections()->orderBy('order')->get(['id', 'title']),
             'subjects' => Subject::orderBy('name')->get(['id', 'name']),
+            'topics' => Topic::orderBy('name')->get(['id', 'subject_id', 'name']),
             'questionBank' => QuestionBank::with('options:id,question_id,option_text,is_correct')
                 ->select('id', 'subject_id', 'question_text', 'difficulty')
                 ->orderByDesc('id')
                 ->limit(200)
                 ->get(),
+            // Set only right after the inline "Add New MCQ"/"Bulk Upload"
+            // forms below redirect back here -- same flash slot Content
+            // Library's bulk uploader already uses.
+            'bulkUploadResult' => session()->pull('bulkUploadResult'),
         ]);
     }
 
@@ -52,7 +58,8 @@ class QuizController extends Controller
     {
         $data = $this->validated($request);
         $questionIds = $data['question_ids'] ?? [];
-        unset($data['question_ids']);
+        unset($data['question_ids'], $data['thumbnail']);
+        $data['thumbnail_path'] = $request->hasFile('thumbnail') ? $request->file('thumbnail')->store('quizzes', 'public') : null;
 
         $quiz = $course->quizzes()->create($data + ['order' => $course->quizzes()->max('order') + 1]);
         $this->syncQuestions($quiz, $questionIds);
@@ -64,7 +71,14 @@ class QuizController extends Controller
     {
         $data = $this->validated($request);
         $questionIds = $data['question_ids'] ?? [];
-        unset($data['question_ids']);
+        unset($data['question_ids'], $data['thumbnail']);
+
+        if ($request->hasFile('thumbnail')) {
+            if ($quiz->thumbnail_path) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($quiz->thumbnail_path);
+            }
+            $data['thumbnail_path'] = $request->file('thumbnail')->store('quizzes', 'public');
+        }
 
         $quiz->update($data);
         $this->syncQuestions($quiz, $questionIds);
@@ -83,6 +97,9 @@ class QuizController extends Controller
     {
         return $request->validate([
             'title' => 'required|string|max:255',
+            'description' => 'nullable|string|max:2000',
+            'syllabus' => 'nullable|string',
+            'thumbnail' => 'nullable|image|max:2048',
             'section_id' => 'nullable|exists:course_sections,id',
             'question_selection_mode' => 'required|in:manual,auto',
             'subject_id' => 'nullable|exists:subjects,id',

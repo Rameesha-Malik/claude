@@ -5,7 +5,7 @@ import StudentLayout from '@/Layouts/StudentLayout';
 
 interface Option { id: number; option_text: string }
 interface Question { id: number; question_text: string; image_path: string | null; options: Option[] }
-interface QuizRecord { id: number; title: string; marks_per_question: string; negative_marking: string }
+interface QuizRecord { id: number; title: string; description: string | null; syllabus: string | null; thumbnail_path: string | null; marks_per_question: string; negative_marking: string }
 interface Props { quiz: QuizRecord; questions: Question[] }
 
 export default function TakeQuiz({ quiz, questions }: Props) {
@@ -27,6 +27,23 @@ export default function TakeQuiz({ quiz, questions }: Props) {
     return (
         <StudentLayout header={quiz.title}>
             <Head title={quiz.title} />
+
+            {(quiz.description || quiz.syllabus || quiz.thumbnail_path) && (
+                <div className="mb-6 flex flex-wrap items-start gap-4 rounded-2xl border border-border bg-surface p-5">
+                    {quiz.thumbnail_path && (
+                        <img src={`/storage/${quiz.thumbnail_path}`} alt="" className="h-24 w-40 flex-shrink-0 rounded-xl object-cover" />
+                    )}
+                    <div className="min-w-0 flex-1">
+                        {quiz.description && <p className="text-sm text-text">{quiz.description}</p>}
+                        {quiz.syllabus && (
+                            <p className="mt-2 text-sm text-text-secondary">
+                                <span className="font-bold uppercase tracking-wide text-text-muted">Covers: </span>
+                                {quiz.syllabus}
+                            </p>
+                        )}
+                    </div>
+                </div>
+            )}
 
             <QuestionRunner
                 questions={questions}

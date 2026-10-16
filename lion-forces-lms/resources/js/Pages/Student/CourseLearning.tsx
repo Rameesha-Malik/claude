@@ -16,7 +16,7 @@ interface PracticeTestSummary {
     latest_attempt_id: number | null;
 }
 interface QuizSummary {
-    id: number; title: string; question_selection_mode: string; auto_question_count: number | null; questions_count: number;
+    id: number; title: string; thumbnail_path: string | null; question_selection_mode: string; auto_question_count: number | null; questions_count: number;
     latest_attempt_id: number | null; section_id: number | null;
 }
 interface FlashcardItem { id: number; front_text: string; back_text: string; subject: { id: number; name: string } | null }
@@ -569,6 +569,7 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
                         <TestCard
                             key={q.id}
                             title={q.title}
+                            thumbnail={q.thumbnail_path}
                             meta={
                                 (q.question_selection_mode === 'manual' ? `${q.questions_count} questions` : `${q.auto_question_count ?? 10} questions (random)`) +
                                 ' · No time limit'
@@ -728,6 +729,7 @@ function TestCard({
     href,
     cta,
     latestAttemptId,
+    thumbnail,
 }: {
     title: string;
     meta: string;
@@ -736,12 +738,16 @@ function TestCard({
     /** When set, a completed attempt exists -- offer a way back to it so a
      *  student can review it again later, not just once right after submitting. */
     latestAttemptId?: number | null;
+    thumbnail?: string | null;
 }) {
     return (
         <div className="group flex flex-wrap items-center justify-between gap-3 rounded-3xl border border-border bg-surface p-5 transition-all duration-normal hover:-translate-y-0.5 hover:border-primary hover:shadow-lg">
-            <div>
-                <h4 className="font-semibold text-text group-hover:text-primary">{title}</h4>
-                <p className="text-sm text-text-secondary">{meta}</p>
+            <div className="flex items-center gap-4">
+                {thumbnail && <img src={`/storage/${thumbnail}`} alt="" className="h-12 w-20 flex-shrink-0 rounded-lg object-cover" />}
+                <div>
+                    <h4 className="font-semibold text-text group-hover:text-primary">{title}</h4>
+                    <p className="text-sm text-text-secondary">{meta}</p>
+                </div>
             </div>
             <div className="flex flex-wrap gap-2">
                 {latestAttemptId && (

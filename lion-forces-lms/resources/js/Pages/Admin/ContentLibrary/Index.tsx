@@ -1,5 +1,7 @@
 import { Head, router, useForm } from '@inertiajs/react';
 import { useState } from 'react';
+import QuestionBankForm from '@/Components/QuestionBankForm';
+import { BulkUploadResult, QuestionBankBulkUploadForm, QuestionBankBulkUploadResult } from '@/Components/QuestionBankBulkUpload';
 import RichTextArea from '@/Components/RichTextArea';
 import AdminLayout from '@/Layouts/AdminLayout';
 
@@ -9,7 +11,6 @@ interface Option { id?: number; option_text: string; is_correct: boolean }
 interface Question { id: number; question_text: string; explanation: string | null; difficulty: string; subject: Subject | null; topic: Topic | null; options: Option[] }
 interface Note { id: number; title: string; content: string | null; subject: Subject | null }
 interface Paginated<T> { data: T[]; links: { url: string | null; label: string; active: boolean }[] }
-interface BulkUploadResult { added: number; errors: string[] }
 interface Props {
     questions: Paginated<Question>;
     notes: Paginated<Note>;
@@ -85,10 +86,10 @@ function QuestionsPanel({ questions, subjects, topics, filters, bulkUploadResult
                 </div>
             </div>
 
-            {showBulk && <BulkUploadForm onDone={() => setShowBulk(false)} />}
-            {bulkUploadResult && <BulkUploadResultBox result={bulkUploadResult} />}
+            {showBulk && <QuestionBankBulkUploadForm onDone={() => setShowBulk(false)} />}
+            {bulkUploadResult && <QuestionBankBulkUploadResult result={bulkUploadResult} />}
 
-            {showAdd && <QuestionForm subjects={subjects} topics={topics} onDone={() => setShowAdd(false)} />}
+            {showAdd && <QuestionBankForm subjects={subjects} topics={topics} onDone={() => setShowAdd(false)} />}
 
             <div className="space-y-3">
                 {questions.data.map((q) => (
@@ -117,132 +118,6 @@ function QuestionsPanel({ questions, subjects, topics, filters, bulkUploadResult
             </div>
 
             <Pagination links={questions.links} />
-        </div>
-    );
-}
-
-function QuestionForm({ subjects, topics, onDone }: { subjects: Subject[]; topics: Topic[]; onDone: () => void }) {
-    const form = useForm({
-        subject_id: '',
-        topic_id: '',
-        question_text: '',
-        explanation: '',
-        difficulty: 'medium',
-        options: [{ option_text: '', is_correct: true }, { option_text: '', is_correct: false }, { option_text: '', is_correct: false }, { option_text: '', is_correct: false }],
-    });
-
-    // Topic is scoped to a subject -- only show topics belonging to
-    // whichever subject is currently picked, and clear a stale topic_id
-    // if the subject changes out from under it.
-    const availableTopics = topics.filter((t) => String(t.subject_id) === form.data.subject_id);
-
-    function setOption(i: number, field: 'option_text' | 'is_correct', value: string | boolean) {
-        const options = [...form.data.options];
-        if (field === 'is_correct') {
-            options.forEach((o, j) => (o.is_correct = j === i));
-        } else {
-            options[i] = { ...options[i], option_text: value as string };
-        }
-        form.setData('options', options);
-    }
-
-    function submit(e: React.FormEvent) {
-        e.preventDefault();
-        form.post('/admin/content-library/questions', { onSuccess: () => { form.reset(); onDone(); } });
-    }
-
-    return (
-        <form onSubmit={submit} className="mb-6 space-y-3 rounded-2xl border border-border bg-surface p-5">
-            <div className="grid grid-cols-2 gap-3">
-                <select
-                    className={inputClass}
-                    value={form.data.subject_id}
-                    onChange={(e) => form.setData((prev) => ({ ...prev, subject_id: e.target.value, topic_id: '' }))}
-                >
-                    <option value="">No subject</option>
-                    {subjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
-                </select>
-                <select className={inputClass} value={form.data.difficulty} onChange={(e) => form.setData('difficulty', e.target.value)}>
-                    {['easy', 'medium', 'hard'].map((d) => <option key={d} value={d}>{d}</option>)}
-                </select>
-            </div>
-            <select
-                className={inputClass}
-                value={form.data.topic_id}
-                onChange={(e) => form.setData('topic_id', e.target.value)}
-                disabled={!form.data.subject_id}
-            >
-                <option value="">{form.data.subject_id ? 'No topic' : 'Pick a subject first to choose a topic'}</option>
-                {availableTopics.map((t) => <option key={t.id} value={t.id}>{t.name}</option>)}
-            </select>
-            <RichTextArea rows={2} className={inputClass} placeholder="Question text" value={form.data.question_text} onChange={(v) => form.setData('question_text', v)} />
-            {form.data.options.map((opt, i) => (
-                <div key={i} className="flex items-center gap-2">
-                    <input type="radio" checked={opt.is_correct} onChange={() => setOption(i, 'is_correct', true)} />
-                    <input className={inputClass} placeholder={`Option ${i + 1}`} value={opt.option_text} onChange={(e) => setOption(i, 'option_text', e.target.value)} />
-                </div>
-            ))}
-            <RichTextArea rows={2} className={inputClass} placeholder="Explanation (optional)" value={form.data.explanation} onChange={(v) => form.setData('explanation', v)} />
-            <button type="submit" disabled={form.processing} className={btnClass}>Save Question</button>
-            {Object.values(form.errors).map((m, i) => <div key={i} className="text-sm text-danger">{String(m)}</div>)}
-        </form>
-    );
-}
-
-const CSV_TEMPLATE = [
-    'Subject,Topic,Difficulty,Question,Option A,Option B,Option C,Option D,Correct Answer,Explanation',
-    'Pakistan Studies,Constitutional History,easy,"In which year was the 1973 Constitution of Pakistan adopted?",1971,1973,1977,1985,B,"The current Constitution of Pakistan was adopted on 10 April 1973."',
-].join('\n');
-
-function BulkUploadForm({ onDone }: { onDone: () => void }) {
-    const form = useForm<{ csv: File | null }>({ csv: null });
-
-    function submit(e: React.FormEvent) {
-        e.preventDefault();
-        if (!form.data.csv) return;
-        form.post('/admin/content-library/questions/bulk', { onSuccess: () => { form.reset(); onDone(); } });
-    }
-
-    return (
-        <form onSubmit={submit} className="mb-6 space-y-3 rounded-2xl border border-border bg-surface p-5">
-            <p className="text-sm text-text-secondary">
-                Upload a CSV instead of adding questions one at a time. Columns, in order: Subject, Topic
-                (optional), Difficulty (easy/medium/hard), Question, Option A–D, Correct Answer (A/B/C/D),
-                Explanation (optional). A Subject or Topic that doesn't exist yet is created automatically.
-            </p>
-            <a
-                href={`data:text/csv;charset=utf-8,${encodeURIComponent(CSV_TEMPLATE)}`}
-                download="question-bank-template.csv"
-                className="inline-block text-sm font-bold uppercase text-primary hover:underline"
-            >
-                Download CSV Template
-            </a>
-            <input
-                type="file"
-                accept=".csv,text/csv"
-                className={inputClass}
-                onChange={(e) => form.setData('csv', e.target.files?.[0] ?? null)}
-            />
-            <button type="submit" disabled={form.processing || !form.data.csv} className={btnClass}>
-                {form.processing ? 'Uploading…' : 'Upload'}
-            </button>
-            {Object.values(form.errors).map((m, i) => <div key={i} className="text-sm text-danger">{String(m)}</div>)}
-        </form>
-    );
-}
-
-function BulkUploadResultBox({ result }: { result: BulkUploadResult }) {
-    return (
-        <div className="mb-6 rounded-2xl border border-border bg-surface p-5">
-            <p className="font-semibold text-text">
-                {result.added} question{result.added === 1 ? '' : 's'} added
-                {result.errors.length > 0 ? `, ${result.errors.length} row${result.errors.length === 1 ? '' : 's'} skipped.` : '.'}
-            </p>
-            {result.errors.length > 0 && (
-                <ul className="mt-2 space-y-1 text-sm text-danger">
-                    {result.errors.map((err, i) => <li key={i}>{err}</li>)}
-                </ul>
-            )}
         </div>
     );
 }

@@ -1,13 +1,16 @@
 import { Head, useForm } from '@inertiajs/react';
 import { useState } from 'react';
+import { BulkUploadResult, QuestionBankBulkUploadForm, QuestionBankBulkUploadResult } from '@/Components/QuestionBankBulkUpload';
+import QuestionBankForm from '@/Components/QuestionBankForm';
 import AdminLayout from '@/Layouts/AdminLayout';
 
 interface Subject { id: number; name: string }
+interface Topic { id: number; subject_id: number; name: string }
 interface Section { id: number; title: string }
 interface Option { id: number; option_text: string; is_correct: boolean }
 interface QuestionRow { id: number; subject_id: number | null; question_text: string; difficulty: string; options: Option[] }
 interface QuizRecord {
-    id: number; title: string; section_id: number | null;
+    id: number; title: string; description: string | null; syllabus: string | null; thumbnail_path: string | null; section_id: number | null;
     question_selection_mode: string; subject_id: number | null; auto_question_count: number | null;
     shuffle_questions: boolean; marks_per_question: string; negative_marking: string;
     is_repeatable: boolean; is_active: boolean; questions: QuestionRow[];
@@ -17,18 +20,25 @@ interface Props {
     quiz?: QuizRecord;
     sections: Section[];
     subjects: Subject[];
+    topics: Topic[];
     questionBank: QuestionRow[];
+    bulkUploadResult: BulkUploadResult | null;
 }
 
 const inputClass = 'w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:shadow-glow focus:outline-none';
 const labelClass = 'mb-1 block text-sm font-medium text-text';
 
-export default function QuizForm({ course, quiz, sections, subjects, questionBank }: Props) {
+export default function QuizForm({ course, quiz, sections, subjects, topics, questionBank, bulkUploadResult }: Props) {
     const isEdit = !!quiz;
     const [subjectFilter, setSubjectFilter] = useState<string>('');
+    const [showAddQuestion, setShowAddQuestion] = useState(false);
+    const [showBulkUpload, setShowBulkUpload] = useState(false);
 
     const form = useForm({
         title: quiz?.title ?? '',
+        description: quiz?.description ?? '',
+        syllabus: quiz?.syllabus ?? '',
+        thumbnail: null as File | null,
         section_id: quiz?.section_id ?? ('' as number | ''),
         question_selection_mode: quiz?.question_selection_mode ?? 'manual',
         subject_id: quiz?.subject_id ?? '',
@@ -65,6 +75,43 @@ export default function QuizForm({ course, quiz, sections, subjects, questionBan
                     <div>
                         <label className={labelClass}>Title</label>
                         <input className={inputClass} value={form.data.title} onChange={(e) => form.setData('title', e.target.value)} />
+                    </div>
+
+                    <div>
+                        <label className={labelClass}>Intro (optional)</label>
+                        <textarea
+                            rows={2}
+                            className={inputClass}
+                            placeholder="Shown to the student before they start the quiz"
+                            value={form.data.description}
+                            onChange={(e) => form.setData('description', e.target.value)}
+                        />
+                    </div>
+
+                    <div>
+                        <label className={labelClass}>Syllabus (optional)</label>
+                        <textarea
+                            rows={2}
+                            className={inputClass}
+                            placeholder="What this quiz covers"
+                            value={form.data.syllabus}
+                            onChange={(e) => form.setData('syllabus', e.target.value)}
+                        />
+                    </div>
+
+                    <div>
+                        <label className={labelClass}>Thumbnail (optional)</label>
+                        <div className="flex items-center gap-3">
+                            {quiz?.thumbnail_path && (
+                                <img src={`/storage/${quiz.thumbnail_path}`} alt="" className="h-12 w-20 rounded-lg border border-border object-cover" />
+                            )}
+                            <input
+                                type="file"
+                                accept="image/*"
+                                className={inputClass}
+                                onChange={(e) => form.setData('thumbnail', e.target.files?.[0] ?? null)}
+                            />
+                        </div>
                     </div>
 
                     <div>
@@ -135,13 +182,38 @@ export default function QuizForm({ course, quiz, sections, subjects, questionBan
 
                 {form.data.question_selection_mode === 'manual' && (
                     <div className="rounded-2xl border border-border bg-surface p-6 lg:col-span-2">
-                        <div className="mb-3 flex items-center justify-between">
+                        <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                             <h3 className="font-bold text-text">Select Questions ({form.data.question_ids.length} selected)</h3>
-                            <select className={inputClass} style={{ width: 200 }} value={subjectFilter} onChange={(e) => setSubjectFilter(e.target.value)}>
-                                <option value="">All subjects</option>
-                                {subjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
-                            </select>
+                            <div className="flex flex-wrap items-center gap-2">
+                                <select className={inputClass} style={{ width: 200 }} value={subjectFilter} onChange={(e) => setSubjectFilter(e.target.value)}>
+                                    <option value="">All subjects</option>
+                                    {subjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
+                                </select>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowBulkUpload((v) => !v)}
+                                    className="rounded-lg border border-border px-3 py-2 text-xs font-bold uppercase tracking-wide text-text hover:border-primary"
+                                >
+                                    {showBulkUpload ? 'Cancel' : 'Bulk Upload (CSV)'}
+                                </button>
+                                <button
+                                    type="button"
+                                    onClick={() => setShowAddQuestion((v) => !v)}
+                                    className="rounded-lg border border-primary px-3 py-2 text-xs font-bold uppercase tracking-wide text-primary hover:bg-primary-subtle"
+                                >
+                                    {showAddQuestion ? 'Cancel' : '+ Add New MCQ'}
+                                </button>
+                            </div>
                         </div>
+
+                        {/* Both post straight to the Question Bank (Content Library's
+                            endpoints) and redirect back to this exact quiz-builder URL,
+                            so the newly added question shows up in the list below without
+                            losing whatever else was already typed into this form. */}
+                        {showBulkUpload && <QuestionBankBulkUploadForm onDone={() => setShowBulkUpload(false)} />}
+                        {bulkUploadResult && <QuestionBankBulkUploadResult result={bulkUploadResult} />}
+                        {showAddQuestion && <QuestionBankForm subjects={subjects} topics={topics} onDone={() => setShowAddQuestion(false)} />}
+
                         <div className="max-h-[600px] space-y-2 overflow-y-auto">
                             {filteredBank.map((q) => (
                                 <label key={q.id} className="flex cursor-pointer items-start gap-3 rounded-lg border border-border p-3 hover:border-primary">

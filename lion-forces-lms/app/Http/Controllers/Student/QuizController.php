@@ -30,7 +30,7 @@ class QuizController extends Controller
         ])->values();
 
         return Inertia::render('Student/Quizzes/Take', [
-            'quiz' => $quiz->only('id', 'title', 'marks_per_question', 'negative_marking'),
+            'quiz' => $quiz->only('id', 'title', 'description', 'syllabus', 'thumbnail_path', 'marks_per_question', 'negative_marking'),
             'questions' => $questions,
         ]);
     }

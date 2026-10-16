@@ -10,7 +10,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 #[Fillable([
-    'course_id', 'section_id', 'title', 'question_selection_mode', 'subject_id', 'auto_question_count',
+    'course_id', 'section_id', 'title', 'description', 'syllabus', 'thumbnail_path',
+    'question_selection_mode', 'subject_id', 'auto_question_count',
     'shuffle_questions', 'marks_per_question', 'negative_marking', 'is_repeatable', 'is_active', 'order',
 ])]
 class Quiz extends Model
