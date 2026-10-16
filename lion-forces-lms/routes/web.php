@@ -305,6 +305,7 @@ Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->nam
         Route::post('/subjects', [AdminContentLibraryController::class, 'storeSubject'])->name('subjects.store');
         Route::post('/topics', [AdminContentLibraryController::class, 'storeTopic'])->name('topics.store');
         Route::post('/questions', [AdminContentLibraryController::class, 'storeQuestion'])->name('questions.store');
+        Route::post('/questions/bulk', [AdminContentLibraryController::class, 'bulkUploadQuestions'])->name('questions.bulk');
         Route::put('/questions/{question}', [AdminContentLibraryController::class, 'updateQuestion'])->name('questions.update');
         Route::delete('/questions/{question}', [AdminContentLibraryController::class, 'destroyQuestion'])->name('questions.destroy');
         Route::post('/notes', [AdminContentLibraryController::class, 'storeNote'])->name('notes.store');

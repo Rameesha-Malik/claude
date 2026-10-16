@@ -9,6 +9,7 @@ use App\Models\QuestionBank;
 use App\Models\Subject;
 use App\Models\Topic;
 use Illuminate\Http\Request;
+use Illuminate\Support\Str;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -33,6 +34,9 @@ class ContentLibraryController extends Controller
             // for the question list filter.
             'topics' => Topic::orderBy('name')->get(['id', 'subject_id', 'name']),
             'filters' => $request->only(['subject_id']),
+            // Only present right after a bulk-upload redirect -- pull() so
+            // it doesn't linger in the session past this one page load.
+            'bulkUploadResult' => session()->pull('bulkUploadResult'),
         ]);
     }
 
@@ -85,6 +89,90 @@ class ContentLibraryController extends Controller
         ActivityLog::record('added', 'MCQ', $question->id, 'MCQ added.');
 
         return back()->with('success', 'Question added to the bank.');
+    }
+
+    // Client: "no need to change or upload each mcq one by one" -- the
+    // single-question form above was the only way in, fine for a handful
+    // of questions but not for "a bank of 200". CSV columns: Subject,
+    // Topic, Difficulty, Question, Option A, Option B, Option C,
+    // Option D, Correct Answer (A/B/C/D), Explanation. Subject/Topic are
+    // matched by name (case-insensitive) or created on the fly, same as
+    // typing a new one into the single-question form's dropdowns would
+    // require doing by hand first -- this does it inline per row instead.
+    public function bulkUploadQuestions(Request $request)
+    {
+        $request->validate(['csv' => 'required|file|mimes:csv,txt|max:2048']);
+
+        $handle = fopen($request->file('csv')->getRealPath(), 'r');
+        $header = fgetcsv($handle);
+        $rowNumber = 1;
+        $added = 0;
+        $errors = [];
+
+        while (($row = fgetcsv($handle)) !== false) {
+            $rowNumber++;
+            if (count(array_filter($row, fn ($v) => trim((string) $v) !== '')) === 0) {
+                continue; // skip fully blank rows (trailing newline etc.)
+            }
+
+            [$subjectName, $topicName, $difficulty, $questionText, $optA, $optB, $optC, $optD, $correct, $explanation] = array_pad($row, 10, null);
+
+            $subjectName = trim((string) $subjectName);
+            $questionText = trim((string) $questionText);
+            $options = [trim((string) $optA), trim((string) $optB), trim((string) $optC), trim((string) $optD)];
+            $correct = strtoupper(trim((string) $correct));
+            $difficulty = strtolower(trim((string) $difficulty)) ?: 'medium';
+
+            if ($subjectName === '' || $questionText === '' || in_array('', $options, true)) {
+                $errors[] = "Row {$rowNumber}: missing Subject, Question, or one of the four options.";
+
+                continue;
+            }
+            if (! in_array($difficulty, ['easy', 'medium', 'hard'], true)) {
+                $errors[] = "Row {$rowNumber}: Difficulty must be easy, medium, or hard (got \"{$difficulty}\").";
+
+                continue;
+            }
+            $correctIndex = array_search($correct, ['A', 'B', 'C', 'D'], true);
+            if ($correctIndex === false) {
+                $errors[] = "Row {$rowNumber}: Correct Answer must be A, B, C, or D (got \"{$correct}\").";
+
+                continue;
+            }
+
+            $subject = Subject::firstOrCreate(['slug' => Str::slug($subjectName)], ['name' => $subjectName]);
+            $topic = null;
+            $topicName = trim((string) $topicName);
+            if ($topicName !== '') {
+                $topic = Topic::firstOrCreate(['subject_id' => $subject->id, 'name' => $topicName]);
+            }
+
+            $question = QuestionBank::create([
+                'subject_id' => $subject->id,
+                'topic_id' => $topic?->id,
+                'question_text' => $questionText,
+                'explanation' => trim((string) $explanation) ?: null,
+                'difficulty' => $difficulty,
+                'created_by' => $request->user()->id,
+            ]);
+
+            foreach ($options as $i => $optionText) {
+                $question->options()->create([
+                    'option_text' => $optionText,
+                    'is_correct' => $i === $correctIndex,
+                    'order' => $i + 1,
+                ]);
+            }
+
+            $added++;
+        }
+        fclose($handle);
+
+        if ($added > 0) {
+            ActivityLog::record('added', 'MCQ', null, "{$added} MCQs bulk-uploaded.");
+        }
+
+        return back()->with('bulkUploadResult', ['added' => $added, 'errors' => $errors]);
     }
 
     public function updateQuestion(Request $request, QuestionBank $question)

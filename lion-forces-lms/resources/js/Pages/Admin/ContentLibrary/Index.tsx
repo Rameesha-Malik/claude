@@ -9,18 +9,20 @@ interface Option { id?: number; option_text: string; is_correct: boolean }
 interface Question { id: number; question_text: string; explanation: string | null; difficulty: string; subject: Subject | null; topic: Topic | null; options: Option[] }
 interface Note { id: number; title: string; content: string | null; subject: Subject | null }
 interface Paginated<T> { data: T[]; links: { url: string | null; label: string; active: boolean }[] }
+interface BulkUploadResult { added: number; errors: string[] }
 interface Props {
     questions: Paginated<Question>;
     notes: Paginated<Note>;
     subjects: Subject[];
     topics: Topic[];
     filters: { subject_id?: string };
+    bulkUploadResult: BulkUploadResult | null;
 }
 
 const inputClass = 'w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:shadow-glow focus:outline-none';
 const btnClass = 'rounded-lg bg-primary px-4 py-2 text-sm font-bold uppercase tracking-wide text-on-primary hover:bg-primary-hover disabled:opacity-50';
 
-export default function ContentLibraryIndex({ questions, notes, subjects, topics, filters }: Props) {
+export default function ContentLibraryIndex({ questions, notes, subjects, topics, filters, bulkUploadResult }: Props) {
     const [tab, setTab] = useState<'Questions' | 'Notes' | 'Subjects' | 'Topics'>('Questions');
 
     return (
@@ -43,7 +45,15 @@ export default function ContentLibraryIndex({ questions, notes, subjects, topics
                 ))}
             </div>
 
-            {tab === 'Questions' && <QuestionsPanel questions={questions} subjects={subjects} topics={topics} filters={filters} />}
+            {tab === 'Questions' && (
+                <QuestionsPanel
+                    questions={questions}
+                    subjects={subjects}
+                    topics={topics}
+                    filters={filters}
+                    bulkUploadResult={bulkUploadResult}
+                />
+            )}
             {tab === 'Notes' && <NotesPanel notes={notes} subjects={subjects} />}
             {tab === 'Subjects' && <SubjectsPanel subjects={subjects} />}
             {tab === 'Topics' && <TopicsPanel subjects={subjects} topics={topics} />}
@@ -51,8 +61,9 @@ export default function ContentLibraryIndex({ questions, notes, subjects, topics
     );
 }
 
-function QuestionsPanel({ questions, subjects, topics, filters }: { questions: Paginated<Question>; subjects: Subject[]; topics: Topic[]; filters: { subject_id?: string } }) {
+function QuestionsPanel({ questions, subjects, topics, filters, bulkUploadResult }: { questions: Paginated<Question>; subjects: Subject[]; topics: Topic[]; filters: { subject_id?: string }; bulkUploadResult: BulkUploadResult | null }) {
     const [showAdd, setShowAdd] = useState(false);
+    const [showBulk, setShowBulk] = useState(false);
 
     return (
         <div>
@@ -66,8 +77,16 @@ function QuestionsPanel({ questions, subjects, topics, filters }: { questions: P
                     <option value="">All subjects</option>
                     {subjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
                 </select>
-                <button onClick={() => setShowAdd((v) => !v)} className={btnClass}>{showAdd ? 'Cancel' : '+ Add Question'}</button>
+                <div className="flex gap-2">
+                    <button onClick={() => setShowBulk((v) => !v)} className={`${btnClass} bg-surface-sunken text-text hover:bg-surface-sunken/80`}>
+                        {showBulk ? 'Cancel' : 'Bulk Upload (CSV)'}
+                    </button>
+                    <button onClick={() => setShowAdd((v) => !v)} className={btnClass}>{showAdd ? 'Cancel' : '+ Add Question'}</button>
+                </div>
             </div>
+
+            {showBulk && <BulkUploadForm onDone={() => setShowBulk(false)} />}
+            {bulkUploadResult && <BulkUploadResultBox result={bulkUploadResult} />}
 
             {showAdd && <QuestionForm subjects={subjects} topics={topics} onDone={() => setShowAdd(false)} />}
 
@@ -167,6 +186,64 @@ function QuestionForm({ subjects, topics, onDone }: { subjects: Subject[]; topic
             <button type="submit" disabled={form.processing} className={btnClass}>Save Question</button>
             {Object.values(form.errors).map((m, i) => <div key={i} className="text-sm text-danger">{String(m)}</div>)}
         </form>
+    );
+}
+
+const CSV_TEMPLATE = [
+    'Subject,Topic,Difficulty,Question,Option A,Option B,Option C,Option D,Correct Answer,Explanation',
+    'Pakistan Studies,Constitutional History,easy,"In which year was the 1973 Constitution of Pakistan adopted?",1971,1973,1977,1985,B,"The current Constitution of Pakistan was adopted on 10 April 1973."',
+].join('\n');
+
+function BulkUploadForm({ onDone }: { onDone: () => void }) {
+    const form = useForm<{ csv: File | null }>({ csv: null });
+
+    function submit(e: React.FormEvent) {
+        e.preventDefault();
+        if (!form.data.csv) return;
+        form.post('/admin/content-library/questions/bulk', { onSuccess: () => { form.reset(); onDone(); } });
+    }
+
+    return (
+        <form onSubmit={submit} className="mb-6 space-y-3 rounded-2xl border border-border bg-surface p-5">
+            <p className="text-sm text-text-secondary">
+                Upload a CSV instead of adding questions one at a time. Columns, in order: Subject, Topic
+                (optional), Difficulty (easy/medium/hard), Question, Option A–D, Correct Answer (A/B/C/D),
+                Explanation (optional). A Subject or Topic that doesn't exist yet is created automatically.
+            </p>
+            <a
+                href={`data:text/csv;charset=utf-8,${encodeURIComponent(CSV_TEMPLATE)}`}
+                download="question-bank-template.csv"
+                className="inline-block text-sm font-bold uppercase text-primary hover:underline"
+            >
+                Download CSV Template
+            </a>
+            <input
+                type="file"
+                accept=".csv,text/csv"
+                className={inputClass}
+                onChange={(e) => form.setData('csv', e.target.files?.[0] ?? null)}
+            />
+            <button type="submit" disabled={form.processing || !form.data.csv} className={btnClass}>
+                {form.processing ? 'Uploading…' : 'Upload'}
+            </button>
+            {Object.values(form.errors).map((m, i) => <div key={i} className="text-sm text-danger">{String(m)}</div>)}
+        </form>
+    );
+}
+
+function BulkUploadResultBox({ result }: { result: BulkUploadResult }) {
+    return (
+        <div className="mb-6 rounded-2xl border border-border bg-surface p-5">
+            <p className="font-semibold text-text">
+                {result.added} question{result.added === 1 ? '' : 's'} added
+                {result.errors.length > 0 ? `, ${result.errors.length} row${result.errors.length === 1 ? '' : 's'} skipped.` : '.'}
+            </p>
+            {result.errors.length > 0 && (
+                <ul className="mt-2 space-y-1 text-sm text-danger">
+                    {result.errors.map((err, i) => <li key={i}>{err}</li>)}
+                </ul>
+            )}
+        </div>
     );
 }
 
