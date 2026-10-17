@@ -42,7 +42,6 @@ export default function CourseForm({ course, categories, instructors }: Props) {
         short_description: course?.short_description ?? '',
         description: course?.description ?? '',
         syllabus: course?.syllabus ?? '',
-        level: course?.level ?? '',
         hours: course?.hours ?? '',
         base_price: course?.base_price ?? '',
         status: course?.status ?? 'draft',
@@ -120,21 +119,7 @@ export default function CourseForm({ course, categories, instructors }: Props) {
                 <RichTextArea rows={3} className={inputClass} value={form.data.syllabus} onChange={(v) => form.setData('syllabus', v)} />
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
-                <div>
-                    <label className={labelClass}>Level</label>
-                    {/* Was a free-text input -- test/placeholder values typed in
-                        here (e.g. "2") rendered as-is in the level badge students
-                        see on the course page. A fixed list keeps that badge
-                        always meaningful. */}
-                    <select className={inputClass} value={form.data.level} onChange={(e) => form.setData('level', e.target.value)}>
-                        <option value="">— None —</option>
-                        <option value="Beginner">Beginner</option>
-                        <option value="Intermediate">Intermediate</option>
-                        <option value="Advanced">Advanced</option>
-                        <option value="All Levels">All Levels</option>
-                    </select>
-                </div>
+            <div className="grid grid-cols-2 gap-4">
                 <div>
                     <label className={labelClass}>Hours</label>
                     <input type="number" className={inputClass} value={form.data.hours} onChange={(e) => form.setData('hours', e.target.value)} />
@@ -201,6 +186,10 @@ export default function CourseForm({ course, categories, instructors }: Props) {
     return (
         <AdminLayout header={isEdit ? 'Edit Course' : 'New Course'}>
             <Head title={isEdit ? course!.title : 'New Course'} />
+
+            <Link href="/admin/courses" className="mb-4 inline-flex items-center gap-1 text-sm text-text-secondary hover:text-primary">
+                ← Back to courses
+            </Link>
 
             {!isEdit && detailsForm}
 

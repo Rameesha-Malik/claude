@@ -169,7 +169,6 @@ class CourseController extends Controller
             'short_description' => 'nullable|string|max:500',
             'description' => 'nullable|string',
             'syllabus' => 'nullable|string',
-            'level' => 'nullable|string|max:100',
             'hours' => 'nullable|integer|min:0',
             'base_price' => 'nullable|numeric|min:0',
             'status' => 'required|in:draft,published,hidden',
