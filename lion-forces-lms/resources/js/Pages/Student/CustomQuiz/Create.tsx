@@ -1,15 +1,84 @@
-import { Head, Link, useForm } from '@inertiajs/react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
 import { FormEvent } from 'react';
 import StudentLayout from '@/Layouts/StudentLayout';
 
 interface SubjectOption { id: number; name: string; questions_count: number }
 interface TopicOption { id: number; subject_id: number; name: string }
 interface CourseInfo { id: number; title: string; slug: string }
-interface Props { subjects: SubjectOption[]; topics: TopicOption[]; locked?: boolean; course?: CourseInfo | null }
+interface HistoryItem {
+    id: number; subject: string | null; topic: string | null; difficulty: string | null;
+    question_count: number; created_at: string; attempt_id: number | null; percentage: string | null;
+}
+interface Props {
+    subjects: SubjectOption[]; topics: TopicOption[]; locked?: boolean; course?: CourseInfo | null;
+    history?: HistoryItem[];
+}
 
 const inputClass = 'w-full rounded-lg border border-border px-3 py-2.5 text-sm focus:border-primary focus:shadow-glow focus:outline-none';
 
-export default function CreateCustomQuiz({ subjects, topics, locked = false, course = null }: Props) {
+function scoreTone(pct: number): string {
+    if (pct >= 70) return 'bg-success-bg text-success';
+    if (pct >= 50) return 'bg-warning-bg text-warning';
+    return 'bg-danger-bg text-danger';
+}
+
+// UWorld's "Tests" tab, folded into this same page rather than a separate
+// nav entry/URL -- a student can see every quiz they've built, pick up an
+// unsubmitted one, retake with a fresh random pick of the same filters, or
+// clear out old ones, all right under the builder that made them.
+function TestHistory({ history }: { history: HistoryItem[] }) {
+    function destroy(id: number) {
+        if (confirm('Remove this from your test history? This cannot be undone.')) {
+            router.delete(`/portal/custom-quiz/${id}`, { preserveScroll: true });
+        }
+    }
+
+    if (history.length === 0) return null;
+
+    return (
+        <div className="mx-auto mt-8 max-w-lg">
+            <h2 className="mb-3 text-sm font-bold uppercase tracking-wide text-text-muted">Your Past Tests</h2>
+            <div className="space-y-3">
+                {history.map((h) => (
+                    <div key={h.id} className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-surface p-4">
+                        <div className="min-w-0">
+                            <p className="truncate text-sm font-semibold text-text">
+                                {h.subject ?? 'Any subject'}{h.topic ? ` — ${h.topic}` : ''}
+                            </p>
+                            <p className="text-xs text-text-muted">
+                                {h.question_count} question{h.question_count === 1 ? '' : 's'}
+                                {h.difficulty ? ` · ${h.difficulty}` : ''} · {new Date(h.created_at).toLocaleDateString()}
+                            </p>
+                        </div>
+                        <div className="flex flex-shrink-0 items-center gap-2">
+                            {h.percentage !== null ? (
+                                <Link href={`/portal/attempts/${h.attempt_id}`} className={`rounded-full px-2.5 py-1 text-xs font-bold ${scoreTone(Number(h.percentage))}`}>
+                                    {h.percentage}%
+                                </Link>
+                            ) : (
+                                <Link href={`/portal/custom-quiz/${h.id}`} className="rounded-full bg-primary-subtle px-2.5 py-1 text-xs font-bold text-primary hover:bg-primary/20">
+                                    Resume
+                                </Link>
+                            )}
+                            <button
+                                onClick={() => router.post(`/portal/custom-quiz/${h.id}/duplicate`)}
+                                title="Retake with a fresh random pick"
+                                className="rounded-full border border-border px-2.5 py-1 text-xs font-bold text-text-secondary hover:border-primary hover:text-primary"
+                            >
+                                Retake
+                            </button>
+                            <button onClick={() => destroy(h.id)} title="Remove" className="text-text-muted hover:text-danger">
+                                ✕
+                            </button>
+                        </div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+}
+
+export default function CreateCustomQuiz({ subjects, topics, locked = false, course = null, history = [] }: Props) {
     const form = useForm({
         subject_id: '' as number | '',
         topic_id: '' as number | '',
@@ -121,6 +190,8 @@ export default function CreateCustomQuiz({ subjects, topics, locked = false, cou
                     </button>
                 </form>
             </div>
+
+            <TestHistory history={history} />
         </StudentLayout>
     );
 }

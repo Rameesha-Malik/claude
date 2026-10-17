@@ -15,7 +15,10 @@ interface CourseRow { id: number; title: string; quizzes_enabled: boolean }
 interface Props {
     configs: ConfigRow[];
     enabled: boolean;
-    stats: { total_generated: number; subjects_with_questions: number; topics_with_questions: number };
+    stats: {
+        total_generated: number; subjects_with_questions: number; topics_with_questions: number;
+        bank_coverage: { used: number; total: number; percentage: number };
+    };
     courses: CourseRow[];
 }
 
@@ -58,7 +61,7 @@ export default function AdminCustomQuizIndex({ configs, enabled, stats, courses 
                 </div>
             </div>
 
-            <div className="mb-6 grid gap-4 sm:grid-cols-3">
+            <div className="mb-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <div className="rounded-2xl border border-border bg-surface p-5">
                     <div className="font-display text-3xl text-text">{stats.total_generated}</div>
                     <div className="text-sm text-text-secondary">Quizzes generated (all time)</div>
@@ -70,6 +73,12 @@ export default function AdminCustomQuizIndex({ configs, enabled, stats, courses 
                 <div className="rounded-2xl border border-border bg-surface p-5">
                     <div className="font-display text-3xl text-text">{stats.topics_with_questions}</div>
                     <div className="text-sm text-text-secondary">Topics with questions</div>
+                </div>
+                <div className="rounded-2xl border border-border bg-surface p-5">
+                    <div className="font-display text-3xl text-text">{stats.bank_coverage.percentage}%</div>
+                    <div className="text-sm text-text-secondary">
+                        Bank coverage ({stats.bank_coverage.used.toLocaleString()} of {stats.bank_coverage.total.toLocaleString()} questions ever answered)
+                    </div>
                 </div>
             </div>
 

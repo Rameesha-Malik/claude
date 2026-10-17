@@ -60,6 +60,26 @@ class CustomQuizController extends Controller
             'topics' => $topics,
             'locked' => false,
             'course' => $course?->only('id', 'title', 'slug'),
+            // Client, from a UWorld QBank walkthrough: a student should be
+            // able to see every test they've built, not just the one they
+            // just finished. Kept on this same page (not a separate nav
+            // entry/URL) rather than duplicating the builder's course
+            // context and access gate on a second page.
+            'history' => CustomQuizConfig::where('user_id', $request->user()->id)
+                ->with(['subject:id,name', 'topic:id,name', 'attempts'])
+                ->latest()
+                ->limit(20)
+                ->get()
+                ->map(fn (CustomQuizConfig $c) => [
+                    'id' => $c->id,
+                    'subject' => $c->subject?->name,
+                    'topic' => $c->topic?->name,
+                    'difficulty' => $c->difficulty,
+                    'question_count' => $c->question_count,
+                    'created_at' => $c->created_at,
+                    'attempt_id' => $c->attempts->first()?->id,
+                    'percentage' => $c->attempts->first()?->percentage,
+                ]),
         ]);
     }
 
@@ -78,17 +98,7 @@ class CustomQuizController extends Controller
         $course = ! empty($data['course_id']) ? Course::find($data['course_id']) : null;
         abort_unless($this->hasQuizAccess($request, $course), 403, 'Buy a course with quiz access to use Custom Quiz.');
 
-        $questionIds = QuestionBank::query()
-            ->when($data['subject_id'] ?? null, fn ($q, $id) => $q->where('subject_id', $id))
-            ->when($data['topic_id'] ?? null, fn ($q, $id) => $q->where('topic_id', $id))
-            ->when($data['difficulty'] ?? null, fn ($q, $d) => $q->where('difficulty', $d))
-            ->inRandomOrder()
-            ->limit($data['question_count'])
-            ->pluck('id')
-            ->values()
-            ->all();
-
-        abort_if(count($questionIds) === 0, 422, 'No questions match those filters yet -- try a different subject, topic, or difficulty.');
+        $questionIds = $this->pickQuestionIds($data);
 
         $config = CustomQuizConfig::create([
             'user_id' => $request->user()->id,
@@ -100,6 +110,43 @@ class CustomQuizController extends Controller
         ]);
 
         return redirect()->route('student.custom-quiz.show', $config);
+    }
+
+    // "Duplicate" (UWorld Tests tab): same filters, a fresh random pick --
+    // not literally the same questions, since the point of retaking is
+    // practice, not memorizing one frozen set.
+    public function duplicate(Request $request, CustomQuizConfig $config)
+    {
+        abort_unless(FeatureFlags::enabled('custom_quiz'), 404);
+        abort_unless($config->user_id === $request->user()->id, 403);
+
+        $questionIds = $this->pickQuestionIds([
+            'subject_id' => $config->subject_id,
+            'topic_id' => $config->topic_id,
+            'difficulty' => $config->difficulty,
+            'question_count' => $config->question_count,
+        ]);
+
+        $copy = CustomQuizConfig::create([
+            'user_id' => $request->user()->id,
+            'subject_id' => $config->subject_id,
+            'topic_id' => $config->topic_id,
+            'difficulty' => $config->difficulty,
+            'question_count' => count($questionIds),
+            'question_ids' => $questionIds,
+        ]);
+
+        return redirect()->route('student.custom-quiz.show', $copy);
+    }
+
+    public function destroy(Request $request, CustomQuizConfig $config)
+    {
+        abort_unless($config->user_id === $request->user()->id, 403);
+
+        $config->attempts->each->delete();
+        $config->delete();
+
+        return back()->with('success', 'Removed from your test history.');
     }
 
     public function show(Request $request, CustomQuizConfig $config): Response
@@ -209,5 +256,25 @@ class CustomQuizController extends Controller
         }
 
         return $query->exists();
+    }
+
+    // Shared by store() (new config) and duplicate() (retake with a fresh
+    // random pick, same filters) -- kept as one place so both can never
+    // drift apart on how a set of questions gets picked.
+    private function pickQuestionIds(array $data): array
+    {
+        $questionIds = QuestionBank::query()
+            ->when($data['subject_id'] ?? null, fn ($q, $id) => $q->where('subject_id', $id))
+            ->when($data['topic_id'] ?? null, fn ($q, $id) => $q->where('topic_id', $id))
+            ->when($data['difficulty'] ?? null, fn ($q, $d) => $q->where('difficulty', $d))
+            ->inRandomOrder()
+            ->limit($data['question_count'])
+            ->pluck('id')
+            ->values()
+            ->all();
+
+        abort_if(count($questionIds) === 0, 422, 'No questions match those filters yet -- try a different subject, topic, or difficulty.');
+
+        return $questionIds;
     }
 }
