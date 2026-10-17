@@ -20,8 +20,8 @@ use Inertia\Response;
  * header/footer links (nav_items was seeded once and never touched
  * again), so a new Page was only ever reachable by sharing its raw URL.
  * "Show in Header/Footer Menu" below creates/removes the matching
- * top-level NavItem for this page instead of requiring a separate
- * full navigation-management screen.
+ * NavItem for this page (see syncNavItems()) instead of requiring a
+ * separate full navigation-management screen.
  */
 class PageController extends Controller
 {
@@ -106,30 +106,61 @@ class PageController extends Controller
     // (one per location) to match the checkboxes -- keeps the label in
     // sync with the page title too, since a NavItem for a Page has no
     // reason to ever say something different from the page itself.
+    //
+    // Footer layout is a fixed 4-column grid (Logo, one column per
+    // top-level footer NavItem, Contact) -- every TOP-LEVEL footer entry
+    // becomes its own column. A new standalone column per page pushed
+    // "Contact" onto its own near-empty row once there were more than 2
+    // groups, which is exactly the extra blank space the client flagged.
+    // So a footer link goes in UNDER the existing "Resources" group
+    // instead of becoming a new column; the header has no such grid
+    // constraint (it's a flat link row), so it stays top-level there.
     private function syncNavItems(Page $page, array $nav): void
     {
         $url = "/pages/{$page->slug}";
 
-        foreach (['header', 'footer'] as $location) {
-            $existing = NavItem::where('url', $url)->where('location', $location)->first();
-
-            // A draft page 404s at its own URL -- never leave a nav link
-            // pointing at one, even if the checkbox was left checked.
-            if ($nav[$location] && $page->is_published) {
-                if ($existing) {
-                    $existing->update(['label' => $page->title]);
-                } else {
-                    NavItem::create([
-                        'label' => $page->title,
-                        'url' => $url,
-                        'location' => $location,
-                        'order' => NavItem::where('location', $location)->whereNull('parent_id')->max('order') + 1,
-                        'is_visible' => true,
-                    ]);
-                }
-            } elseif ($existing) {
-                $existing->delete();
+        $existingHeader = NavItem::where('url', $url)->where('location', 'header')->first();
+        if ($nav['header'] && $page->is_published) {
+            if ($existingHeader) {
+                $existingHeader->update(['label' => $page->title]);
+            } else {
+                NavItem::create([
+                    'label' => $page->title,
+                    'url' => $url,
+                    'location' => 'header',
+                    'order' => NavItem::where('location', 'header')->whereNull('parent_id')->max('order') + 1,
+                    'is_visible' => true,
+                ]);
             }
+        } elseif ($existingHeader) {
+            $existingHeader->delete();
+        }
+
+        // Also catches a stray top-level footer entry from an earlier
+        // version of this feature (which made every page its own column)
+        // and folds it into Resources below instead of leaving a
+        // duplicate link dangling.
+        $existingFooter = NavItem::where('url', $url)->where('location', 'footer')->first();
+        if ($nav['footer'] && $page->is_published) {
+            $resources = NavItem::firstOrCreate(
+                ['label' => 'Resources', 'location' => 'footer', 'parent_id' => null],
+                ['url' => '#', 'order' => 1, 'is_visible' => true],
+            );
+
+            if ($existingFooter) {
+                $existingFooter->update(['label' => $page->title, 'parent_id' => $resources->id]);
+            } else {
+                NavItem::create([
+                    'label' => $page->title,
+                    'url' => $url,
+                    'location' => 'footer',
+                    'parent_id' => $resources->id,
+                    'order' => $resources->children()->max('order') + 1,
+                    'is_visible' => true,
+                ]);
+            }
+        } elseif ($existingFooter) {
+            $existingFooter->delete();
         }
     }
 }
