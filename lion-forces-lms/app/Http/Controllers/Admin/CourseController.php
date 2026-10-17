@@ -176,8 +176,6 @@ class CourseController extends Controller
             'flashcards_enabled' => 'boolean',
             'tests_enabled' => 'boolean',
             'assignments_enabled' => 'boolean',
-            'target_exam_name' => 'nullable|string|max:100',
-            'target_exam_date' => 'nullable|date',
             'tags' => 'nullable|string|max:500',
             'thumbnail' => 'nullable|image|max:2048',
         ]);

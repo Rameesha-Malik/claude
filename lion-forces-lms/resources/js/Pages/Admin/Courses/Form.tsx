@@ -49,8 +49,6 @@ export default function CourseForm({ course, categories, instructors }: Props) {
         flashcards_enabled: course?.flashcards_enabled ?? false,
         tests_enabled: course?.tests_enabled ?? false,
         assignments_enabled: course?.assignments_enabled ?? false,
-        target_exam_name: course?.target_exam_name ?? '',
-        target_exam_date: course?.target_exam_date ?? '',
         tags: course?.tags.map((t) => t.name).join(', ') ?? '',
         thumbnail: null as File | null,
     });
@@ -127,17 +125,6 @@ export default function CourseForm({ course, categories, instructors }: Props) {
                 <div>
                     <label className={labelClass}>Base Price (Rs.)</label>
                     <input type="number" className={inputClass} value={form.data.base_price} onChange={(e) => form.setData('base_price', e.target.value)} />
-                </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-                <div>
-                    <label className={labelClass}>Target Exam Name</label>
-                    <input className={inputClass} value={form.data.target_exam_name} onChange={(e) => form.setData('target_exam_name', e.target.value)} />
-                </div>
-                <div>
-                    <label className={labelClass}>Target Exam Date</label>
-                    <input type="date" className={inputClass} value={form.data.target_exam_date} onChange={(e) => form.setData('target_exam_date', e.target.value)} />
                 </div>
             </div>
 
