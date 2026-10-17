@@ -14,7 +14,6 @@ interface Course {
     id: number; title: string; category_id: number; instructor_id: number | null;
     short_description: string | null; description: string | null; syllabus: string | null;
     level: string | null; hours: number | null; base_price: string | null; status: string;
-    quizzes_enabled: boolean; flashcards_enabled: boolean; tests_enabled: boolean; assignments_enabled: boolean;
     target_exam_name: string | null; target_exam_date: string | null; thumbnail_path: string | null;
     packages: Package[]; lessons: Lesson[]; sections: Section[]; tags: Tag[];
 }
@@ -45,10 +44,6 @@ export default function CourseForm({ course, categories, instructors }: Props) {
         hours: course?.hours ?? '',
         base_price: course?.base_price ?? '',
         status: course?.status ?? 'draft',
-        quizzes_enabled: course?.quizzes_enabled ?? false,
-        flashcards_enabled: course?.flashcards_enabled ?? false,
-        tests_enabled: course?.tests_enabled ?? false,
-        assignments_enabled: course?.assignments_enabled ?? false,
         tags: course?.tags.map((t) => t.name).join(', ') ?? '',
         thumbnail: null as File | null,
     });
@@ -146,22 +141,6 @@ export default function CourseForm({ course, categories, instructors }: Props) {
                     <option value="published">Published</option>
                     <option value="hidden">Hidden</option>
                 </select>
-            </div>
-
-            <div>
-                <label className={labelClass}>Modules (Lectures + Notes are always included)</label>
-                <div className="flex gap-4">
-                    {(['quizzes_enabled', 'flashcards_enabled', 'tests_enabled', 'assignments_enabled'] as const).map((key) => (
-                        <label key={key} className="flex items-center gap-2 text-sm text-text">
-                            <input type="checkbox" checked={form.data[key]} onChange={(e) => form.setData(key, e.target.checked)} />
-                            {key.replace('_enabled', '')}
-                        </label>
-                    ))}
-                </div>
-                <p className="mt-1 text-xs text-text-muted">
-                    "Quizzes" also gates Custom Quiz -- a student enrolled in this course can only build/take a
-                    Custom Quiz (Admin &rarr; Custom Quiz) while this is checked.
-                </p>
             </div>
 
             <button type="submit" disabled={form.processing} className={btnClass}>

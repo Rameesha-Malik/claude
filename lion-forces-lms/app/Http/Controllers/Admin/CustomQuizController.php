@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\Course;
 use App\Models\CustomQuizConfig;
 use App\Models\Subject;
 use App\Models\Topic;
@@ -49,12 +48,6 @@ class CustomQuizController extends Controller
                 'subjects_with_questions' => Subject::has('questions')->count(),
                 'topics_with_questions' => Topic::has('questions')->count(),
             ],
-            // Custom Quiz is only reachable from a course whose "quizzes"
-            // module is switched on (Course > Details > Modules) -- that
-            // checkbox doesn't say so, so this is the one place that makes
-            // it visible which courses actually let a student in, without
-            // having to open every course to check.
-            'courses' => Course::orderBy('title')->get(['id', 'title', 'quizzes_enabled']),
         ]);
     }
 }

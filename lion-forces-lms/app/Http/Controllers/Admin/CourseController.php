@@ -83,6 +83,13 @@ class CourseController extends Controller
         unset($data['tags'], $data['thumbnail']);
         $data['thumbnail_path'] = $request->hasFile('thumbnail') ? $request->file('thumbnail')->store('courses', 'public') : null;
 
+        // Quizzes/Flashcards/Tests/Assignments are no longer a per-course
+        // choice -- every course gets all four, same as Lectures/Notes
+        // always have been. No admin control for this anymore, so it's
+        // set here rather than left to the quizzes_enabled etc. column
+        // defaults (false).
+        $data += ['quizzes_enabled' => true, 'flashcards_enabled' => true, 'tests_enabled' => true, 'assignments_enabled' => true];
+
         $course = Course::create($data);
         $this->syncTags($course, $tags);
         ActivityLog::record('added', 'Course', $course->id, "Course \"{$course->title}\" was created.", $course->id);
@@ -172,10 +179,6 @@ class CourseController extends Controller
             'hours' => 'nullable|integer|min:0',
             'base_price' => 'nullable|numeric|min:0',
             'status' => 'required|in:draft,published,hidden',
-            'quizzes_enabled' => 'boolean',
-            'flashcards_enabled' => 'boolean',
-            'tests_enabled' => 'boolean',
-            'assignments_enabled' => 'boolean',
             'tags' => 'nullable|string|max:500',
             'thumbnail' => 'nullable|image|max:2048',
         ]);
