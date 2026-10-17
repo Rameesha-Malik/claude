@@ -60,12 +60,32 @@
   --blue-600:  #2563eb;  --blue-100:  #dbeafe;  /* info, distinct from teal */
 
   /* ---------------------------------------------------------------------
+     1. PRIMITIVE — accent gold  (derived, decorative)
+     A second brand voice, not a status color: badges, dividers, the
+     display-font numerals, secondary CTAs. Teal+charcoal alone reads as
+     another generic SaaS blue-family site; gold against deep teal is the
+     recruitment-poster / medal-ribbon contrast that actually differentiates
+     this brand. Never reuse --amber-* (warning) for decoration or a real
+     warning stops reading as one.
+     --------------------------------------------------------------------- */
+  --gold-300: #f3d98b;
+  --gold-400: #e8c15f;
+  --gold-500: #d4a537;
+  --gold-600: #b8860b;
+  --gold-700: #8f6a08;
+
+  /* ---------------------------------------------------------------------
      1. PRIMITIVE — typography, spacing, radius, elevation, motion
      --------------------------------------------------------------------- */
   --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system,
                "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-urdu: "Noto Nastaliq Urdu", var(--font-sans);
   --font-mono: ui-monospace, "JetBrains Mono", "SF Mono", Menlo, monospace;
+  /* Display face for hero/section headlines only — condensed, all-caps,
+     poster-weight. This is what gives the brand a distinct silhouette
+     instead of reading as another generic SaaS-sans layout. Never use it
+     below ~20px or for body copy; it has no lowercase descenders to spare. */
+  --font-display: "Bebas Neue", "Anton", var(--font-sans);
 
   /* 1.200 minor-third scale, 16px base */
   --text-xs:   0.75rem;   --text-sm:   0.875rem;  --text-base: 1rem;
@@ -121,6 +141,12 @@
   --color-surface-sunken:  var(--neutral-100);
   --color-surface-brand:   var(--teal-50);
   --color-surface-inverse: var(--teal-900);
+  /* Translucent variant for the sticky header — a literal rgba, not an
+     opacity modifier on --color-surface: Tailwind's /NN opacity syntax
+     cannot resolve a color that is itself a CSS custom property, and
+     silently emits no rule at all rather than an error. Keep this in sync
+     with --color-surface by hand in each theme block below. */
+  --color-surface-translucent: rgba(255, 255, 255, 0.85);
 
   /* text */
   --color-text:           var(--neutral-900);
@@ -149,6 +175,11 @@
 
   /* focus — never remove, only restyle */
   --color-focus-ring: var(--teal-600);
+
+  /* accent — the gold voice described above */
+  --color-accent: var(--gold-500);
+  --color-accent-hover: var(--gold-600);
+  --color-on-accent: var(--teal-950);
 
   /* feedback */
   --color-success: var(--green-600); --color-success-bg: var(--green-100);
@@ -207,6 +238,7 @@
     --color-surface-sunken:  #071312;
     --color-surface-brand:   #06342f;
     --color-surface-inverse: var(--neutral-0);
+    --color-surface-translucent: rgba(15, 36, 34, 0.85);
 
     --color-text:           #e8f5f3;
     --color-text-secondary: #a3bfbc;
@@ -227,6 +259,10 @@
 
     --color-secondary:      var(--teal-800);
     --color-secondary-hover:var(--teal-700);
+
+    --color-accent:       var(--gold-400);
+    --color-accent-hover: var(--gold-300);
+    --color-on-accent:    var(--teal-950);
 
     --color-success-bg: #0c2f1c; --color-warning-bg: #3a2708;
     --color-danger-bg:  #3a1414; --color-info-bg:    #10224a;
