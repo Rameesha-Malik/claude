@@ -45,7 +45,7 @@ class CustomQuizController extends Controller
         $hasAccess = $this->hasQuizAccess($request, $course);
 
         if (! $hasAccess) {
-            return Inertia::render('Student/CustomQuiz/Create', ['subjects' => [], 'topics' => [], 'locked' => true, 'course' => $course?->only('id', 'title')]);
+            return Inertia::render('Student/CustomQuiz/Create', ['subjects' => [], 'topics' => [], 'locked' => true, 'course' => $course?->only('id', 'title', 'slug')]);
         }
 
         $subjects = Subject::withCount('questions')->having('questions_count', '>', 0)->orderBy('name')->get(['id', 'name']);
@@ -59,7 +59,7 @@ class CustomQuizController extends Controller
             'subjects' => $subjects,
             'topics' => $topics,
             'locked' => false,
-            'course' => $course?->only('id', 'title'),
+            'course' => $course?->only('id', 'title', 'slug'),
         ]);
     }
 

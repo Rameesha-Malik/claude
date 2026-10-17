@@ -10,10 +10,18 @@ interface CourseOption { id: number; title: string }
 interface Props { packages: PackageRow[]; courses: CourseOption[] }
 
 function AddPackageModal({ courses, onClose }: { courses: CourseOption[]; onClose: () => void }) {
-    const form = useForm({ course_id: courses[0]?.id ?? ('' as number | ''), name: '', description: '', price: '', validity_days: '' });
+    // Starts blank on purpose -- it used to silently default to whichever
+    // course sorted first alphabetically, with no label explaining what
+    // the dropdown even was. An admin could add a package to the wrong
+    // course without ever noticing. courses itself is a live query (every
+    // course, freshly loaded each time this page opens), so a course
+    // added anywhere else in admin shows up here automatically -- nothing
+    // to maintain in this list by hand.
+    const form = useForm({ course_id: '' as number | '', name: '', description: '', price: '', validity_days: '' });
 
     function submit(e: FormEvent) {
         e.preventDefault();
+        if (!form.data.course_id) return;
         form.post(`/admin/courses/${form.data.course_id}/packages`, { onSuccess: onClose });
     }
 
@@ -25,9 +33,19 @@ function AddPackageModal({ courses, onClose }: { courses: CourseOption[]; onClos
                     <button onClick={onClose} className="text-text-muted hover:text-text">✕</button>
                 </div>
                 <form onSubmit={submit} className="space-y-3">
-                    <select value={form.data.course_id} onChange={(e) => form.setData('course_id', Number(e.target.value))} className="w-full rounded-lg border border-border px-3 py-2 text-sm">
-                        {courses.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
-                    </select>
+                    <div>
+                        <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-text-muted">Course</label>
+                        <select
+                            required
+                            value={form.data.course_id}
+                            onChange={(e) => form.setData('course_id', e.target.value ? Number(e.target.value) : '')}
+                            className="w-full rounded-lg border border-border px-3 py-2 text-sm"
+                        >
+                            <option value="">— Select a course —</option>
+                            {courses.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
+                        </select>
+                        <p className="mt-1 text-xs text-text-muted">Which course this pricing tier belongs to.</p>
+                    </div>
                     <input placeholder="Package Name" value={form.data.name} onChange={(e) => form.setData('name', e.target.value)} className="w-full rounded-lg border border-border px-3 py-2 text-sm" />
                     {form.errors.name && <p className="text-xs text-danger">{form.errors.name}</p>}
                     <textarea
@@ -41,7 +59,7 @@ function AddPackageModal({ courses, onClose }: { courses: CourseOption[]; onClos
                         <input type="number" placeholder="Price" value={form.data.price} onChange={(e) => form.setData('price', e.target.value)} className="w-full rounded-lg border border-border px-3 py-2 text-sm" />
                         <input type="number" placeholder="Validity (days)" value={form.data.validity_days} onChange={(e) => form.setData('validity_days', e.target.value)} className="w-full rounded-lg border border-border px-3 py-2 text-sm" />
                     </div>
-                    <button type="submit" disabled={form.processing} className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-bold uppercase text-on-primary hover:bg-primary-hover disabled:opacity-50">
+                    <button type="submit" disabled={form.processing || !form.data.course_id} className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-bold uppercase text-on-primary hover:bg-primary-hover disabled:opacity-50">
                         {form.processing ? 'Saving…' : 'Add Package'}
                     </button>
                 </form>

@@ -141,7 +141,7 @@ class PublicSiteController extends Controller
                 'headline' => $hero?->content['headline'] ?? 'How to Buy',
                 'subheading' => $hero?->content['subheading'] ?? 'Simple steps from registration to your first lesson.',
             ],
-            'packages' => \App\Models\CoursePackage::with('course:id,title')
+            'packages' => \App\Models\CoursePackage::with('course:id,title,slug')
                 ->where('is_active', true)
                 ->orderBy('price')
                 ->limit(12)

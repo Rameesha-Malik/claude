@@ -4,7 +4,7 @@ import StudentLayout from '@/Layouts/StudentLayout';
 
 interface SubjectOption { id: number; name: string; questions_count: number }
 interface TopicOption { id: number; subject_id: number; name: string }
-interface CourseInfo { id: number; title: string }
+interface CourseInfo { id: number; title: string; slug: string }
 interface Props { subjects: SubjectOption[]; topics: TopicOption[]; locked?: boolean; course?: CourseInfo | null }
 
 const inputClass = 'w-full rounded-lg border border-border px-3 py-2.5 text-sm focus:border-primary focus:shadow-glow focus:outline-none';
@@ -40,7 +40,7 @@ export default function CreateCustomQuiz({ subjects, topics, locked = false, cou
                             : 'Buy a course that includes quiz access to build your own random quizzes from the question bank.'}
                     </p>
                     <Link
-                        href={course ? `/courses/${course.id}` : '/courses'}
+                        href={course ? `/courses/${course.slug}` : '/courses'}
                         className="mt-6 inline-block rounded-full bg-primary px-6 py-2.5 text-sm font-bold uppercase tracking-wide text-on-primary shadow-sm hover:bg-primary-hover"
                     >
                         {course ? 'View Course' : 'Browse Courses'}

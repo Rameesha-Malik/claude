@@ -7,7 +7,7 @@ import { PageProps } from '@/types';
 
 interface PackageItem {
     id: number; name: string; description: string | null; price: string;
-    validity_days: number | null; course: { id: number; title: string } | null;
+    validity_days: number | null; course: { id: number; title: string; slug: string } | null;
 }
 interface FaqItem { question: string; answer: string }
 
@@ -145,7 +145,7 @@ export default function HowToBuy({ hero, packages, paymentMethods, faqs }: { her
 
                                         {pkg.course && (
                                             <Link
-                                                href={`/courses/${pkg.course.id}`}
+                                                href={`/courses/${pkg.course.slug}`}
                                                 className="mt-6 block rounded-full bg-primary py-2.5 text-center text-sm font-bold uppercase tracking-wide text-on-primary shadow-sm transition-all duration-fast hover:-translate-y-0.5 hover:bg-primary-hover hover:shadow-md"
                                             >
                                                 View Package
