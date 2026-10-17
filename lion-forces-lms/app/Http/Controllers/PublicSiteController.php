@@ -132,13 +132,6 @@ class PublicSiteController extends Controller
         ]);
     }
 
-    public function resources(): Response
-    {
-        return Inertia::render('Public/Resources', [
-            'resources' => \App\Models\Resource::where('is_published', true)->orderByDesc('created_at')->paginate(12),
-        ]);
-    }
-
     public function howToBuy(): Response
     {
         $hero = \App\Models\HomeSection::where('section_key', 'how_to_buy_hero')->first();

@@ -13,7 +13,7 @@ class DatabaseSeeder extends Seeder
             UserSeeder::class,
             CatalogSeeder::class,
             SiteContentSeeder::class,
-            NewsResourceSeeder::class,
+            NewsSeeder::class,
             DemoContentSeeder::class,
         ]);
     }

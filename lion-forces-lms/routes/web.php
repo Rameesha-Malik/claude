@@ -32,7 +32,6 @@ use App\Http\Controllers\Admin\QuestionNoteController as AdminQuestionNoteContro
 use App\Http\Controllers\Admin\QuestionReportController as AdminQuestionReportController;
 use App\Http\Controllers\Admin\QuizController as AdminQuizController;
 use App\Http\Controllers\Admin\ReportController as AdminReportController;
-use App\Http\Controllers\Admin\ResourceController as AdminResourceController;
 use App\Http\Controllers\Admin\ReviewController as AdminReviewController;
 use App\Http\Controllers\Admin\SettingsController as AdminSettingsController;
 use App\Http\Controllers\Admin\StagedTestController as AdminStagedTestController;
@@ -67,7 +66,6 @@ Route::get('/about', [PublicSiteController::class, 'about'])->name('about');
 Route::get('/contact', [PublicSiteController::class, 'contact'])->name('contact');
 Route::post('/contact', [PublicSiteController::class, 'submitContact'])->name('contact.submit');
 Route::get('/news', [PublicSiteController::class, 'news'])->name('news');
-Route::get('/resources', [PublicSiteController::class, 'resources'])->name('resources');
 Route::get('/how-to-buy', [PublicSiteController::class, 'howToBuy'])->name('how-to-buy');
 Route::get('/practice-tests', [PublicSiteController::class, 'practiceTests'])->name('practice-tests');
 Route::get('/notes', [PublicSiteController::class, 'notes'])->name('notes');
@@ -345,13 +343,6 @@ Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->nam
         Route::post('/', [AdminNewsController::class, 'store'])->name('store');
         Route::put('/{news}', [AdminNewsController::class, 'update'])->name('update');
         Route::delete('/{news}', [AdminNewsController::class, 'destroy'])->name('destroy');
-    });
-
-    Route::prefix('resources')->name('resources.')->group(function () {
-        Route::get('/', [AdminResourceController::class, 'index'])->name('index');
-        Route::post('/', [AdminResourceController::class, 'store'])->name('store');
-        Route::put('/{resource}', [AdminResourceController::class, 'update'])->name('update');
-        Route::delete('/{resource}', [AdminResourceController::class, 'destroy'])->name('destroy');
     });
 
     Route::prefix('instructors')->name('instructors.')->group(function () {

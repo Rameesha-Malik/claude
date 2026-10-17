@@ -4,15 +4,13 @@ namespace Database\Seeders;
 
 use App\Models\CourseCategory;
 use App\Models\NewsAnnouncement;
-use App\Models\Resource;
 use Illuminate\Database\Seeder;
 
-class NewsResourceSeeder extends Seeder
+class NewsSeeder extends Seeder
 {
     /**
-     * All PLACEHOLDER — the client has not yet supplied real announcements
-     * or resource files. These exist so /news and /resources are
-     * demoable; replace via Admin -> News / Admin -> Resources.
+     * All PLACEHOLDER — the client has not yet supplied real announcements.
+     * These exist so /news is demoable; replace via Admin -> News.
      */
     public function run(): void
     {
@@ -45,21 +43,6 @@ class NewsResourceSeeder extends Seeder
             'deadline_date' => now()->addDays(10),
             'is_pinned' => false,
             'is_active' => true,
-        ]);
-
-        Resource::updateOrCreate(['title' => 'PMA Syllabus Overview'], [
-            'category' => 'Syllabus',
-            'description' => 'Official PMA test pattern and subject breakdown.',
-        ]);
-
-        Resource::updateOrCreate(['title' => 'ISSB Preparation Guide'], [
-            'category' => 'Guide',
-            'description' => 'A general overview of the ISSB testing process and what to expect.',
-        ]);
-
-        Resource::updateOrCreate(['title' => 'Physical Fitness Standards'], [
-            'category' => 'Fitness',
-            'description' => 'Reference standards for the 1.6km run, push-ups, and sit-ups.',
         ]);
     }
 }
