@@ -3,7 +3,7 @@ import { FormEvent, useState } from 'react';
 import RichTextArea from '@/Components/RichTextArea';
 import AdminLayout from '@/Layouts/AdminLayout';
 
-interface PageRow { id: number; title: string; slug: string; content: string | null; is_published: boolean }
+interface PageRow { id: number; title: string; slug: string; content: string | null; is_published: boolean; show_in_header: boolean; show_in_footer: boolean }
 interface Props { pages: PageRow[] }
 
 function PageModal({ page, onClose }: { page: PageRow | null; onClose: () => void }) {
@@ -11,6 +11,8 @@ function PageModal({ page, onClose }: { page: PageRow | null; onClose: () => voi
         title: page?.title ?? '',
         content: page?.content ?? '',
         is_published: page?.is_published ?? true,
+        show_in_header: page?.show_in_header ?? false,
+        show_in_footer: page?.show_in_footer ?? false,
     });
 
     function submit(e: FormEvent) {
@@ -34,6 +36,22 @@ function PageModal({ page, onClose }: { page: PageRow | null; onClose: () => voi
                         <input type="checkbox" checked={form.data.is_published} onChange={(e) => form.setData('is_published', e.target.checked)} />
                         Published
                     </label>
+                    <div className="rounded-lg border border-dashed border-border p-3">
+                        <p className="mb-2 text-xs font-bold uppercase tracking-wide text-text-muted">Show a link to this page in...</p>
+                        <div className="flex gap-4">
+                            <label className="flex items-center gap-2 text-sm text-text">
+                                <input type="checkbox" checked={form.data.show_in_header} onChange={(e) => form.setData('show_in_header', e.target.checked)} />
+                                Header Menu
+                            </label>
+                            <label className="flex items-center gap-2 text-sm text-text">
+                                <input type="checkbox" checked={form.data.show_in_footer} onChange={(e) => form.setData('show_in_footer', e.target.checked)} />
+                                Footer Menu
+                            </label>
+                        </div>
+                        {!form.data.is_published && (form.data.show_in_header || form.data.show_in_footer) && (
+                            <p className="mt-2 text-xs text-warning">Won't actually appear until this page is Published.</p>
+                        )}
+                    </div>
                     <button type="submit" disabled={form.processing} className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-bold uppercase text-on-primary hover:bg-primary-hover disabled:opacity-50">
                         {form.processing ? 'Saving…' : page ? 'Save Changes' : 'Add Page'}
                     </button>
@@ -57,8 +75,8 @@ export default function PagesIndex({ pages }: Props) {
             <Head title="Pages" />
 
             <p className="mb-4 text-sm text-text-secondary">
-                Static content pages (Privacy Policy, Terms &amp; Conditions, etc.) — link to them from the site footer's
-                nav menu using <code>/pages/&lt;slug&gt;</code>.
+                Static content pages (Privacy Policy, Terms &amp; Conditions, etc.). Check "Header Menu" or "Footer
+                Menu" on a page to add it to the site's navigation automatically.
             </p>
 
             <div className="mb-4">
@@ -75,6 +93,8 @@ export default function PagesIndex({ pages }: Props) {
                             <Link href={`/pages/${p.slug}`} target="_blank" className="text-xs text-primary hover:underline">/pages/{p.slug}</Link>
                         </div>
                         <div className="flex items-center gap-3">
+                            {p.show_in_header && <span className="rounded-full bg-primary-subtle px-2 py-0.5 text-xs font-bold text-primary">In Header</span>}
+                            {p.show_in_footer && <span className="rounded-full bg-primary-subtle px-2 py-0.5 text-xs font-bold text-primary">In Footer</span>}
                             <span className={`rounded-full px-2 py-0.5 text-xs font-bold uppercase ${p.is_published ? 'bg-success-bg text-success' : 'bg-surface-sunken text-text-muted'}`}>
                                 {p.is_published ? 'Published' : 'Draft'}
                             </span>
