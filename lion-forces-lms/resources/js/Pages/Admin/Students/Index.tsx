@@ -149,8 +149,8 @@ export default function StudentsIndex({ students, filters }: Props) {
                     {students.data.map((s) => (
                         <div key={s.id} className="rounded-3xl border border-border bg-surface p-5">
                             <div className="flex items-start justify-between gap-3">
-                                <div className="flex items-center gap-3">
-                                    <span className="flex h-11 w-11 items-center justify-center rounded-full bg-primary-subtle text-sm font-bold text-primary">
+                                <div className="flex min-w-0 items-center gap-3">
+                                    <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-primary-subtle text-sm font-bold text-primary">
                                         {s.name.charAt(0).toUpperCase()}
                                     </span>
                                     <div className="min-w-0">
@@ -158,9 +158,22 @@ export default function StudentsIndex({ students, filters }: Props) {
                                         <p className="truncate text-xs text-text-muted">{s.email}</p>
                                     </div>
                                 </div>
-                                <span className={`flex-shrink-0 rounded-full px-2.5 py-0.5 text-xs font-bold uppercase ${s.is_active ? 'bg-success-bg text-success' : 'bg-danger-bg text-danger'}`}>
-                                    {s.is_active ? 'Active' : 'Suspended'}
-                                </span>
+                                {/* Active is the default, expected state for almost every
+                                    student here -- a loud green pill on every single card
+                                    competed with the name for attention and added nothing
+                                    (of course they're active). A plain dot says the same
+                                    thing quietly; Suspended is the actual exception worth
+                                    a reader's eye, so it keeps the bold pill. */}
+                                {s.is_active ? (
+                                    <span className="flex flex-shrink-0 items-center gap-1.5 text-xs font-medium text-text-muted">
+                                        <span className="h-1.5 w-1.5 rounded-full bg-success" />
+                                        Active
+                                    </span>
+                                ) : (
+                                    <span className="flex-shrink-0 rounded-full bg-danger-bg px-2.5 py-0.5 text-xs font-bold uppercase text-danger">
+                                        Suspended
+                                    </span>
+                                )}
                             </div>
 
                             <div className="mt-4 flex items-center justify-between border-t border-border pt-3 text-sm">
@@ -168,18 +181,31 @@ export default function StudentsIndex({ students, filters }: Props) {
                                 <span className="font-bold text-text">{s.enrollments_count}</span>
                             </div>
 
+                            {/* Delete is destructive and permanent (cascades enrollments +
+                                test history) -- kept visually apart from the two routine
+                                actions, icon-only and unobtrusive until hovered, rather than
+                                sitting flush against "Deactivate" as equally-weighted text
+                                where a misclick is one slip away. */}
                             <div className="mt-3 flex items-center justify-between gap-2 border-t border-border pt-3 text-sm">
-                                <Link href={`/admin/students/${s.id}`} className="font-semibold text-primary hover:underline">
-                                    Profile
-                                </Link>
+                                <div className="flex items-center gap-4">
+                                    <Link href={`/admin/students/${s.id}`} className="font-semibold text-primary hover:underline">
+                                        Profile
+                                    </Link>
+                                    <button
+                                        onClick={() => router.post(`/admin/students/${s.id}/toggle-suspend`, {}, { preserveScroll: true })}
+                                        className="font-semibold text-warning hover:underline"
+                                    >
+                                        {s.is_active ? 'Deactivate' : 'Reactivate'}
+                                    </button>
+                                </div>
                                 <button
-                                    onClick={() => router.post(`/admin/students/${s.id}/toggle-suspend`, {}, { preserveScroll: true })}
-                                    className="font-semibold text-warning hover:underline"
+                                    onClick={() => destroyStudent(s)}
+                                    title={`Delete ${s.name}`}
+                                    className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg text-text-muted hover:bg-danger-bg hover:text-danger"
                                 >
-                                    {s.is_active ? 'Deactivate' : 'Reactivate'}
-                                </button>
-                                <button onClick={() => destroyStudent(s)} className="font-semibold text-danger hover:underline">
-                                    Delete
+                                    <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 7h12M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2m2 0v13a1 1 0 01-1 1H8a1 1 0 01-1-1V7h10z" />
+                                    </svg>
                                 </button>
                             </div>
                         </div>
