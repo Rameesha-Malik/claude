@@ -151,7 +151,12 @@
   /* text */
   --color-text:           var(--neutral-900);
   --color-text-secondary: var(--neutral-600);
-  --color-text-muted:     var(--neutral-400);
+  /* Not --neutral-400 (#a5a5a5) directly -- that's the client's brand
+     swatch and stays untouched for non-text uses, but at 2.46:1 on white
+     it fails WCAG AA for text (needs 4.5:1) and was genuinely hard to
+     read as the labels/hints/timestamps this is used for everywhere.
+     #757575 keeps the same "muted grey" role at 4.61:1. */
+  --color-text-muted:     #757575;
   --color-text-brand:     var(--teal-700);
   --color-text-inverse:   var(--neutral-0);
   --color-text-on-brand:  var(--neutral-0);
@@ -242,7 +247,7 @@
 
     --color-text:           #e8f5f3;
     --color-text-secondary: #a3bfbc;
-    --color-text-muted:     #6f8b88;
+    --color-text-muted:     #758f8c;
     --color-text-brand:     var(--teal-400);
     --color-text-inverse:   var(--neutral-900);
 
@@ -293,7 +298,7 @@
 
   --color-text:           #e8f5f3;
   --color-text-secondary: #a3bfbc;
-  --color-text-muted:     #6f8b88;
+  --color-text-muted:     #758f8c;
   --color-text-brand:     var(--teal-400);
   --color-text-inverse:   var(--neutral-900);
 

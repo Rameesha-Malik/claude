@@ -1,6 +1,6 @@
 import { Head, router } from '@inertiajs/react';
 import { FormEvent, useEffect, useState } from 'react';
-
+import CloseButton from '@/Components/CloseButton';
 import AdminLayout from '@/Layouts/AdminLayout';
 
 interface Package { id: number; name: string }
@@ -97,7 +97,7 @@ function EnrollStudentModal({ courses, onClose }: { courses: CourseOpt[]; onClos
             <div className="w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-xl">
                 <div className="mb-4 flex items-center justify-between">
                     <h2 className="font-bold text-text">Enroll Student</h2>
-                    <button onClick={onClose} className="text-text-muted hover:text-text">✕</button>
+                    <CloseButton onClick={onClose} />
                 </div>
                 <form onSubmit={submit} className="space-y-3">
                     <StudentPicker onPick={(s) => setStudentId(s?.id ?? null)} />

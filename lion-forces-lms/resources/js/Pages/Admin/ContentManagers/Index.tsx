@@ -1,5 +1,6 @@
 import { Head, router, useForm } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
+import CloseButton from '@/Components/CloseButton';
 import AdminLayout from '@/Layouts/AdminLayout';
 
 interface CourseOpt { id: number; title: string }
@@ -30,7 +31,7 @@ function AddManagerModal({ courses, onClose }: { courses: CourseOpt[]; onClose: 
             <div className="w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-xl">
                 <div className="mb-4 flex items-center justify-between">
                     <h2 className="font-bold text-text">Add Content Manager</h2>
-                    <button onClick={onClose} className="text-text-muted hover:text-text">✕</button>
+                    <CloseButton onClick={onClose} />
                 </div>
                 <form onSubmit={submit} className="space-y-3">
                     <div>
@@ -86,7 +87,7 @@ function EditPermissionsModal({ manager, courses, onClose }: { manager: Manager;
             <div className="w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-xl">
                 <div className="mb-4 flex items-center justify-between">
                     <h2 className="font-bold text-text">Edit Permissions — {manager.name}</h2>
-                    <button onClick={onClose} className="text-text-muted hover:text-text">✕</button>
+                    <CloseButton onClick={onClose} />
                 </div>
                 <p className="mb-2 text-xs font-bold uppercase text-text-muted">Assigned courses</p>
                 <div className="max-h-56 space-y-1 overflow-y-auto rounded-lg border border-border p-2">

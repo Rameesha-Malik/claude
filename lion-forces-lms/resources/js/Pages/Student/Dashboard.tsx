@@ -1,6 +1,7 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { ReactNode, useEffect, useState } from 'react';
 import AnimatedCounter from '@/Components/AnimatedCounter';
+import Icon from '@/Components/Icon';
 import RevealOnScroll from '@/Components/RevealOnScroll';
 import StudentLayout from '@/Layouts/StudentLayout';
 import { PageProps } from '@/types';
@@ -20,14 +21,6 @@ interface Props {
     revisionCount: number;
     unreadNotifications: { id: string; data: { message?: string }; created_at: string }[];
     recentBroadcasts: Broadcast[];
-}
-
-function Icon({ d, className = 'h-5 w-5' }: { d: string; className?: string }) {
-    return (
-        <svg className={className} fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d={d} />
-        </svg>
-    );
 }
 
 const ICONS = {

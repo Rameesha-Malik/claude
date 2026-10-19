@@ -1,5 +1,6 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import { FormEvent } from 'react';
+import Icon from '@/Components/Icon';
 import StudentLayout from '@/Layouts/StudentLayout';
 
 interface SubjectOption { id: number; name: string; questions_count: number }
@@ -68,7 +69,7 @@ function TestHistory({ history }: { history: HistoryItem[] }) {
                                 Retake
                             </button>
                             <button onClick={() => destroy(h.id)} title="Remove" className="text-text-muted hover:text-danger">
-                                ✕
+                                <Icon d="M6 18L18 6M6 6l12 12" className="h-4 w-4" />
                             </button>
                         </div>
                     </div>

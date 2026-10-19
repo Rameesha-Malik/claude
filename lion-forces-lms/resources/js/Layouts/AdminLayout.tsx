@@ -1,18 +1,11 @@
 import { Link, usePage, router } from '@inertiajs/react';
 import { PropsWithChildren, ReactNode, useState } from 'react';
+import Icon from '@/Components/Icon';
 import SiteLogo from '@/Components/SiteLogo';
 import { PageProps } from '@/types';
 
 interface NavEntry { label: string; href: string; icon: ReactNode }
 interface NavGroup { section: string | null; items: NavEntry[] }
-
-function Icon({ d, className = 'h-5 w-5' }: { d: string; className?: string }) {
-    return (
-        <svg className={className} fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d={d} />
-        </svg>
-    );
-}
 
 // Grouped into labeled sections instead of one flat 36-link list -- client
 // feedback: "make it easy to understand... even a non-tech person operate

@@ -1,5 +1,6 @@
 import { Head, router, useForm } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
+import CloseButton from '@/Components/CloseButton';
 import LiteMarkdown from '@/Components/LiteMarkdown';
 import RichTextArea from '@/Components/RichTextArea';
 import AdminLayout from '@/Layouts/AdminLayout';
@@ -38,7 +39,7 @@ function AddReviewModal({ courses, onClose }: { courses: CourseOption[]; onClose
             <div className="w-full max-w-lg rounded-2xl border border-border bg-surface p-6 shadow-xl">
                 <div className="mb-4 flex items-center justify-between">
                     <h2 className="font-bold text-text">Add Review</h2>
-                    <button onClick={onClose} className="text-text-muted hover:text-text">✕</button>
+                    <CloseButton onClick={onClose} />
                 </div>
                 <form onSubmit={submit} className="space-y-3">
                     <select value={form.data.course_id} onChange={(e) => form.setData('course_id', Number(e.target.value))} className="w-full rounded-lg border border-border px-3 py-2 text-sm">

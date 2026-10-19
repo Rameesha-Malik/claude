@@ -1,5 +1,6 @@
 import { Link, usePage, router } from '@inertiajs/react';
 import { PropsWithChildren, ReactNode, useState } from 'react';
+import Icon from '@/Components/Icon';
 import SiteLogo from '@/Components/SiteLogo';
 import { PageProps } from '@/types';
 
@@ -7,14 +8,6 @@ interface NavEntry {
     label: string;
     href: string;
     icon: ReactNode;
-}
-
-function Icon({ d }: { d: string }) {
-    return (
-        <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d={d} />
-        </svg>
-    );
 }
 
 const NAV: (NavEntry & { feature?: string })[] = [
