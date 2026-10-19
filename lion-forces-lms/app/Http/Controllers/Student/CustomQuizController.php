@@ -34,19 +34,24 @@ use Inertia\Response;
  * from inside one specific purchased course's Quizzes tab (?course_id=…),
  * which checks that exact course and remembers it so results lead back
  * there.
+ *
+ * Client: a student with no quiz access used to hit a bare "buy a
+ * course" wall and never see the feature itself. Now they get a real
+ * but capped taste of it instead -- same builder, same question bank,
+ * just limited to FREE_TRIAL_MAX_QUESTIONS per quiz -- so they can
+ * actually try it and get curious enough to buy, rather than being
+ * told to buy something they've never used.
  */
 class CustomQuizController extends Controller
 {
+    private const FREE_TRIAL_MAX_QUESTIONS = 5;
+
     public function create(Request $request): Response
     {
         abort_unless(FeatureFlags::enabled('custom_quiz'), 404);
 
         $course = $request->integer('course_id') ? Course::find($request->integer('course_id')) : null;
         $hasAccess = $this->hasQuizAccess($request, $course);
-
-        if (! $hasAccess) {
-            return Inertia::render('Student/CustomQuiz/Create', ['subjects' => [], 'topics' => [], 'locked' => true, 'course' => $course?->only('id', 'title', 'slug')]);
-        }
 
         $subjects = Subject::withCount('questions')->having('questions_count', '>', 0)->orderBy('name')->get(['id', 'name']);
 
@@ -58,13 +63,16 @@ class CustomQuizController extends Controller
         return Inertia::render('Student/CustomQuiz/Create', [
             'subjects' => $subjects,
             'topics' => $topics,
-            'locked' => false,
+            'hasAccess' => $hasAccess,
+            'freeTrialMax' => self::FREE_TRIAL_MAX_QUESTIONS,
             'course' => $course?->only('id', 'title', 'slug'),
             // Client, from a UWorld QBank walkthrough: a student should be
             // able to see every test they've built, not just the one they
             // just finished. Kept on this same page (not a separate nav
             // entry/URL) rather than duplicating the builder's course
-            // context and access gate on a second page.
+            // context and access gate on a second page. Shown regardless
+            // of access so a free-trial student still sees their own
+            // small history building up.
             'history' => CustomQuizConfig::where('user_id', $request->user()->id)
                 ->with(['subject:id,name', 'topic:id,name', 'attempts'])
                 ->latest()
@@ -96,7 +104,14 @@ class CustomQuizController extends Controller
         ]);
 
         $course = ! empty($data['course_id']) ? Course::find($data['course_id']) : null;
-        abort_unless($this->hasQuizAccess($request, $course), 403, 'Buy a course with quiz access to use Custom Quiz.');
+
+        // No access -> not blocked outright, capped to a free-trial size
+        // instead (enforced server-side, not just the frontend's max
+        // attribute, since the request could otherwise be replayed with
+        // any count).
+        if (! $this->hasQuizAccess($request, $course)) {
+            $data['question_count'] = min($data['question_count'], self::FREE_TRIAL_MAX_QUESTIONS);
+        }
 
         $questionIds = $this->pickQuestionIds($data);
 

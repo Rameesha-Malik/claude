@@ -10,7 +10,7 @@ interface HistoryItem {
     question_count: number; created_at: string; attempt_id: number | null; percentage: string | null;
 }
 interface Props {
-    subjects: SubjectOption[]; topics: TopicOption[]; locked?: boolean; course?: CourseInfo | null;
+    subjects: SubjectOption[]; topics: TopicOption[]; hasAccess: boolean; freeTrialMax: number; course?: CourseInfo | null;
     history?: HistoryItem[];
 }
 
@@ -78,45 +78,23 @@ function TestHistory({ history }: { history: HistoryItem[] }) {
     );
 }
 
-export default function CreateCustomQuiz({ subjects, topics, locked = false, course = null, history = [] }: Props) {
+export default function CreateCustomQuiz({ subjects, topics, hasAccess, freeTrialMax, course = null, history = [] }: Props) {
     const form = useForm({
         subject_id: '' as number | '',
         topic_id: '' as number | '',
         difficulty: '' as '' | 'easy' | 'medium' | 'hard',
-        question_count: 10,
+        question_count: hasAccess ? 10 : freeTrialMax,
         course_id: course?.id ?? ('' as number | ''),
     });
 
     // Topic is scoped to a subject -- only offer topics under whichever
     // subject is currently picked, same reasoning as the admin form.
     const availableTopics = topics.filter((t) => t.subject_id === form.data.subject_id);
+    const maxQuestions = hasAccess ? 50 : freeTrialMax;
 
     function submit(e: FormEvent) {
         e.preventDefault();
         form.post('/portal/custom-quiz');
-    }
-
-    if (locked) {
-        return (
-            <StudentLayout header="Custom Quiz">
-                <Head title="Custom Quiz" />
-
-                <div className="mx-auto max-w-lg rounded-3xl border border-dashed border-border bg-surface p-8 text-center">
-                    <h1 className="font-display text-2xl text-text">Custom Quiz is Locked</h1>
-                    <p className="mt-2 text-sm text-text-secondary">
-                        {course
-                            ? `Buy "${course.title}" (with quiz access) to build custom quizzes from its question bank.`
-                            : 'Buy a course that includes quiz access to build your own random quizzes from the question bank.'}
-                    </p>
-                    <Link
-                        href={course ? `/courses/${course.slug}` : '/courses'}
-                        className="mt-6 inline-block rounded-full bg-primary px-6 py-2.5 text-sm font-bold uppercase tracking-wide text-on-primary shadow-sm hover:bg-primary-hover"
-                    >
-                        {course ? 'View Course' : 'Browse Courses'}
-                    </Link>
-                </div>
-            </StudentLayout>
-        );
     }
 
     return (
@@ -129,6 +107,22 @@ export default function CreateCustomQuiz({ subjects, topics, locked = false, cou
                     {course ? `For "${course.title}" -- ` : ''}Pick a subject (and optionally a topic within it), difficulty, and how many questions -- we'll
                     pull a fresh random set from the question bank.
                 </p>
+
+                {/* Client: a student with no quiz access used to hit a bare
+                    "buy a course" wall and never actually see this feature.
+                    Now they get a real, capped taste of it instead -- so
+                    they try it and get curious, rather than being told to
+                    buy something sight-unseen. */}
+                {!hasAccess && (
+                    <div className="mt-4 rounded-xl border border-dashed border-primary bg-primary-subtle px-4 py-3 text-sm text-text">
+                        <span className="font-bold uppercase tracking-wide text-primary">Free Preview</span> — up to {freeTrialMax} questions per
+                        quiz. {course ? `Buy "${course.title}"` : 'Buy a course with quiz access'} to build full custom quizzes (up to 50 questions)
+                        and save your results.{' '}
+                        <Link href={course ? `/courses/${course.slug}` : '/courses'} className="font-bold text-primary hover:underline">
+                            {course ? 'View Course' : 'Browse Courses'} &rarr;
+                        </Link>
+                    </div>
+                )}
 
                 <form onSubmit={submit} className="mt-6 space-y-4">
                     <div>
@@ -172,11 +166,14 @@ export default function CreateCustomQuiz({ subjects, topics, locked = false, cou
                         <input
                             type="number"
                             min={1}
-                            max={50}
+                            max={maxQuestions}
                             className={inputClass}
                             value={form.data.question_count}
-                            onChange={(e) => form.setData('question_count', Number(e.target.value))}
+                            onChange={(e) => form.setData('question_count', Math.min(Number(e.target.value), maxQuestions))}
                         />
+                        {!hasAccess && (
+                            <p className="mt-1 text-xs text-text-muted">Capped at {freeTrialMax} for the free preview.</p>
+                        )}
                     </div>
 
                     {form.errors.question_count && <p className="text-sm text-danger">{form.errors.question_count}</p>}
