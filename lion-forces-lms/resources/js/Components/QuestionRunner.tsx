@@ -313,55 +313,75 @@ export default function QuestionRunner({
     const hasAnswered = selectedOptionId !== null && selectedOptionId !== undefined;
     const isCurrentCorrect = currentFeedbackReady && hasAnswered ? selectedOptionId === currentFeedbackReady.correctOptionId : null;
 
-    return (
-        <div>
-            <div className={`${compact ? 'mb-3' : 'mb-6'} rounded-2xl border border-border bg-surface p-4 shadow-sm`}>
-                <div className="flex flex-wrap items-center justify-between gap-3">
-                    <div className="text-sm text-text-secondary">{headerExtra}</div>
-                    <div className="flex flex-1 items-center gap-3">
-                        {timerNode}
-                        <span className="text-sm font-semibold text-text-secondary">
-                            Question <span className="font-bold text-text">{currentIndex + 1}</span> of {total}
-                        </span>
-                        {compact && (
-                            <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-surface-sunken">
-                                <div
-                                    className="h-full rounded-full bg-gradient-to-r from-secondary to-primary transition-all duration-normal"
-                                    style={{ width: `${progressPercent}%` }}
-                                />
-                            </div>
-                        )}
-                    </div>
+    // Client: the demo quiz's timer/progress/score status strip sat in a
+    // full-width bar above the question, forcing the question+options
+    // below it into one narrow centered column with nothing filling the
+    // rest of a wide screen. Moving that whole status strip into a side
+    // box next to the question (not above it) uses the width the compact
+    // layout actually has -- same information, no navigator grid or
+    // skipped-list added back (still the one thing cut to kill the
+    // scroll), just laid out side-by-side instead of stacked.
+    const compactSidebar = compact && (
+        <div className="order-first space-y-3 lg:order-last lg:w-64 lg:flex-shrink-0 lg:sticky lg:top-4 lg:self-start">
+            <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm">
+                {headerExtra && <div className="mb-2 text-sm text-text-secondary">{headerExtra}</div>}
+                {timerNode}
+                <p className="mt-2 text-sm font-semibold text-text-secondary">
+                    Question <span className="font-bold text-text">{currentIndex + 1}</span> of {total}
+                </p>
+                <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-surface-sunken">
+                    <div
+                        className="h-full rounded-full bg-gradient-to-r from-secondary to-primary transition-all duration-normal"
+                        style={{ width: `${progressPercent}%` }}
+                    />
                 </div>
-                {/* Client: the full stat sidebar (Correct/Wrong/Answered/
-                    Skipped/Not Visited/Progress) was dropped entirely for
-                    compact mode to kill the scroll -- too much; the client
-                    still wants those counts visible, just folded into the
-                    header instead of a separate section, so nothing a
-                    student relies on mid-quiz (their running score, how
-                    many they've skipped) goes missing. */}
-                {compact && (
-                    <div className="mt-2 flex flex-wrap items-center gap-2 border-t border-border pt-2 text-xs">
-                        <span className="inline-flex items-center gap-1 rounded-full border border-success bg-success-bg px-2.5 py-1 font-bold text-success">
-                            <CheckCircleIcon className="h-3.5 w-3.5" /> {correctCount} Correct
-                        </span>
-                        <span className="inline-flex items-center gap-1 rounded-full border border-danger bg-danger-bg px-2.5 py-1 font-bold text-danger">
-                            <XCircleIcon className="h-3.5 w-3.5" /> {wrongCount} Wrong
-                        </span>
-                        <span className="inline-flex items-center gap-1 rounded-full border border-primary bg-primary-subtle px-2.5 py-1 font-bold text-primary">
-                            <BadgeIcon className="h-3.5 w-3.5" /> {answeredCount} Answered
-                        </span>
-                        {skippedIndexes.length > 0 && (
-                            <span className="inline-flex items-center gap-1 rounded-full border border-warning bg-warning-bg px-2.5 py-1 font-bold text-warning">
-                                <FlagIcon className="h-3.5 w-3.5" /> {skippedIndexes.length} Skipped
-                            </span>
-                        )}
+            </div>
+            <div className="grid grid-cols-3 gap-2 lg:grid-cols-1">
+                <div className="rounded-xl border border-success bg-success-bg p-3 text-center text-success">
+                    <CheckCircleIcon className="mx-auto h-4 w-4" />
+                    <p className="mt-1 text-lg font-bold leading-none">{correctCount}</p>
+                    <p className="text-[0.65rem] font-bold uppercase tracking-wide">Correct</p>
+                </div>
+                <div className="rounded-xl border border-danger bg-danger-bg p-3 text-center text-danger">
+                    <XCircleIcon className="mx-auto h-4 w-4" />
+                    <p className="mt-1 text-lg font-bold leading-none">{wrongCount}</p>
+                    <p className="text-[0.65rem] font-bold uppercase tracking-wide">Wrong</p>
+                </div>
+                <div className="rounded-xl border border-primary bg-primary-subtle p-3 text-center text-primary">
+                    <BadgeIcon className="mx-auto h-4 w-4" />
+                    <p className="mt-1 text-lg font-bold leading-none">{answeredCount}</p>
+                    <p className="text-[0.65rem] font-bold uppercase tracking-wide">Answered</p>
+                </div>
+                {skippedIndexes.length > 0 && (
+                    <div className="col-span-3 rounded-xl border border-warning bg-warning-bg p-3 text-center text-warning lg:col-span-1">
+                        <FlagIcon className="mx-auto h-4 w-4" />
+                        <p className="mt-1 text-lg font-bold leading-none">{skippedIndexes.length}</p>
+                        <p className="text-[0.65rem] font-bold uppercase tracking-wide">Skipped</p>
                     </div>
                 )}
             </div>
+        </div>
+    );
 
-            <div className={compact ? 'space-y-3' : 'grid gap-6 lg:grid-cols-3'}>
-                <div className={compact ? 'space-y-3' : 'space-y-6 lg:col-span-2'}>
+    return (
+        <div>
+            {!compact && (
+                <div className="mb-6 rounded-2xl border border-border bg-surface p-4 shadow-sm">
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div className="text-sm text-text-secondary">{headerExtra}</div>
+                        <div className="flex flex-1 items-center gap-3">
+                            {timerNode}
+                            <span className="text-sm font-semibold text-text-secondary">
+                                Question <span className="font-bold text-text">{currentIndex + 1}</span> of {total}
+                            </span>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            <div className={compact ? 'flex flex-col gap-4 lg:flex-row' : 'grid gap-6 lg:grid-cols-3'}>
+                {compactSidebar}
+                <div className={compact ? 'min-w-0 flex-1 space-y-3' : 'space-y-6 lg:col-span-2'}>
                     {!compact && (
                         <div className="rounded-2xl border border-border bg-surface p-5">
                             <div className="flex flex-wrap items-center gap-2">
