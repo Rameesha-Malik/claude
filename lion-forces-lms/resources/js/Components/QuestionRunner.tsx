@@ -336,29 +336,29 @@ export default function QuestionRunner({
                     />
                 </div>
             </div>
-            <div className="grid grid-cols-3 gap-2 lg:grid-cols-1">
-                <div className="rounded-xl border border-success bg-success-bg p-3 text-center text-success">
-                    <CheckCircleIcon className="mx-auto h-4 w-4" />
-                    <p className="mt-1 text-lg font-bold leading-none">{correctCount}</p>
-                    <p className="text-[0.65rem] font-bold uppercase tracking-wide">Correct</p>
-                </div>
-                <div className="rounded-xl border border-danger bg-danger-bg p-3 text-center text-danger">
-                    <XCircleIcon className="mx-auto h-4 w-4" />
-                    <p className="mt-1 text-lg font-bold leading-none">{wrongCount}</p>
-                    <p className="text-[0.65rem] font-bold uppercase tracking-wide">Wrong</p>
-                </div>
-                <div className="rounded-xl border border-primary bg-primary-subtle p-3 text-center text-primary">
-                    <BadgeIcon className="mx-auto h-4 w-4" />
-                    <p className="mt-1 text-lg font-bold leading-none">{answeredCount}</p>
-                    <p className="text-[0.65rem] font-bold uppercase tracking-wide">Answered</p>
-                </div>
-                {skippedIndexes.length > 0 && (
-                    <div className="col-span-3 rounded-xl border border-warning bg-warning-bg p-3 text-center text-warning lg:col-span-1">
+            <div className="rounded-2xl border border-border bg-surface p-3 shadow-sm">
+                <div className="grid grid-cols-2 gap-2">
+                    <div className="rounded-xl border border-success bg-success-bg p-3 text-center text-success">
+                        <CheckCircleIcon className="mx-auto h-4 w-4" />
+                        <p className="mt-1 text-lg font-bold leading-none">{correctCount}</p>
+                        <p className="text-[0.65rem] font-bold uppercase tracking-wide">Correct</p>
+                    </div>
+                    <div className="rounded-xl border border-danger bg-danger-bg p-3 text-center text-danger">
+                        <XCircleIcon className="mx-auto h-4 w-4" />
+                        <p className="mt-1 text-lg font-bold leading-none">{wrongCount}</p>
+                        <p className="text-[0.65rem] font-bold uppercase tracking-wide">Wrong</p>
+                    </div>
+                    <div className="rounded-xl border border-primary bg-primary-subtle p-3 text-center text-primary">
+                        <BadgeIcon className="mx-auto h-4 w-4" />
+                        <p className="mt-1 text-lg font-bold leading-none">{answeredCount}</p>
+                        <p className="text-[0.65rem] font-bold uppercase tracking-wide">Answered</p>
+                    </div>
+                    <div className="rounded-xl border border-warning bg-warning-bg p-3 text-center text-warning">
                         <FlagIcon className="mx-auto h-4 w-4" />
                         <p className="mt-1 text-lg font-bold leading-none">{skippedIndexes.length}</p>
                         <p className="text-[0.65rem] font-bold uppercase tracking-wide">Skipped</p>
                     </div>
-                )}
+                </div>
             </div>
         </div>
     );
