@@ -48,8 +48,12 @@ export default function DemoQuizTake({ quiz, attemptId, questions }: Props) {
             {/* Client: the full public py-10 top/bottom padding (fine for a
                 marketing page) was itself eating into the "all in one
                 screen, no scroll" budget for a timed demo quiz -- cut down
-                to just enough to not look cramped against the navbar. */}
-            <div className="mx-auto max-w-3xl px-4 py-4 sm:px-6 lg:px-8">
+                to just enough to not look cramped against the navbar.
+                Width was max-w-3xl (768px), which on anything wider than a
+                laptop left huge dead gutters either side of the quiz card --
+                widened to max-w-5xl so the card actually uses the screen
+                instead of sitting in a narrow column in the middle of it. */}
+            <div className="mx-auto max-w-5xl px-4 py-4 sm:px-6 lg:px-8">
                 <QuestionRunner
                     questions={questions}
                     answers={answers}
