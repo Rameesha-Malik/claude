@@ -187,6 +187,17 @@ export default function QuestionRunner({
             .finally(() => setNoteSaving(false));
     }
 
+    // Same guest-redirect pattern as toggleFavourite below -- notes are
+    // tied to an account, so a guest (e.g. a Demo Quiz visitor) is sent to
+    // sign up instead of silently doing nothing when they tap the button.
+    function openNote(questionId: number) {
+        if (!isAuthenticated) {
+            window.location.href = '/register';
+            return;
+        }
+        setNoteOpenFor(noteOpenFor === questionId ? null : questionId);
+    }
+
     // Favouriting only means something per-user (QuestionCheckController
     // rejects an anonymous request with 401) -- shown to everyone,
     // including a demo guest, but a guest clicking it is sent to sign up
@@ -481,15 +492,14 @@ export default function QuestionRunner({
                                         <FlagOutlineIcon /> Report
                                     </button>
                                 )}
-                                {isAuthenticated && (
-                                    <button
-                                        type="button"
-                                        onClick={() => setNoteOpenFor(noteOpenFor === current.id ? null : current.id)}
-                                        className={`inline-flex items-center gap-1 font-bold uppercase tracking-wide ${noteSavedIds.has(current.id) ? 'text-primary' : 'text-text-muted hover:text-primary'}`}
-                                    >
-                                        <NoteIcon /> {noteSavedIds.has(current.id) ? 'Note saved' : 'Note'}
-                                    </button>
-                                )}
+                                <button
+                                    type="button"
+                                    onClick={() => openNote(current.id)}
+                                    title={isAuthenticated ? undefined : 'Sign up to save notes'}
+                                    className={`inline-flex items-center gap-1 font-bold uppercase tracking-wide ${noteSavedIds.has(current.id) ? 'text-primary' : 'text-text-muted hover:text-primary'}`}
+                                >
+                                    <NoteIcon /> {noteSavedIds.has(current.id) ? 'Note saved' : 'Note'}
+                                </button>
                             </div>
                         </div>
                         {noteOpenFor === current.id && (
