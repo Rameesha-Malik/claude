@@ -1,8 +1,10 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { ReactNode, useEffect, useState } from 'react';
 import AnimatedCounter from '@/Components/AnimatedCounter';
+import BarChart from '@/Components/BarChart';
 import Icon from '@/Components/Icon';
 import RevealOnScroll from '@/Components/RevealOnScroll';
+import RingStat from '@/Components/RingStat';
 import StudentLayout from '@/Layouts/StudentLayout';
 import { PageProps } from '@/types';
 
@@ -15,9 +17,11 @@ interface Performance {
     questions_attempted: number; correct: number; incorrect: number; accuracy: number | null;
     favourites: number; sessions: number; last_test_percentage: string | null;
 }
+interface TrendPoint { label: string; value: number }
 interface Props {
     enrollments: EnrollmentCard[];
     performance: Performance;
+    activityTrend: TrendPoint[];
     revisionCount: number;
     unreadNotifications: { id: string; data: { message?: string }; created_at: string }[];
     recentBroadcasts: Broadcast[];
@@ -27,11 +31,9 @@ const ICONS = {
     book: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253',
     flag: 'M5 3v18m0-16h10l-2 4 2 4H5',
     bell: 'M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0',
-    chart: 'M4 20V10m6.67 10V4M17.33 20v-7',
     arrow: 'M11.3 3.3a1 1 0 011.4 0l5 5a1 1 0 010 1.4l-5 5a1 1 0 11-1.4-1.4L14.6 10H4a1 1 0 010-2h10.6l-3.3-3.3a1 1 0 010-1.4z',
     megaphone: 'M3 11l18-5v12L3 13v-2zm0 0v6a2 2 0 002 2h1a1 1 0 001-1v-5',
     star: 'M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z',
-    check: 'M9 12.75L11.25 15 15 9.75m6 2.25a9 9 0 11-18 0 9 9 0 0118 0z',
 };
 
 function greeting(): string {
@@ -73,37 +75,61 @@ function CourseCountdown({ course }: { course: EnrollmentCard }) {
     );
 }
 
-export default function Dashboard({ enrollments, performance, revisionCount, unreadNotifications, recentBroadcasts }: Props) {
+/** See Admin/Dashboard.tsx for the shared design reasoning (client
+ * reference screenshots, welcome banner + ring stats + trend chart
+ * instead of plain stat tiles, in the site's own teal/gold brand colors). */
+export default function Dashboard({ enrollments, performance, activityTrend, revisionCount, unreadNotifications, recentBroadcasts }: Props) {
     const { auth } = usePage<PageProps>().props;
     const firstName = auth.user?.name?.split(' ')[0] ?? 'there';
-    const overallProgress = Math.round(enrollments.reduce((a, c) => a + c.progress, 0) / (enrollments.length || 1));
+    const overallProgress = enrollments.length ? Math.round(enrollments.reduce((a, c) => a + c.progress, 0) / enrollments.length) : 0;
 
     return (
         <StudentLayout>
             <Head title="Dashboard" />
 
-            <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
-                <div>
-                    <p className="text-sm text-text-secondary">{greeting()},</p>
-                    <h1 className="font-display text-3xl uppercase tracking-wide text-text sm:text-4xl">{firstName}</h1>
+            <div className="relative overflow-hidden rounded-3xl p-7 text-on-primary" style={{ background: 'linear-gradient(120deg, var(--color-secondary), var(--color-primary))' }}>
+                <div className="relative z-10 flex flex-wrap items-end justify-between gap-4">
+                    <div className="max-w-lg">
+                        <p className="text-sm font-semibold opacity-80">{greeting()}</p>
+                        <h1 className="mt-1 text-3xl font-extrabold">{firstName}</h1>
+                        <p className="mt-2 text-sm opacity-90">
+                            {enrollments.length > 0
+                                ? `You're ${overallProgress}% through your course${enrollments.length > 1 ? 's' : ''}.`
+                                : "You're not enrolled in any courses yet."}
+                            {revisionCount > 0 ? ` ${revisionCount} question${revisionCount === 1 ? '' : 's'} need${revisionCount === 1 ? 's' : ''} revision.` : ''}
+                        </p>
+                    </div>
+                    <Link
+                        href="/courses"
+                        className="relative z-10 inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-on-accent shadow-sm transition-all duration-fast hover:-translate-y-0.5 hover:shadow-md"
+                    >
+                        Browse Courses
+                        <Icon d={ICONS.arrow} className="h-4 w-4" />
+                    </Link>
                 </div>
-                <Link
-                    href="/courses"
-                    className="inline-flex items-center gap-2 rounded-full bg-primary px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-on-primary shadow-sm transition-all duration-fast hover:-translate-y-0.5 hover:bg-primary-hover hover:shadow-md"
-                >
-                    Browse Courses
-                    <Icon d={ICONS.arrow} className="h-4 w-4" />
-                </Link>
+                <div className="absolute right-0 top-0 h-full w-64 opacity-20" style={{ background: 'radial-gradient(circle at 70% 30%, var(--color-accent), transparent 60%)' }} />
             </div>
 
-            <RevealOnScroll staggerMs={80} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <SummaryCard label="Enrolled Courses" value={enrollments.length} icon={<Icon d={ICONS.book} />} />
+            <RevealOnScroll staggerMs={80} className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <RingTile
+                    label="Overall Progress"
+                    percentage={overallProgress}
+                    valueLabel={`${overallProgress}%`}
+                    color="var(--color-primary)"
+                    sub={`${enrollments.length} course${enrollments.length === 1 ? '' : 's'}`}
+                />
+                <RingTile
+                    label="Accuracy"
+                    percentage={performance.accuracy ?? 0}
+                    valueLabel={performance.accuracy !== null ? `${performance.accuracy}%` : 'N/A'}
+                    color="var(--color-success)"
+                    sub={performance.questions_attempted > 0 ? `${performance.questions_attempted} attempted` : 'No attempts yet'}
+                />
                 <SummaryCard
                     label="Questions to Revise"
                     value={revisionCount}
                     icon={<Icon d={ICONS.flag} />}
                     tone={revisionCount > 0 ? 'warning' : 'primary'}
-                    badge={revisionCount > 0 ? 'Needs attention' : undefined}
                     href="/portal/revision-list"
                 />
                 <SummaryCard
@@ -111,29 +137,27 @@ export default function Dashboard({ enrollments, performance, revisionCount, unr
                     value={unreadNotifications.length}
                     icon={<Icon d={ICONS.bell} />}
                     tone={unreadNotifications.length > 0 ? 'warning' : 'primary'}
-                    badge={unreadNotifications.length > 0 ? 'New' : undefined}
-                />
-                <SummaryCard
-                    label="Overall Progress"
-                    value={`${enrollments.length ? overallProgress : 0}%`}
-                    icon={<Icon d={ICONS.chart} />}
-                    badge={enrollments.length === 0 ? undefined : overallProgress >= 50 ? 'On track' : 'Just started'}
-                    badgeTone={overallProgress >= 50 ? 'success' : 'warning'}
                 />
             </RevealOnScroll>
 
-            {/* Client, from a UWorld QBank reference shown in a meeting:
-                the dashboard should show a student "what they need to
-                know" -- their own accuracy across every quiz/test they've
-                taken, not just how far through a course they've clicked. */}
-            {performance.questions_attempted > 0 && (
-                <div className="mt-6 rounded-3xl border border-border bg-surface p-5">
-                    <h2 className="mb-4 font-bold text-text">Your Performance</h2>
-                    <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-6">
-                        <PerfStat label="Attempted" value={performance.questions_attempted} />
+            <div className="mt-6 grid gap-6 lg:grid-cols-3">
+                <div className="rounded-3xl border border-border bg-surface p-6 lg:col-span-2">
+                    <div className="mb-1 flex items-center justify-between">
+                        <h2 className="font-bold text-text">Your Activity, Last 14 Days</h2>
+                        <span className="rounded-full bg-primary-subtle px-2.5 py-1 text-xs font-bold text-primary">
+                            {activityTrend.reduce((n, d) => n + d.value, 0)} questions answered
+                        </span>
+                    </div>
+                    <div className="mt-3">
+                        <BarChart data={activityTrend} color="var(--color-primary)" height={150} />
+                    </div>
+                </div>
+
+                <div className="rounded-3xl border border-border bg-surface p-6">
+                    <h2 className="mb-4 font-bold text-text">Performance</h2>
+                    <div className="grid grid-cols-2 gap-4">
                         <PerfStat label="Correct" value={performance.correct} tone="success" />
                         <PerfStat label="Incorrect" value={performance.incorrect} tone="danger" />
-                        <PerfStat label="Accuracy" value={performance.accuracy !== null ? `${performance.accuracy}%` : 'N/A'} />
                         <PerfStat label="Favourites" value={performance.favourites} icon={<Icon d={ICONS.star} className="h-4 w-4" />} />
                         <PerfStat label="Sessions" value={performance.sessions} />
                     </div>
@@ -143,9 +167,9 @@ export default function Dashboard({ enrollments, performance, revisionCount, unr
                         </p>
                     )}
                 </div>
-            )}
+            </div>
 
-            <div className="mt-8 grid gap-6 lg:grid-cols-3">
+            <div className="mt-6 grid gap-6 lg:grid-cols-3">
                 <div className="lg:col-span-2">
                     <h2 className="mb-4 text-lg font-bold text-text">My Courses</h2>
                     {enrollments.length === 0 ? (
@@ -181,7 +205,7 @@ export default function Dashboard({ enrollments, performance, revisionCount, unr
                                             </div>
                                             <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-surface-sunken">
                                                 <div
-                                                    className="h-full rounded-full bg-gradient-to-r from-secondary to-primary transition-all duration-slow"
+                                                    className="h-full rounded-full bg-gradient-to-r from-accent to-primary transition-all duration-slow"
                                                     style={{ width: `${course.progress}%` }}
                                                 />
                                             </div>
@@ -222,50 +246,47 @@ export default function Dashboard({ enrollments, performance, revisionCount, unr
     );
 }
 
+function RingTile({ label, percentage, valueLabel, color, sub }: { label: string; percentage: number; valueLabel: string; color: string; sub: string }) {
+    return (
+        <div className="flex items-center gap-4 rounded-3xl border border-border bg-surface p-5">
+            <RingStat percentage={percentage} color={color} />
+            <div className="min-w-0">
+                <div className="font-display text-2xl text-text">{valueLabel}</div>
+                <div className="truncate text-sm text-text-secondary">{label}</div>
+                <div className="truncate text-xs text-text-muted">{sub}</div>
+            </div>
+        </div>
+    );
+}
+
 function SummaryCard({
     label,
     value,
     icon,
     tone = 'primary',
-    badge,
-    badgeTone,
     href,
 }: {
     label: string;
     value: string | number;
     icon: ReactNode;
     tone?: 'primary' | 'warning';
-    badge?: string;
-    badgeTone?: 'success' | 'warning';
     /** Makes the whole card a link -- e.g. the revision count previously had
      *  nowhere to click through to. */
     href?: string;
 }) {
-    const resolvedBadgeTone = badgeTone ?? (tone === 'warning' ? 'warning' : 'success');
     const Wrapper = href ? Link : 'div';
     return (
         <Wrapper
             {...(href ? { href } : {})}
             className="group rounded-3xl border border-border bg-surface p-5 transition-all duration-normal hover:-translate-y-1 hover:shadow-lg"
         >
-            <div className="flex items-center justify-between">
-                <span
-                    className={`flex h-11 w-11 items-center justify-center rounded-2xl transition-transform duration-normal group-hover:scale-110 ${
-                        tone === 'warning' ? 'bg-warning-bg text-warning' : 'bg-primary-subtle text-primary'
-                    }`}
-                >
-                    {icon}
-                </span>
-                {badge && (
-                    <span
-                        className={`rounded-full px-2.5 py-1 text-[0.65rem] font-bold uppercase tracking-wide ${
-                            resolvedBadgeTone === 'warning' ? 'bg-warning-bg text-warning' : 'bg-success-bg text-success'
-                        }`}
-                    >
-                        {badge}
-                    </span>
-                )}
-            </div>
+            <span
+                className={`flex h-11 w-11 items-center justify-center rounded-2xl transition-transform duration-normal group-hover:scale-110 ${
+                    tone === 'warning' ? 'bg-warning-bg text-warning' : 'bg-primary-subtle text-primary'
+                }`}
+            >
+                {icon}
+            </span>
             <div className="mt-4 font-display text-3xl text-text">
                 <AnimatedCounter value={String(value)} />
             </div>

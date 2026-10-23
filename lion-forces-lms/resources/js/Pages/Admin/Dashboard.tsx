@@ -1,8 +1,11 @@
 import { Head } from '@inertiajs/react';
 import { ReactNode } from 'react';
 import AnimatedCounter from '@/Components/AnimatedCounter';
+import BarChart from '@/Components/BarChart';
+import DonutChart from '@/Components/DonutChart';
 import Icon from '@/Components/Icon';
 import RevealOnScroll from '@/Components/RevealOnScroll';
+import RingStat from '@/Components/RingStat';
 import AdminLayout from '@/Layouts/AdminLayout';
 
 interface Stats {
@@ -14,10 +17,17 @@ interface QuestionBankStats { total_questions: number; platform_accuracy: number
 interface MissedQuestion { question_text: string; wrong_count: number }
 interface Enrollment { id: number; status: string; user: { name: string } | null; course: { title: string } | null; created_at: string }
 interface Payment { id: number; amount: string; method: string; status: string; enrollment: { user: { name: string } | null } | null; created_at: string }
+interface TrendPoint { label: string; value: number }
+interface RevenueSlice { method: string; amount: number; percentage: number }
+interface Admin { id: number; name: string }
 interface Props {
     stats: Stats;
     questionBank: QuestionBankStats;
     mostMissedQuestions: MissedQuestion[];
+    enrollmentTrend: TrendPoint[];
+    revenueBreakdown: RevenueSlice[];
+    admins: Admin[];
+    adminsCount: number;
     recentEnrollments: Enrollment[];
     recentPayments: Payment[];
     popularCourses: { title: string; enrollments: number }[];
@@ -25,51 +35,128 @@ interface Props {
 
 const ICONS = {
     students: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253',
-    pulse: 'M4 12h3l2 8 4-16 2 8h5',
-    sparkle: 'M9.813 15.904L9 18.75l-.813-2.846a4.5 4.5 0 00-3.09-3.09L2.25 12l2.846-.813a4.5 4.5 0 003.09-3.09L9 5.25l.813 2.846a4.5 4.5 0 003.09 3.09L15.75 12l-2.846.813a4.5 4.5 0 00-3.09 3.09z',
-    course: 'M12 14l9-5-9-5-9 5 9 5zm0 0l6.16-3.422A12.083 12.083 0 0112 20.417a12.083 12.083 0 01-6.16-9.839L12 14z',
-    ticket: 'M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z',
     cash: 'M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z',
     clock: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',
-    chart: 'M4 20V10m6.67 10V4M17.33 20v-7',
-    bank: 'M3.75 21h16.5M4.5 10.5h15M5.25 10.5V21m13.5-10.5V21M9 21V13.5h6V21M4.5 10.5L12 3.75l7.5 6.75',
-    target: 'M12 9v6m-3-3h6m6 0a9 9 0 11-18 0 9 9 0 0118 0z',
 };
 
-export default function Dashboard({ stats, questionBank, mostMissedQuestions, recentEnrollments, recentPayments, popularCourses }: Props) {
+const METHOD_LABELS: Record<string, string> = {
+    bank_transfer: 'Bank Transfer',
+    easypaisa: 'Easypaisa',
+    jazzcash: 'JazzCash',
+    card: 'Card',
+    other: 'Other',
+};
+const METHOD_COLORS = ['var(--color-primary)', 'var(--color-accent)', 'var(--color-success)', 'var(--color-secondary)', 'var(--color-warning)'];
+
+function initials(name: string): string {
+    return name.split(' ').filter(Boolean).slice(0, 2).map((p) => p[0]?.toUpperCase()).join('');
+}
+
+/**
+ * Client reference: two dashboard screenshots (a smart-home app, and a
+ * generic "Arion" admin template) with the request to make the admin and
+ * student dashboards look less "vibecoded" -- a welcome banner, ring/donut
+ * progress instead of plain stat numbers, and a real trend chart. Kept in
+ * the site's own teal/gold brand colors rather than the references' purple
+ * palette. Deliberately does NOT duplicate the "bank coverage" stat that
+ * already lives on Admin > Custom Quiz (see that controller's comment) --
+ * the two ring stats here (active students, platform accuracy) are chosen
+ * from data this page already had, just re-presented.
+ */
+export default function Dashboard({
+    stats,
+    questionBank,
+    mostMissedQuestions,
+    enrollmentTrend,
+    revenueBreakdown,
+    admins,
+    adminsCount,
+    recentEnrollments,
+    recentPayments,
+    popularCourses,
+}: Props) {
+    const activePercent = stats.total_students > 0 ? Math.round((stats.active_students / stats.total_students) * 100) : 0;
+
     return (
         <AdminLayout header="Dashboard">
             <Head title="Admin Dashboard" />
 
-            <RevealOnScroll staggerMs={60} className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <Stat label="Total Students" value={stats.total_students} icon={<Icon d={ICONS.students} />} />
-                <Stat label="Active Students" value={stats.active_students} icon={<Icon d={ICONS.pulse} />} tone="success" />
-                <Stat label="New This Week" value={stats.new_this_week} icon={<Icon d={ICONS.sparkle} />} />
-                <Stat label="Total Courses" value={stats.total_courses} icon={<Icon d={ICONS.course} />} />
-                <Stat label="Total Enrollments" value={stats.total_enrollments} icon={<Icon d={ICONS.ticket} />} />
-                <Stat
-                    label="Revenue (30d, verified)"
-                    value={Number(stats.recent_payments_total).toLocaleString()}
-                    prefix="Rs. "
-                    icon={<Icon d={ICONS.cash} />}
-                    tone="success"
+            <div className="relative overflow-hidden rounded-3xl p-7 text-on-primary" style={{ background: 'linear-gradient(120deg, var(--color-secondary), var(--color-primary))' }}>
+                <div className="relative z-10 max-w-lg">
+                    <p className="text-sm font-semibold opacity-80">Welcome back</p>
+                    <h1 className="mt-1 text-3xl font-extrabold">Admin Dashboard</h1>
+                    <p className="mt-2 text-sm opacity-90">
+                        {stats.total_students.toLocaleString()} students, {questionBank.total_questions.toLocaleString()} questions in the bank.
+                        {stats.pending_payments > 0 ? ` ${stats.pending_payments} payment${stats.pending_payments === 1 ? '' : 's'} need review.` : ' Everything looks healthy.'}
+                    </p>
+                </div>
+                <div className="absolute right-0 top-0 h-full w-64 opacity-20" style={{ background: 'radial-gradient(circle at 70% 30%, var(--color-accent), transparent 60%)' }} />
+            </div>
+
+            <RevealOnScroll staggerMs={60} className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <RingTile
+                    label="Active Students"
+                    percentage={activePercent}
+                    valueLabel={`${activePercent}%`}
+                    color="var(--color-success)"
+                    sub={`${stats.active_students.toLocaleString()} of ${stats.total_students.toLocaleString()}`}
                 />
+                <RingTile
+                    label="Platform Accuracy"
+                    percentage={questionBank.platform_accuracy ?? 0}
+                    valueLabel={questionBank.platform_accuracy !== null ? `${questionBank.platform_accuracy}%` : 'N/A'}
+                    color="var(--color-primary)"
+                    sub={questionBank.total_answered > 0 ? `${questionBank.total_answered.toLocaleString()} answers` : 'No answers yet'}
+                />
+                <Stat label="Total Enrollments" value={stats.total_enrollments} icon={<Icon d={ICONS.students} />} />
                 <Stat
                     label="Pending Payments"
                     value={stats.pending_payments}
                     icon={<Icon d={ICONS.clock} />}
                     tone={stats.pending_payments > 0 ? 'warning' : 'primary'}
-                    badge={stats.pending_payments > 0 ? 'Needs review' : undefined}
                 />
-                <Stat label="Test Attempts (7d)" value={stats.recent_attempts} icon={<Icon d={ICONS.chart} />} />
             </RevealOnScroll>
 
-            {/* Client, from a UWorld QBank reference shown in a meeting: a
-                dashboard should surface "important things," not just
-                enrollment/revenue -- for admin that's whether the question
-                bank is actually being used (size + platform-wide accuracy)
-                and an actionable signal (which specific questions keep
-                getting missed, worth a second look for a wording problem). */}
+            <div className="mt-6 grid gap-6 lg:grid-cols-3">
+                <div className="rounded-3xl border border-border bg-surface p-6 lg:col-span-2">
+                    <div className="mb-1 flex items-center justify-between">
+                        <h2 className="font-bold text-text">Enrollments, Last 30 Days</h2>
+                        <span className="rounded-full bg-success-bg px-2.5 py-1 text-xs font-bold text-success">
+                            {enrollmentTrend.reduce((n, d) => n + d.value, 0)} total
+                        </span>
+                    </div>
+                    <div className="mt-3">
+                        <BarChart data={enrollmentTrend} color="var(--color-primary)" height={160} />
+                    </div>
+                </div>
+
+                <div className="rounded-3xl border border-border bg-surface p-6">
+                    <h2 className="mb-4 font-bold text-text">Revenue by Method, 30d</h2>
+                    {revenueBreakdown.length === 0 ? (
+                        <p className="text-sm text-text-secondary">No verified payments in the last 30 days.</p>
+                    ) : (
+                        <>
+                            <div className="flex items-center justify-center">
+                                <DonutChart
+                                    segments={revenueBreakdown.map((r, i) => ({ label: METHOD_LABELS[r.method] ?? r.method, value: r.amount, color: METHOD_COLORS[i % METHOD_COLORS.length] }))}
+                                />
+                            </div>
+                            <div className="mt-4 space-y-2 text-sm">
+                                {revenueBreakdown.map((r, i) => (
+                                    <div key={r.method} className="flex items-center justify-between">
+                                        <span className="flex items-center gap-2 text-text-secondary">
+                                            <span className="h-2.5 w-2.5 rounded-full" style={{ background: METHOD_COLORS[i % METHOD_COLORS.length] }} />
+                                            {METHOD_LABELS[r.method] ?? r.method}
+                                        </span>
+                                        <span className="font-bold text-text">{r.percentage}%</span>
+                                    </div>
+                                ))}
+                            </div>
+                        </>
+                    )}
+                </div>
+            </div>
+
             <div className="mt-6 grid gap-6 lg:grid-cols-3">
                 <div className="rounded-3xl border border-border bg-surface p-5 lg:col-span-1">
                     <h2 className="mb-4 font-bold text-text">Question Bank</h2>
@@ -82,16 +169,14 @@ export default function Dashboard({ stats, questionBank, mostMissedQuestions, re
                         </div>
                         <div>
                             <div className="font-display text-3xl text-text">
-                                {questionBank.platform_accuracy !== null ? `${questionBank.platform_accuracy}%` : 'N/A'}
+                                {Number(stats.recent_payments_total).toLocaleString()}
                             </div>
-                            <div className="text-sm text-text-secondary">
-                                Platform-wide accuracy{questionBank.total_answered > 0 ? ` (${questionBank.total_answered.toLocaleString()} answers)` : ''}
-                            </div>
+                            <div className="text-sm text-text-secondary">Revenue, 30d, Rs.</div>
                         </div>
                     </div>
                 </div>
 
-                <div className="rounded-3xl border border-border bg-surface p-5 lg:col-span-2 min-w-0">
+                <div className="min-w-0 rounded-3xl border border-border bg-surface p-5 lg:col-span-2">
                     <h2 className="mb-4 font-bold text-text">Most-Missed Questions</h2>
                     {mostMissedQuestions.length === 0 ? (
                         <p className="text-sm text-text-secondary">No wrong answers recorded yet.</p>
@@ -110,8 +195,8 @@ export default function Dashboard({ stats, questionBank, mostMissedQuestions, re
                 </div>
             </div>
 
-            <div className="mt-8 grid gap-6 lg:grid-cols-3">
-                <div className="rounded-3xl border border-border bg-surface p-5 lg:col-span-2 min-w-0">
+            <div className="mt-6 grid gap-6 lg:grid-cols-3">
+                <div className="min-w-0 rounded-3xl border border-border bg-surface p-5 lg:col-span-2">
                     <h2 className="mb-4 font-bold text-text">Recent Enrollments</h2>
                     {recentEnrollments.length === 0 ? (
                         <p className="text-sm text-text-secondary">No enrollments yet.</p>
@@ -124,13 +209,9 @@ export default function Dashboard({ stats, questionBank, mostMissedQuestions, re
                             <tbody className="divide-y divide-border">
                                 {recentEnrollments.map((e) => (
                                     <tr key={e.id}>
-                                        <td className="py-2 text-text">{e.user?.name}</td>
-                                        <td className="py-2 text-text-secondary">{e.course?.title}</td>
-                                        <td className="py-2">
-                                            <span className={`rounded-full px-2 py-0.5 text-xs font-bold uppercase ${
-                                                e.status === 'active' ? 'bg-success-bg text-success' : 'bg-warning-bg text-warning'
-                                            }`}>{e.status}</span>
-                                        </td>
+                                        <td className="py-2.5 text-text">{e.user?.name}</td>
+                                        <td className="py-2.5 text-text-secondary">{e.course?.title}</td>
+                                        <td className="py-2.5"><StatusDot status={e.status} /></td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -139,16 +220,38 @@ export default function Dashboard({ stats, questionBank, mostMissedQuestions, re
                     )}
                 </div>
 
-                <div className="rounded-3xl border border-border bg-surface p-5 min-w-0">
-                    <h2 className="mb-4 font-bold text-text">Popular Courses</h2>
+                <div className="min-w-0 rounded-3xl border border-border bg-surface p-5">
+                    <div className="mb-4 flex items-center justify-between">
+                        <h2 className="font-bold text-text">Team</h2>
+                        <span className="text-xs text-text-secondary">{adminsCount} with access</span>
+                    </div>
+                    <div className="flex -space-x-3">
+                        {admins.map((a, i) => (
+                            <div
+                                key={a.id}
+                                title={a.name}
+                                className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-surface text-sm font-bold text-on-primary"
+                                style={{ background: METHOD_COLORS[i % METHOD_COLORS.length] }}
+                            >
+                                {initials(a.name)}
+                            </div>
+                        ))}
+                        {adminsCount > admins.length && (
+                            <div className="flex h-11 w-11 items-center justify-center rounded-full border-2 border-surface bg-surface-sunken text-sm font-bold text-text-secondary">
+                                +{adminsCount - admins.length}
+                            </div>
+                        )}
+                    </div>
+
+                    <h2 className="mb-3 mt-6 font-bold text-text">Popular Courses</h2>
                     {popularCourses.length === 0 ? (
                         <p className="text-sm text-text-secondary">No data yet.</p>
                     ) : (
                         <div className="space-y-3">
                             {popularCourses.map((c, i) => (
                                 <div key={i} className="flex items-center justify-between text-sm">
-                                    <span className="text-text">{c.title}</span>
-                                    <span className="font-bold text-primary">{c.enrollments}</span>
+                                    <span className="min-w-0 flex-1 truncate text-text">{c.title}</span>
+                                    <span className="flex-shrink-0 font-bold text-primary">{c.enrollments}</span>
                                 </div>
                             ))}
                         </div>
@@ -169,14 +272,10 @@ export default function Dashboard({ stats, questionBank, mostMissedQuestions, re
                         <tbody className="divide-y divide-border">
                             {recentPayments.map((p) => (
                                 <tr key={p.id}>
-                                    <td className="py-2 text-text">{p.enrollment?.user?.name}</td>
-                                    <td className="py-2 text-text-secondary capitalize">{p.method.replace('_', ' ')}</td>
-                                    <td className="py-2 font-semibold text-text">Rs. {Number(p.amount).toLocaleString()}</td>
-                                    <td className="py-2">
-                                        <span className={`rounded-full px-2 py-0.5 text-xs font-bold uppercase ${
-                                            p.status === 'verified' ? 'bg-success-bg text-success' : p.status === 'pending' ? 'bg-warning-bg text-warning' : 'bg-danger-bg text-danger'
-                                        }`}>{p.status}</span>
-                                    </td>
+                                    <td className="py-2.5 text-text">{p.enrollment?.user?.name}</td>
+                                    <td className="py-2.5 text-text-secondary capitalize">{p.method.replace('_', ' ')}</td>
+                                    <td className="py-2.5 font-semibold text-text">Rs. {Number(p.amount).toLocaleString()}</td>
+                                    <td className="py-2.5"><StatusDot status={p.status} /></td>
                                 </tr>
                             ))}
                         </tbody>
@@ -188,38 +287,44 @@ export default function Dashboard({ stats, questionBank, mostMissedQuestions, re
     );
 }
 
-function Stat({
-    label,
-    value,
-    icon,
-    tone = 'primary',
-    badge,
-    prefix,
-}: {
-    label: string;
-    value: string | number;
-    icon: ReactNode;
-    tone?: 'primary' | 'success' | 'warning';
-    badge?: string;
-    /** Rendered before the animated digits, e.g. "Rs. " -- kept out of
-     * AnimatedCounter's value since it only supports a trailing suffix. */
-    prefix?: string;
-}) {
-    const iconTone = tone === 'warning' ? 'bg-warning-bg text-warning' : tone === 'success' ? 'bg-success-bg text-success' : 'bg-primary-subtle text-primary';
+/** Quiet dot + plain-case text instead of a bold all-caps translucent pill
+ * -- client feedback was that the pill badges read as generic/AI-generated.
+ * Only the states that genuinely need attention (pending, rejected) get a
+ * colored, semibold treatment; routine states stay muted. */
+function StatusDot({ status }: { status: string }) {
+    const needsAttention = ['pending', 'rejected', 'suspended'].includes(status);
+    const isNegative = ['rejected', 'suspended'].includes(status);
+    const dotColor = isNegative ? 'var(--color-danger)' : needsAttention ? 'var(--color-warning)' : 'var(--color-success)';
+    const textClass = needsAttention ? (isNegative ? 'font-semibold text-danger' : 'font-semibold text-warning') : 'text-text-secondary';
+    return (
+        <span className={`inline-flex items-center gap-1.5 text-sm capitalize ${textClass}`}>
+            <span className="h-1.5 w-1.5 rounded-full" style={{ background: dotColor }} />
+            {status}
+        </span>
+    );
+}
+
+function RingTile({ label, percentage, valueLabel, color, sub }: { label: string; percentage: number; valueLabel: string; color: string; sub: string }) {
+    return (
+        <div className="flex items-center gap-4 rounded-3xl border border-border bg-surface p-5">
+            <RingStat percentage={percentage} color={color} />
+            <div className="min-w-0">
+                <div className="font-display text-2xl text-text">{valueLabel}</div>
+                <div className="truncate text-sm text-text-secondary">{label}</div>
+                <div className="truncate text-xs text-text-muted">{sub}</div>
+            </div>
+        </div>
+    );
+}
+
+function Stat({ label, value, icon, tone = 'primary' }: { label: string; value: string | number; icon: ReactNode; tone?: 'primary' | 'warning' }) {
+    const iconTone = tone === 'warning' ? 'bg-warning-bg text-warning' : 'bg-primary-subtle text-primary';
     return (
         <div className="group rounded-3xl border border-border bg-surface p-5 transition-all duration-normal hover:-translate-y-1 hover:shadow-lg">
-            <div className="flex items-center justify-between">
-                <span className={`flex h-11 w-11 items-center justify-center rounded-2xl transition-transform duration-normal group-hover:scale-110 ${iconTone}`}>
-                    {icon}
-                </span>
-                {badge && (
-                    <span className="rounded-full bg-warning-bg px-2.5 py-1 text-[0.65rem] font-bold uppercase tracking-wide text-warning">
-                        {badge}
-                    </span>
-                )}
-            </div>
+            <span className={`flex h-11 w-11 items-center justify-center rounded-2xl transition-transform duration-normal group-hover:scale-110 ${iconTone}`}>
+                {icon}
+            </span>
             <div className="mt-4 font-display text-3xl text-text">
-                {prefix}
                 <AnimatedCounter value={String(value)} />
             </div>
             <div className="mt-1 text-sm text-text-secondary">{label}</div>

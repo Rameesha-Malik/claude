@@ -40,6 +40,33 @@ class DashboardController extends Controller
             ->map(fn ($row) => ['question_text' => $row->question->question_text, 'wrong_count' => $row->wrong_count])
             ->values();
 
+        // Bar chart of daily enrollment counts over the last 30 days --
+        // DATE(created_at) rather than MySQL-only MONTH()/YEAR() (as
+        // LeaderboardController uses) so this also runs on SQLite during
+        // local review, not just the MySQL production database.
+        $enrollmentSince = now()->subDays(29)->startOfDay();
+        $enrollmentsByDay = Enrollment::where('created_at', '>=', $enrollmentSince)
+            ->selectRaw('DATE(created_at) as day, COUNT(*) as total')
+            ->groupBy('day')
+            ->pluck('total', 'day');
+        $enrollmentTrend = collect(range(0, 29))->map(function (int $i) use ($enrollmentSince, $enrollmentsByDay) {
+            $date = $enrollmentSince->copy()->addDays($i);
+            return ['label' => $date->format('M j'), 'value' => (int) ($enrollmentsByDay[$date->format('Y-m-d')] ?? 0)];
+        });
+
+        $revenueSince = now()->subDays(29)->startOfDay();
+        $revenueByMethod = Payment::where('status', 'verified')
+            ->where('created_at', '>=', $revenueSince)
+            ->selectRaw('method, SUM(amount) as total')
+            ->groupBy('method')
+            ->pluck('total', 'method');
+        $revenueTotal = (float) $revenueByMethod->sum();
+        $revenueBreakdown = $revenueByMethod->map(fn ($amount, $method) => [
+            'method' => $method,
+            'amount' => (float) $amount,
+            'percentage' => $revenueTotal > 0 ? round((float) $amount / $revenueTotal * 100) : 0,
+        ])->values();
+
         return Inertia::render('Admin/Dashboard', [
             'questionBank' => [
                 'total_questions' => QuestionBank::count(),
@@ -47,6 +74,10 @@ class DashboardController extends Controller
                 'total_answered' => $totalAnswered,
             ],
             'mostMissedQuestions' => $mostMissed,
+            'enrollmentTrend' => $enrollmentTrend,
+            'revenueBreakdown' => $revenueBreakdown,
+            'admins' => User::where('user_type', 'admin')->orderBy('name')->limit(6)->get(['id', 'name']),
+            'adminsCount' => User::where('user_type', 'admin')->count(),
             'stats' => [
                 'total_students' => (clone $students)->count(),
                 'active_students' => (clone $students)->where('is_active', true)->count(),

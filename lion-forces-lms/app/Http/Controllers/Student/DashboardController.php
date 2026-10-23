@@ -41,6 +41,22 @@ class DashboardController extends Controller
             'last_test_percentage' => $lastTest?->percentage,
         ];
 
+        // Bar chart of the student's own daily question-answering activity
+        // over the last 14 days -- a count, not a daily accuracy %, since
+        // accuracy from just a handful of questions on a light day would
+        // be noisy and misleading as a trend line.
+        $activitySince = now()->subDays(13)->startOfDay();
+        $answersByDay = TestAttemptAnswer::whereHas('attempt', fn ($q) => $q->where('user_id', $user->id))
+            ->whereNotNull('is_correct')
+            ->where('created_at', '>=', $activitySince)
+            ->selectRaw('DATE(created_at) as day, COUNT(*) as total')
+            ->groupBy('day')
+            ->pluck('total', 'day');
+        $activityTrend = collect(range(0, 13))->map(function (int $i) use ($activitySince, $answersByDay) {
+            $date = $activitySince->copy()->addDays($i);
+            return ['label' => $date->format('M j'), 'value' => (int) ($answersByDay[$date->format('Y-m-d')] ?? 0)];
+        });
+
         $enrollments = $user->enrollments()
             ->where('status', 'active')
             ->with(['course.category', 'course.lessons'])
@@ -69,6 +85,7 @@ class DashboardController extends Controller
         return Inertia::render('Student/Dashboard', [
             'enrollments' => $enrollments,
             'performance' => $performance,
+            'activityTrend' => $activityTrend,
             'revisionCount' => RevisionListItem::where('user_id', $user->id)->where('resolved', false)->count(),
             'unreadNotifications' => $user->unreadNotifications()->limit(5)->get(['id', 'data', 'created_at']),
             'recentBroadcasts' => NotificationBroadcast::latest('sent_at')->limit(3)->get(['title', 'body', 'sent_at']),
