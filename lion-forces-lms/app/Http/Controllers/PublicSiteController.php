@@ -79,7 +79,16 @@ class PublicSiteController extends Controller
 
     public function courseDetail(Course $course): Response
     {
-        $course->load(['category', 'instructor', 'packages' => fn ($q) => $q->where('is_active', true), 'approvedReviews.user', 'lessons' => fn ($q) => $q->where('is_free_preview', true), 'tags:id,name']);
+        $course->load([
+            'category', 'instructor',
+            'packages' => fn ($q) => $q->where('is_active', true),
+            'approvedReviews.user',
+            'lessons' => fn ($q) => $q->where('is_free_preview', true)->orderBy('order'),
+            'tags:id,name',
+        ])->loadCount([
+            'lessons',
+            'enrollments' => fn ($q) => $q->where('status', 'active'),
+        ]);
 
         return Inertia::render('Public/CourseDetail', ['course' => $course]);
     }

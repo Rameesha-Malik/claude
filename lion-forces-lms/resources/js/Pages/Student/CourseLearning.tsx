@@ -92,8 +92,16 @@ function youtubeEmbedUrl(url: string): string | null {
 // (YouTube's lightweight embed protocol, no iframe_api.js needed) and
 // only shows the bottom block until the student actually presses play;
 // from then on the real control bar takes over underneath, uncovered.
-function YoutubeEmbed({ embed, title }: { embed: string; title: string }) {
+function YoutubeEmbed({ embed, title, rawUrl }: { embed: string; title: string; rawUrl: string | null }) {
     const [started, setStarted] = useState(false);
+    // Client: a lecture video added as an unlisted/restricted YouTube link
+    // can fail to embed (region lock, sign-in required, wrong link) with
+    // nothing on screen to explain why -- the watermark/title overlays
+    // below are intentionally blocked so a *working* video can't be used
+    // to browse away to YouTube, but that same blocking left a *broken*
+    // embed with no way out at all. If no "playback has started" signal
+    // ever arrives, show a plain link to open the real video directly.
+    const [showFallback, setShowFallback] = useState(false);
     const iframeRef = useRef<HTMLIFrameElement>(null);
 
     useEffect(() => {
@@ -112,23 +120,37 @@ function YoutubeEmbed({ embed, title }: { embed: string; title: string }) {
             }
         }
         window.addEventListener('message', onMessage);
-        return () => window.removeEventListener('message', onMessage);
+        const fallbackTimer = setTimeout(() => setShowFallback(true), 10000);
+        return () => {
+            window.removeEventListener('message', onMessage);
+            clearTimeout(fallbackTimer);
+        };
     }, []);
 
     return (
-        <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-black">
-            <iframe
-                ref={iframeRef}
-                src={embed}
-                className="h-full w-full"
-                allow="fullscreen; encrypted-media; picture-in-picture"
-                allowFullScreen
-                title={title}
-                onLoad={() => iframeRef.current?.contentWindow?.postMessage(JSON.stringify({ event: 'listening', id: 1 }), '*')}
-            />
-            <div className="absolute left-0 top-0 h-10 w-2/5 max-w-[14rem]" />
-            <div className="absolute right-0 top-0 h-10 w-24" />
-            {! started && <div className="absolute bottom-0 right-0 h-[15%] w-1/3 max-w-[16rem]" />}
+        <div>
+            <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-black">
+                <iframe
+                    ref={iframeRef}
+                    src={embed}
+                    className="h-full w-full"
+                    allow="fullscreen; encrypted-media; picture-in-picture"
+                    allowFullScreen
+                    title={title}
+                    onLoad={() => iframeRef.current?.contentWindow?.postMessage(JSON.stringify({ event: 'listening', id: 1 }), '*')}
+                />
+                <div className="absolute left-0 top-0 h-10 w-2/5 max-w-[14rem]" />
+                <div className="absolute right-0 top-0 h-10 w-24" />
+                {! started && <div className="absolute bottom-0 right-0 h-[15%] w-1/3 max-w-[16rem]" />}
+            </div>
+            {showFallback && ! started && rawUrl && (
+                <p className="mt-2 text-sm text-text-secondary">
+                    Video not loading? It's hosted on YouTube.{' '}
+                    <a href={rawUrl} target="_blank" rel="noopener noreferrer" className="font-semibold text-primary hover:underline">
+                        Open it directly &rarr;
+                    </a>
+                </p>
+            )}
         </div>
     );
 }
@@ -166,7 +188,7 @@ function LessonPlayer({ lesson }: { lesson: Lesson }) {
         case 'video_youtube': {
             const embed = lesson.external_url ? youtubeEmbedUrl(lesson.external_url) : null;
             return embed ? (
-                <YoutubeEmbed embed={embed} title={lesson.title} />
+                <YoutubeEmbed embed={embed} title={lesson.title} rawUrl={lesson.external_url} />
             ) : (
                 <p className="rounded-xl bg-surface-sunken p-6 text-sm text-text-muted">Video link not set yet.</p>
             );
