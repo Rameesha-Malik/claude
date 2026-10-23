@@ -105,7 +105,7 @@ export default function CreateCustomQuiz({ subjects, topics, hasAccess, freeTria
             <div className="mx-auto max-w-lg rounded-3xl border border-border bg-surface p-6 sm:p-8">
                 <h1 className="font-display text-2xl text-text">Build Your Own Quiz</h1>
                 <p className="mt-1 text-sm text-text-secondary">
-                    {course ? `For "${course.title}" -- ` : ''}Pick a subject (and optionally a topic within it), difficulty, and how many questions -- we'll
+                    {course ? `For "${course.title}": ` : ''}Pick a subject (and optionally a topic within it), difficulty, and how many questions. We'll
                     pull a fresh random set from the question bank.
                 </p>
 

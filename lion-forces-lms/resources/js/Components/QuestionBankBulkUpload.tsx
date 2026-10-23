@@ -1,6 +1,7 @@
 import { useForm } from '@inertiajs/react';
 
 export interface BulkUploadResult { added: number; errors: string[] }
+interface CourseOption { id: number; title: string }
 
 const inputClass = 'w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:shadow-glow focus:outline-none';
 const btnClass = 'rounded-lg bg-primary px-4 py-2 text-sm font-bold uppercase tracking-wide text-on-primary hover:bg-primary-hover disabled:opacity-50';
@@ -15,12 +16,16 @@ const CSV_TEMPLATE = [
 // can import many MCQs at once without leaving the quiz they're
 // building. preserveState keeps the embedding page's own unsaved state
 // (e.g. a partly-filled-in Quiz form) intact when the redirect-back lands.
-export function QuestionBankBulkUploadForm({ onDone }: { onDone: () => void }) {
-    const form = useForm<{ csv: File | null }>({ csv: null });
+// Course is required (see the migration that added question_bank.
+// course_id) -- every question in this one CSV batch is tagged to the
+// same course, since a CSV is naturally "the question set for one course"
+// rather than mixing courses row by row.
+export function QuestionBankBulkUploadForm({ course, courses = [], onDone }: { course?: CourseOption; courses?: CourseOption[]; onDone: () => void }) {
+    const form = useForm<{ csv: File | null; course_id: string }>({ csv: null, course_id: course ? String(course.id) : '' });
 
     function submit(e: React.FormEvent) {
         e.preventDefault();
-        if (!form.data.csv) return;
+        if (!form.data.csv || !form.data.course_id) return;
         form.post('/admin/content-library/questions/bulk', { preserveState: true, onSuccess: () => { form.reset(); onDone(); } });
     }
 
@@ -30,6 +35,7 @@ export function QuestionBankBulkUploadForm({ onDone }: { onDone: () => void }) {
                 Upload a CSV instead of adding questions one at a time. Columns, in order: Subject, Topic
                 (optional), Difficulty (easy/medium/hard), Question, Option A–D, Correct Answer (A/B/C/D),
                 Explanation (optional). A Subject or Topic that doesn't exist yet is created automatically.
+                Every question in the file is tagged to the one course picked below.
             </p>
             <a
                 href={`data:text/csv;charset=utf-8,${encodeURIComponent(CSV_TEMPLATE)}`}
@@ -38,13 +44,21 @@ export function QuestionBankBulkUploadForm({ onDone }: { onDone: () => void }) {
             >
                 Download CSV Template
             </a>
+            {course ? (
+                <p className="text-sm text-text-secondary">Adding to <span className="font-semibold text-text">{course.title}</span></p>
+            ) : (
+                <select required className={inputClass} value={form.data.course_id} onChange={(e) => form.setData('course_id', e.target.value)}>
+                    <option value="">Select a course</option>
+                    {courses.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
+                </select>
+            )}
             <input
                 type="file"
                 accept=".csv,text/csv"
                 className={inputClass}
                 onChange={(e) => form.setData('csv', e.target.files?.[0] ?? null)}
             />
-            <button type="submit" disabled={form.processing || !form.data.csv} className={btnClass}>
+            <button type="submit" disabled={form.processing || !form.data.csv || !form.data.course_id} className={btnClass}>
                 {form.processing ? 'Uploading…' : 'Upload'}
             </button>
             {Object.values(form.errors).map((m, i) => <div key={i} className="text-sm text-danger">{String(m)}</div>)}

@@ -7,8 +7,9 @@ import AdminLayout from '@/Layouts/AdminLayout';
 
 interface Subject { id: number; name: string }
 interface Topic { id: number; subject_id: number; name: string }
+interface CourseOption { id: number; title: string }
 interface Option { id?: number; option_text: string; is_correct: boolean }
-interface Question { id: number; question_text: string; explanation: string | null; difficulty: string; subject: Subject | null; topic: Topic | null; options: Option[] }
+interface Question { id: number; question_text: string; explanation: string | null; difficulty: string; subject: Subject | null; topic: Topic | null; course: CourseOption | null; options: Option[] }
 interface Note { id: number; title: string; content: string | null; subject: Subject | null }
 interface Paginated<T> { data: T[]; links: { url: string | null; label: string; active: boolean }[] }
 interface Props {
@@ -16,6 +17,7 @@ interface Props {
     notes: Paginated<Note>;
     subjects: Subject[];
     topics: Topic[];
+    courses: CourseOption[];
     filters: { subject_id?: string };
     bulkUploadResult: BulkUploadResult | null;
 }
@@ -23,7 +25,7 @@ interface Props {
 const inputClass = 'w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:shadow-glow focus:outline-none';
 const btnClass = 'rounded-lg bg-primary px-4 py-2 text-sm font-bold uppercase tracking-wide text-on-primary hover:bg-primary-hover disabled:opacity-50';
 
-export default function ContentLibraryIndex({ questions, notes, subjects, topics, filters, bulkUploadResult }: Props) {
+export default function ContentLibraryIndex({ questions, notes, subjects, topics, courses, filters, bulkUploadResult }: Props) {
     const [tab, setTab] = useState<'Questions' | 'Notes' | 'Subjects' | 'Topics'>('Questions');
 
     return (
@@ -51,6 +53,7 @@ export default function ContentLibraryIndex({ questions, notes, subjects, topics
                     questions={questions}
                     subjects={subjects}
                     topics={topics}
+                    courses={courses}
                     filters={filters}
                     bulkUploadResult={bulkUploadResult}
                 />
@@ -62,7 +65,7 @@ export default function ContentLibraryIndex({ questions, notes, subjects, topics
     );
 }
 
-function QuestionsPanel({ questions, subjects, topics, filters, bulkUploadResult }: { questions: Paginated<Question>; subjects: Subject[]; topics: Topic[]; filters: { subject_id?: string }; bulkUploadResult: BulkUploadResult | null }) {
+function QuestionsPanel({ questions, subjects, topics, courses, filters, bulkUploadResult }: { questions: Paginated<Question>; subjects: Subject[]; topics: Topic[]; courses: CourseOption[]; filters: { subject_id?: string }; bulkUploadResult: BulkUploadResult | null }) {
     const [showAdd, setShowAdd] = useState(false);
     const [showBulk, setShowBulk] = useState(false);
 
@@ -86,10 +89,10 @@ function QuestionsPanel({ questions, subjects, topics, filters, bulkUploadResult
                 </div>
             </div>
 
-            {showBulk && <QuestionBankBulkUploadForm onDone={() => setShowBulk(false)} />}
+            {showBulk && <QuestionBankBulkUploadForm courses={courses} onDone={() => setShowBulk(false)} />}
             {bulkUploadResult && <QuestionBankBulkUploadResult result={bulkUploadResult} />}
 
-            {showAdd && <QuestionBankForm subjects={subjects} topics={topics} onDone={() => setShowAdd(false)} />}
+            {showAdd && <QuestionBankForm subjects={subjects} topics={topics} courses={courses} onDone={() => setShowAdd(false)} />}
 
             <div className="space-y-3">
                 {questions.data.map((q) => (
@@ -97,6 +100,11 @@ function QuestionsPanel({ questions, subjects, topics, filters, bulkUploadResult
                         <div className="flex items-start justify-between gap-4">
                             <div className="flex-1">
                                 <div className="mb-2 flex gap-2">
+                                    {q.course ? (
+                                        <span className="rounded-full bg-success-bg px-2 py-0.5 text-xs font-bold text-success">{q.course.title}</span>
+                                    ) : (
+                                        <span className="rounded-full bg-warning-bg px-2 py-0.5 text-xs font-bold text-warning">No course tagged</span>
+                                    )}
                                     {q.subject && <span className="rounded-full bg-primary-subtle px-2 py-0.5 text-xs font-bold text-primary">{q.subject.name}</span>}
                                     {q.topic && <span className="rounded-full bg-surface-sunken px-2 py-0.5 text-xs font-bold text-text-secondary">{q.topic.name}</span>}
                                     <span className="rounded-full bg-surface-sunken px-2 py-0.5 text-xs font-bold uppercase text-text-muted">{q.difficulty}</span>

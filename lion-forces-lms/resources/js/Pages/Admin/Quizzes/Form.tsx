@@ -210,9 +210,9 @@ export default function QuizForm({ course, quiz, sections, subjects, topics, que
                             endpoints) and redirect back to this exact quiz-builder URL,
                             so the newly added question shows up in the list below without
                             losing whatever else was already typed into this form. */}
-                        {showBulkUpload && <QuestionBankBulkUploadForm onDone={() => setShowBulkUpload(false)} />}
+                        {showBulkUpload && <QuestionBankBulkUploadForm course={course} onDone={() => setShowBulkUpload(false)} />}
                         {bulkUploadResult && <QuestionBankBulkUploadResult result={bulkUploadResult} />}
-                        {showAddQuestion && <QuestionBankForm subjects={subjects} topics={topics} onDone={() => setShowAddQuestion(false)} />}
+                        {showAddQuestion && <QuestionBankForm subjects={subjects} topics={topics} course={course} onDone={() => setShowAddQuestion(false)} />}
 
                         <div className="max-h-[600px] space-y-2 overflow-y-auto">
                             {filteredBank.map((q) => (

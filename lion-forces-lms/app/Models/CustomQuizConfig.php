@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
-#[Fillable(['user_id', 'subject_id', 'topic_id', 'difficulty', 'question_count', 'question_ids'])]
+#[Fillable(['user_id', 'subject_id', 'topic_id', 'course_id', 'difficulty', 'question_count', 'question_ids'])]
 class CustomQuizConfig extends Model
 {
     use HasFactory;
@@ -31,6 +31,11 @@ class CustomQuizConfig extends Model
     public function topic(): BelongsTo
     {
         return $this->belongsTo(Topic::class);
+    }
+
+    public function course(): BelongsTo
+    {
+        return $this->belongsTo(Course::class);
     }
 
     // Same morphMany pattern Quiz::attempts() already uses -- lets admin

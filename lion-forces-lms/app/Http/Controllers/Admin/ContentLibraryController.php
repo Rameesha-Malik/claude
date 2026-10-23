@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
+use App\Models\Course;
 use App\Models\NotesBank;
 use App\Models\QuestionBank;
 use App\Models\Subject;
@@ -18,7 +19,7 @@ class ContentLibraryController extends Controller
     public function index(Request $request): Response
     {
         return Inertia::render('Admin/ContentLibrary/Index', [
-            'questions' => QuestionBank::with(['subject', 'topic', 'options'])
+            'questions' => QuestionBank::with(['subject', 'topic', 'course:id,title', 'options'])
                 ->when($request->subject_id, fn ($q, $s) => $q->where('subject_id', $s))
                 ->latest()
                 ->paginate(10, ['*'], 'questions_page')
@@ -28,6 +29,11 @@ class ContentLibraryController extends Controller
                 ->paginate(10, ['*'], 'notes_page')
                 ->withQueryString(),
             'subjects' => Subject::orderBy('name')->get(),
+            // Required on every question going forward (see this
+            // migration's own comment) -- Custom Quiz only shows a
+            // student the subset of the bank tagged to the course whose
+            // quiz module they actually bought.
+            'courses' => Course::orderBy('title')->get(['id', 'title']),
             // All topics, each carrying its subject_id -- the frontend
             // filters this client-side to whichever subject is picked in
             // the question form, same as it already does with Subjects
@@ -65,6 +71,7 @@ class ContentLibraryController extends Controller
         $data = $request->validate([
             'subject_id' => 'nullable|exists:subjects,id',
             'topic_id' => 'nullable|exists:topics,id',
+            'course_id' => 'required|exists:courses,id',
             'question_text' => 'required|string|max:2000',
             'explanation' => 'nullable|string|max:2000',
             'difficulty' => 'required|in:easy,medium,hard',
@@ -101,7 +108,10 @@ class ContentLibraryController extends Controller
     // require doing by hand first -- this does it inline per row instead.
     public function bulkUploadQuestions(Request $request)
     {
-        $request->validate(['csv' => 'required|file|mimes:csv,txt|max:2048']);
+        $data = $request->validate([
+            'csv' => 'required|file|mimes:csv,txt|max:2048',
+            'course_id' => 'required|exists:courses,id',
+        ]);
 
         $handle = fopen($request->file('csv')->getRealPath(), 'r');
         $header = fgetcsv($handle);
@@ -150,6 +160,7 @@ class ContentLibraryController extends Controller
             $question = QuestionBank::create([
                 'subject_id' => $subject->id,
                 'topic_id' => $topic?->id,
+                'course_id' => $data['course_id'],
                 'question_text' => $questionText,
                 'explanation' => trim((string) $explanation) ?: null,
                 'difficulty' => $difficulty,
@@ -180,6 +191,7 @@ class ContentLibraryController extends Controller
         $data = $request->validate([
             'subject_id' => 'nullable|exists:subjects,id',
             'topic_id' => 'nullable|exists:topics,id',
+            'course_id' => 'required|exists:courses,id',
             'question_text' => 'required|string|max:2000',
             'explanation' => 'nullable|string|max:2000',
             'difficulty' => 'required|in:easy,medium,hard',

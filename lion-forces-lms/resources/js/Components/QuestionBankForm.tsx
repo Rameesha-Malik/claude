@@ -3,9 +3,20 @@ import RichTextArea from '@/Components/RichTextArea';
 
 interface Subject { id: number; name: string }
 interface Topic { id: number; subject_id: number; name: string }
+interface CourseOption { id: number; title: string }
 
 const inputClass = 'w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:shadow-glow focus:outline-none';
 const btnClass = 'rounded-lg bg-primary px-4 py-2 text-sm font-bold uppercase tracking-wide text-on-primary hover:bg-primary-hover disabled:opacity-50';
+
+interface Props {
+    subjects: Subject[];
+    topics: Topic[];
+    /** Already-known course (embedded in that course's own Quiz builder) -- the course is locked instead of picked. */
+    course?: CourseOption;
+    /** Free course picker, used when there's no single obvious course (Content Library's own Questions tab). */
+    courses?: CourseOption[];
+    onDone: () => void;
+}
 
 // Adds straight into the shared Question Bank (question_bank table) --
 // used from Content Library's own Questions tab, and from inside the
@@ -13,10 +24,16 @@ const btnClass = 'rounded-lg bg-primary px-4 py-2 text-sm font-bold uppercase tr
 // quiz they're building. preserveState keeps whichever page embeds this
 // (e.g. a partly-filled-in Quiz form) from losing its own unsaved state
 // when the redirect-back lands.
-export default function QuestionBankForm({ subjects, topics, onDone }: { subjects: Subject[]; topics: Topic[]; onDone: () => void }) {
+//
+// Course is required (see the migration that added question_bank.
+// course_id) -- Custom Quiz only shows a student the questions tagged to
+// the course whose quiz module they bought, so an untagged question would
+// never actually reach anyone.
+export default function QuestionBankForm({ subjects, topics, course, courses = [], onDone }: Props) {
     const form = useForm({
         subject_id: '',
         topic_id: '',
+        course_id: course ? String(course.id) : '',
         question_text: '',
         explanation: '',
         difficulty: 'medium',
@@ -42,6 +59,14 @@ export default function QuestionBankForm({ subjects, topics, onDone }: { subject
 
     return (
         <form onSubmit={submit} className="mb-6 space-y-3 rounded-2xl border border-border bg-surface p-5">
+            {course ? (
+                <p className="text-sm text-text-secondary">Adding to <span className="font-semibold text-text">{course.title}</span></p>
+            ) : (
+                <select required className={inputClass} value={form.data.course_id} onChange={(e) => form.setData('course_id', e.target.value)}>
+                    <option value="">Select a course</option>
+                    {courses.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
+                </select>
+            )}
             <div className="grid grid-cols-2 gap-3">
                 <select
                     className={inputClass}
@@ -72,7 +97,7 @@ export default function QuestionBankForm({ subjects, topics, onDone }: { subject
                 </div>
             ))}
             <RichTextArea rows={2} className={inputClass} placeholder="Explanation (optional)" value={form.data.explanation} onChange={(v) => form.setData('explanation', v)} />
-            <button type="submit" disabled={form.processing} className={btnClass}>Save Question</button>
+            <button type="submit" disabled={form.processing || !form.data.course_id} className={btnClass}>Save Question</button>
             {Object.values(form.errors).map((m, i) => <div key={i} className="text-sm text-danger">{String(m)}</div>)}
         </form>
     );

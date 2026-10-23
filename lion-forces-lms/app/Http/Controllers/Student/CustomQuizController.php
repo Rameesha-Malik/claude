@@ -51,14 +51,49 @@ class CustomQuizController extends Controller
         abort_unless(FeatureFlags::enabled('custom_quiz'), 404);
 
         $course = $request->integer('course_id') ? Course::find($request->integer('course_id')) : null;
+
+        // No course given explicitly (the generic "Custom Quiz" nav entry,
+        // not a specific course's Quizzes tab) -- auto-pick the one course
+        // this student actually has quiz access to, so the bank is still
+        // scoped correctly without an extra click for the common case of
+        // one quiz purchase at a time. A student with quiz access to
+        // several courses at once falls back to the whole bank below
+        // (same as having no access at all) rather than guessing which
+        // one they meant.
+        if (! $course) {
+            $accessibleCourses = Course::whereHas('enrollments', fn ($q) => $q->where('user_id', $request->user()->id)->active()->grantingModule('quiz'))
+                ->where('quizzes_enabled', true)
+                ->orderBy('title')
+                ->get(['id', 'title', 'slug']);
+            if ($accessibleCourses->count() === 1) {
+                $course = $accessibleCourses->first();
+            }
+        }
+
         $hasAccess = $this->hasQuizAccess($request, $course);
 
-        $subjects = Subject::withCount('questions')->having('questions_count', '>', 0)->orderBy('name')->get(['id', 'name']);
+        // Client: buying "Quiz Only" for one course was showing the
+        // student the entire platform-wide bank, not just that course's
+        // own questions -- Subject/Topic aren't tied to a course, but
+        // QuestionBank.course_id now is, so scope through that. No course
+        // in play (free trial, or a student with access to several
+        // courses at once) keeps the old whole-bank behavior.
+        $subjects = Subject::query()
+            ->when($course, fn ($q) => $q->whereHas('questions', fn ($qq) => $qq->where('course_id', $course->id)))
+            ->withCount(['questions' => fn ($q) => $q->when($course, fn ($qq) => $qq->where('course_id', $course->id))])
+            ->having('questions_count', '>', 0)
+            ->orderBy('name')
+            ->get(['id', 'name']);
 
         // Every topic with at least one question -- the picker filters
         // this down client-side to whichever subject the student chose,
         // same pattern as the admin question form's topic dropdown.
-        $topics = Topic::withCount('questions')->having('questions_count', '>', 0)->orderBy('name')->get(['id', 'subject_id', 'name']);
+        $topics = Topic::query()
+            ->when($course, fn ($q) => $q->whereHas('questions', fn ($qq) => $qq->where('course_id', $course->id)))
+            ->withCount(['questions' => fn ($q) => $q->when($course, fn ($qq) => $qq->where('course_id', $course->id))])
+            ->having('questions_count', '>', 0)
+            ->orderBy('name')
+            ->get(['id', 'subject_id', 'name']);
 
         return Inertia::render('Student/CustomQuiz/Create', [
             'subjects' => $subjects,
@@ -119,6 +154,7 @@ class CustomQuizController extends Controller
             'user_id' => $request->user()->id,
             'subject_id' => $data['subject_id'] ?? null,
             'topic_id' => $data['topic_id'] ?? null,
+            'course_id' => $course?->id,
             'difficulty' => $data['difficulty'] ?? null,
             'question_count' => count($questionIds),
             'question_ids' => $questionIds,
@@ -138,6 +174,7 @@ class CustomQuizController extends Controller
         $questionIds = $this->pickQuestionIds([
             'subject_id' => $config->subject_id,
             'topic_id' => $config->topic_id,
+            'course_id' => $config->course_id,
             'difficulty' => $config->difficulty,
             'question_count' => $config->question_count,
         ]);
@@ -146,6 +183,7 @@ class CustomQuizController extends Controller
             'user_id' => $request->user()->id,
             'subject_id' => $config->subject_id,
             'topic_id' => $config->topic_id,
+            'course_id' => $config->course_id,
             'difficulty' => $config->difficulty,
             'question_count' => count($questionIds),
             'question_ids' => $questionIds,
@@ -283,6 +321,7 @@ class CustomQuizController extends Controller
             ->when($data['subject_id'] ?? null, fn ($q, $id) => $q->where('subject_id', $id))
             ->when($data['topic_id'] ?? null, fn ($q, $id) => $q->where('topic_id', $id))
             ->when($data['difficulty'] ?? null, fn ($q, $d) => $q->where('difficulty', $d))
+            ->when($data['course_id'] ?? null, fn ($q, $id) => $q->where('course_id', $id))
             ->inRandomOrder()
             ->limit($data['question_count'])
             ->pluck('id')

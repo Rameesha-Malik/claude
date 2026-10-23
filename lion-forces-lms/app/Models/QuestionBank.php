@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
-    'subject_id', 'topic_id', 'category_id', 'question_text', 'image_path',
+    'subject_id', 'topic_id', 'category_id', 'course_id', 'question_text', 'image_path',
     'explanation', 'difficulty', 'created_by',
 ])]
 class QuestionBank extends Model
@@ -26,6 +26,11 @@ class QuestionBank extends Model
     public function topic(): BelongsTo
     {
         return $this->belongsTo(Topic::class);
+    }
+
+    public function course(): BelongsTo
+    {
+        return $this->belongsTo(Course::class);
     }
 
     public function category(): BelongsTo
