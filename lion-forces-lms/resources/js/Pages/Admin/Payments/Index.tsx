@@ -49,7 +49,7 @@ export default function PaymentsIndex({ payments, filters }: Props) {
                     <div>
                         <h1 className="font-display text-3xl">Transactions</h1>
                         <p className="mt-2 max-w-xl text-sm text-teal-100">
-                            Payment and received records — created from enrollments or student payment assignments.
+                            Payment and received records, created from enrollments or student payment assignments.
                         </p>
                     </div>
                 </div>
@@ -120,14 +120,14 @@ export default function PaymentsIndex({ payments, filters }: Props) {
                                     <div className="font-medium text-text">{p.enrollment?.user?.name}</div>
                                     <div className="text-xs text-text-muted">{p.enrollment?.user?.email}</div>
                                 </td>
-                                <td className="px-5 py-3 text-text-secondary">{p.enrollment?.course?.title ?? '—'}</td>
+                                <td className="px-5 py-3 text-text-secondary">{p.enrollment?.course?.title ?? 'N/A'}</td>
                                 <td className="px-5 py-3 capitalize text-text-secondary">{p.method.replace('_', ' ')}</td>
                                 <td className="px-5 py-3 font-semibold text-text">PKR {Number(p.amount).toLocaleString()}</td>
                                 <td className="px-5 py-3">
                                     {p.proof_file_path ? (
                                         <a href={`/storage/${p.proof_file_path}`} target="_blank" rel="noopener noreferrer" className="font-semibold text-primary hover:underline">View</a>
                                     ) : (
-                                        <span className="text-text-muted">—</span>
+                                        <span className="text-text-muted">N/A</span>
                                     )}
                                     {p.reference_number && <div className="text-xs text-text-muted">Ref: {p.reference_number}</div>}
                                 </td>

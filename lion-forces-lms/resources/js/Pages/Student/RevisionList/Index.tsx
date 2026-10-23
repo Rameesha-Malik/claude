@@ -55,7 +55,7 @@ function RevisionCard({ item }: { item: RevisionItem }) {
             )}
 
             <p className="mt-3 text-xs text-text-muted">
-                Last missed {new Date(item.last_wrong_at).toLocaleDateString()} — this stays here until you answer it correctly on a
+                Last missed {new Date(item.last_wrong_at).toLocaleDateString()}. This stays here until you answer it correctly on a
                 later attempt.
             </p>
         </div>
@@ -74,7 +74,7 @@ export default function RevisionListIndex({ items }: Props) {
 
             {items.length === 0 ? (
                 <div className="rounded-3xl border border-dashed border-border bg-surface p-10 text-center text-text-secondary">
-                    Nothing to revise right now — either you haven't taken a test yet, or you're getting everything right. Keep it up!
+                    Nothing to revise right now. Either you haven't taken a test yet, or you're getting everything right. Keep it up!
                 </div>
             ) : (
                 <RevealOnScroll staggerMs={40} className="space-y-5">

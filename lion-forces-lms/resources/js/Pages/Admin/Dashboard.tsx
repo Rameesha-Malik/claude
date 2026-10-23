@@ -82,7 +82,7 @@ export default function Dashboard({ stats, questionBank, mostMissedQuestions, re
                         </div>
                         <div>
                             <div className="font-display text-3xl text-text">
-                                {questionBank.platform_accuracy !== null ? `${questionBank.platform_accuracy}%` : '—'}
+                                {questionBank.platform_accuracy !== null ? `${questionBank.platform_accuracy}%` : 'N/A'}
                             </div>
                             <div className="text-sm text-text-secondary">
                                 Platform-wide accuracy{questionBank.total_answered > 0 ? ` (${questionBank.total_answered.toLocaleString()} answers)` : ''}

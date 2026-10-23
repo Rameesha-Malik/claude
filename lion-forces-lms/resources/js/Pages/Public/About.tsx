@@ -67,7 +67,7 @@ export default function About({ instructors, section, stats }: Props) {
 
                             <p className="mt-5 max-w-lg text-text-secondary">
                                 A modern, results-driven learning platform built for Pakistan Armed Forces test
-                                preparation — structured training, smart assessments, and performance tracking to
+                                preparation: structured training, smart assessments, and performance tracking to
                                 help candidates prepare with confidence and clarity.
                             </p>
 

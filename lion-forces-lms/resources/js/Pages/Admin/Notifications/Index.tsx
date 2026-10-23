@@ -32,8 +32,8 @@ export default function NotificationsIndex({ broadcasts, courses, packages }: Pr
         : packages;
 
     function targetLabel(b: Broadcast): string {
-        if (b.target_type === 'course') return `Course: ${b.target_course?.title ?? '—'}`;
-        if (b.target_type === 'package') return `Package: ${b.target_package?.name ?? '—'}`;
+        if (b.target_type === 'course') return `Course: ${b.target_course?.title ?? 'N/A'}`;
+        if (b.target_type === 'package') return `Package: ${b.target_package?.name ?? 'N/A'}`;
         return 'All Students';
     }
 

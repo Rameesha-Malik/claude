@@ -86,7 +86,7 @@ function EditPermissionsModal({ manager, courses, onClose }: { manager: Manager;
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
             <div className="w-full max-w-md rounded-2xl border border-border bg-surface p-6 shadow-xl">
                 <div className="mb-4 flex items-center justify-between">
-                    <h2 className="font-bold text-text">Edit Permissions — {manager.name}</h2>
+                    <h2 className="font-bold text-text">Edit Permissions: {manager.name}</h2>
                     <CloseButton onClick={onClose} />
                 </div>
                 <p className="mb-2 text-xs font-bold uppercase text-text-muted">Assigned courses</p>

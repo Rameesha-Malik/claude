@@ -45,7 +45,7 @@ export default function MockExamIntro({ mockExam, attemptsUsed, isAvailable, can
                             <p className="text-xs uppercase text-text-muted">Questions</p>
                         </div>
                         <div className="rounded-lg bg-surface-sunken p-3">
-                            <p className="text-xl font-bold text-text">{totalMinutes || '—'}</p>
+                            <p className="text-xl font-bold text-text">{totalMinutes || 'N/A'}</p>
                             <p className="text-xs uppercase text-text-muted">Minutes</p>
                         </div>
                     </div>

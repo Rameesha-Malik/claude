@@ -72,7 +72,7 @@ class CheckoutController extends Controller
         $package = $data['package_id'] ? $course->packages()->find($data['package_id']) : null;
         $amount = $package->price ?? $course->base_price;
 
-        abort_if($amount === null, 422, 'This course has no price set — contact us to enroll.');
+        abort_if($amount === null, 422, 'This course has no price set. Contact us to enroll.');
 
         $enrollment = Enrollment::create([
             'user_id' => $request->user()->id,

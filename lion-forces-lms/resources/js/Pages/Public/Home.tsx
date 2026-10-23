@@ -236,7 +236,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                         </h1>
 
                         <p className="mt-6 max-w-xl text-lg leading-relaxed text-text-secondary">
-                            {hero.subheading ?? "Pakistan's largest online forces preparation platform — structured courses, mock exams, and expert mentorship for ISSB, PMA, Navy and Air Force candidates."}
+                            {hero.subheading ?? "Pakistan's largest online forces preparation platform: structured courses, mock exams, and expert mentorship for ISSB, PMA, Navy and Air Force candidates."}
                         </p>
 
                         {/* selected-candidate avatar cluster -- initials standing in until real student photos are supplied */}

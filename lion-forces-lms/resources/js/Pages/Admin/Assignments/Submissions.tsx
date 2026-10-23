@@ -16,8 +16,8 @@ interface Props {
 
 export default function AssignmentSubmissions({ assignment, course, submissions }: Props) {
     return (
-        <AdminLayout header={`Submissions — ${assignment.title}`}>
-            <Head title={`Submissions — ${assignment.title}`} />
+        <AdminLayout header={`Submissions: ${assignment.title}`}>
+            <Head title={`Submissions: ${assignment.title}`} />
 
             <p className="mb-6 text-sm text-text-secondary">{course.title} · {submissions.length} submission{submissions.length === 1 ? '' : 's'}</p>
 
@@ -54,7 +54,7 @@ function SubmissionCard({ submission, maxMarks, courseId }: { submission: Submis
         <div className="rounded-2xl border border-border bg-surface p-5">
             <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
-                    <div className="font-semibold text-text">{submission.user.name} <span className="font-normal text-text-secondary">— {submission.user.email}</span></div>
+                    <div className="font-semibold text-text">{submission.user.name} <span className="font-normal text-text-secondary">({submission.user.email})</span></div>
                     <p className="mt-0.5 text-xs text-text-muted">Submitted {new Date(submission.submitted_at).toLocaleString()}</p>
                 </div>
                 <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold uppercase ${submission.status === 'graded' ? 'bg-success-bg text-success' : 'bg-warning-bg text-warning'}`}>
@@ -73,7 +73,7 @@ function SubmissionCard({ submission, maxMarks, courseId }: { submission: Submis
 
             {submission.status === 'graded' && !grading && (
                 <div className="mt-3 rounded-lg bg-primary-subtle p-3 text-sm text-text">
-                    <span className="font-bold text-primary">Feedback: </span>{submission.feedback || '—'}
+                    <span className="font-bold text-primary">Feedback: </span>{submission.feedback || 'N/A'}
                 </div>
             )}
 

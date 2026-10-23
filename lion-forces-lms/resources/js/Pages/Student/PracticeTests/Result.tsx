@@ -22,8 +22,8 @@ export default function PracticeTestResult({ attempt, testTitle, isRepeatable, p
     const skippedCount = attempt.answers.filter((a) => a.is_correct === null).length;
 
     return (
-        <StudentLayout header={`Result — ${testTitle}`}>
-            <Head title={`Result — ${testTitle}`} />
+        <StudentLayout header={`Result: ${testTitle}`}>
+            <Head title={`Result: ${testTitle}`} />
 
             <div className={`mb-6 rounded-3xl border p-6 shadow-sm ${attempt.passed ? 'border-success bg-success-bg' : 'border-danger bg-danger-bg'}`}>
                 <div className="flex flex-wrap items-center justify-between gap-4">

@@ -86,7 +86,7 @@ export default function FavouriteQuestionsIndex({ favourites }: Props) {
 
             {favourites.length === 0 ? (
                 <div className="rounded-3xl border border-dashed border-border bg-surface p-10 text-center text-text-secondary">
-                    No favourites yet — tap the star on any question while taking a quiz or test to save it here.
+                    No favourites yet. Tap the star on any question while taking a quiz or test to save it here.
                 </div>
             ) : (
                 <RevealOnScroll staggerMs={40} className="space-y-5">

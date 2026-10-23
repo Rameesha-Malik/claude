@@ -104,7 +104,7 @@ export default function CourseForm({ course, categories, instructors }: Props) {
                 <div>
                     <label className={labelClass}>Instructor</label>
                     <select className={inputClass} value={form.data.instructor_id} onChange={(e) => form.setData('instructor_id', e.target.value)}>
-                        <option value="">— None —</option>
+                        <option value="">None</option>
                         {instructors.map((i) => <option key={i.id} value={i.id}>{i.name}</option>)}
                     </select>
                 </div>
@@ -409,10 +409,10 @@ function CurriculumPanel({ course }: { course: Course }) {
 
     return (
         <div className="rounded-2xl border-2 border-primary bg-surface p-5">
-            <h3 className="mb-1 font-bold text-text">Curriculum — Topics &amp; Video Lectures</h3>
+            <h3 className="mb-1 font-bold text-text">Curriculum: Topics &amp; Video Lectures</h3>
             <p className="mb-3 text-sm text-text-secondary">
                 This is where video lectures live: <strong>Course → Topic → Lesson</strong>. Add a topic below (e.g. "Chemistry
-                Lectures"), then add lessons into it — pick type <em>video (YouTube link)</em> or <em>video (file upload)</em> for a
+                Lectures"), then add lessons into it. Pick type <em>video (YouTube link)</em> or <em>video (file upload)</em> for a
                 lecture. Lessons left ungrouped still show to students, just not under a named topic.
             </p>
 

@@ -119,7 +119,7 @@ export default function DemoQuizIntro({ quiz, quizzes, pageContent }: Props) {
                         </div>
                     ) : (
                         <div className="rounded-2xl border border-dashed border-border bg-surface p-10 text-center text-text-secondary shadow-2xl">
-                            The demo quiz isn't available right now — check back soon, or explore our full course catalog.
+                            The demo quiz isn't available right now. Check back soon, or explore our full course catalog.
                         </div>
                     )}
                 </div>

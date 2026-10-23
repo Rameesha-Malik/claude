@@ -47,7 +47,7 @@ function NoteModal({ note, subjects, onClose }: { note: Note | null; subjects: S
                     {form.errors.title && <p className="text-xs text-danger">{form.errors.title}</p>}
                     <RichTextArea rows={4} className="w-full rounded-lg border border-border px-3 py-2 text-sm" placeholder="Content / preview text" value={form.data.content} onChange={(v) => form.setData('content', v)} />
                     <div>
-                        <label className="mb-1 block text-xs font-bold uppercase text-text-muted">Price (Rs.) — leave blank for a free note</label>
+                        <label className="mb-1 block text-xs font-bold uppercase text-text-muted">Price (Rs.): leave blank for a free note</label>
                         <input type="number" min="0" step="0.01" placeholder="0" value={form.data.price} onChange={(e) => form.setData('price', e.target.value)} className="w-full rounded-lg border border-border px-3 py-2 text-sm" />
                     </div>
                     <label className="flex items-center gap-2 text-sm text-text">
@@ -143,7 +143,7 @@ export default function GuaranteedNotesIndex({ notes, subjects, filters, stats }
                                         <div className="font-medium text-text">{n.title}</div>
                                         {n.content && <div className="mt-0.5 line-clamp-1 max-w-xs text-xs text-text-muted">{n.content}</div>}
                                     </td>
-                                    <td className="px-5 py-3 text-text-secondary">{n.subject?.name ?? '—'}</td>
+                                    <td className="px-5 py-3 text-text-secondary">{n.subject?.name ?? 'N/A'}</td>
                                     <td className="px-5 py-3 text-text-secondary">{n.file_path ? 'PDF' : 'Text'}</td>
                                     <td className="px-5 py-3">
                                         <span className={`rounded-full px-2 py-0.5 text-xs font-bold uppercase ${isPaid ? 'bg-warning-bg text-warning' : 'bg-success-bg text-success'}`}>

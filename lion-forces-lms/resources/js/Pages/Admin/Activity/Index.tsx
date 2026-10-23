@@ -140,7 +140,7 @@ export default function ActivityIndex({ logs, courses, users, filters }: Props) 
                                     </span>
                                 </td>
                                 <td className="px-5 py-3 text-text">{log.description}</td>
-                                <td className="px-5 py-3 text-text-secondary">{log.course?.title ?? '—'}</td>
+                                <td className="px-5 py-3 text-text-secondary">{log.course?.title ?? 'N/A'}</td>
                                 <td className="px-5 py-3 text-text-secondary">{log.user?.name ?? 'System'}</td>
                             </tr>
                         ))}

@@ -41,7 +41,7 @@ function StatBox({ label, value }: { label: string; value: string | number }) {
 export default function PerformanceReport({ data, generatedAt }: Props) {
     return (
         <div className="mx-auto max-w-3xl bg-white p-8 text-gray-900 print:p-0">
-            <Head title={`${data.student.name} — Performance Report`} />
+            <Head title={`${data.student.name}: Performance Report`} />
             <style>{`
                 @media print {
                     .no-print { display: none !important; }
@@ -144,7 +144,7 @@ export default function PerformanceReport({ data, generatedAt }: Props) {
             </div>
 
             <p className="mt-10 border-t border-gray-200 pt-4 text-center text-xs text-gray-400">
-                Lion Forces Academy — automatically generated performance summary.
+                Lion Forces Academy: automatically generated performance summary.
             </p>
         </div>
     );

@@ -90,7 +90,7 @@ function QuestionCard({ question }: { question: QuestionItem }) {
             <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                     <div className="text-sm font-semibold text-text">
-                        {question.user?.name ?? 'Unknown student'} <span className="font-normal text-text-secondary">— {question.user?.email}</span>
+                        {question.user?.name ?? 'Unknown student'} <span className="font-normal text-text-secondary">({question.user?.email})</span>
                     </div>
                     <div className="mt-0.5 text-xs text-text-muted">
                         {question.course?.title}

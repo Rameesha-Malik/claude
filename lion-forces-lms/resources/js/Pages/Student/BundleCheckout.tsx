@@ -75,7 +75,7 @@ export default function BundleCheckout({ alreadyEnrolled, bundle, courses = [], 
 
                     <div className="mt-6 flex items-center justify-between border-t border-border pt-4">
                         <span className="text-sm font-semibold text-text">Total</span>
-                        <span className="font-display text-2xl text-primary">{bundle.price ? `Rs. ${Number(bundle.price).toLocaleString()}` : '—'}</span>
+                        <span className="font-display text-2xl text-primary">{bundle.price ? `Rs. ${Number(bundle.price).toLocaleString()}` : 'N/A'}</span>
                     </div>
                 </div>
 
@@ -84,7 +84,7 @@ export default function BundleCheckout({ alreadyEnrolled, bundle, courses = [], 
 
                     {availableMethods.length === 0 ? (
                         <p className="mt-3 text-sm text-text-secondary">
-                            Payment methods haven't been configured yet — please contact us directly to arrange payment.
+                            Payment methods haven't been configured yet. Please contact us directly to arrange payment.
                         </p>
                     ) : (
                         <form onSubmit={submit} className="mt-4 space-y-4">

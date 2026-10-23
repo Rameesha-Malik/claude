@@ -38,7 +38,7 @@ class BundlePurchaseController extends Controller
         // weren't getting one set at all before this.
         $purchase->enrollments()->get()->each(fn ($enrollment) => $enrollment->activate());
 
-        return back()->with('success', 'Bundle purchase verified — all included courses activated.');
+        return back()->with('success', 'Bundle purchase verified. All included courses activated.');
     }
 
     public function reject(Request $request, BundlePurchase $purchase)

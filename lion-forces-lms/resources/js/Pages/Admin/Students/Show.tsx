@@ -282,7 +282,7 @@ function BioField({ label, value }: { label: string; value: string | null }) {
     return (
         <div>
             <p className="text-xs font-bold uppercase tracking-wide text-text-muted">{label}</p>
-            <p className="mt-0.5 text-sm text-text">{value || '—'}</p>
+            <p className="mt-0.5 text-sm text-text">{value || 'N/A'}</p>
         </div>
     );
 }
@@ -350,7 +350,7 @@ function PaymentsPanel({ student, courses, payments }: { student: Student; cours
                     {payments.map((p) => (
                         <div key={p.id} className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border p-3 text-sm">
                             <div>
-                                <span className="font-semibold text-text">{p.enrollment?.course.title ?? '—'}</span>
+                                <span className="font-semibold text-text">{p.enrollment?.course.title ?? 'N/A'}</span>
                                 <span className="ml-2 text-text-muted">{p.reference_number}</span>
                             </div>
                             <div className="flex items-center gap-3">
@@ -388,10 +388,10 @@ function LoginHistoryPanel({ logs }: { logs: LoginLogRow[] }) {
                             {logs.map((l) => (
                                 <tr key={l.id} className="border-t border-border">
                                     <td className="py-2 pr-4 text-text">{new Date(l.created_at).toLocaleString()}</td>
-                                    <td className="py-2 pr-4 text-text-secondary">{l.ip_address ?? '—'}</td>
-                                    <td className="py-2 pr-4 text-text-secondary">—</td>
-                                    <td className="py-2 pr-4 text-text-secondary">{l.device ?? '—'}</td>
-                                    <td className="py-2 text-text-secondary">{l.browser ?? '—'}</td>
+                                    <td className="py-2 pr-4 text-text-secondary">{l.ip_address ?? 'N/A'}</td>
+                                    <td className="py-2 pr-4 text-text-secondary">N/A</td>
+                                    <td className="py-2 pr-4 text-text-secondary">{l.device ?? 'N/A'}</td>
+                                    <td className="py-2 text-text-secondary">{l.browser ?? 'N/A'}</td>
                                 </tr>
                             ))}
                         </tbody>
@@ -450,7 +450,7 @@ function EnrollmentsPanel({ student, courses }: { student: Student; courses: Cou
                             </div>
                             {e.payments.length > 0 && (
                                 <div className="mt-2 text-xs text-text-muted">
-                                    {e.payments.length} payment(s) — {e.payments.map((p) => `Rs. ${Number(p.amount).toLocaleString()} (${p.status})`).join(', ')}
+                                    {e.payments.length} payment(s): {e.payments.map((p) => `Rs. ${Number(p.amount).toLocaleString()} (${p.status})`).join(', ')}
                                 </div>
                             )}
                         </div>
@@ -502,7 +502,7 @@ function ReviewsPanel({ reviews }: { reviews: Review[] }) {
                     {reviews.map((r) => (
                         <div key={r.id} className="rounded-lg border border-border p-3 text-sm">
                             <div className="flex items-center justify-between">
-                                <span className="font-semibold text-text">{r.course?.title ?? '—'}</span>
+                                <span className="font-semibold text-text">{r.course?.title ?? 'N/A'}</span>
                                 {r.rating && <span className="text-gold-700">{'★'.repeat(r.rating)}</span>}
                             </div>
                             <LiteMarkdown text={r.review_text} className="mt-1 text-text-secondary" />

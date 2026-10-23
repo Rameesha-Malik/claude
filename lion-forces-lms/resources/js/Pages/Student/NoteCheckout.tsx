@@ -70,7 +70,7 @@ export default function NoteCheckout({ note, alreadyRequested, payment }: Props)
 
                     {availableMethods.length === 0 ? (
                         <p className="mt-3 text-sm text-text-secondary">
-                            Payment methods haven't been configured yet — please contact us directly to arrange payment.
+                            Payment methods haven't been configured yet. Please contact us directly to arrange payment.
                         </p>
                     ) : (
                         <form onSubmit={submit} className="mt-4 space-y-4">

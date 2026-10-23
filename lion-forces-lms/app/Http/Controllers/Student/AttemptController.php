@@ -43,7 +43,7 @@ class AttemptController extends Controller
     {
         $attempt->load(['answers.question.options', 'answers.selectedOption']);
         $config = $attempt->attemptable()->with('subject')->first();
-        $title = $config?->subject?->name ? "Custom Quiz — {$config->subject->name}" : 'Custom Quiz';
+        $title = $config?->subject?->name ? "Custom Quiz: {$config->subject->name}" : 'Custom Quiz';
 
         return Inertia::render('Student/Quizzes/Result', [
             'attempt' => $attempt,

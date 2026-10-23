@@ -112,7 +112,7 @@ function LogoPanel({ logoPath }: { logoPath: string | null }) {
         <Panel>
             <h2 className="mb-1 font-bold text-text">Site Logo</h2>
             <p className="mb-4 text-sm text-text-secondary">
-                Shown in the header and footer of the public site. Square or wide logos both work — it's scaled to fit each spot automatically.
+                Shown in the header and footer of the public site. Square or wide logos both work, it's scaled to fit each spot automatically.
             </p>
             <div className="mb-4 flex items-center gap-4">
                 <div className="flex h-20 w-20 flex-shrink-0 items-center justify-center rounded-2xl border border-dashed border-border bg-surface-sunken">
@@ -349,7 +349,7 @@ function HowToBuyPanel({ hero, paymentMethods }: { hero: HomeSection; paymentMet
     return (
         <div className="space-y-6">
             <Panel>
-                <h2 className="mb-4 font-bold text-text">How to Buy — Hero</h2>
+                <h2 className="mb-4 font-bold text-text">How to Buy: Hero</h2>
                 <form
                     onSubmit={(e) => { e.preventDefault(); router.put(`/admin/website/home-sections/${hero.id}`, { content: heroForm.data }); }}
                     className="space-y-4"
@@ -509,7 +509,7 @@ function TestimonialsPanel({ items }: { items: Testimonial[] }) {
     return (
         <Panel>
             <h2 className="mb-1 font-bold text-text">Testimonials</h2>
-            <p className="mb-4 text-sm text-text-secondary">Admin-created real stories only — no student self-submission.</p>
+            <p className="mb-4 text-sm text-text-secondary">Admin-created real stories only; no student self-submission.</p>
             <div className="mb-6 space-y-2">
                 {items.map((item) => (
                     <EditableRow key={item.id} onDelete={() => router.delete(`/admin/website/testimonials/${item.id}`)}>

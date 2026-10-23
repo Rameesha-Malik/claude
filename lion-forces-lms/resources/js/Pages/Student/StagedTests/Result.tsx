@@ -19,8 +19,8 @@ export default function StagedTestResult({ attempt, testTitle, stages }: Props) 
     const stoppedAt = stages.find((s) => s.completed && !s.passed);
 
     return (
-        <StudentLayout header={`Result — ${testTitle}`}>
-            <Head title={`Result — ${testTitle}`} />
+        <StudentLayout header={`Result: ${testTitle}`}>
+            <Head title={`Result: ${testTitle}`} />
 
             <div className={`mb-6 rounded-2xl border p-6 ${attempt.passed ? 'border-success bg-success-bg' : 'border-danger bg-danger-bg'}`}>
                 <p className={`text-sm font-bold uppercase tracking-wide ${attempt.passed ? 'text-success' : 'text-danger'}`}>
@@ -29,7 +29,7 @@ export default function StagedTestResult({ attempt, testTitle, stages }: Props) 
                 <p className="mt-1 font-display text-4xl text-text">{attempt.percentage}%</p>
                 <p className="mt-1 text-sm text-text-secondary">Overall Score: {attempt.score} / {attempt.total_marks}</p>
                 {stoppedAt && (
-                    <p className="mt-2 text-sm font-semibold text-danger">Stopped at "{stoppedAt.name}" — its pass threshold wasn't met.</p>
+                    <p className="mt-2 text-sm font-semibold text-danger">Stopped at "{stoppedAt.name}": its pass threshold wasn't met.</p>
                 )}
                 <Link href="/portal/my-courses" className="mt-4 inline-block rounded-lg border border-border px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-text hover:border-primary">
                     Back to My Courses
@@ -66,7 +66,7 @@ export default function StagedTestResult({ attempt, testTitle, stages }: Props) 
 
             {stages.filter((s) => s.id === openStage).map((s) => (
                 <div key={s.id} className="space-y-5">
-                    <h3 className="font-bold text-text">{s.name} — Question Review</h3>
+                    <h3 className="font-bold text-text">{s.name}: Question Review</h3>
                     {s.answers.map((a, i) => (
                         <AnswerReviewCard key={a.id} a={a} index={i} />
                     ))}

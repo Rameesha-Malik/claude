@@ -25,7 +25,7 @@ export default function Bundles({ bundles }: { bundles: BundleItem[] }) {
 
             <section className="mx-auto max-w-container px-4 py-20 sm:px-6 lg:px-8">
                 {bundles.length === 0 ? (
-                    <p className="text-center text-text-secondary">No bundles available right now — check back soon.</p>
+                    <p className="text-center text-text-secondary">No bundles available right now. Check back soon.</p>
                 ) : (
                     <RevealOnScroll staggerMs={60} className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                         {bundles.map((b) => {

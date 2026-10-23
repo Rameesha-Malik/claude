@@ -75,13 +75,13 @@ export default function QuestionNotesIndex({ notes }: Props) {
             <Head title="MCQ Notes" />
 
             <p className="mb-6 max-w-2xl text-sm text-text-secondary">
-                Personal notes you've written on a question while attempting a quiz or test — a memory jog for tricky
+                Personal notes you've written on a question while attempting a quiz or test, a memory jog for tricky
                 ones, kept private to you.
             </p>
 
             {notes.length === 0 ? (
                 <div className="rounded-3xl border border-dashed border-border bg-surface p-10 text-center text-text-secondary">
-                    No notes yet — while taking a quiz or test, tap the pencil icon on any question to jot one down.
+                    No notes yet. While taking a quiz or test, tap the pencil icon on any question to jot one down.
                 </div>
             ) : (
                 <RevealOnScroll staggerMs={40} className="space-y-5">

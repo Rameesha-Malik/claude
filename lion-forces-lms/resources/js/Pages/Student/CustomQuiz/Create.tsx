@@ -44,7 +44,7 @@ function TestHistory({ history }: { history: HistoryItem[] }) {
                     <div key={h.id} className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-surface p-4">
                         <div className="min-w-0">
                             <p className="truncate text-sm font-semibold text-text">
-                                {h.subject ?? 'Any subject'}{h.topic ? ` — ${h.topic}` : ''}
+                                {h.subject ?? 'Any subject'}{h.topic ? ` / ${h.topic}` : ''}
                             </p>
                             <p className="text-xs text-text-muted">
                                 {h.question_count} question{h.question_count === 1 ? '' : 's'}
@@ -116,7 +116,7 @@ export default function CreateCustomQuiz({ subjects, topics, hasAccess, freeTria
                     buy something sight-unseen. */}
                 {!hasAccess && (
                     <div className="mt-4 rounded-xl border border-dashed border-primary bg-primary-subtle px-4 py-3 text-sm text-text">
-                        <span className="font-bold uppercase tracking-wide text-primary">Free Preview</span> — up to {freeTrialMax} questions per
+                        <span className="font-bold uppercase tracking-wide text-primary">Free Preview</span>: up to {freeTrialMax} questions per
                         quiz. {course ? `Buy "${course.title}"` : 'Buy a course with quiz access'} to build full custom quizzes (up to 50 questions)
                         and save your results.{' '}
                         <Link href={course ? `/courses/${course.slug}` : '/courses'} className="font-bold text-primary hover:underline">

@@ -17,8 +17,8 @@ export default function MockExamResult({ attempt, examTitle, sections }: Props) 
     const [openSection, setOpenSection] = useState<number | null>(sections[0]?.id ?? null);
 
     return (
-        <StudentLayout header={`Result — ${examTitle}`}>
-            <Head title={`Result — ${examTitle}`} />
+        <StudentLayout header={`Result: ${examTitle}`}>
+            <Head title={`Result: ${examTitle}`} />
 
             <div className={`mb-6 rounded-2xl border p-6 ${attempt.passed ? 'border-success bg-success-bg' : 'border-danger bg-danger-bg'}`}>
                 <p className={`text-sm font-bold uppercase tracking-wide ${attempt.passed ? 'text-success' : 'text-danger'}`}>
@@ -51,7 +51,7 @@ export default function MockExamResult({ attempt, examTitle, sections }: Props) 
 
             {sections.filter((s) => s.id === openSection).map((s) => (
                 <div key={s.id} className="space-y-5">
-                    <h3 className="font-bold text-text">{s.name} — Question Review</h3>
+                    <h3 className="font-bold text-text">{s.name}: Question Review</h3>
                     {s.answers.map((a, i) => (
                         <AnswerReviewCard key={a.id} a={a} index={i} />
                     ))}

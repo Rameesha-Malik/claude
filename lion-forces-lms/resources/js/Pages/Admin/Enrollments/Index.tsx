@@ -39,7 +39,7 @@ function StudentPicker({ onPick }: { onPick: (s: { id: number; name: string; ema
     if (picked) {
         return (
             <div className="flex items-center justify-between rounded-lg border border-primary bg-primary-subtle px-3 py-2 text-sm">
-                <span className="text-text">{picked.name} — {picked.email}</span>
+                <span className="text-text">{picked.name} ({picked.email})</span>
                 <button type="button" onClick={() => { setPicked(null); setQ(''); onPick(null as never); }} className="text-xs font-bold text-primary hover:underline">
                     Change
                 </button>
@@ -264,7 +264,7 @@ export default function EnrollmentsIndex({ enrollments, courses, filters }: Prop
                                     <div className="font-medium text-text">{e.user?.name}</div>
                                     <div className="text-xs text-text-muted">{e.user?.email}</div>
                                 </td>
-                                <td className="px-5 py-3 text-text-secondary">{e.course?.title ?? '—'}</td>
+                                <td className="px-5 py-3 text-text-secondary">{e.course?.title ?? 'N/A'}</td>
                                 <td className="px-5 py-3">
                                     <span className={`rounded-full px-2 py-0.5 text-xs font-bold uppercase ${
                                         e.status === 'active' ? 'bg-success-bg text-success' : e.status === 'pending' ? 'bg-warning-bg text-warning' : 'bg-danger-bg text-danger'
@@ -280,7 +280,7 @@ export default function EnrollmentsIndex({ enrollments, courses, filters }: Prop
                                                 </a>
                                             )}
                                         </>
-                                    ) : '—'}
+                                    ) : 'N/A'}
                                 </td>
                                 <td className="px-5 py-3 text-text-secondary">{e.assigned ? 'Yes' : 'No'}</td>
                                 <td className="px-5 py-3 text-text-secondary">{e.progress}%</td>

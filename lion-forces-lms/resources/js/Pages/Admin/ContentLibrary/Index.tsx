@@ -31,7 +31,7 @@ export default function ContentLibraryIndex({ questions, notes, subjects, topics
             <Head title="Content Library" />
             <p className="mb-4 max-w-2xl text-sm text-text-secondary">
                 The shared Question Bank and Notes Bank. Anything created here can be assigned into multiple
-                courses' practice tests, mock exams, and notes sections — one edit updates it everywhere it's used.
+                courses' practice tests, mock exams, and notes sections. One edit updates it everywhere it's used.
             </p>
 
             <div className="mb-6 flex gap-2 border-b border-border">
@@ -105,7 +105,7 @@ function QuestionsPanel({ questions, subjects, topics, filters, bulkUploadResult
                                 <ul className="mt-2 space-y-1 text-sm">
                                     {q.options.map((o, i) => (
                                         <li key={i} className={o.is_correct ? 'font-semibold text-success' : 'text-text-secondary'}>
-                                            {o.is_correct ? '✓ ' : '— '}{o.option_text}
+                                            {o.is_correct && '✓ '}{o.option_text}
                                         </li>
                                     ))}
                                 </ul>

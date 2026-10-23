@@ -5,7 +5,7 @@ interface QuizRow { id: number; title: string; is_active: boolean; question_sele
 
 export default function QuizzesIndex({ course, quizzes }: { course: { id: number; title: string }; quizzes: QuizRow[] }) {
     return (
-        <AdminLayout header={`Quizzes — ${course.title}`}>
+        <AdminLayout header={`Quizzes: ${course.title}`}>
             <Head title="Quizzes" />
 
             <div className="mb-4 flex justify-end">

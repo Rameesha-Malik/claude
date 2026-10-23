@@ -18,14 +18,14 @@ export default function Notes({ notes }: { notes: NoteItem[] }) {
                     <SectionKicker dark><span className="mx-auto">Study Material</span></SectionKicker>
                     <h1 className="font-display text-5xl uppercase tracking-wide sm:text-6xl">Notes</h1>
                     <p className="mx-auto mt-4 max-w-xl text-teal-200">
-                        Subject-wise notes bundled into every course — including Guaranteed Notes on select packages.
+                        Subject-wise notes bundled into every course, including Guaranteed Notes on select packages.
                     </p>
                 </div>
             </section>
 
             <section className="mx-auto max-w-container px-4 py-20 sm:px-6 lg:px-8">
                 {notes.length === 0 ? (
-                    <p className="text-center text-text-secondary">No notes published yet — check back soon.</p>
+                    <p className="text-center text-text-secondary">No notes published yet. Check back soon.</p>
                 ) : (
                     <RevealOnScroll staggerMs={60} className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                         {notes.map((n) => (
@@ -52,7 +52,7 @@ export default function Notes({ notes }: { notes: NoteItem[] }) {
                                         href={`/portal/notes/${n.id}/purchase`}
                                         className="mt-3 inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-xs font-bold uppercase tracking-wide text-on-primary hover:bg-primary-hover"
                                     >
-                                        Buy Now — Rs. {Number(n.price).toLocaleString()}
+                                        Buy Now (Rs. {Number(n.price).toLocaleString()})
                                     </Link>
                                 )}
                                 {n.courses.length > 0 && (

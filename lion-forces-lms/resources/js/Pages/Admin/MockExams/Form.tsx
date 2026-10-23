@@ -46,7 +46,7 @@ export default function MockExamForm({ course, mockExam, subjects, questionBank 
     }
 
     return (
-        <AdminLayout header={isEdit ? `Edit Mock Exam — ${mockExam!.title}` : 'New Mock Exam'}>
+        <AdminLayout header={isEdit ? `Edit Mock Exam: ${mockExam!.title}` : 'New Mock Exam'}>
             <Head title="Mock Exam" />
 
             <div className="grid gap-6 lg:grid-cols-3">
@@ -90,7 +90,7 @@ export default function MockExamForm({ course, mockExam, subjects, questionBank 
                         Active (visible to students)
                     </label>
                     <button type="submit" disabled={form.processing} className={btnClass + ' w-full'}>
-                        {isEdit ? 'Save Changes' : 'Create Mock Exam — Then Add Sections'}
+                        {isEdit ? 'Save Changes' : 'Create Mock Exam, Then Add Sections'}
                     </button>
                     {Object.values(form.errors).map((m, i) => <div key={i} className="text-sm text-danger">{String(m)}</div>)}
                 </form>

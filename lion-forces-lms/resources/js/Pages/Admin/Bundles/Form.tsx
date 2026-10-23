@@ -72,9 +72,9 @@ export default function BundleForm({ bundle, courses }: Props) {
                     {form.errors.price && <div className="mt-1 text-sm text-danger">{form.errors.price}</div>}
                     {selectedTotal > 0 && (
                         <p className="mt-1 text-xs text-text-muted">
-                            Individually these courses cost Rs. {selectedTotal.toLocaleString()}
+                            Individually these courses cost Rs. {selectedTotal.toLocaleString()}.
                             {Number(form.data.price) > 0 && Number(form.data.price) < selectedTotal && (
-                                <> — Rs. {(selectedTotal - Number(form.data.price)).toLocaleString()} savings for the student.</>
+                                <> Rs. {(selectedTotal - Number(form.data.price)).toLocaleString()} savings for the student.</>
                             )}
                         </p>
                     )}
@@ -109,7 +109,7 @@ export default function BundleForm({ bundle, courses }: Props) {
                                     <input type="checkbox" checked={form.data.course_ids.includes(c.id)} onChange={() => toggleCourse(c.id)} />
                                     {c.title}
                                 </span>
-                                <span className="text-text-muted">{c.base_price ? `Rs. ${Number(c.base_price).toLocaleString()}` : '—'}</span>
+                                <span className="text-text-muted">{c.base_price ? `Rs. ${Number(c.base_price).toLocaleString()}` : 'N/A'}</span>
                             </label>
                         ))}
                     </div>

@@ -24,7 +24,7 @@ export default function AssignmentsIndex({ course, assignments, sections }: Prop
     }
 
     return (
-        <AdminLayout header={`Assignments — ${course.title}`}>
+        <AdminLayout header={`Assignments: ${course.title}`}>
             <Head title="Assignments" />
 
             <div className="grid gap-6 lg:grid-cols-3">

@@ -69,7 +69,7 @@ export default function StagedTestStagePage({ stagedTest, attemptId, stage, stag
 
     return (
         <StudentLayout header={stagedTest.title}>
-            <Head title={`${stagedTest.title} — ${stage.name}`} />
+            <Head title={`${stagedTest.title}: ${stage.name}`} />
 
             <div className="mb-4 flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-wide text-text-muted">
                 {stages.map((s) => (

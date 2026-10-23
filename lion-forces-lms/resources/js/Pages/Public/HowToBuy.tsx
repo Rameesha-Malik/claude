@@ -29,8 +29,8 @@ const STEPS = [
     },
     {
         title: 'Pay',
-        en: 'Pay via Bank Transfer, Easypaisa, or JazzCash — details shown at checkout.',
-        ur: 'بینک ٹرانسفر، ایزی پیسہ یا جاز کیش کے ذریعے ادائیگی کریں — تفصیلات چیک آؤٹ پر دکھائی جائیں گی۔',
+        en: 'Pay via Bank Transfer, Easypaisa, or JazzCash. Details shown at checkout.',
+        ur: 'بینک ٹرانسفر، ایزی پیسہ یا جاز کیش کے ذریعے ادائیگی کریں۔ تفصیلات چیک آؤٹ پر دکھائی جائیں گی۔',
     },
     {
         title: 'Send Screenshot on WhatsApp',

@@ -114,7 +114,7 @@ export default function DemoQuizForm({ demoQuiz, subjects, categories, questionB
                                 </div>
                             </label>
                         ))}
-                        {filteredBank.length === 0 && <p className="text-sm text-text-secondary">No questions in the bank yet — add some in Content Library.</p>}
+                        {filteredBank.length === 0 && <p className="text-sm text-text-secondary">No questions in the bank yet. Add some in Content Library.</p>}
                     </div>
                 </div>
             </form>

@@ -24,7 +24,7 @@ export default function FlashcardsIndex({ course, flashcards, subjects }: Props)
     }
 
     return (
-        <AdminLayout header={`Flashcards — ${course.title}`}>
+        <AdminLayout header={`Flashcards: ${course.title}`}>
             <Head title="Flashcards" />
 
             <div className="grid gap-6 lg:grid-cols-3">

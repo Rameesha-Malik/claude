@@ -58,7 +58,7 @@ export default function BundlePurchasesIndex({ purchases, filters }: Props) {
                                             View
                                         </a>
                                     ) : (
-                                        <span className="text-text-muted">—</span>
+                                        <span className="text-text-muted">N/A</span>
                                     )}
                                     {p.reference_number && <div className="text-xs text-text-muted">Ref: {p.reference_number}</div>}
                                 </td>

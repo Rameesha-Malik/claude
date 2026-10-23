@@ -145,9 +145,9 @@ export default function AdminCustomQuizIndex({ configs, enabled, stats, courses 
                             <tbody className="divide-y divide-border">
                                 {configs.map((c) => (
                                     <tr key={c.id}>
-                                        <td className="py-2 text-text">{c.user?.name ?? '—'}</td>
+                                        <td className="py-2 text-text">{c.user?.name ?? 'N/A'}</td>
                                         <td className="py-2 text-text-secondary">
-                                            {c.subject ?? 'Any subject'}{c.topic ? ` — ${c.topic}` : ''}
+                                            {c.subject ?? 'Any subject'}{c.topic ? ` / ${c.topic}` : ''}
                                         </td>
                                         <td className="py-2 text-text-secondary capitalize">{c.difficulty ?? 'Any'}</td>
                                         <td className="py-2 text-text-secondary">{c.question_count}</td>

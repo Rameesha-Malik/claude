@@ -5,7 +5,7 @@ interface Test { id: number; title: string; is_active: boolean; question_selecti
 
 export default function PracticeTestsIndex({ course, tests }: { course: { id: number; title: string }; tests: Test[] }) {
     return (
-        <AdminLayout header={`Practice Tests — ${course.title}`}>
+        <AdminLayout header={`Practice Tests: ${course.title}`}>
             <Head title="Practice Tests" />
 
             <div className="mb-4 flex justify-end">

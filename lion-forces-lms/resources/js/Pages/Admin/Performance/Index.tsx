@@ -159,7 +159,7 @@ export default function PerformanceIndex({ students, selectedStudentId, data }: 
                             <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-bold uppercase tracking-wide">
                                 Performance Index
                             </span>
-                            <h2 className="mt-4 font-display text-2xl sm:text-3xl">{data.student.name} — Overall score</h2>
+                            <h2 className="mt-4 font-display text-2xl sm:text-3xl">{data.student.name}: Overall score</h2>
                             <p className="mt-2 max-w-lg text-sm text-teal-100">
                                 Lion Forces Academy algorithm-based index from quizzes, pass rate, lectures &amp; course completion.
                             </p>
@@ -292,7 +292,7 @@ export default function PerformanceIndex({ students, selectedStudentId, data }: 
                                 <ul className="space-y-2 text-sm">
                                     {data.weak_points.map((s) => (
                                         <li key={s.subject} className="rounded-xl bg-danger-bg px-3 py-2 text-danger">
-                                            <span className="font-bold">{s.subject}</span> ({s.accuracy}% accuracy) — revise this subject in the Content Library and retake a practice test.
+                                            <span className="font-bold">{s.subject}</span> ({s.accuracy}% accuracy). Revise this subject in the Content Library and retake a practice test.
                                         </li>
                                     ))}
                                 </ul>

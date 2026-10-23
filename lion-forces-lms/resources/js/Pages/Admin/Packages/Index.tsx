@@ -42,7 +42,7 @@ function AddPackageModal({ courses, onClose }: { courses: CourseOption[]; onClos
                             onChange={(e) => form.setData('course_id', e.target.value ? Number(e.target.value) : '')}
                             className="w-full rounded-lg border border-border px-3 py-2 text-sm"
                         >
-                            <option value="">— Select a course —</option>
+                            <option value="">Select a course</option>
                             {courses.map((c) => <option key={c.id} value={c.id}>{c.title}</option>)}
                         </select>
                         <p className="mt-1 text-xs text-text-muted">Which course this pricing tier belongs to.</p>
@@ -128,7 +128,7 @@ function PackageRow({ pkg }: { pkg: PackageRow }) {
                 <div className="font-medium text-text">{pkg.name}</div>
                 {pkg.description && <div className="whitespace-pre-line text-xs text-text-muted">{pkg.description}</div>}
             </td>
-            <td className="px-5 py-3 text-text-secondary">{pkg.course?.title ?? '—'}</td>
+            <td className="px-5 py-3 text-text-secondary">{pkg.course?.title ?? 'N/A'}</td>
             <td className="px-5 py-3 font-semibold text-text">Rs. {Number(pkg.price).toLocaleString()}</td>
             <td className="px-5 py-3 text-text-secondary">{pkg.validity_days ? `${pkg.validity_days} days` : 'Lifetime'}</td>
             <td className="px-5 py-3">

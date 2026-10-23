@@ -246,7 +246,7 @@ class SettingsController extends Controller
         try {
             Mail::raw(
                 'This is a test email from your Lion Forces Academy admin panel. If you received this, your SMTP settings are working.',
-                fn ($message) => $message->to($data['email'])->subject('Test email — SMTP settings'),
+                fn ($message) => $message->to($data['email'])->subject('Test email: SMTP settings'),
             );
         } catch (\Throwable $e) {
             return back()->with('error', 'Could not send test email: '.$e->getMessage());

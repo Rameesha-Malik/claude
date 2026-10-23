@@ -202,7 +202,7 @@ class ContentLibraryController extends Controller
 
         ActivityLog::record('edited', 'MCQ', $question->id, 'MCQ updated.');
 
-        return back()->with('success', 'Question updated — change reflects in every course using it.');
+        return back()->with('success', 'Question updated. Change reflects in every course using it.');
     }
 
     public function destroyQuestion(QuestionBank $question)
@@ -241,7 +241,7 @@ class ContentLibraryController extends Controller
 
         ActivityLog::record('edited', 'Note', $note->id, "Note \"{$note->title}\" was updated.");
 
-        return back()->with('success', 'Note updated — change reflects in every course using it.');
+        return back()->with('success', 'Note updated. Change reflects in every course using it.');
     }
 
     public function destroyNote(NotesBank $note)

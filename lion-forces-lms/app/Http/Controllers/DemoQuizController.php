@@ -33,7 +33,7 @@ class DemoQuizController extends Controller
             'quizzes' => $activeQuizzes->count() > 1 ? $activeQuizzes->values() : [],
             'pageContent' => [
                 'title' => Setting::get('demo_quiz_page_title', 'Free Demo Quizzes'),
-                'subtitle' => Setting::get('demo_quiz_page_subtitle', 'Try a sample of the real thing — the same question bank, timer, and scoring our enrolled students use.'),
+                'subtitle' => Setting::get('demo_quiz_page_subtitle', 'Try a sample of the real thing: the same question bank, timer, and scoring our enrolled students use.'),
             ],
         ]);
     }

@@ -45,7 +45,7 @@ export default function DemoQuizIndex({ quizzes }: { quizzes: Quiz[] }) {
 
             {quizzes.length === 0 ? (
                 <div className="rounded-3xl border border-dashed border-border bg-surface p-10 text-center text-text-secondary">
-                    No demo quiz set up yet — the homepage link will show "not available" until one is active.
+                    No demo quiz set up yet. The homepage link will show "not available" until one is active.
                 </div>
             ) : (
                 <div className="space-y-3">

@@ -133,7 +133,7 @@ export default function Dashboard({ enrollments, performance, revisionCount, unr
                         <PerfStat label="Attempted" value={performance.questions_attempted} />
                         <PerfStat label="Correct" value={performance.correct} tone="success" />
                         <PerfStat label="Incorrect" value={performance.incorrect} tone="danger" />
-                        <PerfStat label="Accuracy" value={performance.accuracy !== null ? `${performance.accuracy}%` : '—'} />
+                        <PerfStat label="Accuracy" value={performance.accuracy !== null ? `${performance.accuracy}%` : 'N/A'} />
                         <PerfStat label="Favourites" value={performance.favourites} icon={<Icon d={ICONS.star} className="h-4 w-4" />} />
                         <PerfStat label="Sessions" value={performance.sessions} />
                     </div>

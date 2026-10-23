@@ -75,7 +75,7 @@ class GuaranteedNotesController extends Controller
             'assignable_id' => $purchase->user_id,
         ]);
 
-        return back()->with('success', 'Purchase verified — note unlocked for the student.');
+        return back()->with('success', 'Purchase verified. Note unlocked for the student.');
     }
 
     public function reject(Request $request, NotePurchase $purchase)

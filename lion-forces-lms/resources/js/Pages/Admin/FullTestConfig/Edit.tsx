@@ -41,7 +41,7 @@ export default function FullTestConfigEdit({ stagedTest, courses, subjects, ques
 
     return (
         <AdminLayout header="Edit Test">
-            <Head title={`Edit — ${stagedTest.title}`} />
+            <Head title={`Edit: ${stagedTest.title}`} />
 
             <Link href="/admin/full-test-config" className="mb-4 inline-flex items-center gap-1 text-sm text-text-secondary hover:text-primary">
                 ← Back to tests
@@ -102,7 +102,7 @@ function StagesPanel({ stagedTest, subjects, questionBank }: { stagedTest: Stage
 
             <p className="mb-4 text-sm text-text-secondary">
                 Stages run in order. An ungrouped stage gates the next one on its own pass threshold, failing ends the
-                attempt there. A stage in a group doesn't gate on its own — see Stage groups below.
+                attempt there. A stage in a group doesn't gate on its own. See Stage groups below.
             </p>
 
             <div className="space-y-3">
@@ -214,7 +214,7 @@ function StageForm({
                         onChange={(e) => form.setData('pass_threshold_percent', e.target.value)}
                         disabled={!!form.data.stage_group_id}
                     />
-                    {form.data.stage_group_id ? <p className="mt-1 text-xs text-text-muted">Ignored — this stage is in a group; the group's threshold applies instead.</p> : null}
+                    {form.data.stage_group_id ? <p className="mt-1 text-xs text-text-muted">Ignored. This stage is in a group; the group's threshold applies instead.</p> : null}
                 </div>
                 <div>
                     <label className={labelClass}>Marks / Question</label>
@@ -230,7 +230,7 @@ function StageForm({
                 <div>
                     <label className={labelClass}>Stage group</label>
                     <select className={inputClass} value={form.data.stage_group_id} onChange={(e) => form.setData('stage_group_id', e.target.value ? Number(e.target.value) : '')}>
-                        <option value="">Ungrouped — passes individually</option>
+                        <option value="">Ungrouped: passes individually</option>
                         {stagedTest.stage_groups.map((g) => <option key={g.id} value={g.id}>{g.name || `Group #${g.id}`}</option>)}
                     </select>
                 </div>

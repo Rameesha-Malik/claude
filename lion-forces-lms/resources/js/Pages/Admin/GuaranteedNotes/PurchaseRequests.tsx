@@ -59,7 +59,7 @@ export default function PurchaseRequestsIndex({ purchases, filters }: Props) {
                                 <td className="px-5 py-3">
                                     {p.proof_file_path ? (
                                         <a href={`/storage/${p.proof_file_path}`} target="_blank" rel="noopener noreferrer" className="font-semibold text-primary hover:underline">View</a>
-                                    ) : <span className="text-text-muted">—</span>}
+                                    ) : <span className="text-text-muted">N/A</span>}
                                     {p.reference_number && <div className="text-xs text-text-muted">Ref: {p.reference_number}</div>}
                                 </td>
                                 <td className="px-5 py-3">

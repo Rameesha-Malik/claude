@@ -115,7 +115,7 @@ class DemoQuizController extends Controller
         return Inertia::render('Admin/DemoQuiz/PageContent', [
             'content' => [
                 'title' => Setting::get('demo_quiz_page_title', 'Free Demo Quizzes'),
-                'subtitle' => Setting::get('demo_quiz_page_subtitle', 'Try a sample of the real thing — the same question bank, timer, and scoring our enrolled students use.'),
+                'subtitle' => Setting::get('demo_quiz_page_subtitle', 'Try a sample of the real thing: the same question bank, timer, and scoring our enrolled students use.'),
             ],
             'totalQuestions' => DemoQuiz::where('is_active', true)->withCount('questions')->get()->sum('questions_count'),
         ]);

@@ -78,7 +78,7 @@ export default function MockExamSectionPage({ mockExam, attemptId, section, sect
 
     return (
         <StudentLayout header={mockExam.title}>
-            <Head title={`${mockExam.title} — ${section.name}`} />
+            <Head title={`${mockExam.title}: ${section.name}`} />
 
             <div ref={containerRef} className="bg-canvas">
                 <div className="mb-4 flex flex-wrap items-center gap-2 text-xs font-bold uppercase tracking-wide text-text-muted">

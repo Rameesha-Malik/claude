@@ -78,7 +78,7 @@ export default function NoteDetail({ note, faqs, testimonials }: Props) {
                                         href={`/portal/notes/${note.id}/purchase`}
                                         className="mt-4 inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-bold uppercase tracking-wide text-on-primary hover:bg-primary-hover"
                                     >
-                                        Buy Now — Rs. {Number(note.price).toLocaleString()}
+                                        Buy Now (Rs. {Number(note.price).toLocaleString()})
                                     </Link>
                                 </div>
                             </>

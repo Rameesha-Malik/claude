@@ -186,7 +186,7 @@ export default function LeaderboardIndex({ leaderboard, year, availableYears, fi
 
                     <div className="rounded-3xl border border-border bg-surface p-5">
                         <p className="font-bold text-text">Activity</p>
-                        <p className="mb-4 text-xs text-text-muted">{year} — Quizzes per month</p>
+                        <p className="mb-4 text-xs text-text-muted">{year}: Quizzes per month</p>
                         <div className="flex h-32 items-end gap-1.5">
                             {stats.activity_by_month.map((count, i) => (
                                 <div key={i} className="flex h-full flex-1 flex-col items-center justify-end gap-1">

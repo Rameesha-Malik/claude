@@ -27,7 +27,7 @@ export default function PracticeTests({ tests, totalQuestions }: { tests: TestIt
 
             <section className="mx-auto max-w-container px-4 py-20 sm:px-6 lg:px-8">
                 {tests.length === 0 ? (
-                    <p className="text-center text-text-secondary">No practice tests published yet — check back soon.</p>
+                    <p className="text-center text-text-secondary">No practice tests published yet. Check back soon.</p>
                 ) : (
                     <RevealOnScroll staggerMs={60} className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                         {tests.map((t) => (

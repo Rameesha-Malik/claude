@@ -5,7 +5,7 @@ interface Exam { id: number; title: string; is_active: boolean; sections_count: 
 
 export default function MockExamsIndex({ course, exams }: { course: { id: number; title: string }; exams: Exam[] }) {
     return (
-        <AdminLayout header={`Mock Exams — ${course.title}`}>
+        <AdminLayout header={`Mock Exams: ${course.title}`}>
             <Head title="Mock Exams" />
 
             <div className="mb-4 flex justify-end">

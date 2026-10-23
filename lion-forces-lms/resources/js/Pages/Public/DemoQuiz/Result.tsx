@@ -54,7 +54,7 @@ export default function DemoQuizResult({ attempt, quizTitle }: Props) {
 
     return (
         <PublicLayout>
-            <Head title={`Result — ${quizTitle}`} />
+            <Head title={`Result: ${quizTitle}`} />
 
             <section className="relative overflow-hidden bg-gradient-to-br from-teal-700 via-teal-800 to-teal-950 pb-24 pt-24 text-center text-white sm:pt-28">
                 <GradientMesh className="opacity-40" />

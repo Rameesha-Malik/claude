@@ -174,7 +174,7 @@ class StudentController extends Controller
         ]);
 
         $enrollment = $student->enrollments()->where('course_id', $data['course_id'])->first();
-        abort_unless($enrollment, 422, 'This student is not enrolled in that course yet — enroll them first.');
+        abort_unless($enrollment, 422, 'This student is not enrolled in that course yet. Enroll them first.');
 
         Payment::create([
             'enrollment_id' => $enrollment->id,

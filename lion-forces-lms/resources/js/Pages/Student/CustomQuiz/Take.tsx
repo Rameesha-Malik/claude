@@ -24,8 +24,8 @@ export default function TakeCustomQuiz({ config, subjectName, topicName, questio
         setAnswers((prev) => ({ ...prev, [questionId]: optionId }));
     }
 
-    const scope = [subjectName, topicName].filter(Boolean).join(' — ');
-    const title = scope ? `Custom Quiz — ${scope}` : 'Custom Quiz';
+    const scope = [subjectName, topicName].filter(Boolean).join(' / ');
+    const title = scope ? `Custom Quiz: ${scope}` : 'Custom Quiz';
 
     return (
         <StudentLayout header={title}>
