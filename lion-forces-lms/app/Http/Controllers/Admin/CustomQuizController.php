@@ -37,20 +37,27 @@ class CustomQuizController extends Controller
         $totalQuestions = QuestionBank::count();
         $usedQuestions = TestAttemptAnswer::whereNotNull('is_correct')->distinct('question_id')->count('question_id');
 
-        $configs = CustomQuizConfig::with(['user:id,name,email', 'subject:id,name', 'topic:id,name', 'attempts'])
+        $rawConfigs = CustomQuizConfig::with(['user:id,name,email', 'attempts'])
             ->latest()
             ->limit(50)
-            ->get()
-            ->map(fn (CustomQuizConfig $config) => [
-                'id' => $config->id,
-                'user' => $config->user?->only('name', 'email'),
-                'subject' => $config->subject?->name,
-                'topic' => $config->topic?->name,
-                'difficulty' => $config->difficulty,
-                'question_count' => $config->question_count,
-                'created_at' => $config->created_at,
-                'percentage' => $config->attempts->first()?->percentage,
-            ]);
+            ->get();
+
+        // subject_ids/topic_ids are plain JSON arrays, not a relation --
+        // one bulk name lookup across the whole page instead of a query
+        // per row.
+        $subjectNames = Subject::whereIn('id', $rawConfigs->pluck('subject_ids')->flatten()->filter()->unique())->pluck('name', 'id');
+        $topicNames = Topic::whereIn('id', $rawConfigs->pluck('topic_ids')->flatten()->filter()->unique())->pluck('name', 'id');
+
+        $configs = $rawConfigs->map(fn (CustomQuizConfig $config) => [
+            'id' => $config->id,
+            'user' => $config->user?->only('name', 'email'),
+            'subject' => CustomQuizConfig::summarizeNames(collect($config->subject_ids ?? [])->map(fn ($id) => $subjectNames->get($id))->filter()->all()),
+            'topic' => CustomQuizConfig::summarizeNames(collect($config->topic_ids ?? [])->map(fn ($id) => $topicNames->get($id))->filter()->all()),
+            'difficulty' => $config->difficulty,
+            'question_count' => $config->question_count,
+            'created_at' => $config->created_at,
+            'percentage' => $config->attempts->first()?->percentage,
+        ]);
 
         return Inertia::render('Admin/CustomQuiz/Index', [
             'configs' => $configs,

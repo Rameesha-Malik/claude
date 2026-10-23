@@ -8,14 +8,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
-#[Fillable(['user_id', 'subject_id', 'topic_id', 'course_id', 'difficulty', 'question_count', 'question_ids'])]
+#[Fillable(['user_id', 'subject_ids', 'topic_ids', 'course_id', 'difficulty', 'question_count', 'question_ids'])]
 class CustomQuizConfig extends Model
 {
     use HasFactory;
 
     protected function casts(): array
     {
-        return ['question_ids' => 'array'];
+        return ['question_ids' => 'array', 'subject_ids' => 'array', 'topic_ids' => 'array'];
     }
 
     public function user(): BelongsTo
@@ -23,14 +23,34 @@ class CustomQuizConfig extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function subject(): BelongsTo
+    // subject_ids/topic_ids are frozen JSON lists (same reasoning as
+    // question_ids below), not a pivot table -- a handful of ids picked
+    // once at creation and never queried from the Subject/Topic side, so
+    // these are plain lookups, not Eloquent relations.
+    public function subjects()
     {
-        return $this->belongsTo(Subject::class);
+        return Subject::whereIn('id', $this->subject_ids ?? [])->get();
     }
 
-    public function topic(): BelongsTo
+    public function topics()
     {
-        return $this->belongsTo(Topic::class);
+        return Topic::whereIn('id', $this->topic_ids ?? [])->get();
+    }
+
+    // "Anatomy, Behavioral Science +2" -- same overflow pattern UWorld's
+    // own Tests list uses for a config with several subjects/topics
+    // picked, rather than a long comma-separated line. Shared by the
+    // student and admin Custom Quiz controllers rather than duplicated.
+    public static function summarizeNames(array $names, int $max = 2): ?string
+    {
+        if (count($names) === 0) {
+            return null;
+        }
+        if (count($names) <= $max) {
+            return implode(', ', $names);
+        }
+
+        return implode(', ', array_slice($names, 0, $max)).' +'.(count($names) - $max);
     }
 
     public function course(): BelongsTo

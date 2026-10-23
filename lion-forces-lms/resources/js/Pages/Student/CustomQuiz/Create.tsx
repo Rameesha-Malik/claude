@@ -81,17 +81,38 @@ function TestHistory({ history }: { history: HistoryItem[] }) {
 
 export default function CreateCustomQuiz({ subjects, topics, hasAccess, freeTrialMax, course = null, history = [] }: Props) {
     const form = useForm({
-        subject_id: '' as number | '',
-        topic_id: '' as number | '',
+        subject_ids: [] as number[],
+        topic_ids: [] as number[],
         difficulty: '' as '' | 'easy' | 'medium' | 'hard',
         question_count: hasAccess ? 10 : freeTrialMax,
         course_id: course?.id ?? ('' as number | ''),
     });
 
-    // Topic is scoped to a subject -- only offer topics under whichever
-    // subject is currently picked, same reasoning as the admin form.
-    const availableTopics = topics.filter((t) => t.subject_id === form.data.subject_id);
+    // Topic is scoped to whichever subjects are picked -- same reasoning
+    // as the admin question form's topic dropdown, just extended to
+    // "any of the selected subjects" now that more than one can be picked.
+    const availableTopics = topics.filter((t) => form.data.subject_ids.includes(t.subject_id));
     const maxQuestions = hasAccess ? 50 : freeTrialMax;
+
+    // Client sent a video of UWorld's own "Create Test" screen: Subjects
+    // (and Systems) there are multi-select -- "Anatomy | Behavioral
+    // science | Biostatistics | ..." -- not a single dropdown. Picking
+    // more than one subject pulls from all of them combined.
+    function toggleSubject(id: number) {
+        form.setData((prev) => {
+            const subject_ids = prev.subject_ids.includes(id) ? prev.subject_ids.filter((s) => s !== id) : [...prev.subject_ids, id];
+            // Drop any picked topic that no longer belongs to a still-selected subject.
+            const topic_ids = prev.topic_ids.filter((tid) => topics.some((t) => t.id === tid && subject_ids.includes(t.subject_id)));
+            return { ...prev, subject_ids, topic_ids };
+        });
+    }
+
+    function toggleTopic(id: number) {
+        form.setData((prev) => ({
+            ...prev,
+            topic_ids: prev.topic_ids.includes(id) ? prev.topic_ids.filter((t) => t !== id) : [...prev.topic_ids, id],
+        }));
+    }
 
     function submit(e: FormEvent) {
         e.preventDefault();
@@ -127,28 +148,36 @@ export default function CreateCustomQuiz({ subjects, topics, hasAccess, freeTria
 
                 <form onSubmit={submit} className="mt-6 space-y-4">
                     <div>
-                        <label className="mb-1 block text-sm font-medium text-text">Subject</label>
-                        <select
-                            className={inputClass}
-                            value={form.data.subject_id}
-                            onChange={(e) => form.setData((prev) => ({ ...prev, subject_id: e.target.value ? Number(e.target.value) : '', topic_id: '' }))}
-                        >
-                            <option value="">Any subject</option>
+                        <div className="mb-1 flex items-center justify-between">
+                            <label className="block text-sm font-medium text-text">Subjects</label>
+                            <span className="text-xs text-text-muted">{form.data.subject_ids.length === 0 ? 'Any subject' : `${form.data.subject_ids.length} selected`}</span>
+                        </div>
+                        <div className="max-h-48 space-y-1 overflow-y-auto rounded-lg border border-border p-2">
                             {subjects.map((s) => (
-                                <option key={s.id} value={s.id}>{s.name} ({s.questions_count} questions)</option>
+                                <label key={s.id} className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-surface-sunken">
+                                    <input type="checkbox" checked={form.data.subject_ids.includes(s.id)} onChange={() => toggleSubject(s.id)} />
+                                    <span className="flex-1 text-text">{s.name}</span>
+                                    <span className="text-xs text-text-muted">{s.questions_count}</span>
+                                </label>
                             ))}
-                        </select>
+                        </div>
+                        <p className="mt-1 text-xs text-text-muted">Leave none checked to pull from every subject.</p>
                     </div>
 
                     {availableTopics.length > 0 && (
                         <div>
-                            <label className="mb-1 block text-sm font-medium text-text">Topic</label>
-                            <select className={inputClass} value={form.data.topic_id} onChange={(e) => form.setData('topic_id', e.target.value ? Number(e.target.value) : '')}>
-                                <option value="">Any topic in this subject</option>
+                            <div className="mb-1 flex items-center justify-between">
+                                <label className="block text-sm font-medium text-text">Topics</label>
+                                <span className="text-xs text-text-muted">{form.data.topic_ids.length === 0 ? 'Any topic' : `${form.data.topic_ids.length} selected`}</span>
+                            </div>
+                            <div className="max-h-48 space-y-1 overflow-y-auto rounded-lg border border-border p-2">
                                 {availableTopics.map((t) => (
-                                    <option key={t.id} value={t.id}>{t.name}</option>
+                                    <label key={t.id} className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-surface-sunken">
+                                        <input type="checkbox" checked={form.data.topic_ids.includes(t.id)} onChange={() => toggleTopic(t.id)} />
+                                        <span className="text-text">{t.name}</span>
+                                    </label>
                                 ))}
-                            </select>
+                            </div>
                         </div>
                     )}
 

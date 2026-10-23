@@ -101,28 +101,7 @@ class CustomQuizController extends Controller
             'hasAccess' => $hasAccess,
             'freeTrialMax' => self::FREE_TRIAL_MAX_QUESTIONS,
             'course' => $course?->only('id', 'title', 'slug'),
-            // Client, from a UWorld QBank walkthrough: a student should be
-            // able to see every test they've built, not just the one they
-            // just finished. Kept on this same page (not a separate nav
-            // entry/URL) rather than duplicating the builder's course
-            // context and access gate on a second page. Shown regardless
-            // of access so a free-trial student still sees their own
-            // small history building up.
-            'history' => CustomQuizConfig::where('user_id', $request->user()->id)
-                ->with(['subject:id,name', 'topic:id,name', 'attempts'])
-                ->latest()
-                ->limit(20)
-                ->get()
-                ->map(fn (CustomQuizConfig $c) => [
-                    'id' => $c->id,
-                    'subject' => $c->subject?->name,
-                    'topic' => $c->topic?->name,
-                    'difficulty' => $c->difficulty,
-                    'question_count' => $c->question_count,
-                    'created_at' => $c->created_at,
-                    'attempt_id' => $c->attempts->first()?->id,
-                    'percentage' => $c->attempts->first()?->percentage,
-                ]),
+            'history' => $this->historyFor($request->user()->id),
         ]);
     }
 
@@ -131,8 +110,10 @@ class CustomQuizController extends Controller
         abort_unless(FeatureFlags::enabled('custom_quiz'), 404);
 
         $data = $request->validate([
-            'subject_id' => 'nullable|exists:subjects,id',
-            'topic_id' => 'nullable|exists:topics,id',
+            'subject_ids' => 'nullable|array',
+            'subject_ids.*' => 'exists:subjects,id',
+            'topic_ids' => 'nullable|array',
+            'topic_ids.*' => 'exists:topics,id',
             'difficulty' => 'nullable|in:easy,medium,hard',
             'question_count' => 'required|integer|min:1|max:50',
             'course_id' => 'nullable|exists:courses,id',
@@ -152,8 +133,8 @@ class CustomQuizController extends Controller
 
         $config = CustomQuizConfig::create([
             'user_id' => $request->user()->id,
-            'subject_id' => $data['subject_id'] ?? null,
-            'topic_id' => $data['topic_id'] ?? null,
+            'subject_ids' => $data['subject_ids'] ?? [],
+            'topic_ids' => $data['topic_ids'] ?? [],
             'course_id' => $course?->id,
             'difficulty' => $data['difficulty'] ?? null,
             'question_count' => count($questionIds),
@@ -172,8 +153,8 @@ class CustomQuizController extends Controller
         abort_unless($config->user_id === $request->user()->id, 403);
 
         $questionIds = $this->pickQuestionIds([
-            'subject_id' => $config->subject_id,
-            'topic_id' => $config->topic_id,
+            'subject_ids' => $config->subject_ids,
+            'topic_ids' => $config->topic_ids,
             'course_id' => $config->course_id,
             'difficulty' => $config->difficulty,
             'question_count' => $config->question_count,
@@ -181,8 +162,8 @@ class CustomQuizController extends Controller
 
         $copy = CustomQuizConfig::create([
             'user_id' => $request->user()->id,
-            'subject_id' => $config->subject_id,
-            'topic_id' => $config->topic_id,
+            'subject_ids' => $config->subject_ids,
+            'topic_ids' => $config->topic_ids,
             'course_id' => $config->course_id,
             'difficulty' => $config->difficulty,
             'question_count' => count($questionIds),
@@ -216,8 +197,8 @@ class CustomQuizController extends Controller
 
         return Inertia::render('Student/CustomQuiz/Take', [
             'config' => $config->only('id', 'question_count'),
-            'subjectName' => $config->subject?->name,
-            'topicName' => $config->topic?->name,
+            'subjectNames' => $config->subjects()->pluck('name'),
+            'topicNames' => $config->topics()->pluck('name'),
             'questions' => $questions,
         ]);
     }
@@ -312,14 +293,47 @@ class CustomQuizController extends Controller
         return $query->exists();
     }
 
+    // Client, from a UWorld QBank walkthrough: a student should be able to
+    // see every test they've built, not just the one they just finished.
+    // Kept on this same page (not a separate nav entry/URL) rather than
+    // duplicating the builder's course context and access gate on a
+    // second page. Shown regardless of access so a free-trial student
+    // still sees their own small history building up.
+    //
+    // subject_ids/topic_ids are plain JSON arrays, not a relation, so
+    // names are resolved with one bulk lookup across the whole page of
+    // history rather than a query per row.
+    private function historyFor(int $userId)
+    {
+        $configs = CustomQuizConfig::where('user_id', $userId)
+            ->with('attempts')
+            ->latest()
+            ->limit(20)
+            ->get();
+
+        $subjectNames = Subject::whereIn('id', $configs->pluck('subject_ids')->flatten()->filter()->unique())->pluck('name', 'id');
+        $topicNames = Topic::whereIn('id', $configs->pluck('topic_ids')->flatten()->filter()->unique())->pluck('name', 'id');
+
+        return $configs->map(fn (CustomQuizConfig $c) => [
+            'id' => $c->id,
+            'subject' => CustomQuizConfig::summarizeNames(collect($c->subject_ids ?? [])->map(fn ($id) => $subjectNames->get($id))->filter()->all()),
+            'topic' => CustomQuizConfig::summarizeNames(collect($c->topic_ids ?? [])->map(fn ($id) => $topicNames->get($id))->filter()->all()),
+            'difficulty' => $c->difficulty,
+            'question_count' => $c->question_count,
+            'created_at' => $c->created_at,
+            'attempt_id' => $c->attempts->first()?->id,
+            'percentage' => $c->attempts->first()?->percentage,
+        ]);
+    }
+
     // Shared by store() (new config) and duplicate() (retake with a fresh
     // random pick, same filters) -- kept as one place so both can never
     // drift apart on how a set of questions gets picked.
     private function pickQuestionIds(array $data): array
     {
         $questionIds = QuestionBank::query()
-            ->when($data['subject_id'] ?? null, fn ($q, $id) => $q->where('subject_id', $id))
-            ->when($data['topic_id'] ?? null, fn ($q, $id) => $q->where('topic_id', $id))
+            ->when(! empty($data['subject_ids']), fn ($q) => $q->whereIn('subject_id', $data['subject_ids']))
+            ->when(! empty($data['topic_ids']), fn ($q) => $q->whereIn('topic_id', $data['topic_ids']))
             ->when($data['difficulty'] ?? null, fn ($q, $d) => $q->where('difficulty', $d))
             ->when($data['course_id'] ?? null, fn ($q, $id) => $q->where('course_id', $id))
             ->inRandomOrder()
@@ -328,7 +342,7 @@ class CustomQuizController extends Controller
             ->values()
             ->all();
 
-        abort_if(count($questionIds) === 0, 422, 'No questions match those filters yet -- try a different subject, topic, or difficulty.');
+        abort_if(count($questionIds) === 0, 422, 'No questions match those filters yet. Try different subjects, topics, or a different difficulty.');
 
         return $questionIds;
     }

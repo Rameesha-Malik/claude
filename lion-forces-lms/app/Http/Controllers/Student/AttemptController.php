@@ -42,8 +42,9 @@ class AttemptController extends Controller
     private function customQuizResult(TestAttempt $attempt): Response
     {
         $attempt->load(['answers.question.options', 'answers.selectedOption']);
-        $config = $attempt->attemptable()->with('subject')->first();
-        $title = $config?->subject?->name ? "Custom Quiz: {$config->subject->name}" : 'Custom Quiz';
+        $config = $attempt->attemptable()->first();
+        $subjectNames = $config?->subjects()->pluck('name')->all() ?? [];
+        $title = count($subjectNames) > 0 ? 'Custom Quiz: '.\App\Models\CustomQuizConfig::summarizeNames($subjectNames) : 'Custom Quiz';
 
         return Inertia::render('Student/Quizzes/Result', [
             'attempt' => $attempt,
