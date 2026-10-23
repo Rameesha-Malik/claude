@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['user_id', 'course_id', 'package_id', 'bundle_purchase_id', 'status', 'activated_at', 'expires_at'])]
+#[Fillable(['user_id', 'course_id', 'package_id', 'bundle_purchase_id', 'module', 'status', 'activated_at', 'expires_at'])]
 class Enrollment extends Model
 {
     use HasFactory;
@@ -58,6 +58,20 @@ class Enrollment extends Model
     {
         return $query->where('status', 'active')
             ->where(fn ($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()));
+    }
+
+    // A 'full' enrollment grants every module; a 'quiz' or 'tests'
+    // enrollment only grants that one. Used by both the query-builder
+    // gating in authorizeEnrollment() (scopeGrantingModule, below) and
+    // anywhere a loaded Enrollment needs the same check.
+    public function grantsModule(string $module): bool
+    {
+        return $this->module === 'full' || $this->module === $module;
+    }
+
+    public function scopeGrantingModule($query, string $module)
+    {
+        return $query->where(fn ($q) => $q->where('module', 'full')->orWhere('module', $module));
     }
 
     // Marks this enrollment active and computes its real expiry date from

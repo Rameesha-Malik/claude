@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Course;
+use App\Models\CoursePackage;
 use App\Models\Enrollment;
 use App\Models\User;
 use Illuminate\Http\Request;
@@ -53,6 +54,7 @@ class EnrollmentController extends Controller
                 'user' => $e->user?->only('name', 'email'),
                 'course' => $e->course?->only('title'),
                 'package' => $e->package?->only('name'),
+                'module' => $e->module,
                 'payment' => $payment ? ['amount' => $payment->amount, 'proof_file_path' => $payment->proof_file_path] : null,
             ];
         });
@@ -60,7 +62,7 @@ class EnrollmentController extends Controller
         return Inertia::render('Admin/Enrollments/Index', [
             'enrollments' => $enrollments,
             'courses' => Course::orderBy('title')->get(['id', 'title'])
-                ->map(fn ($c) => ['id' => $c->id, 'title' => $c->title, 'packages' => $c->packages()->where('is_active', true)->get(['id', 'name'])]),
+                ->map(fn ($c) => ['id' => $c->id, 'title' => $c->title, 'packages' => $c->packages()->where('is_active', true)->get(['id', 'name', 'module'])]),
             'filters' => $request->only(['status', 'course_id', 'search']),
         ]);
     }
@@ -78,11 +80,13 @@ class EnrollmentController extends Controller
         ]);
 
         $student = User::where('id', $data['user_id'])->where('user_type', 'student')->firstOrFail();
+        $package = ! empty($data['package_id']) ? CoursePackage::find($data['package_id']) : null;
 
         $enrollment = Enrollment::create([
             'user_id' => $student->id,
             'course_id' => $data['course_id'],
-            'package_id' => $data['package_id'] ?? null,
+            'package_id' => $package?->id,
+            'module' => $package->module ?? 'full',
         ]);
         $enrollment->activate();
 

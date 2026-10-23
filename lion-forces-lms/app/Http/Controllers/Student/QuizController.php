@@ -127,6 +127,7 @@ class QuizController extends Controller
         $enrolled = $request->user()->enrollments()
             ->where('course_id', $quiz->course_id)
             ->active()
+            ->grantingModule('quiz')
             ->exists();
 
         abort_unless($enrolled, 403, 'You must be enrolled in this course.');

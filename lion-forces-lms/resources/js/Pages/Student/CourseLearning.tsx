@@ -42,6 +42,8 @@ interface Course {
     mock_exams: MockExamSummary[]; staged_tests: StagedTestSummary[]; flashcards: FlashcardItem[];
     assignments: AssignmentItem[];
     quizzes_enabled: boolean; flashcards_enabled: boolean; tests_enabled: boolean; assignments_enabled: boolean;
+    /** False for a module-only enrollment (Quiz Only / Tests Only) -- those never include lectures or notes. */
+    lectures_enabled: boolean;
     level: string | null; enrollments_count: number; approved_reviews: { rating: number }[];
 }
 interface Review { id: number; rating: number; review_text: string | null; status: string }
@@ -59,6 +61,17 @@ interface Props {
 
 const TABS = ['Lectures', 'Notes', 'Quizzes', 'Flashcards', 'Tests', 'Assignments', 'Q&A'] as const;
 type Tab = (typeof TABS)[number];
+
+// Lectures is the sensible default for a full enrollment, but a Quiz Only
+// or Tests Only student never has that tab at all -- defaulting to it
+// anyway would leave them looking at a blank panel with no visibly
+// "active" tab button.
+function initialTab(course: Partial<Course>): Tab {
+    if (course.lectures_enabled !== false) return 'Lectures';
+    if (course.quizzes_enabled) return 'Quizzes';
+    if (course.tests_enabled) return 'Tests';
+    return 'Lectures';
+}
 
 // Client: lectures must play inside the platform, not act as a doorway to
 // browsing YouTube -- no related-videos-from-other-channels, no
@@ -239,7 +252,7 @@ function LessonPlayer({ lesson }: { lesson: Lesson }) {
 }
 
 export default function CourseLearning({ course: courseProp, personalNotes = [], lessonProgress = {}, questions = [], myReview = null, enrollmentStatus }: Props) {
-    const [tab, setTab] = useState<Tab>('Lectures');
+    const [tab, setTab] = useState<Tab>(() => initialTab(courseProp));
     const [activeLesson, setActiveLesson] = useState<Lesson | null>((courseProp as Course).lessons?.[0] ?? null);
     // Client: "course content show when sidebar click then minimize and
     // make size of lecture bit large to view" -- picking a lesson
@@ -293,8 +306,12 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
 
     // Only show a module's tab when the admin has actually enabled it for
     // this course (Course.quizzes_enabled / flashcards_enabled /
-    // tests_enabled, set in Admin -> Courses -> Modules).
+    // tests_enabled, set in Admin -> Courses -> Modules) -- and, for a
+    // student who bought only one module (Quiz Only / Tests Only) rather
+    // than the full course, lectures_enabled/quizzes_enabled/tests_enabled
+    // are already further narrowed server-side to just what they paid for.
     const visibleTabs = TABS.filter((t) => {
+        if (t === 'Lectures' || t === 'Notes') return course.lectures_enabled;
         if (t === 'Quizzes') return course.quizzes_enabled;
         if (t === 'Flashcards') return course.flashcards_enabled;
         if (t === 'Tests') return course.tests_enabled;

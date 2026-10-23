@@ -139,6 +139,7 @@ class PracticeTestController extends Controller
         $enrolled = $request->user()->enrollments()
             ->where('course_id', $practiceTest->course_id)
             ->active()
+            ->grantingModule('tests')
             ->exists();
 
         abort_unless($enrolled, 403, 'You must be enrolled in this course.');

@@ -4,7 +4,9 @@ import LiteMarkdown from '@/Components/LiteMarkdown';
 import PublicLayout from '@/Layouts/PublicLayout';
 import { PageProps } from '@/types';
 
-interface Package { id: number; name: string; description: string | null; price: string; validity_days: number | null }
+type Module = 'full' | 'quiz' | 'tests';
+const MODULE_LABELS: Record<Module, string> = { full: 'Full Course', quiz: 'Quiz Only', tests: 'Tests Only' };
+interface Package { id: number; name: string; module: Module; description: string | null; price: string; validity_days: number | null }
 interface Lesson { id: number; title: string; type: string }
 interface Review { id: number; rating: number; review_text: string | null; user: { name: string } | null }
 interface Course {
@@ -232,6 +234,11 @@ export default function CourseDetail({ course }: { course: Course }) {
                                                 <span>{pkg.name}</span>
                                                 <span>Rs. {Number(pkg.price).toLocaleString()}</span>
                                             </div>
+                                            {pkg.module !== 'full' && (
+                                                <span className="mt-1 inline-block rounded-full bg-primary-subtle px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-primary">
+                                                    {MODULE_LABELS[pkg.module]}
+                                                </span>
+                                            )}
                                             {pkg.description && <p className="mt-1 text-xs text-text-secondary">{pkg.description}</p>}
                                         </Link>
                                     ))}

@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
-#[Fillable(['course_id', 'name', 'description', 'price', 'validity_days', 'order', 'is_active'])]
+#[Fillable(['course_id', 'name', 'module', 'description', 'price', 'validity_days', 'order', 'is_active'])]
 class CoursePackage extends Model
 {
     use HasFactory;

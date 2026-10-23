@@ -264,7 +264,8 @@ class CustomQuizController extends Controller
     // exact course.
     private function hasQuizAccess(Request $request, ?Course $course): bool
     {
-        $query = $request->user()->enrollments()->active()->whereHas('course', fn ($q) => $q->where('quizzes_enabled', true));
+        $query = $request->user()->enrollments()->active()->grantingModule('quiz')
+            ->whereHas('course', fn ($q) => $q->where('quizzes_enabled', true));
 
         if ($course) {
             $query->where('course_id', $course->id);

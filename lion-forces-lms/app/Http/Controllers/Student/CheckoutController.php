@@ -20,16 +20,23 @@ class CheckoutController extends Controller
 {
     public function create(Request $request, Course $course): Response
     {
+        // A 'full' enrollment already covers everything a student could
+        // buy for this course, so it still blocks the whole checkout page.
+        // A 'quiz'-or'tests'-only enrollment only blocks buying that same
+        // module again -- the student can still come back here to buy the
+        // other one, so existingModules is sent down instead of a single
+        // blanket "already enrolled" flag.
         $existing = Enrollment::where('user_id', $request->user()->id)
             ->where('course_id', $course->id)
             ->whereIn('status', ['active', 'pending'])
-            ->first();
+            ->get();
 
-        if ($existing?->status === 'active') {
-            return Inertia::render('Student/Checkout', ['alreadyEnrolled' => 'active', 'course' => $course->only('title', 'slug')]);
-        }
-        if ($existing?->status === 'pending') {
-            return Inertia::render('Student/Checkout', ['alreadyEnrolled' => 'pending', 'course' => $course->only('title', 'slug')]);
+        $fullEnrollment = $existing->firstWhere('module', 'full');
+        if ($fullEnrollment) {
+            return Inertia::render('Student/Checkout', [
+                'alreadyEnrolled' => $fullEnrollment->status,
+                'course' => $course->only('title', 'slug'),
+            ]);
         }
 
         $course->load(['packages' => fn ($q) => $q->where('is_active', true)->orderBy('price')]);
@@ -43,6 +50,10 @@ class CheckoutController extends Controller
             'course' => $course->only('id', 'title', 'slug', 'base_price'),
             'packages' => $course->packages,
             'selectedPackageId' => $selectedPackageId,
+            // module => status, for whichever modules this student already
+            // has a pending/active purchase for -- lets the page grey out
+            // just those packages instead of blocking the whole checkout.
+            'existingModules' => $existing->pluck('status', 'module'),
             'payment' => [
                 'bankDetails' => Setting::get('payment_bank_details'),
                 'easypaisaNumber' => Setting::get('payment_easypaisa_number'),
@@ -53,15 +64,6 @@ class CheckoutController extends Controller
 
     public function store(Request $request, Course $course)
     {
-        $alreadyEnrolled = Enrollment::where('user_id', $request->user()->id)
-            ->where('course_id', $course->id)
-            ->whereIn('status', ['active', 'pending'])
-            ->exists();
-
-        if ($alreadyEnrolled) {
-            return redirect()->route('student.courses')->with('success', 'You already have an enrollment for this course.');
-        }
-
         $data = $request->validate([
             'package_id' => 'nullable|exists:course_packages,id',
             'method' => 'required|in:bank_transfer,easypaisa,jazzcash',
@@ -70,6 +72,22 @@ class CheckoutController extends Controller
         ]);
 
         $package = $data['package_id'] ? $course->packages()->find($data['package_id']) : null;
+        $module = $package->module ?? 'full';
+
+        // Blocks re-buying the exact module the student is about to pay
+        // for (or anything if they already have full access), but not a
+        // *different* module of the same course -- someone with Quiz Only
+        // can still come back and buy Tests Only separately.
+        $alreadyHasModule = Enrollment::where('user_id', $request->user()->id)
+            ->where('course_id', $course->id)
+            ->whereIn('status', ['active', 'pending'])
+            ->where(fn ($q) => $q->where('module', 'full')->orWhere('module', $module))
+            ->exists();
+
+        if ($alreadyHasModule) {
+            return redirect()->route('student.courses')->with('success', 'You already have an enrollment that covers this.');
+        }
+
         $amount = $package->price ?? $course->base_price;
 
         abort_if($amount === null, 422, 'This course has no price set. Contact us to enroll.');
@@ -78,6 +96,7 @@ class CheckoutController extends Controller
             'user_id' => $request->user()->id,
             'course_id' => $course->id,
             'package_id' => $package?->id,
+            'module' => $module,
             'status' => 'pending',
         ]);
 

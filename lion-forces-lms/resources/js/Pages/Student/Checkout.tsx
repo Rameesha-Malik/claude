@@ -2,12 +2,17 @@ import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
 import StudentLayout from '@/Layouts/StudentLayout';
 
-interface Package { id: number; name: string; description: string | null; price: string; validity_days: number | null }
+type Module = 'full' | 'quiz' | 'tests';
+const MODULE_LABELS: Record<Module, string> = { full: 'Full Course', quiz: 'Quiz Only', tests: 'Tests Only' };
+
+interface Package { id: number; name: string; module: Module; description: string | null; price: string; validity_days: number | null }
 interface Props {
     alreadyEnrolled?: 'active' | 'pending';
     course: { id?: number; title: string; slug: string; base_price?: string | null };
     packages?: Package[];
     selectedPackageId?: number | null;
+    /** module => status ('active'/'pending'), for modules this student already has a purchase covering. */
+    existingModules?: Record<string, string>;
     payment?: { bankDetails: string | null; easypaisaNumber: string | null; jazzcashNumber: string | null };
 }
 
@@ -17,7 +22,7 @@ const METHODS = [
     { key: 'jazzcash' as const, label: 'JazzCash', detailsKey: 'jazzcashNumber' as const },
 ];
 
-export default function Checkout({ alreadyEnrolled, course, packages = [], selectedPackageId = null, payment }: Props) {
+export default function Checkout({ alreadyEnrolled, course, packages = [], selectedPackageId = null, existingModules = {}, payment }: Props) {
     if (alreadyEnrolled) {
         return (
             <StudentLayout header="Checkout">
@@ -78,29 +83,46 @@ export default function Checkout({ alreadyEnrolled, course, packages = [], selec
                         <div className="mt-5">
                             <p className="text-sm font-semibold text-text">Choose a package</p>
                             <div className="mt-2 space-y-2">
-                                {packages.map((pkg) => (
-                                    <label
-                                        key={pkg.id}
-                                        className={`flex cursor-pointer items-start justify-between gap-3 rounded-xl border p-3 text-sm transition-colors ${
-                                            packageId === pkg.id ? 'border-primary bg-primary-subtle' : 'border-border hover:border-primary'
-                                        }`}
-                                    >
-                                        <div className="flex items-start gap-2.5">
-                                            <input
-                                                type="radio"
-                                                className="mt-1"
-                                                checked={packageId === pkg.id}
-                                                onChange={() => { setPackageId(pkg.id); setData('package_id', pkg.id); }}
-                                            />
-                                            <div>
-                                                <div className="font-semibold text-text">{pkg.name}</div>
-                                                {pkg.description && <div className="text-xs text-text-secondary">{pkg.description}</div>}
-                                                <div className="text-xs text-text-muted">{pkg.validity_days ? `${pkg.validity_days} days` : 'Lifetime'} access</div>
+                                {packages.map((pkg) => {
+                                    const owned = existingModules[pkg.module];
+                                    return (
+                                        <label
+                                            key={pkg.id}
+                                            className={`flex items-start justify-between gap-3 rounded-xl border p-3 text-sm transition-colors ${
+                                                owned
+                                                    ? 'cursor-not-allowed border-border bg-surface-sunken opacity-60'
+                                                    : packageId === pkg.id
+                                                      ? 'cursor-pointer border-primary bg-primary-subtle'
+                                                      : 'cursor-pointer border-border hover:border-primary'
+                                            }`}
+                                        >
+                                            <div className="flex items-start gap-2.5">
+                                                <input
+                                                    type="radio"
+                                                    className="mt-1"
+                                                    disabled={!!owned}
+                                                    checked={packageId === pkg.id}
+                                                    onChange={() => { setPackageId(pkg.id); setData('package_id', pkg.id); }}
+                                                />
+                                                <div>
+                                                    <div className="flex flex-wrap items-center gap-2">
+                                                        <span className="font-semibold text-text">{pkg.name}</span>
+                                                        {pkg.module !== 'full' && (
+                                                            <span className="rounded-full bg-primary-subtle px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-primary">
+                                                                {MODULE_LABELS[pkg.module]}
+                                                            </span>
+                                                        )}
+                                                    </div>
+                                                    {pkg.description && <div className="text-xs text-text-secondary">{pkg.description}</div>}
+                                                    <div className="text-xs text-text-muted">
+                                                        {owned ? `You already have this (${owned})` : `${pkg.validity_days ? `${pkg.validity_days} days` : 'Lifetime'} access`}
+                                                    </div>
+                                                </div>
                                             </div>
-                                        </div>
-                                        <div className="whitespace-nowrap font-bold text-primary">Rs. {Number(pkg.price).toLocaleString()}</div>
-                                    </label>
-                                ))}
+                                            <div className="whitespace-nowrap font-bold text-primary">Rs. {Number(pkg.price).toLocaleString()}</div>
+                                        </label>
+                                    );
+                                })}
                             </div>
                         </div>
                     )}

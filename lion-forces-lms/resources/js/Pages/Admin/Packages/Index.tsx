@@ -3,12 +3,26 @@ import { FormEvent, useState } from 'react';
 import CloseButton from '@/Components/CloseButton';
 import AdminLayout from '@/Layouts/AdminLayout';
 
+type Module = 'full' | 'quiz' | 'tests';
+const MODULE_LABELS: Record<Module, string> = { full: 'Full Course', quiz: 'Quiz Only', tests: 'Tests Only' };
+
 interface PackageRow {
-    id: number; name: string; description: string | null; price: string; validity_days: number | null; is_active: boolean;
+    id: number; name: string; module: Module; description: string | null; price: string; validity_days: number | null; is_active: boolean;
     course: { id: number; title: string } | null;
 }
 interface CourseOption { id: number; title: string }
 interface Props { packages: PackageRow[]; courses: CourseOption[] }
+
+function ModuleSelect({ value, onChange }: { value: Module; onChange: (v: Module) => void }) {
+    return (
+        <div>
+            <select value={value} onChange={(e) => onChange(e.target.value as Module)} className="w-full rounded-lg border border-border px-3 py-2 text-sm">
+                {(Object.keys(MODULE_LABELS) as Module[]).map((m) => <option key={m} value={m}>{MODULE_LABELS[m]}</option>)}
+            </select>
+            <p className="mt-1 text-xs text-text-muted">What this package actually unlocks for the student.</p>
+        </div>
+    );
+}
 
 function AddPackageModal({ courses, onClose }: { courses: CourseOption[]; onClose: () => void }) {
     // Starts blank on purpose -- it used to silently default to whichever
@@ -18,7 +32,7 @@ function AddPackageModal({ courses, onClose }: { courses: CourseOption[]; onClos
     // course, freshly loaded each time this page opens), so a course
     // added anywhere else in admin shows up here automatically -- nothing
     // to maintain in this list by hand.
-    const form = useForm({ course_id: '' as number | '', name: '', description: '', price: '', validity_days: '' });
+    const form = useForm({ course_id: '' as number | '', name: '', module: 'full' as Module, description: '', price: '', validity_days: '' });
 
     function submit(e: FormEvent) {
         e.preventDefault();
@@ -49,6 +63,7 @@ function AddPackageModal({ courses, onClose }: { courses: CourseOption[]; onClos
                     </div>
                     <input placeholder="Package Name" value={form.data.name} onChange={(e) => form.setData('name', e.target.value)} className="w-full rounded-lg border border-border px-3 py-2 text-sm" />
                     {form.errors.name && <p className="text-xs text-danger">{form.errors.name}</p>}
+                    <ModuleSelect value={form.data.module} onChange={(v) => form.setData('module', v)} />
                     <textarea
                         placeholder={'One feature per line (optional), e.g.\nComplete Notes\nVerbal Intelligence Live Lectures'}
                         rows={4}
@@ -79,7 +94,7 @@ function AddPackageModal({ courses, onClose }: { courses: CourseOption[]; onClos
 function PackageRow({ pkg }: { pkg: PackageRow }) {
     const [editing, setEditing] = useState(false);
     const form = useForm({
-        name: pkg.name, description: pkg.description ?? '', price: pkg.price, validity_days: pkg.validity_days ?? '', is_active: pkg.is_active,
+        name: pkg.name, module: pkg.module, description: pkg.description ?? '', price: pkg.price, validity_days: pkg.validity_days ?? '', is_active: pkg.is_active,
     });
 
     function submit(e: FormEvent) {
@@ -99,6 +114,7 @@ function PackageRow({ pkg }: { pkg: PackageRow }) {
                 <td colSpan={6} className="px-5 py-4">
                     <form onSubmit={submit} className="grid gap-3 sm:grid-cols-2">
                         <input value={form.data.name} onChange={(e) => form.setData('name', e.target.value)} placeholder="Package Name" className="rounded-lg border border-border px-3 py-2 text-sm sm:col-span-2" />
+                        <div className="sm:col-span-2"><ModuleSelect value={form.data.module} onChange={(v) => form.setData('module', v)} /></div>
                         <textarea
                             value={form.data.description}
                             onChange={(e) => form.setData('description', e.target.value)}
@@ -126,6 +142,11 @@ function PackageRow({ pkg }: { pkg: PackageRow }) {
         <tr>
             <td className="px-5 py-3">
                 <div className="font-medium text-text">{pkg.name}</div>
+                {pkg.module !== 'full' && (
+                    <span className="mt-1 inline-block rounded-full bg-primary-subtle px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-primary">
+                        {MODULE_LABELS[pkg.module]}
+                    </span>
+                )}
                 {pkg.description && <div className="whitespace-pre-line text-xs text-text-muted">{pkg.description}</div>}
             </td>
             <td className="px-5 py-3 text-text-secondary">{pkg.course?.title ?? 'N/A'}</td>

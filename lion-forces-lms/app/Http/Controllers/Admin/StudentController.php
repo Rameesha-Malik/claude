@@ -229,10 +229,13 @@ class StudentController extends Controller
             'package_id' => 'nullable|exists:course_packages,id',
         ]);
 
+        $package = ! empty($data['package_id']) ? \App\Models\CoursePackage::find($data['package_id']) : null;
+
         $enrollment = Enrollment::create([
             'user_id' => $student->id,
             'course_id' => $data['course_id'],
-            'package_id' => $data['package_id'] ?? null,
+            'package_id' => $package?->id,
+            'module' => $package->module ?? 'full',
         ]);
         $enrollment->activate();
 

@@ -214,6 +214,7 @@ class CourseController extends Controller
 
         $data = $request->validate([
             'name' => 'required|string|max:150',
+            'module' => 'required|in:full,quiz,tests',
             'description' => 'nullable|string|max:500',
             'price' => 'required|numeric|min:0',
             'validity_days' => 'nullable|integer|min:1',
@@ -230,6 +231,7 @@ class CourseController extends Controller
 
         $package->update($request->validate([
             'name' => 'required|string|max:150',
+            'module' => 'required|in:full,quiz,tests',
             'description' => 'nullable|string|max:500',
             'price' => 'required|numeric|min:0',
             'validity_days' => 'nullable|integer|min:1',

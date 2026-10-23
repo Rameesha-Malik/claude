@@ -261,6 +261,7 @@ class StagedTestController extends Controller
         $enrolled = $request->user()->enrollments()
             ->where('course_id', $stagedTest->course_id)
             ->active()
+            ->grantingModule('tests')
             ->exists();
 
         abort_unless($enrolled, 403, 'You must be enrolled in this course.');

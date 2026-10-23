@@ -73,14 +73,19 @@ class BundleCheckoutController extends Controller
         ]);
 
         foreach ($bundle->courses as $course) {
-            $existing = Enrollment::where('user_id', $request->user()->id)
+            // Don't create a second pending/active *full* enrollment for a
+            // course the student already has full access to through
+            // another purchase. A module-only enrollment (Quiz Only /
+            // Tests Only) doesn't block this -- the bundle still owes them
+            // full access to that course, on top of whatever narrower
+            // purchase they already made.
+            $hasFull = Enrollment::where('user_id', $request->user()->id)
                 ->where('course_id', $course->id)
                 ->whereIn('status', ['active', 'pending'])
-                ->first();
+                ->where('module', 'full')
+                ->exists();
 
-            // Don't create a second pending/active enrollment for a course
-            // the student already has through another purchase.
-            if ($existing) {
+            if ($hasFull) {
                 continue;
             }
 
