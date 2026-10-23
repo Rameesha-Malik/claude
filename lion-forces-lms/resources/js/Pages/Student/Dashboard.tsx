@@ -249,10 +249,10 @@ export default function Dashboard({ enrollments, performance, activityTrend, rev
 function RingTile({ label, percentage, valueLabel, color, sub }: { label: string; percentage: number; valueLabel: string; color: string; sub: string }) {
     return (
         <div className="flex items-center gap-4 rounded-3xl border border-border bg-surface p-5">
-            <RingStat percentage={percentage} color={color} />
+            <RingStat percentage={percentage} color={color} size={52} strokeWidth={6} />
             <div className="min-w-0">
                 <div className="font-display text-2xl text-text">{valueLabel}</div>
-                <div className="truncate text-sm text-text-secondary">{label}</div>
+                <div className="text-sm leading-snug text-text-secondary">{label}</div>
                 <div className="truncate text-xs text-text-muted">{sub}</div>
             </div>
         </div>
@@ -275,22 +275,16 @@ function SummaryCard({
     href?: string;
 }) {
     const Wrapper = href ? Link : 'div';
+    const accentColor = tone === 'warning' ? 'var(--color-warning)' : 'var(--color-primary)';
     return (
-        <Wrapper
-            {...(href ? { href } : {})}
-            className="group rounded-3xl border border-border bg-surface p-5 transition-all duration-normal hover:-translate-y-1 hover:shadow-lg"
-        >
-            <span
-                className={`flex h-11 w-11 items-center justify-center rounded-2xl transition-transform duration-normal group-hover:scale-110 ${
-                    tone === 'warning' ? 'bg-warning-bg text-warning' : 'bg-primary-subtle text-primary'
-                }`}
-            >
-                {icon}
-            </span>
-            <div className="mt-4 font-display text-3xl text-text">
+        <Wrapper {...(href ? { href } : {})} className="rounded-3xl border border-border bg-surface p-5 transition-all duration-normal hover:-translate-y-1 hover:shadow-lg">
+            <div className="flex items-center gap-2">
+                <span className="flex h-5 w-5 flex-shrink-0" style={{ color: accentColor }}>{icon}</span>
+                <span className="text-sm font-semibold text-text-secondary">{label}</span>
+            </div>
+            <div className="mt-3 font-display text-3xl text-text">
                 <AnimatedCounter value={String(value)} />
             </div>
-            <div className="mt-1 text-sm text-text-secondary">{label}</div>
         </Wrapper>
     );
 }

@@ -35,7 +35,6 @@ interface Props {
 
 const ICONS = {
     students: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253',
-    cash: 'M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z',
     clock: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',
 };
 
@@ -307,27 +306,31 @@ function StatusDot({ status }: { status: string }) {
 function RingTile({ label, percentage, valueLabel, color, sub }: { label: string; percentage: number; valueLabel: string; color: string; sub: string }) {
     return (
         <div className="flex items-center gap-4 rounded-3xl border border-border bg-surface p-5">
-            <RingStat percentage={percentage} color={color} />
+            <RingStat percentage={percentage} color={color} size={52} strokeWidth={6} />
             <div className="min-w-0">
                 <div className="font-display text-2xl text-text">{valueLabel}</div>
-                <div className="truncate text-sm text-text-secondary">{label}</div>
+                <div className="text-sm leading-snug text-text-secondary">{label}</div>
                 <div className="truncate text-xs text-text-muted">{sub}</div>
             </div>
         </div>
     );
 }
 
+/** Plain inline icon next to the label, no colored circular badge behind
+ * it -- client feedback was that the pastel icon-in-a-circle treatment
+ * read as a generic AI-dashboard template rather than something a
+ * designer actually chose. The number stays the hero element. */
 function Stat({ label, value, icon, tone = 'primary' }: { label: string; value: string | number; icon: ReactNode; tone?: 'primary' | 'warning' }) {
-    const iconTone = tone === 'warning' ? 'bg-warning-bg text-warning' : 'bg-primary-subtle text-primary';
+    const accentColor = tone === 'warning' ? 'var(--color-warning)' : 'var(--color-primary)';
     return (
-        <div className="group rounded-3xl border border-border bg-surface p-5 transition-all duration-normal hover:-translate-y-1 hover:shadow-lg">
-            <span className={`flex h-11 w-11 items-center justify-center rounded-2xl transition-transform duration-normal group-hover:scale-110 ${iconTone}`}>
-                {icon}
-            </span>
-            <div className="mt-4 font-display text-3xl text-text">
+        <div className="rounded-3xl border border-border bg-surface p-5">
+            <div className="flex items-center gap-2">
+                <span className="flex h-5 w-5 flex-shrink-0" style={{ color: accentColor }}>{icon}</span>
+                <span className="text-sm font-semibold text-text-secondary">{label}</span>
+            </div>
+            <div className="mt-3 font-display text-3xl text-text">
                 <AnimatedCounter value={String(value)} />
             </div>
-            <div className="mt-1 text-sm text-text-secondary">{label}</div>
         </div>
     );
 }
