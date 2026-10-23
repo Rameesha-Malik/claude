@@ -2,7 +2,6 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 /**
@@ -21,10 +20,12 @@ return new class extends Migration
         Schema::table('staged_tests', function (Blueprint $table) {
             $table->dropForeign(['course_id']);
         });
-        // Raw SQL rather than Blueprint::change() -- avoids a doctrine/dbal
-        // dependency this project doesn't otherwise need just to widen one
-        // column to nullable.
-        DB::statement('ALTER TABLE staged_tests MODIFY course_id BIGINT UNSIGNED NULL');
+        // Blueprint::change() rather than raw MODIFY SQL -- native since
+        // Laravel 11 (no doctrine/dbal needed) and portable across MySQL
+        // and SQLite, unlike the MySQL-only MODIFY syntax this used to use.
+        Schema::table('staged_tests', function (Blueprint $table) {
+            $table->unsignedBigInteger('course_id')->nullable()->change();
+        });
         Schema::table('staged_tests', function (Blueprint $table) {
             $table->foreign('course_id')->references('id')->on('courses')->nullOnDelete();
         });
@@ -59,7 +60,9 @@ return new class extends Migration
         Schema::table('staged_tests', function (Blueprint $table) {
             $table->dropForeign(['course_id']);
         });
-        DB::statement('ALTER TABLE staged_tests MODIFY course_id BIGINT UNSIGNED NOT NULL');
+        Schema::table('staged_tests', function (Blueprint $table) {
+            $table->unsignedBigInteger('course_id')->nullable(false)->change();
+        });
         Schema::table('staged_tests', function (Blueprint $table) {
             $table->foreign('course_id')->references('id')->on('courses')->cascadeOnDelete();
         });
