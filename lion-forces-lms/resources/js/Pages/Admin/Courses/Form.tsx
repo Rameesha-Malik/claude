@@ -6,18 +6,18 @@ import AdminLayout from '@/Layouts/AdminLayout';
 
 interface Category { id: number; name: string }
 interface Instructor { id: number; name: string }
-type Module = 'full' | 'quiz' | 'tests';
-const MODULE_LABELS: Record<Module, string> = { full: 'Full Course', quiz: 'Quiz Only', tests: 'Tests Only' };
+type Module = 'full' | 'quiz' | 'tests' | 'assignments';
+const MODULE_LABELS: Record<Module, string> = { full: 'Full Course', quiz: 'Quiz Only', tests: 'Tests Only', assignments: 'Assignments Only' };
 interface Package { id: number; name: string; module: Module; description: string | null; price: string; validity_days: number | null }
 interface Lesson { id: number; title: string; type: string; is_free_preview: boolean; section_id: number | null }
 interface Section { id: number; title: string; description: string | null; lessons: Lesson[] }
 interface Tag { id: number; name: string }
 interface Course {
-    id: number; title: string; category_id: number; instructor_id: number | null;
-    short_description: string | null; description: string | null; syllabus: string | null;
-    level: string | null; hours: number | null; base_price: string | null; status: string;
+    id: number; title: string; category_id: number | null; instructor_id: number | null;
+    description: string | null; syllabus: string | null;
+    hours: number | null; base_price: string | null; status: string;
     quizzes_enabled: boolean; flashcards_enabled: boolean; tests_enabled: boolean; assignments_enabled: boolean;
-    target_exam_name: string | null; target_exam_date: string | null; thumbnail_path: string | null;
+    thumbnail_path: string | null;
     packages: Package[]; lessons: Lesson[]; sections: Section[]; tags: Tag[];
 }
 interface Props { course?: Course; categories: Category[]; instructors: Instructor[] }
@@ -39,16 +39,12 @@ export default function CourseForm({ course, categories, instructors }: Props) {
     const isEdit = !!course;
     const form = useForm({
         title: course?.title ?? '',
-        category_id: course?.category_id ?? (categories[0]?.id ?? ''),
+        category_id: course?.category_id ?? '',
         instructor_id: course?.instructor_id ?? '',
-        short_description: course?.short_description ?? '',
         description: course?.description ?? '',
         syllabus: course?.syllabus ?? '',
-        level: course?.level ?? '',
         hours: course?.hours ?? '',
         base_price: course?.base_price ?? '',
-        target_exam_name: course?.target_exam_name ?? '',
-        target_exam_date: course?.target_exam_date ? course.target_exam_date.slice(0, 10) : '',
         status: course?.status ?? 'draft',
         // Default ON for a brand-new course (not the courses.* column's
         // own false default) -- the previous off-by-default caused
@@ -99,10 +95,15 @@ export default function CourseForm({ course, categories, instructors }: Props) {
                 {form.errors.thumbnail && <div className="mt-1 text-sm text-danger">{form.errors.thumbnail}</div>}
             </div>
 
-            <div className="grid gap-4 sm:grid-cols-3">
+            <div className="grid grid-cols-2 gap-4">
                 <div>
                     <label className={labelClass}>Category</label>
-                    <select className={inputClass} value={form.data.category_id} onChange={(e) => form.setData('category_id', Number(e.target.value))}>
+                    <select
+                        className={inputClass}
+                        value={form.data.category_id}
+                        onChange={(e) => form.setData('category_id', e.target.value ? Number(e.target.value) : '')}
+                    >
+                        <option value="">None</option>
                         {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                     </select>
                 </div>
@@ -113,23 +114,10 @@ export default function CourseForm({ course, categories, instructors }: Props) {
                         {instructors.map((i) => <option key={i.id} value={i.id}>{i.name}</option>)}
                     </select>
                 </div>
-                <div>
-                    <label className={labelClass}>Level</label>
-                    <select className={inputClass} value={form.data.level} onChange={(e) => form.setData('level', e.target.value)}>
-                        <option value="">Not set</option>
-                        <option value="Beginner">Beginner</option>
-                        <option value="Intermediate">Intermediate</option>
-                        <option value="Advanced">Advanced</option>
-                    </select>
-                </div>
             </div>
 
             <div>
-                <label className={labelClass}>Short Description</label>
-                <input className={inputClass} value={form.data.short_description} onChange={(e) => form.setData('short_description', e.target.value)} />
-            </div>
-            <div>
-                <label className={labelClass}>Full Description</label>
+                <label className={labelClass}>Description</label>
                 <RichTextArea rows={4} className={inputClass} value={form.data.description} onChange={(v) => form.setData('description', v)} />
             </div>
             <div>
@@ -147,26 +135,6 @@ export default function CourseForm({ course, categories, instructors }: Props) {
                     <input type="number" className={inputClass} value={form.data.base_price} onChange={(e) => form.setData('base_price', e.target.value)} />
                 </div>
             </div>
-
-            <div className="grid grid-cols-2 gap-4">
-                <div>
-                    <label className={labelClass}>Target Exam Name</label>
-                    <input
-                        className={inputClass}
-                        placeholder="e.g. PMA Long Course 145"
-                        value={form.data.target_exam_name}
-                        onChange={(e) => form.setData('target_exam_name', e.target.value)}
-                    />
-                </div>
-                <div>
-                    <label className={labelClass}>Target Exam Date</label>
-                    <input type="date" className={inputClass} value={form.data.target_exam_date} onChange={(e) => form.setData('target_exam_date', e.target.value)} />
-                </div>
-            </div>
-            <p className="-mt-2 text-xs text-text-muted">
-                Powers the countdown shown on an enrolled student's dashboard (e.g. "45 days left"), unless the
-                student has set their own exam date.
-            </p>
 
             <div>
                 <label className={labelClass}>Tags</label>
@@ -345,16 +313,10 @@ function PackagesPanel({ course }: { course: Course }) {
     );
 }
 
-const URL_TYPES = ['video_youtube', 'link'];
-const FILE_ACCEPT: Record<string, string> = {
-    pdf: '.pdf',
-    audio: '.mp3,.wav,.m4a',
-    video_upload: '.mp4,.mov,.webm',
-    document: '.pdf,.doc,.docx,.ppt,.pptx',
-};
-// "video lectures" is the #1 thing admins look for in this panel -- both
-// video options say "Video" up front instead of "video_youtube"/"video_upload"
-// so they're not mistaken for some other content type while scanning the list.
+// Every new lesson is a video link now (client: keep it to just a title,
+// link, and free-preview toggle) -- this map only still matters for
+// displaying whatever type an older lesson already has (PDF/Audio/
+// Document/uploaded video), from before the form was simplified.
 const LESSON_TYPE_LABELS: Record<string, string> = {
     video_youtube: 'Video (YouTube Link)',
     video_upload: 'Video (File Upload)',
@@ -444,10 +406,13 @@ function TopicHeader({ section }: { section: Section }) {
 }
 
 function CurriculumPanel({ course }: { course: Course }) {
-    const addForm = useForm<{ title: string; type: string; external_url: string; is_free_preview: boolean; section_id: string; file: File | null }>({
-        title: '', type: 'video_youtube', external_url: '', is_free_preview: false, section_id: '', file: null,
+    // `type` is always 'video_youtube' now -- not shown as a choice (client:
+    // simplify to just a title, link, and free-preview toggle) -- but the
+    // shared storeLesson endpoint still expects the field, same backend
+    // used by every pre-existing lesson type.
+    const addForm = useForm<{ title: string; type: string; external_url: string; is_free_preview: boolean; section_id: string }>({
+        title: '', type: 'video_youtube', external_url: '', is_free_preview: false, section_id: '',
     });
-    const isUrlType = URL_TYPES.includes(addForm.data.type);
     const ungrouped = course.lessons.filter((l) => l.section_id === null);
 
     return (
@@ -455,8 +420,8 @@ function CurriculumPanel({ course }: { course: Course }) {
             <h3 className="mb-1 font-bold text-text">Curriculum: Topics &amp; Video Lectures</h3>
             <p className="mb-3 text-sm text-text-secondary">
                 This is where video lectures live: <strong>Course → Topic → Lesson</strong>. Add a topic below (e.g. "Chemistry
-                Lectures"), then add lessons into it. Pick type <em>video (YouTube link)</em> or <em>video (file upload)</em> for a
-                lecture. Lessons left ungrouped still show to students, just not under a named topic.
+                Lectures"), then add lessons into it -- a title and a video link (e.g. an unlisted YouTube link) is all each
+                lesson needs. Lessons left ungrouped still show to students, just not under a named topic.
             </p>
 
             <AddTopicForm courseId={course.id} />
@@ -488,39 +453,22 @@ function CurriculumPanel({ course }: { course: Course }) {
                 className="space-y-2 border-t border-border pt-4"
             >
                 <input className={inputClass} placeholder="Lesson Title" value={addForm.data.title} onChange={(e) => addForm.setData('title', e.target.value)} />
-                <div className="grid grid-cols-2 gap-2">
-                    <select className={inputClass} value={addForm.data.type} onChange={(e) => addForm.setData('type', e.target.value)}>
-                        {Object.entries(LESSON_TYPE_LABELS).map(([t, label]) => <option key={t} value={t}>{label}</option>)}
-                    </select>
-                    <select className={inputClass} value={addForm.data.section_id} onChange={(e) => addForm.setData('section_id', e.target.value)}>
-                        <option value="">No topic (ungrouped)</option>
-                        {course.sections.map((s) => <option key={s.id} value={s.id}>{s.title}</option>)}
-                    </select>
-                </div>
-                {isUrlType ? (
-                    <input
-                        className={inputClass}
-                        placeholder={addForm.data.type === 'video_youtube' ? 'YouTube URL' : 'Link URL'}
-                        value={addForm.data.external_url}
-                        onChange={(e) => addForm.setData('external_url', e.target.value)}
-                    />
-                ) : (
-                    <div>
-                        <input
-                            type="file"
-                            accept={FILE_ACCEPT[addForm.data.type]}
-                            onChange={(e) => addForm.setData('file', e.target.files?.[0] ?? null)}
-                            className="w-full text-sm text-text-secondary file:mr-3 file:rounded-lg file:border-0 file:bg-primary file:px-3 file:py-1.5 file:text-xs file:font-bold file:uppercase file:text-on-primary"
-                        />
-                        {addForm.data.type === 'video_upload' && <p className="mt-1 text-xs text-text-muted">MP4/MOV/WEBM, up to 500MB. Prefer YouTube for longer lectures.</p>}
-                    </div>
-                )}
+                <select className={inputClass} value={addForm.data.section_id} onChange={(e) => addForm.setData('section_id', e.target.value)}>
+                    <option value="">No topic (ungrouped)</option>
+                    {course.sections.map((s) => <option key={s.id} value={s.id}>{s.title}</option>)}
+                </select>
+                <input
+                    className={inputClass}
+                    placeholder="Video link (e.g. an unlisted YouTube URL)"
+                    value={addForm.data.external_url}
+                    onChange={(e) => addForm.setData('external_url', e.target.value)}
+                />
                 <label className="flex items-center gap-2 text-sm text-text">
                     <input type="checkbox" checked={addForm.data.is_free_preview} onChange={(e) => addForm.setData('is_free_preview', e.target.checked)} />
                     Free preview
                 </label>
                 <button type="submit" disabled={addForm.processing} className="w-full rounded-lg bg-primary py-2 text-sm font-bold uppercase text-on-primary hover:bg-primary-hover">
-                    {addForm.progress ? `Uploading… ${addForm.progress.percentage}%` : 'Add Lesson'}
+                    Add Lesson
                 </button>
                 {Object.values(addForm.errors).map((m, i) => <div key={i} className="text-sm text-danger">{m}</div>)}
             </form>

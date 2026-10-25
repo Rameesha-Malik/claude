@@ -96,7 +96,7 @@ class CourseController extends Controller
         $course->flashcards_enabled = $course->flashcards_enabled && \App\Support\FeatureFlags::enabled('flashcards') && $module === 'full';
         $course->tests_enabled = $course->tests_enabled && \App\Support\FeatureFlags::enabled('full_test') && $enrollment->grantsModule('tests');
         $course->quizzes_enabled = $course->quizzes_enabled && $enrollment->grantsModule('quiz');
-        $course->assignments_enabled = $course->assignments_enabled && $module === 'full';
+        $course->assignments_enabled = $course->assignments_enabled && $enrollment->grantsModule('assignments');
         // No existing toggle covers Lectures/Notes (every full enrollment
         // always had them) -- this is the one new flag the frontend needs
         // to also hide those two tabs for a module-only purchase.

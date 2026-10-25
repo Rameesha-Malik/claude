@@ -4,8 +4,8 @@ import CloseButton from '@/Components/CloseButton';
 import StatusDot from '@/Components/StatusDot';
 import AdminLayout from '@/Layouts/AdminLayout';
 
-type Module = 'full' | 'quiz' | 'tests';
-const MODULE_LABELS: Record<Module, string> = { full: 'Full Course', quiz: 'Quiz Only', tests: 'Tests Only' };
+type Module = 'full' | 'quiz' | 'tests' | 'assignments';
+const MODULE_LABELS: Record<Module, string> = { full: 'Full Course', quiz: 'Quiz Only', tests: 'Tests Only', assignments: 'Assignments Only' };
 
 interface Package { id: number; name: string; module: Module }
 interface CourseOpt { id: number; title: string; packages: Package[] }

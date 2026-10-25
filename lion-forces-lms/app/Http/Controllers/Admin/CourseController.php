@@ -118,6 +118,7 @@ class CourseController extends Controller
 
         $data = $this->validateCourse($request);
         $data['slug'] = $this->uniqueSlug($data['title']);
+        $data['short_description'] = $this->deriveShortDescription($data['description'] ?? null);
         $tags = $data['tags'] ?? '';
         unset($data['tags'], $data['thumbnail']);
         $data['thumbnail_path'] = $request->hasFile('thumbnail') ? $request->file('thumbnail')->store('courses', 'public') : null;
@@ -152,6 +153,7 @@ class CourseController extends Controller
         abort_unless($request->user()->canManageCourse($course), 403);
 
         $data = $this->validateCourse($request);
+        $data['short_description'] = $this->deriveShortDescription($data['description'] ?? null);
         $tags = $data['tags'] ?? '';
         unset($data['tags'], $data['thumbnail']);
 
@@ -215,16 +217,12 @@ class CourseController extends Controller
     {
         return $request->validate([
             'title' => 'required|string|max:255',
-            'category_id' => 'required|exists:course_categories,id',
+            'category_id' => 'nullable|exists:course_categories,id',
             'instructor_id' => 'nullable|exists:instructors,id',
-            'short_description' => 'nullable|string|max:500',
             'description' => 'nullable|string',
             'syllabus' => 'nullable|string',
-            'level' => 'nullable|in:Beginner,Intermediate,Advanced',
             'hours' => 'nullable|integer|min:0',
             'base_price' => 'nullable|numeric|min:0',
-            'target_exam_name' => 'nullable|string|max:150',
-            'target_exam_date' => 'nullable|date',
             'status' => 'required|in:draft,published,hidden',
             'quizzes_enabled' => 'boolean',
             'flashcards_enabled' => 'boolean',
@@ -233,6 +231,30 @@ class CourseController extends Controller
             'tags' => 'nullable|string|max:500',
             'thumbnail' => 'nullable|image|max:2048',
         ]);
+    }
+
+    // Client: the admin form should only have one Description field, not a
+    // separate Short + Full -- but course cards across the public site
+    // (Home, Courses listing, Bundle detail) specifically read
+    // short_description as their teaser text, and course_categories.
+    // short_description is still a real, selected-by-name column in
+    // PublicSiteController::courses(). Rather than touching every one of
+    // those (and losing the clamped-teaser look those cards already have),
+    // this derives it automatically from the one Description field on
+    // every save, so the admin only ever types the long version.
+    private function deriveShortDescription(?string $description): ?string
+    {
+        if (! $description) {
+            return null;
+        }
+
+        // Strips this app's lightweight markdown syntax (RichTextArea.tsx:
+        // **bold**, *italic*, ++underline++, ## heading, "- " bullets) so
+        // the auto-generated teaser isn't littered with stray marks.
+        $plain = preg_replace('/^#{1,6}\s*|^- |\+\+|[*_]/m', '', $description);
+        $plain = trim(preg_replace('/\s+/', ' ', $plain));
+
+        return mb_strlen($plain) > 160 ? mb_substr($plain, 0, 157).'...' : $plain;
     }
 
     private function uniqueSlug(string $title): string
@@ -268,7 +290,7 @@ class CourseController extends Controller
 
         $data = $request->validate([
             'name' => 'required|string|max:150',
-            'module' => 'required|in:full,quiz,tests',
+            'module' => 'required|in:full,quiz,tests,assignments',
             'description' => 'nullable|string|max:500',
             'price' => 'required|numeric|min:0',
             'validity_days' => 'nullable|integer|min:1',
@@ -285,7 +307,7 @@ class CourseController extends Controller
 
         $package->update($request->validate([
             'name' => 'required|string|max:150',
-            'module' => 'required|in:full,quiz,tests',
+            'module' => 'required|in:full,quiz,tests,assignments',
             'description' => 'nullable|string|max:500',
             'price' => 'required|numeric|min:0',
             'validity_days' => 'nullable|integer|min:1',

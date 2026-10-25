@@ -4,8 +4,8 @@ import LiteMarkdown from '@/Components/LiteMarkdown';
 import PublicLayout from '@/Layouts/PublicLayout';
 import { PageProps } from '@/types';
 
-type Module = 'full' | 'quiz' | 'tests';
-const MODULE_LABELS: Record<Module, string> = { full: 'Full Course', quiz: 'Quiz Only', tests: 'Tests Only' };
+type Module = 'full' | 'quiz' | 'tests' | 'assignments';
+const MODULE_LABELS: Record<Module, string> = { full: 'Full Course', quiz: 'Quiz Only', tests: 'Tests Only', assignments: 'Assignments Only' };
 interface Package { id: number; name: string; module: Module; description: string | null; price: string; validity_days: number | null }
 interface Lesson { id: number; title: string; type: string }
 interface Review { id: number; rating: number; review_text: string | null; user: { name: string } | null }
