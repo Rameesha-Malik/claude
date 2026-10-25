@@ -149,7 +149,7 @@ interface CourseItem {
 interface FaqItem { question: string; answer: string }
 interface TestimonialItem { student_name: string; photo_path: string | null; testimonial_text: string; rating: number | null }
 interface NewsItem {
-    id: number; title: string; description: string | null; organization: string | null;
+    id: number; title: string; description: string | null; organization: string | null; image_path: string | null;
     deadline_date: string | null; created_at: string;
 }
 interface SectionContent { title: string; content: Record<string, any> }
@@ -173,9 +173,11 @@ function formatDate(v: string) {
     return new Date(v).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
-// Cycle through the brand's two "poster" gradients so the news banner
-// (no real image field on news_announcements) still reads as intentional
-// per-card variation rather than 3 identical blocks in a row.
+// Fallback for a post with no uploaded photo -- cycles through the brand's
+// two "poster" gradients so it still reads as intentional per-card
+// variation rather than 3 identical blocks in a row. A post WITH a photo
+// (Admin > News > Image) shows that instead, same as the dedicated /news
+// page already does.
 const NEWS_BANNER_GRADIENTS = ['from-teal-600 via-teal-800 to-teal-950', 'from-secondary via-teal-900 to-teal-950'];
 
 // Real exam/service names the platform prepares candidates for (same set
@@ -640,15 +642,19 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                     <RevealOnScroll className="grid gap-6 sm:grid-cols-3">
                         {latestNews.map((item, i) => (
                             <div key={item.id} className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-sm transition-all duration-normal hover:-translate-y-1.5 hover:border-primary hover:shadow-2xl">
-                                <div className={`relative flex h-36 items-center justify-center bg-gradient-to-br px-4 text-center ${NEWS_BANNER_GRADIENTS[i % NEWS_BANNER_GRADIENTS.length]}`}>
-                                    <span
-                                        aria-hidden
-                                        className="absolute -right-4 -top-4 h-16 w-16 rotate-12 rounded-lg bg-white/10 transition-transform duration-slow group-hover:rotate-45"
-                                    />
-                                    <span className="relative font-display text-xl uppercase leading-tight tracking-wide text-white">
-                                        {item.organization ?? 'Announcement'}
-                                    </span>
-                                </div>
+                                {item.image_path ? (
+                                    <img src={`/storage/${item.image_path}`} alt={item.title} className="h-36 w-full object-cover" />
+                                ) : (
+                                    <div className={`relative flex h-36 items-center justify-center bg-gradient-to-br px-4 text-center ${NEWS_BANNER_GRADIENTS[i % NEWS_BANNER_GRADIENTS.length]}`}>
+                                        <span
+                                            aria-hidden
+                                            className="absolute -right-4 -top-4 h-16 w-16 rotate-12 rounded-lg bg-white/10 transition-transform duration-slow group-hover:rotate-45"
+                                        />
+                                        <span className="relative font-display text-xl uppercase leading-tight tracking-wide text-white">
+                                            {item.organization ?? 'Announcement'}
+                                        </span>
+                                    </div>
+                                )}
 
                                 <div className="flex flex-1 flex-col p-5">
                                     {item.organization && (

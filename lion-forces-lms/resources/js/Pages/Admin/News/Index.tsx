@@ -10,9 +10,23 @@ interface NewsItem {
     deadline_date: string | null; application_link: string | null; is_pinned: boolean; is_active: boolean;
     category: Category | null;
 }
+interface Props {
+    announcements: { data: NewsItem[]; links: { url: string | null; label: string; active: boolean }[]; total: number };
+    categories: Category[];
+    filters: { search?: string };
+}
 
 const inputClass = 'w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:shadow-glow focus:outline-none';
 const btnClass = 'rounded-lg bg-primary px-4 py-2 text-sm font-bold uppercase tracking-wide text-on-primary hover:bg-primary-hover disabled:opacity-50';
+
+// A deadline already in the past isn't invalid (an admin might deliberately
+// log a closed announcement for the record), just worth flagging -- the
+// post goes live but is immediately invisible to students either way
+// (NewsAnnouncement::scopeVisible), which isn't obvious from this form.
+function isPastDeadline(date: string): boolean {
+    if (!date) return false;
+    return new Date(date) < new Date(new Date().toDateString());
+}
 
 // Edit was missing entirely (only Activate/Deactivate/Delete existed) and
 // neither the category nor the "Apply Now" link had any input anywhere in
@@ -74,10 +88,13 @@ function AnnouncementRow({ item, categories }: { item: NewsItem; categories: Cat
                 </select>
                 <input
                     className={inputClass}
-                    placeholder="Apply Now link (the real external application URL)"
+                    placeholder="https://... (the real external application URL)"
                     value={form.data.application_link}
                     onChange={(e) => form.setData('application_link', e.target.value)}
                 />
+                {isPastDeadline(form.data.deadline_date) && (
+                    <p className="text-xs text-warning">This date has already passed -- the post won't be visible to students.</p>
+                )}
                 <div>
                     <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-text-muted">Image (optional)</label>
                     {item.image_path && !form.data.image && (
@@ -127,14 +144,15 @@ function AnnouncementRow({ item, categories }: { item: NewsItem; categories: Cat
                     <button onClick={toggleActive} className="text-xs font-bold uppercase text-primary hover:underline">
                         {item.is_active ? 'Deactivate' : 'Activate'}
                     </button>
-                    <button onClick={() => router.delete(`/admin/news/${item.id}`)} className="text-xs font-bold uppercase text-danger hover:underline">Delete</button>
+                    <button onClick={() => confirm(`Delete "${item.title}"? This can't be undone.`) && router.delete(`/admin/news/${item.id}`, { preserveScroll: true })} className="text-xs font-bold uppercase text-danger hover:underline">Delete</button>
                 </div>
             </div>
         </div>
     );
 }
 
-export default function NewsIndex({ announcements, categories }: { announcements: NewsItem[]; categories: Category[] }) {
+export default function NewsIndex({ announcements, categories, filters }: Props) {
+    const [search, setSearch] = useState(filters.search ?? '');
     const addForm = useForm<{
         title: string; description: string; organization: string; category_id: number | '';
         deadline_date: string; application_link: string; is_pinned: boolean; image: File | null;
@@ -142,14 +160,43 @@ export default function NewsIndex({ announcements, categories }: { announcements
         title: '', description: '', organization: '', category_id: '', deadline_date: '', application_link: '', is_pinned: false, image: null,
     });
 
+    function submitSearch(e: FormEvent) {
+        e.preventDefault();
+        router.get('/admin/news', { search }, { preserveState: true });
+    }
+
     return (
         <AdminLayout header="News & Announcements">
             <Head title="News" />
 
+            <form onSubmit={submitSearch} className="mb-4 flex max-w-sm gap-2">
+                <input
+                    value={search}
+                    onChange={(e) => setSearch(e.target.value)}
+                    placeholder="Search by title or organization..."
+                    className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:shadow-glow focus:outline-none"
+                />
+                <button type="submit" className="rounded-lg bg-primary px-4 py-2 text-sm font-bold uppercase text-on-primary hover:bg-primary-hover">Search</button>
+            </form>
+
             <div className="mb-6 space-y-3">
-                {announcements.map((item) => <AnnouncementRow key={item.id} item={item} categories={categories} />)}
-                {announcements.length === 0 && <p className="text-sm text-text-secondary">No announcements yet.</p>}
+                {announcements.data.map((item) => <AnnouncementRow key={item.id} item={item} categories={categories} />)}
+                {announcements.data.length === 0 && <p className="text-sm text-text-secondary">{filters.search ? 'No announcements match that search.' : 'No announcements yet.'}</p>}
             </div>
+
+            {announcements.links.length > 3 && (
+                <div className="mb-6 flex flex-wrap justify-center gap-2">
+                    {announcements.links.map((link, i) => (
+                        <button
+                            key={i}
+                            disabled={!link.url}
+                            onClick={() => link.url && router.get(link.url, {}, { preserveState: true })}
+                            className={`rounded-lg px-4 py-2 text-sm ${link.active ? 'bg-primary text-on-primary' : 'bg-surface text-text-secondary hover:bg-primary-subtle'} disabled:opacity-40`}
+                            dangerouslySetInnerHTML={{ __html: link.label }}
+                        />
+                    ))}
+                </div>
+            )}
 
             <h3 className="mb-2 text-xs font-bold uppercase tracking-wide text-text-muted">Add New</h3>
             <form
@@ -165,13 +212,16 @@ export default function NewsIndex({ announcements, categories }: { announcements
                     <input className={inputClass} placeholder="Organization (e.g. PMA)" value={addForm.data.organization} onChange={(e) => addForm.setData('organization', e.target.value)} />
                     <input type="date" className={inputClass} value={addForm.data.deadline_date} onChange={(e) => addForm.setData('deadline_date', e.target.value)} />
                 </div>
+                {isPastDeadline(addForm.data.deadline_date) && (
+                    <p className="text-xs text-warning">This date has already passed -- the post won't be visible to students.</p>
+                )}
                 <select className={inputClass} value={addForm.data.category_id} onChange={(e) => addForm.setData('category_id', e.target.value ? Number(e.target.value) : '')}>
                     <option value="">No exam category</option>
                     {categories.map((c) => <option key={c.id} value={c.id}>{c.name}</option>)}
                 </select>
                 <input
                     className={inputClass}
-                    placeholder="Apply Now link (the real external application URL)"
+                    placeholder="https://... (the real external application URL)"
                     value={addForm.data.application_link}
                     onChange={(e) => addForm.setData('application_link', e.target.value)}
                 />

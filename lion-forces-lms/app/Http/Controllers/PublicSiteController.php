@@ -35,11 +35,10 @@ class PublicSiteController extends Controller
                 ->map(fn ($course) => $this->appendTopicsCount($course)),
             'faqs' => Faq::where('page', 'home')->where('is_active', true)->orderBy('order')->get(['question', 'answer']),
             'testimonials' => Testimonial::orderBy('order')->get(['student_name', 'photo_path', 'testimonial_text', 'rating']),
-            'latestNews' => NewsAnnouncement::where('is_active', true)
-                ->where(fn ($q) => $q->whereNull('deadline_date')->orWhere('deadline_date', '>=', now()))
+            'latestNews' => NewsAnnouncement::visible()
                 ->orderByDesc('is_pinned')->orderByDesc('created_at')
                 ->limit(3)
-                ->get(['id', 'title', 'description', 'organization', 'deadline_date', 'created_at']),
+                ->get(['id', 'title', 'description', 'organization', 'image_path', 'deadline_date', 'created_at']),
         ]);
     }
 
@@ -134,8 +133,7 @@ class PublicSiteController extends Controller
     {
         return Inertia::render('Public/News', [
             'announcements' => NewsAnnouncement::with('category')
-                ->where('is_active', true)
-                ->where(fn ($q) => $q->whereNull('deadline_date')->orWhere('deadline_date', '>=', now()))
+                ->visible()
                 ->orderByDesc('is_pinned')->orderByDesc('created_at')
                 ->paginate(9),
         ]);

@@ -19,10 +19,13 @@ class NewsAnnouncement extends Model
         return $this->belongsTo(CourseCategory::class, 'category_id');
     }
 
-    // Auto-off after deadline: computed, not a stored flag, so nothing has
-    // to run a cron job just to "close" an announcement on time.
-    public function isOpen(): bool
+    // Auto-off after deadline: a query condition, not a stored flag, so
+    // nothing has to run a cron job just to "close" an announcement on
+    // time. Was duplicated inline in both PublicSiteController::home()
+    // and ::news() -- one scope now, used by both.
+    public function scopeVisible(\Illuminate\Database\Eloquent\Builder $query): \Illuminate\Database\Eloquent\Builder
     {
-        return $this->is_active && (! $this->deadline_date || $this->deadline_date->isFuture());
+        return $query->where('is_active', true)
+            ->where(fn ($q) => $q->whereNull('deadline_date')->orWhere('deadline_date', '>=', now()));
     }
 }

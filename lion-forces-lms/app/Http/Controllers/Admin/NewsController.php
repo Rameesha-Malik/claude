@@ -11,11 +11,18 @@ use Inertia\Response;
 
 class NewsController extends Controller
 {
-    public function index(): Response
+    public function index(Request $request): Response
     {
+        $announcements = NewsAnnouncement::with('category')
+            ->when($request->search, fn ($q, $s) => $q->where(fn ($q2) => $q2->where('title', 'like', "%{$s}%")->orWhere('organization', 'like', "%{$s}%")))
+            ->latest()
+            ->paginate(15)
+            ->withQueryString();
+
         return Inertia::render('Admin/News/Index', [
-            'announcements' => NewsAnnouncement::with('category')->latest()->get(),
+            'announcements' => $announcements,
             'categories' => CourseCategory::orderBy('name')->get(['id', 'name']),
+            'filters' => $request->only(['search']),
         ]);
     }
 
@@ -27,7 +34,7 @@ class NewsController extends Controller
             'organization' => 'nullable|string|max:100',
             'category_id' => 'nullable|exists:course_categories,id',
             'deadline_date' => 'nullable|date',
-            'application_link' => 'nullable|string|max:500',
+            'application_link' => 'nullable|url|max:500',
             'image' => 'nullable|image|max:2048',
             'is_pinned' => 'boolean',
         ]);
@@ -48,7 +55,7 @@ class NewsController extends Controller
             'organization' => 'nullable|string|max:100',
             'category_id' => 'nullable|exists:course_categories,id',
             'deadline_date' => 'nullable|date',
-            'application_link' => 'nullable|string|max:500',
+            'application_link' => 'nullable|url|max:500',
             'image' => 'nullable|image|max:2048',
             'is_pinned' => 'boolean',
             'is_active' => 'boolean',
