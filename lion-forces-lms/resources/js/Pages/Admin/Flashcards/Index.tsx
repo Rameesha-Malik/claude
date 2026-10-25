@@ -1,6 +1,7 @@
 import { Head, router, useForm } from '@inertiajs/react';
 import { useState } from 'react';
 import RichTextArea from '@/Components/RichTextArea';
+import StatusDot from '@/Components/StatusDot';
 import AdminLayout from '@/Layouts/AdminLayout';
 
 interface Subject { id: number; name: string }
@@ -110,13 +111,7 @@ function FlashcardRow({ card, courseId, subjects }: { card: FlashcardRow; course
                     <p className="mt-2 text-xs font-bold uppercase tracking-wide text-text-muted">Back</p>
                     <p className="text-sm text-text-secondary">{card.back_text}</p>
                 </div>
-                <span
-                    className={`flex-shrink-0 rounded-full px-2 py-0.5 text-xs font-bold uppercase ${
-                        card.status === 'approved' ? 'bg-success-bg text-success' : card.status === 'rejected' ? 'bg-danger-bg text-danger' : 'bg-warning-bg text-warning'
-                    }`}
-                >
-                    {card.status}
-                </span>
+                <StatusDot label={card.status} tone={card.status === 'approved' ? 'positive' : card.status === 'rejected' ? 'negative' : 'warning'} />
             </div>
             <div className="mt-4 flex flex-wrap gap-3 border-t border-border pt-3">
                 <button onClick={() => setEditing(true)} className="text-xs font-bold uppercase text-primary hover:underline">Edit</button>

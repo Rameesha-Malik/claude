@@ -1,4 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
+import StatusDot from '@/Components/StatusDot';
 import AdminLayout from '@/Layouts/AdminLayout';
 
 interface Exam { id: number; title: string; is_active: boolean; sections_count: number; total_duration_minutes: number | null }
@@ -25,9 +26,7 @@ export default function MockExamsIndex({ course, exams }: { course: { id: number
                             </p>
                         </div>
                         <div className="flex items-center gap-3">
-                            <span className={`rounded-full px-2 py-0.5 text-xs font-bold uppercase ${e.is_active ? 'bg-success-bg text-success' : 'bg-surface-sunken text-text-muted'}`}>
-                                {e.is_active ? 'Active' : 'Inactive'}
-                            </span>
+                            <StatusDot label={e.is_active ? 'Active' : 'Inactive'} tone={e.is_active ? 'positive' : 'neutral'} />
                             <Link href={`/admin/courses/${course.id}/mock-exams/${e.id}/edit`} className="font-semibold text-primary hover:underline">Edit &rarr;</Link>
                             <button onClick={() => router.delete(`/admin/courses/${course.id}/mock-exams/${e.id}`)} className="text-xs font-bold uppercase text-danger hover:underline">Delete</button>
                         </div>

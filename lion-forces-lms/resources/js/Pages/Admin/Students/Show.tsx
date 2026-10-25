@@ -1,6 +1,7 @@
 import { Head, router, useForm } from '@inertiajs/react';
 import { useState } from 'react';
 import LiteMarkdown from '@/Components/LiteMarkdown';
+import StatusDot from '@/Components/StatusDot';
 import AdminLayout from '@/Layouts/AdminLayout';
 
 interface Payment { id: number; amount: string; method: string; status: string; reference_number: string | null; notes: string | null; created_at: string; enrollment?: { course: { id: number; title: string } } }
@@ -355,9 +356,7 @@ function PaymentsPanel({ student, courses, payments }: { student: Student; cours
                             </div>
                             <div className="flex items-center gap-3">
                                 <span className="text-text">Rs. {Number(p.amount).toLocaleString()}</span>
-                                <span className={`rounded-full px-2 py-0.5 text-xs font-bold uppercase ${p.status === 'verified' ? 'bg-success-bg text-success' : p.status === 'rejected' ? 'bg-danger-bg text-danger' : 'bg-warning-bg text-warning'}`}>
-                                    {p.status}
-                                </span>
+                                <StatusDot label={p.status} tone={p.status === 'verified' ? 'positive' : p.status === 'rejected' ? 'negative' : 'warning'} />
                             </div>
                         </div>
                     ))}
@@ -480,9 +479,10 @@ function QuizAttemptsPanel({ attempts }: { attempts: QuizAttempt[] }) {
                             </div>
                             <div className="flex items-center gap-3">
                                 {a.percentage !== null && <span className="text-text">{a.percentage}%</span>}
-                                <span className={`rounded-full px-2 py-0.5 text-xs font-bold uppercase ${a.passed ? 'bg-success-bg text-success' : a.status === 'submitted' ? 'bg-danger-bg text-danger' : 'bg-surface-sunken text-text-muted'}`}>
-                                    {a.status === 'submitted' ? (a.passed ? 'Passed' : 'Failed') : a.status}
-                                </span>
+                                <StatusDot
+                                    label={a.status === 'submitted' ? (a.passed ? 'Passed' : 'Failed') : a.status}
+                                    tone={a.passed ? 'positive' : a.status === 'submitted' ? 'negative' : 'neutral'}
+                                />
                             </div>
                         </div>
                     ))}

@@ -122,9 +122,16 @@ export default function CoursesIndex({ courses, filters, stats }: Props) {
                     {courses.data.map((c) => (
                         <div key={c.id} className="overflow-hidden rounded-3xl border border-border bg-surface shadow-sm">
                             <div className="relative bg-gradient-to-br from-teal-600 via-teal-800 to-teal-950 p-5 text-white">
-                                <span className={`absolute right-4 top-4 rounded-full px-2.5 py-0.5 text-xs font-bold uppercase ${c.status === 'published' ? 'bg-success text-white' : 'bg-white/20 text-white'}`}>
-                                    {c.status === 'published' ? 'Active' : 'Inactive'}
-                                </span>
+                                {c.status === 'published' ? (
+                                    <span className="absolute right-4 top-4 flex items-center gap-1.5 text-xs font-medium text-teal-100">
+                                        <span className="h-1.5 w-1.5 rounded-full bg-success" />
+                                        Active
+                                    </span>
+                                ) : (
+                                    <span className="absolute right-4 top-4 rounded-full bg-white/20 px-2.5 py-0.5 text-xs font-bold uppercase text-white">
+                                        Inactive
+                                    </span>
+                                )}
                                 <h3 className="mt-2 max-w-[80%] truncate text-lg font-bold">{c.title}</h3>
                                 <p className="text-sm text-teal-100">{c.instructor?.name ?? 'System'}</p>
                             </div>

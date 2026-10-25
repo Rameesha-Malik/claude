@@ -2,6 +2,7 @@ import { Head, Link, router, useForm } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
 import CloseButton from '@/Components/CloseButton';
 import RichTextArea from '@/Components/RichTextArea';
+import StatusDot from '@/Components/StatusDot';
 import AdminLayout from '@/Layouts/AdminLayout';
 
 interface Subject { id: number; name: string }
@@ -151,9 +152,7 @@ export default function GuaranteedNotesIndex({ notes, subjects, filters, stats }
                                         </span>
                                     </td>
                                     <td className="px-5 py-3">
-                                        <span className={`rounded-full px-2 py-0.5 text-xs font-bold uppercase ${n.is_published ? 'bg-success-bg text-success' : 'bg-surface-sunken text-text-muted'}`}>
-                                            {n.is_published ? 'Active' : 'Inactive'}
-                                        </span>
+                                        <StatusDot label={n.is_published ? 'Published' : 'Draft'} tone={n.is_published ? 'positive' : 'neutral'} />
                                     </td>
                                     <td className="px-5 py-3 text-right">
                                         <div className="flex justify-end gap-3">

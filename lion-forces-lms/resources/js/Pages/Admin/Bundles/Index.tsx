@@ -1,4 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
+import StatusDot from '@/Components/StatusDot';
 import AdminLayout from '@/Layouts/AdminLayout';
 
 interface BundleRow {
@@ -38,9 +39,7 @@ export default function BundlesIndex({ bundles }: Props) {
                                 <td className="px-5 py-3 text-text-secondary">Rs. {Number(b.price).toLocaleString()}</td>
                                 <td className="px-5 py-3 text-text-secondary">{b.purchases_count}</td>
                                 <td className="px-5 py-3">
-                                    <span className={`rounded-full px-2 py-0.5 text-xs font-bold uppercase ${b.is_active ? 'bg-success-bg text-success' : 'bg-surface-sunken text-text-muted'}`}>
-                                        {b.is_active ? 'Active' : 'Inactive'}
-                                    </span>
+                                    <StatusDot label={b.is_active ? 'Active' : 'Inactive'} tone={b.is_active ? 'positive' : 'neutral'} />
                                 </td>
                                 <td className="px-5 py-3 text-right">
                                     <Link href={`/admin/bundles/${b.id}/edit`} className="mr-3 font-semibold text-primary hover:underline">Edit &rarr;</Link>

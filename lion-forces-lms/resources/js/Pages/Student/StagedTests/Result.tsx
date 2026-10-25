@@ -1,6 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
 import { useState } from 'react';
 import AnswerReviewCard, { WrongAnswersReview } from '@/Components/AnswerReviewCard';
+import StatusDot from '@/Components/StatusDot';
 import StudentLayout from '@/Layouts/StudentLayout';
 
 interface Option { id: number; option_text: string; is_correct: boolean }
@@ -53,9 +54,7 @@ export default function StagedTestResult({ attempt, testTitle, stages }: Props) 
                             <div className="flex items-center justify-between">
                                 <p className="font-semibold text-text">{s.name}</p>
                                 {s.completed && (
-                                    <span className={`rounded-full px-2 py-0.5 text-xs font-bold uppercase ${s.passed ? 'bg-success-bg text-success' : 'bg-danger-bg text-danger'}`}>
-                                        {s.passed ? 'Passed' : 'Failed'}
-                                    </span>
+                                    <StatusDot label={s.passed ? 'Passed' : 'Failed'} tone={s.passed ? 'positive' : 'negative'} />
                                 )}
                             </div>
                             <p className="text-sm text-text-secondary">{s.completed ? `${s.score} / ${s.total_marks} · ${pct}%` : 'Not reached'}</p>

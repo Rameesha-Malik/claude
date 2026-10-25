@@ -1,6 +1,7 @@
 import { Head, router, useForm, usePage } from '@inertiajs/react';
 import { FormEvent, ReactNode, useState } from 'react';
 import RichTextArea from '@/Components/RichTextArea';
+import StatusDot from '@/Components/StatusDot';
 import AdminLayout from '@/Layouts/AdminLayout';
 import { PageProps } from '@/types';
 
@@ -86,9 +87,7 @@ function AccessTab({ staff, roles, paymentSettings }: Pick<Props, 'staff' | 'rol
                             </div>
                             <div className="flex items-center gap-3">
                                 <span className="rounded-full bg-primary-subtle px-2 py-0.5 text-xs font-bold uppercase text-primary">{s.roles[0]?.name ?? 'staff'}</span>
-                                <span className={`rounded-full px-2 py-0.5 text-xs font-bold uppercase ${s.is_active ? 'bg-success-bg text-success' : 'bg-danger-bg text-danger'}`}>
-                                    {s.is_active ? 'Active' : 'Inactive'}
-                                </span>
+                                <StatusDot label={s.is_active ? 'Active' : 'Inactive'} tone={s.is_active ? 'positive' : 'negative'} />
                                 {isOwner && s.id !== auth.user?.id && (
                                     <button onClick={() => router.post(`/admin/settings/staff/${s.id}/toggle-active`)} className="text-xs font-bold uppercase text-danger hover:underline">
                                         {s.is_active ? 'Deactivate' : 'Activate'}

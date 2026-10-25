@@ -1,6 +1,7 @@
 import { Head, router } from '@inertiajs/react';
 import { FormEvent, useEffect, useState } from 'react';
 import CloseButton from '@/Components/CloseButton';
+import StatusDot from '@/Components/StatusDot';
 import AdminLayout from '@/Layouts/AdminLayout';
 
 type Module = 'full' | 'quiz' | 'tests';
@@ -277,9 +278,7 @@ export default function EnrollmentsIndex({ enrollments, courses, filters }: Prop
                                     )}
                                 </td>
                                 <td className="px-5 py-3">
-                                    <span className={`rounded-full px-2 py-0.5 text-xs font-bold uppercase ${
-                                        e.status === 'active' ? 'bg-success-bg text-success' : e.status === 'pending' ? 'bg-warning-bg text-warning' : 'bg-danger-bg text-danger'
-                                    }`}>{e.status}</span>
+                                    <StatusDot label={e.status} tone={e.status === 'active' ? 'positive' : e.status === 'pending' ? 'warning' : 'negative'} />
                                 </td>
                                 <td className="px-5 py-3 text-text-secondary">
                                     {e.payment ? (

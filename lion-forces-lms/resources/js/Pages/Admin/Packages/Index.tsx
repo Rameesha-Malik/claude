@@ -1,6 +1,7 @@
 import { Head, router, useForm } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
 import CloseButton from '@/Components/CloseButton';
+import StatusDot from '@/Components/StatusDot';
 import AdminLayout from '@/Layouts/AdminLayout';
 
 type Module = 'full' | 'quiz' | 'tests';
@@ -153,9 +154,7 @@ function PackageRow({ pkg }: { pkg: PackageRow }) {
             <td className="px-5 py-3 font-semibold text-text">Rs. {Number(pkg.price).toLocaleString()}</td>
             <td className="px-5 py-3 text-text-secondary">{pkg.validity_days ? `${pkg.validity_days} days` : 'Lifetime'}</td>
             <td className="px-5 py-3">
-                <span className={`rounded-full px-2 py-0.5 text-xs font-bold uppercase ${pkg.is_active ? 'bg-success-bg text-success' : 'bg-surface-sunken text-text-muted'}`}>
-                    {pkg.is_active ? 'Active' : 'Inactive'}
-                </span>
+                <StatusDot label={pkg.is_active ? 'Active' : 'Inactive'} tone={pkg.is_active ? 'positive' : 'neutral'} />
             </td>
             <td className="px-5 py-3 text-right">
                 <button onClick={() => setEditing(true)} className="mr-3 text-xs font-bold uppercase text-primary hover:underline">Edit</button>

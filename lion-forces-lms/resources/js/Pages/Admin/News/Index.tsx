@@ -1,6 +1,7 @@
 import { Head, router, useForm } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
 import RichTextArea from '@/Components/RichTextArea';
+import StatusDot from '@/Components/StatusDot';
 import AdminLayout from '@/Layouts/AdminLayout';
 
 interface Category { id: number; name: string }
@@ -109,9 +110,7 @@ function AnnouncementRow({ item, categories }: { item: NewsItem; categories: Cat
                             {item.organization && <span className="rounded-full bg-primary-subtle px-2 py-0.5 text-xs font-bold text-primary">{item.organization}</span>}
                             {item.category && <span className="rounded-full bg-surface-sunken px-2 py-0.5 text-xs font-bold text-text-muted">{item.category.name}</span>}
                             {item.is_pinned && <span className="rounded-full bg-primary px-2 py-0.5 text-xs font-bold text-on-primary">Pinned</span>}
-                            <span className={`rounded-full px-2 py-0.5 text-xs font-bold uppercase ${item.is_active ? 'bg-success-bg text-success' : 'bg-surface-sunken text-text-muted'}`}>
-                                {item.is_active ? 'Active' : 'Off'}
-                            </span>
+                            <StatusDot label={item.is_active ? 'Active' : 'Off'} tone={item.is_active ? 'positive' : 'neutral'} />
                         </div>
                         <h4 className="font-semibold text-text">{item.title}</h4>
                         <p className="mt-1 text-sm text-text-secondary">{item.description}</p>

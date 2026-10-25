@@ -1,5 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
 import RevealOnScroll from '@/Components/RevealOnScroll';
+import StatusDot from '@/Components/StatusDot';
 import StudentLayout from '@/Layouts/StudentLayout';
 
 interface Enrollment {
@@ -37,13 +38,7 @@ export default function MyCourses({ enrollments }: { enrollments: Enrollment[] }
                                 <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-2xl bg-primary-subtle text-primary transition-transform duration-normal group-hover:scale-110">
                                     <BookIcon />
                                 </span>
-                                <span
-                                    className={`rounded-full px-2.5 py-1 text-xs font-bold uppercase tracking-wide ${
-                                        e.status === 'active' ? 'bg-success-bg text-success' : 'bg-warning-bg text-warning'
-                                    }`}
-                                >
-                                    {e.status}
-                                </span>
+                                <StatusDot label={e.status} tone={e.status === 'active' ? 'positive' : 'warning'} />
                             </div>
                             {e.course.category && (
                                 <span className="mt-3 inline-block rounded-full bg-surface-sunken px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide text-text-secondary">

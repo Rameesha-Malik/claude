@@ -1,6 +1,7 @@
 import { Head, useForm } from '@inertiajs/react';
 import { useState } from 'react';
 import RichTextArea from '@/Components/RichTextArea';
+import StatusDot from '@/Components/StatusDot';
 import AdminLayout from '@/Layouts/AdminLayout';
 
 interface Submission {
@@ -57,9 +58,10 @@ function SubmissionCard({ submission, maxMarks, courseId }: { submission: Submis
                     <div className="font-semibold text-text">{submission.user.name} <span className="font-normal text-text-secondary">({submission.user.email})</span></div>
                     <p className="mt-0.5 text-xs text-text-muted">Submitted {new Date(submission.submitted_at).toLocaleString()}</p>
                 </div>
-                <span className={`rounded-full px-2.5 py-0.5 text-xs font-bold uppercase ${submission.status === 'graded' ? 'bg-success-bg text-success' : 'bg-warning-bg text-warning'}`}>
-                    {submission.status === 'graded' ? `Graded${maxMarks ? ` · ${submission.marks_awarded}/${maxMarks}` : ''}` : 'Ungraded'}
-                </span>
+                <StatusDot
+                    label={submission.status === 'graded' ? `Graded${maxMarks ? ` · ${submission.marks_awarded}/${maxMarks}` : ''}` : 'Ungraded'}
+                    tone={submission.status === 'graded' ? 'positive' : 'warning'}
+                />
             </div>
 
             {submission.submission_text && (

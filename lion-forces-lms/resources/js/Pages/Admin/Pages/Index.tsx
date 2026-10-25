@@ -2,6 +2,7 @@ import { Head, Link, router, useForm } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
 import CloseButton from '@/Components/CloseButton';
 import RichTextArea from '@/Components/RichTextArea';
+import StatusDot from '@/Components/StatusDot';
 import AdminLayout from '@/Layouts/AdminLayout';
 
 interface PageRow { id: number; title: string; slug: string; content: string | null; is_published: boolean; show_in_header: boolean; show_in_footer: boolean }
@@ -96,9 +97,7 @@ export default function PagesIndex({ pages }: Props) {
                         <div className="flex items-center gap-3">
                             {p.show_in_header && <span className="rounded-full bg-primary-subtle px-2 py-0.5 text-xs font-bold text-primary">In Header</span>}
                             {p.show_in_footer && <span className="rounded-full bg-primary-subtle px-2 py-0.5 text-xs font-bold text-primary">In Footer</span>}
-                            <span className={`rounded-full px-2 py-0.5 text-xs font-bold uppercase ${p.is_published ? 'bg-success-bg text-success' : 'bg-surface-sunken text-text-muted'}`}>
-                                {p.is_published ? 'Published' : 'Draft'}
-                            </span>
+                            <StatusDot label={p.is_published ? 'Published' : 'Draft'} tone={p.is_published ? 'positive' : 'neutral'} />
                             <button onClick={() => setModalPage(p)} className="text-xs font-bold uppercase text-primary hover:underline">Edit</button>
                             <button onClick={() => destroy(p)} className="text-xs font-bold uppercase text-danger hover:underline">Delete</button>
                         </div>

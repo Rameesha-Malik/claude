@@ -1,6 +1,7 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEventHandler, useState } from 'react';
 import RichTextArea from '@/Components/RichTextArea';
+import StatusDot from '@/Components/StatusDot';
 import AdminLayout from '@/Layouts/AdminLayout';
 
 interface Reply { id: number; reply_text: string; admin: { name: string } | null; created_at: string }
@@ -99,13 +100,7 @@ function QuestionCard({ question }: { question: QuestionItem }) {
                         {new Date(question.created_at).toLocaleString()}
                     </div>
                 </div>
-                <span
-                    className={`rounded-full px-2.5 py-0.5 text-xs font-bold uppercase ${
-                        question.status === 'answered' ? 'bg-success-bg text-success' : 'bg-warning-bg text-warning'
-                    }`}
-                >
-                    {question.status}
-                </span>
+                <StatusDot label={question.status} tone={question.status === 'answered' ? 'positive' : 'warning'} />
             </div>
 
             <p className="mt-3 text-sm text-text">{question.question_text}</p>

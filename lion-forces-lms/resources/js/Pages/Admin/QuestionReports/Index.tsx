@@ -1,4 +1,5 @@
 import { Head, router } from '@inertiajs/react';
+import StatusDot from '@/Components/StatusDot';
 import AdminLayout from '@/Layouts/AdminLayout';
 
 interface ReportRow {
@@ -63,9 +64,7 @@ export default function QuestionReportsIndex({ reports, status, pendingCount }: 
                                 </td>
                                 <td className="max-w-xs px-5 py-3 text-text-secondary">{r.reason}</td>
                                 <td className="px-5 py-3">
-                                    <span className={`rounded-full px-2 py-0.5 text-xs font-bold uppercase ${
-                                        r.status === 'resolved' ? 'bg-success-bg text-success' : r.status === 'pending' ? 'bg-warning-bg text-warning' : 'bg-surface-sunken text-text-muted'
-                                    }`}>{r.status}</span>
+                                    <StatusDot label={r.status} tone={r.status === 'resolved' ? 'positive' : r.status === 'pending' ? 'warning' : 'neutral'} />
                                 </td>
                                 <td className="px-5 py-3 text-right">
                                     {r.status === 'pending' && (

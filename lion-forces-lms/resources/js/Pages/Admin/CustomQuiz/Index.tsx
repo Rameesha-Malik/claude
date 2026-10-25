@@ -1,4 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
+import StatusDot from '@/Components/StatusDot';
 import AdminLayout from '@/Layouts/AdminLayout';
 
 interface ConfigRow {
@@ -49,9 +50,7 @@ export default function AdminCustomQuizIndex({ configs, enabled, stats, courses 
                     <span className="rounded-full bg-primary-subtle px-3 py-1 font-bold text-primary">3. Student creates a test</span>
                 </div>
                 <div className="mt-4 flex flex-wrap gap-3">
-                    <span className={`rounded-full px-3 py-1 text-xs font-bold uppercase ${enabled ? 'bg-success-bg text-success' : 'bg-surface-sunken text-text-muted'}`}>
-                        Feature is {enabled ? 'ON' : 'OFF'}
-                    </span>
+                    <StatusDot label={`Feature is ${enabled ? 'ON' : 'OFF'}`} tone={enabled ? 'positive' : 'neutral'} />
                     <Link href="/admin/settings" className="text-xs font-bold uppercase text-primary hover:underline">
                         Change in Settings &rarr;
                     </Link>
@@ -108,9 +107,7 @@ export default function AdminCustomQuizIndex({ configs, enabled, stats, courses 
                                 <tr key={c.id}>
                                     <td className="py-2 text-text">{c.title}</td>
                                     <td className="py-2">
-                                        <span className={`rounded-full px-2 py-0.5 text-xs font-bold uppercase ${c.quizzes_enabled ? 'bg-success-bg text-success' : 'bg-surface-sunken text-text-muted'}`}>
-                                            {c.quizzes_enabled ? 'On' : 'Off'}
-                                        </span>
+                                        <StatusDot label={c.quizzes_enabled ? 'On' : 'Off'} tone={c.quizzes_enabled ? 'positive' : 'neutral'} />
                                     </td>
                                     <td className="py-2 text-right">
                                         <Link href={`/admin/courses/${c.id}/edit`} className="text-xs font-bold uppercase text-primary hover:underline">

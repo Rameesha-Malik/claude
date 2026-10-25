@@ -1,4 +1,5 @@
 import { Head, Link, router } from '@inertiajs/react';
+import StatusDot from '@/Components/StatusDot';
 import AdminLayout from '@/Layouts/AdminLayout';
 
 interface QuizRow { id: number; title: string; is_active: boolean; question_selection_mode: string; questions_count: number; section: { id: number; title: string } | null }
@@ -29,9 +30,7 @@ export default function QuizzesIndex({ course, quizzes }: { course: { id: number
                             </p>
                         </div>
                         <div className="flex items-center gap-3">
-                            <span className={`rounded-full px-2 py-0.5 text-xs font-bold uppercase ${q.is_active ? 'bg-success-bg text-success' : 'bg-surface-sunken text-text-muted'}`}>
-                                {q.is_active ? 'Active' : 'Inactive'}
-                            </span>
+                            <StatusDot label={q.is_active ? 'Active' : 'Inactive'} tone={q.is_active ? 'positive' : 'neutral'} />
                             <Link href={`/admin/courses/${course.id}/quizzes/${q.id}/edit`} className="font-semibold text-primary hover:underline">Edit &rarr;</Link>
                             <button onClick={() => router.delete(`/admin/courses/${course.id}/quizzes/${q.id}`)} className="text-xs font-bold uppercase text-danger hover:underline">Delete</button>
                         </div>

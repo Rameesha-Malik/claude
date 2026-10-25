@@ -1,4 +1,5 @@
 import { Head, router } from '@inertiajs/react';
+import StatusDot from '@/Components/StatusDot';
 import AdminLayout from '@/Layouts/AdminLayout';
 
 interface Purchase {
@@ -63,9 +64,7 @@ export default function BundlePurchasesIndex({ purchases, filters }: Props) {
                                     {p.reference_number && <div className="text-xs text-text-muted">Ref: {p.reference_number}</div>}
                                 </td>
                                 <td className="px-5 py-3">
-                                    <span className={`rounded-full px-2 py-0.5 text-xs font-bold uppercase ${
-                                        p.status === 'verified' ? 'bg-success-bg text-success' : p.status === 'pending' ? 'bg-warning-bg text-warning' : 'bg-danger-bg text-danger'
-                                    }`}>{p.status}</span>
+                                    <StatusDot label={p.status} tone={p.status === 'verified' ? 'positive' : p.status === 'pending' ? 'warning' : 'negative'} />
                                 </td>
                                 <td className="px-5 py-3 text-right">
                                     {p.status === 'pending' && (

@@ -3,6 +3,7 @@ import { FormEvent, useState } from 'react';
 import CloseButton from '@/Components/CloseButton';
 import LiteMarkdown from '@/Components/LiteMarkdown';
 import RichTextArea from '@/Components/RichTextArea';
+import StatusDot from '@/Components/StatusDot';
 import AdminLayout from '@/Layouts/AdminLayout';
 
 interface NoteOption { id: number; title: string }
@@ -98,9 +99,7 @@ export default function NoteFaqsIndex({ faqs, notes }: Props) {
                                     <LiteMarkdown text={f.answer} className="mt-1 text-sm text-text-secondary" />
                                 </div>
                                 <div className="flex flex-shrink-0 items-center gap-3">
-                                    <span className={`rounded-full px-2 py-0.5 text-xs font-bold uppercase ${f.is_active ? 'bg-success-bg text-success' : 'bg-surface-sunken text-text-muted'}`}>
-                                        {f.is_active ? 'Active' : 'Inactive'}
-                                    </span>
+                                    <StatusDot label={f.is_active ? 'Active' : 'Inactive'} tone={f.is_active ? 'positive' : 'neutral'} />
                                     <button onClick={() => setModalFaq(f)} className="text-xs font-bold uppercase text-primary hover:underline">Edit</button>
                                     <button onClick={() => destroy(f)} className="text-xs font-bold uppercase text-danger hover:underline">Delete</button>
                                 </div>

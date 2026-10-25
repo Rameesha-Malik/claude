@@ -3,6 +3,7 @@ import { FormEvent, useState } from 'react';
 import CloseButton from '@/Components/CloseButton';
 import LiteMarkdown from '@/Components/LiteMarkdown';
 import RichTextArea from '@/Components/RichTextArea';
+import StatusDot from '@/Components/StatusDot';
 import AdminLayout from '@/Layouts/AdminLayout';
 
 interface Review {
@@ -12,10 +13,10 @@ interface Review {
 interface CourseOption { id: number; title: string }
 interface Props { reviews: Review[]; courses: CourseOption[] }
 
-const STATUS_STYLES: Record<string, string> = {
-    pending: 'bg-warning-bg text-warning',
-    approved: 'bg-success-bg text-success',
-    hidden: 'bg-surface-sunken text-text-muted',
+const STATUS_TONE: Record<string, 'positive' | 'warning' | 'neutral'> = {
+    pending: 'warning',
+    approved: 'positive',
+    hidden: 'neutral',
 };
 
 function Stars({ rating }: { rating: number }) {
@@ -118,7 +119,7 @@ export default function ReviewsIndex({ reviews, courses }: Props) {
                             <div>
                                 <div className="flex items-center gap-2">
                                     <Stars rating={r.rating} />
-                                    <span className={`rounded-full px-2 py-0.5 text-xs font-bold uppercase ${STATUS_STYLES[r.status]}`}>{r.status}</span>
+                                    <StatusDot label={r.status} tone={STATUS_TONE[r.status] ?? 'neutral'} />
                                 </div>
                                 <p className="mt-1 text-sm font-semibold text-text">{r.course?.title ?? 'Unknown course'} · {r.user?.name ?? 'Unknown student'}</p>
                                 {r.review_text && <LiteMarkdown text={r.review_text} className="mt-2 text-sm text-text-secondary" />}

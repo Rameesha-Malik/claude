@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import LiteMarkdown from '@/Components/LiteMarkdown';
 import RevealOnScroll from '@/Components/RevealOnScroll';
 import RichTextArea from '@/Components/RichTextArea';
+import StatusDot from '@/Components/StatusDot';
 import StudentLayout from '@/Layouts/StudentLayout';
 
 interface Lesson { id: number; title: string; type: string; external_url: string | null; file_path: string | null; description: string | null; section_id: number | null }
@@ -973,19 +974,10 @@ function AssignmentCard({ assignment }: { assignment: AssignmentItem }) {
                         {assignment.due_date && ` · Due ${new Date(assignment.due_date).toLocaleDateString()}`}
                     </p>
                 </div>
-                <span
-                    className={`rounded-full px-2.5 py-0.5 text-xs font-bold uppercase ${
-                        submission?.status === 'graded'
-                            ? 'bg-success-bg text-success'
-                            : submission
-                              ? 'bg-primary-subtle text-primary'
-                              : overdue
-                                ? 'bg-danger-bg text-danger'
-                                : 'bg-warning-bg text-warning'
-                    }`}
-                >
-                    {submission?.status === 'graded' ? 'Graded' : submission ? 'Submitted' : overdue ? 'Overdue' : 'Not Submitted'}
-                </span>
+                <StatusDot
+                    label={submission?.status === 'graded' ? 'Graded' : submission ? 'Submitted' : overdue ? 'Overdue' : 'Not Submitted'}
+                    tone={submission?.status === 'graded' ? 'positive' : submission ? 'neutral' : overdue ? 'negative' : 'warning'}
+                />
             </div>
 
             {assignment.instructions && <LiteMarkdown text={assignment.instructions} className="mt-3 text-sm text-text-secondary" />}
@@ -1083,13 +1075,7 @@ function QaPanel({ course, questions }: { course: Course; questions: Question[] 
                     <div key={q.id} className="rounded-3xl border border-border bg-surface p-5 transition-shadow duration-normal hover:shadow-md">
                         <div className="flex items-center justify-between">
                             <span className="text-sm font-semibold text-text">You</span>
-                            <span
-                                className={`rounded-full px-2 py-0.5 text-xs font-bold uppercase ${
-                                    q.status === 'answered' ? 'bg-success-bg text-success' : 'bg-warning-bg text-warning'
-                                }`}
-                            >
-                                {q.status}
-                            </span>
+                            <StatusDot label={q.status} tone={q.status === 'answered' ? 'positive' : 'warning'} />
                         </div>
                         <p className="mt-1 text-sm text-text-secondary">{q.question_text}</p>
                         {q.replies.map((r) => (
