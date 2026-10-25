@@ -39,10 +39,27 @@ class PageController extends Controller
         return Inertia::render('Admin/Pages/Index', [
             'pages' => $pages->map(fn ($p) => [
                 ...$p->toArray(),
+                'public_url' => $this->publicUrl($p->slug),
                 'show_in_header' => in_array('header', $navByUrl->get("/pages/{$p->slug}", [])),
                 'show_in_footer' => in_array('footer', $navByUrl->get("/pages/{$p->slug}", [])),
             ]),
         ]);
+    }
+
+    // Privacy Policy and Terms are the exact same Page records as any
+    // other page, just also reachable at a clean top-level URL instead of
+    // /pages/{slug} (see routes/web.php + PublicSiteController::
+    // privacyPolicy/terms) -- this keeps the admin list's "View" link
+    // pointed at whichever URL is actually the one linked in the footer,
+    // instead of always showing /pages/{slug} even for the two pages that
+    // aren't really found there.
+    private function publicUrl(string $slug): string
+    {
+        return match ($slug) {
+            'privacy-policy' => '/privacy-policy',
+            'terms' => '/terms',
+            default => "/pages/{$slug}",
+        };
     }
 
     public function store(Request $request)
@@ -53,7 +70,12 @@ class PageController extends Controller
         $slug = Str::slug($data['title']);
         $original = $slug;
         $i = 1;
-        while (Page::where('slug', $slug)->exists()) {
+        // "faq" is reserved -- /faq is a separate top-level route that
+        // aggregates the Faq model (every FAQ entered anywhere in admin),
+        // not this Page's content, so a Page literally slugged "faq"
+        // would silently never be reachable at the URL an admin would
+        // expect from how Privacy Policy/Terms work.
+        while (Page::where('slug', $slug)->exists() || $slug === 'faq') {
             $slug = "{$original}-{$i}";
             $i++;
         }

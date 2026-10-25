@@ -5,7 +5,7 @@ import RichTextArea from '@/Components/RichTextArea';
 import StatusDot from '@/Components/StatusDot';
 import AdminLayout from '@/Layouts/AdminLayout';
 
-interface PageRow { id: number; title: string; slug: string; content: string | null; is_published: boolean; show_in_header: boolean; show_in_footer: boolean }
+interface PageRow { id: number; title: string; slug: string; content: string | null; is_published: boolean; show_in_header: boolean; show_in_footer: boolean; public_url: string; updated_at: string }
 interface Props { pages: PageRow[] }
 
 function PageModal({ page, onClose }: { page: PageRow | null; onClose: () => void }) {
@@ -92,7 +92,12 @@ export default function PagesIndex({ pages }: Props) {
                     <div key={p.id} className="flex items-center justify-between rounded-2xl border border-border bg-surface p-4">
                         <div>
                             <p className="font-semibold text-text">{p.title}</p>
-                            <Link href={`/pages/${p.slug}`} target="_blank" className="text-xs text-primary hover:underline">/pages/{p.slug}</Link>
+                            {p.is_published ? (
+                                <Link href={p.public_url} target="_blank" className="text-xs text-primary hover:underline">{p.public_url}</Link>
+                            ) : (
+                                <span className="text-xs text-text-muted" title="Publish this page to make it viewable">{p.public_url} (not live yet)</span>
+                            )}
+                            <p className="mt-0.5 text-xs text-text-muted">Updated {new Date(p.updated_at).toLocaleDateString()}</p>
                         </div>
                         <div className="flex items-center gap-3">
                             {p.show_in_header && <span className="rounded-full bg-primary-subtle px-2 py-0.5 text-xs font-bold text-primary">In Header</span>}
