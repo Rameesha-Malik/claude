@@ -6,6 +6,7 @@ import DonutChart from '@/Components/DonutChart';
 import Icon from '@/Components/Icon';
 import RevealOnScroll from '@/Components/RevealOnScroll';
 import RingStat from '@/Components/RingStat';
+import StatusDot from '@/Components/StatusDot';
 import AdminLayout from '@/Layouts/AdminLayout';
 
 interface Stats {
@@ -210,7 +211,7 @@ export default function Dashboard({
                                     <tr key={e.id}>
                                         <td className="py-2.5 text-text">{e.user?.name}</td>
                                         <td className="py-2.5 text-text-secondary">{e.course?.title}</td>
-                                        <td className="py-2.5"><StatusDot status={e.status} /></td>
+                                        <td className="py-2.5"><StatusDot label={e.status} tone={e.status === 'active' ? 'positive' : e.status === 'pending' ? 'warning' : e.status === 'suspended' ? 'negative' : 'neutral'} /></td>
                                     </tr>
                                 ))}
                             </tbody>
@@ -274,7 +275,7 @@ export default function Dashboard({
                                     <td className="py-2.5 text-text">{p.enrollment?.user?.name}</td>
                                     <td className="py-2.5 text-text-secondary capitalize">{p.method.replace('_', ' ')}</td>
                                     <td className="py-2.5 font-semibold text-text">Rs. {Number(p.amount).toLocaleString()}</td>
-                                    <td className="py-2.5"><StatusDot status={p.status} /></td>
+                                    <td className="py-2.5"><StatusDot label={p.status} tone={p.status === 'verified' ? 'positive' : p.status === 'pending' ? 'warning' : p.status === 'rejected' ? 'negative' : 'neutral'} /></td>
                                 </tr>
                             ))}
                         </tbody>
@@ -290,19 +291,6 @@ export default function Dashboard({
  * -- client feedback was that the pill badges read as generic/AI-generated.
  * Only the states that genuinely need attention (pending, rejected) get a
  * colored, semibold treatment; routine states stay muted. */
-function StatusDot({ status }: { status: string }) {
-    const needsAttention = ['pending', 'rejected', 'suspended'].includes(status);
-    const isNegative = ['rejected', 'suspended'].includes(status);
-    const dotColor = isNegative ? 'var(--color-danger)' : needsAttention ? 'var(--color-warning)' : 'var(--color-success)';
-    const textClass = needsAttention ? (isNegative ? 'font-semibold text-danger' : 'font-semibold text-warning') : 'text-text-secondary';
-    return (
-        <span className={`inline-flex items-center gap-1.5 text-sm capitalize ${textClass}`}>
-            <span className="h-1.5 w-1.5 rounded-full" style={{ background: dotColor }} />
-            {status}
-        </span>
-    );
-}
-
 function RingTile({ label, percentage, valueLabel, color, sub }: { label: string; percentage: number; valueLabel: string; color: string; sub: string }) {
     return (
         <div className="flex items-center gap-4 rounded-3xl border border-border bg-surface p-5">
