@@ -1,4 +1,4 @@
-import { Head } from '@inertiajs/react';
+import { Head, Link } from '@inertiajs/react';
 import { ReactNode } from 'react';
 import AnimatedCounter from '@/Components/AnimatedCounter';
 import BarChart from '@/Components/BarChart';
@@ -32,11 +32,18 @@ interface Props {
     recentEnrollments: Enrollment[];
     recentPayments: Payment[];
     popularCourses: { title: string; enrollments: number }[];
+    reportedQuestionsCount: number;
+    unansweredQACount: number;
+    pendingReviewsCount: number;
 }
 
 const ICONS = {
     students: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253',
     clock: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',
+    warningTriangle: 'M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z',
+    star: 'M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z',
+    cash: 'M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z',
+    chatBubble: 'M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z',
 };
 
 const METHOD_LABELS: Record<string, string> = {
@@ -74,6 +81,9 @@ export default function Dashboard({
     recentEnrollments,
     recentPayments,
     popularCourses,
+    reportedQuestionsCount,
+    unansweredQACount,
+    pendingReviewsCount,
 }: Props) {
     const activePercent = stats.total_students > 0 ? Math.round((stats.active_students / stats.total_students) * 100) : 0;
 
@@ -92,6 +102,37 @@ export default function Dashboard({
                 </div>
                 <div className="absolute right-0 top-0 h-full w-64 opacity-20" style={{ background: 'radial-gradient(circle at 70% 30%, var(--color-accent), transparent 60%)' }} />
             </div>
+
+            <RevealOnScroll staggerMs={60} className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <QuickAccessCard
+                    href="/admin/payments"
+                    icon={<Icon d={ICONS.cash} />}
+                    title="Pending Payments"
+                    subtitle={stats.pending_payments > 0 ? `${stats.pending_payments} pending` : 'All verified'}
+                    isAttention={stats.pending_payments > 0}
+                />
+                <QuickAccessCard
+                    href="/admin/reported-questions"
+                    icon={<Icon d={ICONS.warningTriangle} />}
+                    title="Reported Questions"
+                    subtitle={reportedQuestionsCount > 0 ? `${reportedQuestionsCount} pending` : 'Nothing reported'}
+                    isAttention={reportedQuestionsCount > 0}
+                />
+                <QuickAccessCard
+                    href="/admin/qa"
+                    icon={<Icon d={ICONS.chatBubble} />}
+                    title="Student Q&A"
+                    subtitle={unansweredQACount > 0 ? `${unansweredQACount} unanswered` : 'All answered'}
+                    isAttention={unansweredQACount > 0}
+                />
+                <QuickAccessCard
+                    href="/admin/reviews"
+                    icon={<Icon d={ICONS.star} />}
+                    title="Pending Reviews"
+                    subtitle={pendingReviewsCount > 0 ? `${pendingReviewsCount} pending` : 'Nothing pending'}
+                    isAttention={pendingReviewsCount > 0}
+                />
+            </RevealOnScroll>
 
             <RevealOnScroll staggerMs={60} className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
                 <RingTile
@@ -284,6 +325,25 @@ export default function Dashboard({
                 )}
             </div>
         </AdminLayout>
+    );
+}
+
+/** Clickable shortcut to a page that needs admin attention. Plain icon
+ * (no colored circle) to stay consistent with Stat below; the accent
+ * color itself carries the "needs attention" signal instead. */
+function QuickAccessCard({ href, icon, title, subtitle, isAttention }: { href: string; icon: ReactNode; title: string; subtitle: string; isAttention: boolean }) {
+    const accentColor = isAttention ? 'var(--color-warning)' : 'var(--color-text-muted)';
+    return (
+        <Link href={href} className="group rounded-3xl border border-border bg-surface p-5 transition-colors duration-fast hover:border-primary">
+            <div className="flex items-center justify-between">
+                <span className="flex h-5 w-5 flex-shrink-0" style={{ color: accentColor }}>{icon}</span>
+                <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5 text-text-muted transition-transform duration-fast group-hover:translate-x-0.5">
+                    <path d="M11.3 3.3a1 1 0 011.4 0l5 5a1 1 0 010 1.4l-5 5a1 1 0 11-1.4-1.4L14.6 10H4a1 1 0 010-2h10.6l-3.3-3.3a1 1 0 010-1.4z" />
+                </svg>
+            </div>
+            <div className="mt-3 text-sm font-semibold text-text">{title}</div>
+            <div className="text-xs text-text-muted">{subtitle}</div>
+        </Link>
     );
 }
 

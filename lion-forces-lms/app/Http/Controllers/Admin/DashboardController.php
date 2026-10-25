@@ -4,9 +4,12 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Course;
+use App\Models\CourseQuestion;
+use App\Models\CourseReview;
 use App\Models\Enrollment;
 use App\Models\Payment;
 use App\Models\QuestionBank;
+use App\Models\QuestionReport;
 use App\Models\TestAttempt;
 use App\Models\TestAttemptAnswer;
 use App\Models\User;
@@ -76,6 +79,9 @@ class DashboardController extends Controller
             'mostMissedQuestions' => $mostMissed,
             'enrollmentTrend' => $enrollmentTrend,
             'revenueBreakdown' => $revenueBreakdown,
+            'reportedQuestionsCount' => QuestionReport::where('status', 'pending')->count(),
+            'unansweredQACount' => CourseQuestion::where('status', 'unanswered')->count(),
+            'pendingReviewsCount' => CourseReview::where('status', 'pending')->count(),
             'admins' => User::where('user_type', 'admin')->orderBy('name')->limit(6)->get(['id', 'name']),
             'adminsCount' => User::where('user_type', 'admin')->count(),
             'stats' => [
