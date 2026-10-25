@@ -52,7 +52,6 @@ class SettingsController extends Controller
                 'header_logo_path' => Setting::get('header_logo_path'),
                 'footer_logo_path' => Setting::get('footer_logo_path'),
                 'favicon_path' => Setting::get('favicon_path'),
-                'email_logo_path' => Setting::get('email_logo_path'),
                 'robots_txt' => Setting::get('robots_txt'),
                 'llms_txt' => Setting::get('llms_txt'),
                 'meta_title' => Setting::get('meta_title'),
@@ -190,14 +189,17 @@ class SettingsController extends Controller
         return back()->with('success', 'General settings updated.');
     }
 
-    // One endpoint for all 4 logo slots (header/footer/favicon/email) --
+    // One endpoint for all logo slots (header/footer/favicon/OG image) --
     // WebsiteController::updateLogo already does this exact upload/replace
     // dance for the single generic site logo; `slot` just picks which
     // Setting key this upload writes to instead of duplicating the method
-    // 4 times.
+    // per slot. header_logo/footer_logo are actually rendered now (see
+    // SiteLogo.tsx); there's no "email logo" slot because nothing in this
+    // app sends branded HTML email -- the only outgoing mail is the raw
+    // test-email button and Laravel's stock password-reset notification.
     public function updateBrandImage(Request $request, string $slot)
     {
-        $slots = ['header_logo', 'footer_logo', 'favicon', 'email_logo', 'og_image'];
+        $slots = ['header_logo', 'footer_logo', 'favicon', 'og_image'];
         abort_unless(in_array($slot, $slots, true), 404);
 
         $request->validate(['image' => 'required|image|max:2048']);

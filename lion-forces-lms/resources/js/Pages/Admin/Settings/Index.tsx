@@ -219,16 +219,16 @@ function GeneralTab({ general }: { general: Props['general'] }) {
                 </form>
             </Card>
 
-            <Card title="Logos & branding">
+            <Card title="Logos & branding" description="The site-wide logo is set under Website Management -- these two optionally override it for just the header or just the footer, if you want a different mark in each spot.">
                 <div className="grid gap-4 sm:grid-cols-2">
                     {[
-                        { slot: 'header_logo', label: 'Header logo', path: general.header_logo_path },
-                        { slot: 'footer_logo', label: 'Footer logo', path: general.footer_logo_path },
-                        { slot: 'favicon', label: 'Favicon', path: general.favicon_path },
-                        { slot: 'email_logo', label: 'Email logo', path: general.email_logo_path },
+                        { slot: 'header_logo', label: 'Header logo', path: general.header_logo_path, hint: 'Overrides the site logo in the header and both dashboards. Leave empty to use the site logo.' },
+                        { slot: 'footer_logo', label: 'Footer logo', path: general.footer_logo_path, hint: 'Overrides the site logo in the public footer. Leave empty to use the site logo.' },
+                        { slot: 'favicon', label: 'Favicon', path: general.favicon_path, hint: 'Browser tab icon.' },
                     ].map((f) => (
                         <div key={f.slot}>
                             <label className="mb-1 block text-sm font-medium text-text">{f.label}</label>
+                            <p className="mb-1 text-xs text-text-muted">{f.hint}</p>
                             {f.path && <p className="mb-1 truncate text-xs text-text-muted">Current: /storage/{f.path}</p>}
                             <input type="file" accept="image/*" onChange={(e) => uploadSlot(f.slot, e.target.files?.[0] ?? null)} className="w-full text-sm" />
                         </div>

@@ -55,6 +55,10 @@ class HandleInertiaRequests extends Middleware
                 'whatsappEnabled' => Setting::get('whatsapp_enabled', false),
                 'copyrightText' => Setting::get('copyright_text'),
                 'logoPath' => Setting::get('site_logo_path'),
+                // Both fall back to the generic site logo above when unset --
+                // most sites only ever set one logo and expect it everywhere.
+                'headerLogoPath' => Setting::get('header_logo_path') ?: Setting::get('site_logo_path'),
+                'footerLogoPath' => Setting::get('footer_logo_path') ?: Setting::get('site_logo_path'),
                 'social' => [
                     'facebook' => Setting::get('social_facebook'),
                     'instagram' => Setting::get('social_instagram'),

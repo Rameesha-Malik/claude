@@ -28,6 +28,8 @@ export interface SiteSettings {
     whatsappEnabled: boolean;
     copyrightText: string | null;
     logoPath: string | null;
+    headerLogoPath: string | null;
+    footerLogoPath: string | null;
     social: {
         facebook: string | null;
         instagram: string | null;

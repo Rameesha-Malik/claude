@@ -473,12 +473,24 @@ function FaqsPanel({ items }: { items: Faq[] }) {
                     <h3 className="mb-2 text-xs font-bold uppercase tracking-wide text-text-muted">{page.replace('_', ' ')}</h3>
                     <div className="space-y-2">
                         {faqs.map((faq) => (
-                            <EditableRow key={faq.id} onDelete={() => router.delete(`/admin/website/faqs/${faq.id}`)}>
+                            <EditableRow
+                                key={faq.id}
+                                onDelete={() => router.delete(`/admin/website/faqs/${faq.id}`)}
+                                extraAction={
+                                    <button
+                                        onClick={() => router.put(`/admin/website/faqs/${faq.id}`, { page: faq.page, question: faq.question, answer: faq.answer, is_active: !faq.is_active }, { preserveScroll: true })}
+                                        className="whitespace-nowrap text-xs font-bold uppercase text-primary hover:underline"
+                                    >
+                                        {faq.is_active ? 'Hide' : 'Show'}
+                                    </button>
+                                }
+                            >
                                 <InlineEditFields
                                     initial={{ page: faq.page, question: faq.question, answer: faq.answer }}
                                     onSave={(data) => router.put(`/admin/website/faqs/${faq.id}`, data)}
                                     fields={[{ key: 'question', placeholder: 'Question' }, { key: 'answer', placeholder: 'Answer', richText: true }]}
                                 />
+                                {!faq.is_active && <p className="mt-1 text-xs text-text-muted">Hidden from the public site.</p>}
                             </EditableRow>
                         ))}
                     </div>
@@ -537,10 +549,11 @@ function TestimonialsPanel({ items }: { items: Testimonial[] }) {
     );
 }
 
-function EditableRow({ children, onDelete }: { children: React.ReactNode; onDelete: () => void }) {
+function EditableRow({ children, onDelete, extraAction }: { children: React.ReactNode; onDelete: () => void; extraAction?: React.ReactNode }) {
     return (
         <div className="flex items-center gap-2 rounded-lg border border-border p-2">
             <div className="flex-1">{children}</div>
+            {extraAction}
             <button onClick={onDelete} className={btnDangerClass}>Delete</button>
         </div>
     );
