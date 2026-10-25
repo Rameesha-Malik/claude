@@ -78,6 +78,14 @@ class PublicSiteController extends Controller
 
     public function courseDetail(Course $course): Response
     {
+        // Listing queries (courses() above, home()) already filter to
+        // published -- this is the direct-link path, which route-model
+        // binding alone doesn't guard. Without this, a draft/hidden
+        // course's full page (and from there, checkout) was reachable by
+        // anyone who had the URL, same gap Page::where('is_published',
+        // true) already guards against for CMS pages.
+        abort_unless($course->status === 'published', 404);
+
         $course->load([
             'category', 'instructor',
             'packages' => fn ($q) => $q->where('is_active', true),

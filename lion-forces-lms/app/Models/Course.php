@@ -134,9 +134,4 @@ class Course extends Model
     {
         return $this->hasMany(HallOfFame::class);
     }
-
-    public function isPublished(): bool
-    {
-        return $this->status === 'published';
-    }
 }

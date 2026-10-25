@@ -20,6 +20,11 @@ class CheckoutController extends Controller
 {
     public function create(Request $request, Course $course): Response
     {
+        // Same guard as PublicSiteController::courseDetail() -- a
+        // draft/hidden course's page shouldn't be viewable, let alone
+        // checked out of, before it's published.
+        abort_unless($course->status === 'published', 404);
+
         // A 'full' enrollment already covers everything a student could
         // buy for this course, so it still blocks the whole checkout page.
         // A 'quiz'-or'tests'-only enrollment only blocks buying that same
@@ -64,6 +69,8 @@ class CheckoutController extends Controller
 
     public function store(Request $request, Course $course)
     {
+        abort_unless($course->status === 'published', 404);
+
         $data = $request->validate([
             'package_id' => 'nullable|exists:course_packages,id',
             'method' => 'required|in:bank_transfer,easypaisa,jazzcash',

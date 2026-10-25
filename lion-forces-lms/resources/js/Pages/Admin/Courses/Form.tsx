@@ -6,7 +6,9 @@ import AdminLayout from '@/Layouts/AdminLayout';
 
 interface Category { id: number; name: string }
 interface Instructor { id: number; name: string }
-interface Package { id: number; name: string; description: string | null; price: string; validity_days: number | null }
+type Module = 'full' | 'quiz' | 'tests';
+const MODULE_LABELS: Record<Module, string> = { full: 'Full Course', quiz: 'Quiz Only', tests: 'Tests Only' };
+interface Package { id: number; name: string; module: Module; description: string | null; price: string; validity_days: number | null }
 interface Lesson { id: number; title: string; type: string; is_free_preview: boolean; section_id: number | null }
 interface Section { id: number; title: string; description: string | null; lessons: Lesson[] }
 interface Tag { id: number; name: string }
@@ -42,8 +44,11 @@ export default function CourseForm({ course, categories, instructors }: Props) {
         short_description: course?.short_description ?? '',
         description: course?.description ?? '',
         syllabus: course?.syllabus ?? '',
+        level: course?.level ?? '',
         hours: course?.hours ?? '',
         base_price: course?.base_price ?? '',
+        target_exam_name: course?.target_exam_name ?? '',
+        target_exam_date: course?.target_exam_date ? course.target_exam_date.slice(0, 10) : '',
         status: course?.status ?? 'draft',
         // Default ON for a brand-new course (not the courses.* column's
         // own false default) -- the previous off-by-default caused
@@ -94,7 +99,7 @@ export default function CourseForm({ course, categories, instructors }: Props) {
                 {form.errors.thumbnail && <div className="mt-1 text-sm text-danger">{form.errors.thumbnail}</div>}
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid gap-4 sm:grid-cols-3">
                 <div>
                     <label className={labelClass}>Category</label>
                     <select className={inputClass} value={form.data.category_id} onChange={(e) => form.setData('category_id', Number(e.target.value))}>
@@ -106,6 +111,15 @@ export default function CourseForm({ course, categories, instructors }: Props) {
                     <select className={inputClass} value={form.data.instructor_id} onChange={(e) => form.setData('instructor_id', e.target.value)}>
                         <option value="">None</option>
                         {instructors.map((i) => <option key={i.id} value={i.id}>{i.name}</option>)}
+                    </select>
+                </div>
+                <div>
+                    <label className={labelClass}>Level</label>
+                    <select className={inputClass} value={form.data.level} onChange={(e) => form.setData('level', e.target.value)}>
+                        <option value="">Not set</option>
+                        <option value="Beginner">Beginner</option>
+                        <option value="Intermediate">Intermediate</option>
+                        <option value="Advanced">Advanced</option>
                     </select>
                 </div>
             </div>
@@ -133,6 +147,26 @@ export default function CourseForm({ course, categories, instructors }: Props) {
                     <input type="number" className={inputClass} value={form.data.base_price} onChange={(e) => form.setData('base_price', e.target.value)} />
                 </div>
             </div>
+
+            <div className="grid grid-cols-2 gap-4">
+                <div>
+                    <label className={labelClass}>Target Exam Name</label>
+                    <input
+                        className={inputClass}
+                        placeholder="e.g. PMA Long Course 145"
+                        value={form.data.target_exam_name}
+                        onChange={(e) => form.setData('target_exam_name', e.target.value)}
+                    />
+                </div>
+                <div>
+                    <label className={labelClass}>Target Exam Date</label>
+                    <input type="date" className={inputClass} value={form.data.target_exam_date} onChange={(e) => form.setData('target_exam_date', e.target.value)} />
+                </div>
+            </div>
+            <p className="-mt-2 text-xs text-text-muted">
+                Powers the countdown shown on an enrolled student's dashboard (e.g. "45 days left"), unless the
+                student has set their own exam date.
+            </p>
 
             <div>
                 <label className={labelClass}>Tags</label>
@@ -269,17 +303,23 @@ export default function CourseForm({ course, categories, instructors }: Props) {
 }
 
 function PackagesPanel({ course }: { course: Course }) {
-    const addForm = useForm({ name: '', price: '', validity_days: '' });
+    const addForm = useForm({ name: '', module: 'full' as Module, price: '', validity_days: '' });
 
     return (
         <div className="rounded-2xl border border-border bg-surface p-5">
             <h3 className="mb-3 font-bold text-text">Packages</h3>
+            <p className="mb-4 text-sm text-text-secondary">
+                For more fields (description, active/inactive), use the full{' '}
+                <Link href="/admin/courses/packages" className="font-semibold text-primary hover:underline">Packages</Link> page instead.
+            </p>
             <div className="mb-4 space-y-2">
                 {course.packages.map((pkg) => (
                     <div key={pkg.id} className="flex items-center justify-between rounded-lg border border-border p-3 text-sm">
                         <div>
                             <div className="font-semibold text-text">{pkg.name}</div>
-                            <div className="text-text-secondary">Rs. {Number(pkg.price).toLocaleString()} · {pkg.validity_days ? `${pkg.validity_days}d` : 'Lifetime'}</div>
+                            <div className="text-text-secondary">
+                                {MODULE_LABELS[pkg.module]} · Rs. {Number(pkg.price).toLocaleString()} · {pkg.validity_days ? `${pkg.validity_days}d` : 'Lifetime'}
+                            </div>
                         </div>
                         <button onClick={() => router.delete(`/admin/courses/packages/${pkg.id}`)} className="text-xs font-bold uppercase text-danger hover:underline">Delete</button>
                     </div>
@@ -291,6 +331,9 @@ function PackagesPanel({ course }: { course: Course }) {
                 className="space-y-2"
             >
                 <input className={inputClass} placeholder="Package Name" value={addForm.data.name} onChange={(e) => addForm.setData('name', e.target.value)} />
+                <select className={inputClass} value={addForm.data.module} onChange={(e) => addForm.setData('module', e.target.value as Module)}>
+                    {(Object.keys(MODULE_LABELS) as Module[]).map((m) => <option key={m} value={m}>{MODULE_LABELS[m]}</option>)}
+                </select>
                 <div className="flex gap-2">
                     <input type="number" className={inputClass} placeholder="Price" value={addForm.data.price} onChange={(e) => addForm.setData('price', e.target.value)} />
                     <input type="number" className={inputClass} placeholder="Validity (days)" value={addForm.data.validity_days} onChange={(e) => addForm.setData('validity_days', e.target.value)} />

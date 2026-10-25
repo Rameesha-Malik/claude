@@ -60,6 +60,45 @@ class CourseController extends Controller
         return back()->with('success', $course->status === 'published' ? 'Course activated.' : 'Course deactivated.');
     }
 
+    // Swaps this course's `order` with whichever course sits immediately
+    // before/after it (site-wide, by order then id as a tiebreak -- every
+    // course defaults to order=0, so id is what makes the ordering
+    // well-defined until an admin actually starts reordering). Lets an
+    // admin curate the order courses appear in on the public Courses page
+    // and homepage, which previously had no control at all.
+    public function move(Request $request, Course $course)
+    {
+        abort_unless($request->user()->canManageCourse($course), 403);
+
+        $direction = $request->validate(['direction' => 'required|in:up,down'])['direction'];
+
+        // Scoped to courses this user can see at all (same as index()) --
+        // otherwise a content manager could nudge the order of a course
+        // outside their assigned set just by being adjacent to it.
+        $isContentManager = $request->user()->hasRole('content_manager');
+        $neighborQuery = Course::query()->when($isContentManager, fn ($q) => $q->whereIn('id', $request->user()->managedCourses()->pluck('courses.id')));
+
+        // Grouped in a single where(closure) so this ANDs with the
+        // content-manager scope above instead of orWhere-ing past it.
+        $neighbor = $direction === 'up'
+            ? (clone $neighborQuery)
+                ->where(fn ($q) => $q->where('order', '<', $course->order)
+                    ->orWhere(fn ($q2) => $q2->where('order', $course->order)->where('id', '<', $course->id)))
+                ->orderByDesc('order')->orderByDesc('id')->first()
+            : (clone $neighborQuery)
+                ->where(fn ($q) => $q->where('order', '>', $course->order)
+                    ->orWhere(fn ($q2) => $q2->where('order', $course->order)->where('id', '>', $course->id)))
+                ->orderBy('order')->orderBy('id')->first();
+
+        if ($neighbor) {
+            [$course->order, $neighbor->order] = [$neighbor->order, $course->order];
+            $course->save();
+            $neighbor->save();
+        }
+
+        return back();
+    }
+
     public function create(Request $request): Response
     {
         // Creating (and, below, deleting) a whole course -- including its
@@ -155,6 +194,18 @@ class CourseController extends Controller
     {
         abort_if($request->user()->hasRole('content_manager'), 403);
 
+        // Enrollments (and their payments) cascade-delete with the course
+        // -- fine for a course nobody ever bought into, but silently
+        // wiping paying students' history is a different kind of mistake
+        // than deleting an empty course, so block it instead of just
+        // warning in the confirm() dialog.
+        $activeCount = $course->enrollments()->where('status', 'active')->count();
+        if ($activeCount > 0) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'course' => "Can't delete \"{$course->title}\" -- it has {$activeCount} active student".($activeCount === 1 ? '' : 's').' enrolled. Deactivate or transfer them first.',
+            ]);
+        }
+
         $course->delete();
 
         return redirect()->route('admin.courses.index')->with('success', 'Course removed.');
@@ -169,8 +220,11 @@ class CourseController extends Controller
             'short_description' => 'nullable|string|max:500',
             'description' => 'nullable|string',
             'syllabus' => 'nullable|string',
+            'level' => 'nullable|in:Beginner,Intermediate,Advanced',
             'hours' => 'nullable|integer|min:0',
             'base_price' => 'nullable|numeric|min:0',
+            'target_exam_name' => 'nullable|string|max:150',
+            'target_exam_date' => 'nullable|date',
             'status' => 'required|in:draft,published,hidden',
             'quizzes_enabled' => 'boolean',
             'flashcards_enabled' => 'boolean',

@@ -39,9 +39,23 @@ export default function CoursesIndex({ courses, filters, stats }: Props) {
         router.post(`/admin/courses/${c.id}/toggle-status`, {}, { preserveScroll: true });
     }
 
+    // Site-wide reorder (see CourseController::move) -- works from any
+    // filtered/paginated view of the list, but moving a course past the
+    // edge of what's currently on screen won't visibly change this page
+    // until it's reloaded with different filters/page.
+    function moveCourse(c: Course, direction: 'up' | 'down') {
+        router.post(`/admin/courses/${c.id}/move`, { direction }, { preserveScroll: true });
+    }
+
     function destroyCourse(c: Course) {
-        if (confirm(`Delete "${c.title}" permanently? This removes its topics, lectures, packages and enrollments.`)) {
-            router.delete(`/admin/courses/${c.id}`, { preserveScroll: true });
+        if (confirm(`Delete "${c.title}" permanently? This removes its topics, lectures, packages, enrollments and payment records.`)) {
+            router.delete(`/admin/courses/${c.id}`, {
+                preserveScroll: true,
+                onError: (errors) => {
+                    const message = Object.values(errors)[0];
+                    if (message) alert(message);
+                },
+            });
         }
     }
 
@@ -158,6 +172,12 @@ export default function CoursesIndex({ courses, filters, stats }: Props) {
 
                             <div className="flex items-center justify-between border-t border-border px-4 py-3">
                                 <div className="flex items-center gap-1">
+                                    <ActionIcon title="Move up (show earlier on the site)" onClick={() => moveCourse(c, 'up')}>
+                                        <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M5 15l7-7 7 7" /></svg>
+                                    </ActionIcon>
+                                    <ActionIcon title="Move down (show later on the site)" onClick={() => moveCourse(c, 'down')}>
+                                        <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" /></svg>
+                                    </ActionIcon>
                                     <ActionIcon title="Edit" href={`/admin/courses/${c.id}/edit`}>
                                         <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.5-9.5a2.121 2.121 0 013 3L12 16l-4 1 1-4 9.5-9.5z" /></svg>
                                     </ActionIcon>
