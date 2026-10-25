@@ -57,6 +57,53 @@ function Field({ label, hint, children }: { label: string; hint?: string; childr
     );
 }
 
+// Shows a preview box (current upload, or the just-picked file before it's
+// even saved) next to each logo slot -- the whole point of having separate
+// header/footer/favicon/email slots is to check a logo actually looks right
+// in each spot rather than being stretched or cropped oddly, so seeing it
+// matters more here than a plain file input does elsewhere in this file.
+function LogoSlotField({
+    slot,
+    label,
+    path,
+    hint,
+    onUpload,
+    square = false,
+}: {
+    slot: string;
+    label: string;
+    path: string | null;
+    hint: string;
+    onUpload: (slot: string, file: File | null) => void;
+    square?: boolean;
+}) {
+    const [preview, setPreview] = useState<string | null>(null);
+
+    function pickFile(e: React.ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0] ?? null;
+        setPreview(file ? URL.createObjectURL(file) : null);
+        onUpload(slot, file);
+    }
+
+    return (
+        <div className="flex gap-3">
+            <div className={`flex flex-shrink-0 items-center justify-center overflow-hidden rounded-xl border border-dashed border-border bg-surface-sunken ${square ? 'h-14 w-14' : 'h-14 w-24'}`}>
+                {preview || path ? (
+                    // eslint-disable-next-line jsx-a11y/alt-text
+                    <img src={preview ?? `/storage/${path}`} className="h-full w-full object-contain p-1" />
+                ) : (
+                    <span className="text-xs text-text-muted">None</span>
+                )}
+            </div>
+            <div className="min-w-0 flex-1">
+                <label className="mb-1 block text-sm font-medium text-text">{label}</label>
+                <p className="mb-1 text-xs text-text-muted">{hint}</p>
+                <input type="file" accept="image/*" onChange={pickFile} className="w-full text-sm" />
+            </div>
+        </div>
+    );
+}
+
 function Toggle({ checked, onChange, label, hint }: { checked: boolean; onChange: (v: boolean) => void; label: string; hint?: string }) {
     return (
         <label className="flex items-start gap-3 rounded-xl border border-border p-3">
@@ -219,25 +266,16 @@ function GeneralTab({ general }: { general: Props['general'] }) {
                 </form>
             </Card>
 
-            <Card title="Logos & branding" description="The site-wide logo is set under Website Management -- these two optionally override it for just the header or just the footer, if you want a different mark in each spot.">
+            <Card
+                title="Logos & branding"
+                description="The site-wide logo (Website Management) is used everywhere by default. Set any of these only if one logo doesn't look right in every spot -- a wide logo cropped into a tiny favicon, for example."
+            >
                 <div className="grid gap-4 sm:grid-cols-2">
-                    {[
-                        { slot: 'header_logo', label: 'Header logo', path: general.header_logo_path, hint: 'Overrides the site logo in the header and both dashboards. Leave empty to use the site logo.' },
-                        { slot: 'footer_logo', label: 'Footer logo', path: general.footer_logo_path, hint: 'Overrides the site logo in the public footer. Leave empty to use the site logo.' },
-                        { slot: 'favicon', label: 'Favicon', path: general.favicon_path, hint: 'Browser tab icon.' },
-                    ].map((f) => (
-                        <div key={f.slot}>
-                            <label className="mb-1 block text-sm font-medium text-text">{f.label}</label>
-                            <p className="mb-1 text-xs text-text-muted">{f.hint}</p>
-                            {f.path && <p className="mb-1 truncate text-xs text-text-muted">Current: /storage/{f.path}</p>}
-                            <input type="file" accept="image/*" onChange={(e) => uploadSlot(f.slot, e.target.files?.[0] ?? null)} className="w-full text-sm" />
-                        </div>
-                    ))}
-                    <div>
-                        <label className="mb-1 block text-sm font-medium text-text">Open Graph image</label>
-                        {general.og_image_path && <p className="mb-1 truncate text-xs text-text-muted">Current: /storage/{general.og_image_path}</p>}
-                        <input type="file" accept="image/*" onChange={(e) => uploadSlot('og_image', e.target.files?.[0] ?? null)} className="w-full text-sm" />
-                    </div>
+                    <LogoSlotField slot="header_logo" label="Header logo" path={general.header_logo_path} hint="Site header + both dashboards. Leave empty to use the site logo." onUpload={uploadSlot} />
+                    <LogoSlotField slot="footer_logo" label="Footer logo" path={general.footer_logo_path} hint="Public site footer. Leave empty to use the site logo." onUpload={uploadSlot} />
+                    <LogoSlotField slot="favicon" label="Favicon" path={general.favicon_path} hint="Browser tab icon -- needs to read clearly very small, so usually a simplified mark rather than the full logo." onUpload={uploadSlot} square />
+                    <LogoSlotField slot="email_logo" label="Email logo" path={general.email_logo_path} hint="Shown at the top of every email the system sends (password reset, test email). Leave empty to use the site logo." onUpload={uploadSlot} />
+                    <LogoSlotField slot="og_image" label="Open Graph image" path={general.og_image_path} hint="Preview image when a page is shared on social media or WhatsApp. Works best as a wide image, not a logo mark." onUpload={uploadSlot} />
                 </div>
             </Card>
         </div>
