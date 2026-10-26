@@ -13,29 +13,40 @@ use Inertia\Response;
 
 class PracticeTestController extends Controller
 {
-    public function index(Course $course): Response
+    public function index(Request $request, Course $course): Response
     {
+        abort_unless($request->user()->canManageCourse($course), 403);
+
         return Inertia::render('Admin/PracticeTests/Index', [
             'course' => $course->only('id', 'title'),
             'tests' => $course->practiceTests()->withCount('questions')->get(),
         ]);
     }
 
-    public function adminIndex(): Response
+    public function adminIndex(Request $request): Response
     {
+        $isContentManager = $request->user()->hasRole('content_manager');
+        $managedCourseIds = $isContentManager ? $request->user()->managedCourses()->pluck('courses.id') : null;
+
         return Inertia::render('Admin/PracticeTests/AllIndex', [
-            'tests' => PracticeTest::with('course:id,title')->withCount('questions')->orderByDesc('id')->get(),
-            'courses' => Course::orderBy('title')->get(['id', 'title']),
+            'tests' => PracticeTest::with('course:id,title')->withCount('questions')
+                ->when($isContentManager, fn ($q) => $q->whereIn('course_id', $managedCourseIds))
+                ->orderByDesc('id')->get(),
+            'courses' => Course::orderBy('title')->when($isContentManager, fn ($q) => $q->whereIn('id', $managedCourseIds))->get(['id', 'title']),
         ]);
     }
 
-    public function create(Course $course): Response
+    public function create(Request $request, Course $course): Response
     {
+        abort_unless($request->user()->canManageCourse($course), 403);
+
         return $this->form($course);
     }
 
-    public function edit(Course $course, PracticeTest $practiceTest): Response
+    public function edit(Request $request, Course $course, PracticeTest $practiceTest): Response
     {
+        abort_unless($request->user()->canManageCourse($course), 403);
+
         $practiceTest->load('questions.options');
 
         return $this->form($course, $practiceTest);
@@ -57,6 +68,8 @@ class PracticeTestController extends Controller
 
     public function store(Request $request, Course $course)
     {
+        abort_unless($request->user()->canManageCourse($course), 403);
+
         $data = $this->validated($request);
         $questionIds = $data['question_ids'] ?? [];
         unset($data['question_ids']);
@@ -69,6 +82,8 @@ class PracticeTestController extends Controller
 
     public function update(Request $request, Course $course, PracticeTest $practiceTest)
     {
+        abort_unless($request->user()->canManageCourse($course), 403);
+
         $data = $this->validated($request);
         $questionIds = $data['question_ids'] ?? [];
         unset($data['question_ids']);
@@ -79,8 +94,10 @@ class PracticeTestController extends Controller
         return back()->with('success', 'Practice test updated.');
     }
 
-    public function destroy(Course $course, PracticeTest $practiceTest)
+    public function destroy(Request $request, Course $course, PracticeTest $practiceTest)
     {
+        abort_unless($request->user()->canManageCourse($course), 403);
+
         $practiceTest->delete();
 
         return redirect()->route('admin.courses.practice-tests.index', $course)->with('success', 'Practice test removed.');

@@ -12,8 +12,10 @@ use Inertia\Response;
 
 class FlashcardController extends Controller
 {
-    public function index(Course $course): Response
+    public function index(Request $request, Course $course): Response
     {
+        abort_unless($request->user()->canManageCourse($course), 403);
+
         return Inertia::render('Admin/Flashcards/Index', [
             'course' => $course->only('id', 'title'),
             'flashcards' => $course->flashcards()->with('subject:id,name')->orderByDesc('created_at')->get(),
@@ -21,17 +23,24 @@ class FlashcardController extends Controller
         ]);
     }
 
-    public function adminIndex(): Response
+    public function adminIndex(Request $request): Response
     {
+        $isContentManager = $request->user()->hasRole('content_manager');
+        $managedCourseIds = $isContentManager ? $request->user()->managedCourses()->pluck('courses.id') : null;
+
         return Inertia::render('Admin/Flashcards/AllIndex', [
-            'flashcards' => Flashcard::with(['course:id,title', 'subject:id,name'])->orderByDesc('id')->get(),
-            'courses' => Course::orderBy('title')->get(['id', 'title']),
+            'flashcards' => Flashcard::with(['course:id,title', 'subject:id,name'])
+                ->when($isContentManager, fn ($q) => $q->whereIn('course_id', $managedCourseIds))
+                ->orderByDesc('id')->get(),
+            'courses' => Course::orderBy('title')->when($isContentManager, fn ($q) => $q->whereIn('id', $managedCourseIds))->get(['id', 'title']),
             'subjects' => Subject::orderBy('name')->get(['id', 'name']),
         ]);
     }
 
     public function store(Request $request, Course $course)
     {
+        abort_unless($request->user()->canManageCourse($course), 403);
+
         $data = $request->validate([
             'subject_id' => 'nullable|exists:subjects,id',
             'front_text' => 'required|string|max:1000',
@@ -54,6 +63,8 @@ class FlashcardController extends Controller
 
     public function update(Request $request, Course $course, Flashcard $flashcard)
     {
+        abort_unless($request->user()->canManageCourse($course), 403);
+
         $flashcard->update($request->validate([
             'subject_id' => 'nullable|exists:subjects,id',
             'front_text' => 'required|string|max:1000',
@@ -65,6 +76,8 @@ class FlashcardController extends Controller
 
     public function setStatus(Request $request, Course $course, Flashcard $flashcard)
     {
+        abort_unless($request->user()->canManageCourse($course), 403);
+
         $data = $request->validate(['status' => 'required|in:approved,rejected']);
 
         $flashcard->update([
@@ -76,8 +89,10 @@ class FlashcardController extends Controller
         return back()->with('success', $data['status'] === 'approved' ? 'Flashcard approved.' : 'Flashcard rejected.');
     }
 
-    public function destroy(Course $course, Flashcard $flashcard)
+    public function destroy(Request $request, Course $course, Flashcard $flashcard)
     {
+        abort_unless($request->user()->canManageCourse($course), 403);
+
         $flashcard->delete();
 
         return back()->with('success', 'Flashcard removed.');

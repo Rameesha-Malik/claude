@@ -12,8 +12,10 @@ use Inertia\Response;
 
 class AssignmentController extends Controller
 {
-    public function index(Course $course): Response
+    public function index(Request $request, Course $course): Response
     {
+        abort_unless($request->user()->canManageCourse($course), 403);
+
         return Inertia::render('Admin/Assignments/Index', [
             'course' => $course->only('id', 'title'),
             'assignments' => $course->assignments()->withCount([
@@ -24,19 +26,26 @@ class AssignmentController extends Controller
         ]);
     }
 
-    public function adminIndex(): Response
+    public function adminIndex(Request $request): Response
     {
+        $isContentManager = $request->user()->hasRole('content_manager');
+        $managedCourseIds = $isContentManager ? $request->user()->managedCourses()->pluck('courses.id') : null;
+
         return Inertia::render('Admin/Assignments/AllIndex', [
             'assignments' => Assignment::with('course:id,title')->withCount([
                 'submissions',
                 'submissions as ungraded_count' => fn ($q) => $q->where('status', 'submitted'),
-            ])->orderByDesc('id')->get(),
-            'courses' => Course::orderBy('title')->get(['id', 'title']),
+            ])
+                ->when($isContentManager, fn ($q) => $q->whereIn('course_id', $managedCourseIds))
+                ->orderByDesc('id')->get(),
+            'courses' => Course::orderBy('title')->when($isContentManager, fn ($q) => $q->whereIn('id', $managedCourseIds))->get(['id', 'title']),
         ]);
     }
 
     public function store(Request $request, Course $course)
     {
+        abort_unless($request->user()->canManageCourse($course), 403);
+
         $data = $this->validateAssignment($request);
 
         $course->assignments()->create($data + ['order' => $course->assignments()->max('order') + 1]);
@@ -46,13 +55,17 @@ class AssignmentController extends Controller
 
     public function update(Request $request, Course $course, Assignment $assignment)
     {
+        abort_unless($request->user()->canManageCourse($course), 403);
+
         $assignment->update($this->validateAssignment($request));
 
         return back()->with('success', 'Assignment updated.');
     }
 
-    public function destroy(Course $course, Assignment $assignment)
+    public function destroy(Request $request, Course $course, Assignment $assignment)
     {
+        abort_unless($request->user()->canManageCourse($course), 403);
+
         $assignment->submissions->each(function ($s) {
             if ($s->file_path) {
                 \Illuminate\Support\Facades\Storage::disk('public')->delete($s->file_path);
@@ -63,8 +76,10 @@ class AssignmentController extends Controller
         return back()->with('success', 'Assignment removed.');
     }
 
-    public function submissions(Course $course, Assignment $assignment): Response
+    public function submissions(Request $request, Course $course, Assignment $assignment): Response
     {
+        abort_unless($request->user()->canManageCourse($course), 403);
+
         return Inertia::render('Admin/Assignments/Submissions', [
             'assignment' => $assignment->only('id', 'title', 'max_marks', 'course_id'),
             'course' => $assignment->course()->first(['id', 'title']),
@@ -74,6 +89,8 @@ class AssignmentController extends Controller
 
     public function grade(Request $request, Course $course, AssignmentSubmission $submission)
     {
+        abort_unless($request->user()->canManageCourse($course), 403);
+
         $data = $request->validate([
             'marks_awarded' => 'nullable|integer|min:0|max:'.($submission->assignment->max_marks ?? 1000),
             'feedback' => 'nullable|string|max:2000',

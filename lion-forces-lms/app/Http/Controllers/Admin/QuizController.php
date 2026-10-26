@@ -14,29 +14,40 @@ use Inertia\Response;
 
 class QuizController extends Controller
 {
-    public function index(Course $course): Response
+    public function index(Request $request, Course $course): Response
     {
+        abort_unless($request->user()->canManageCourse($course), 403);
+
         return Inertia::render('Admin/Quizzes/Index', [
             'course' => $course->only('id', 'title'),
             'quizzes' => $course->quizzes()->with('section:id,title')->withCount('questions')->get(),
         ]);
     }
 
-    public function adminIndex(): Response
+    public function adminIndex(Request $request): Response
     {
+        $isContentManager = $request->user()->hasRole('content_manager');
+        $managedCourseIds = $isContentManager ? $request->user()->managedCourses()->pluck('courses.id') : null;
+
         return Inertia::render('Admin/Quizzes/AllIndex', [
-            'quizzes' => Quiz::with(['course:id,title', 'section:id,title'])->withCount('questions')->orderByDesc('id')->get(),
-            'courses' => Course::orderBy('title')->get(['id', 'title']),
+            'quizzes' => Quiz::with(['course:id,title', 'section:id,title'])->withCount('questions')
+                ->when($isContentManager, fn ($q) => $q->whereIn('course_id', $managedCourseIds))
+                ->orderByDesc('id')->get(),
+            'courses' => Course::orderBy('title')->when($isContentManager, fn ($q) => $q->whereIn('id', $managedCourseIds))->get(['id', 'title']),
         ]);
     }
 
-    public function create(Course $course): Response
+    public function create(Request $request, Course $course): Response
     {
+        abort_unless($request->user()->canManageCourse($course), 403);
+
         return $this->form($course);
     }
 
-    public function edit(Course $course, Quiz $quiz): Response
+    public function edit(Request $request, Course $course, Quiz $quiz): Response
     {
+        abort_unless($request->user()->canManageCourse($course), 403);
+
         $quiz->load('questions.options');
 
         return $this->form($course, $quiz);
@@ -64,6 +75,8 @@ class QuizController extends Controller
 
     public function store(Request $request, Course $course)
     {
+        abort_unless($request->user()->canManageCourse($course), 403);
+
         $data = $this->validated($request);
         $questionIds = $data['question_ids'] ?? [];
         unset($data['question_ids'], $data['thumbnail']);
@@ -77,6 +90,8 @@ class QuizController extends Controller
 
     public function update(Request $request, Course $course, Quiz $quiz)
     {
+        abort_unless($request->user()->canManageCourse($course), 403);
+
         $data = $this->validated($request);
         $questionIds = $data['question_ids'] ?? [];
         unset($data['question_ids'], $data['thumbnail']);
@@ -94,8 +109,10 @@ class QuizController extends Controller
         return back()->with('success', 'Quiz updated.');
     }
 
-    public function destroy(Course $course, Quiz $quiz)
+    public function destroy(Request $request, Course $course, Quiz $quiz)
     {
+        abort_unless($request->user()->canManageCourse($course), 403);
+
         $quiz->delete();
 
         return redirect()->route('admin.courses.quizzes.index', $course)->with('success', 'Quiz removed.');

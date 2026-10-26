@@ -14,29 +14,40 @@ use Inertia\Response;
 
 class MockExamController extends Controller
 {
-    public function index(Course $course): Response
+    public function index(Request $request, Course $course): Response
     {
+        abort_unless($request->user()->canManageCourse($course), 403);
+
         return Inertia::render('Admin/MockExams/Index', [
             'course' => $course->only('id', 'title'),
             'exams' => $course->mockExams()->withCount('sections')->get(),
         ]);
     }
 
-    public function adminIndex(): Response
+    public function adminIndex(Request $request): Response
     {
+        $isContentManager = $request->user()->hasRole('content_manager');
+        $managedCourseIds = $isContentManager ? $request->user()->managedCourses()->pluck('courses.id') : null;
+
         return Inertia::render('Admin/MockExams/AllIndex', [
-            'exams' => MockExam::with('course:id,title')->withCount('sections')->orderByDesc('id')->get(),
-            'courses' => Course::orderBy('title')->get(['id', 'title']),
+            'exams' => MockExam::with('course:id,title')->withCount('sections')
+                ->when($isContentManager, fn ($q) => $q->whereIn('course_id', $managedCourseIds))
+                ->orderByDesc('id')->get(),
+            'courses' => Course::orderBy('title')->when($isContentManager, fn ($q) => $q->whereIn('id', $managedCourseIds))->get(['id', 'title']),
         ]);
     }
 
-    public function create(Course $course): Response
+    public function create(Request $request, Course $course): Response
     {
+        abort_unless($request->user()->canManageCourse($course), 403);
+
         return $this->form($course);
     }
 
-    public function edit(Course $course, MockExam $mockExam): Response
+    public function edit(Request $request, Course $course, MockExam $mockExam): Response
     {
+        abort_unless($request->user()->canManageCourse($course), 403);
+
         $mockExam->load('sections.questions');
 
         return $this->form($course, $mockExam);
@@ -57,6 +68,8 @@ class MockExamController extends Controller
 
     public function store(Request $request, Course $course)
     {
+        abort_unless($request->user()->canManageCourse($course), 403);
+
         $data = $this->validated($request);
         $exam = $course->mockExams()->create($data);
 
@@ -65,13 +78,17 @@ class MockExamController extends Controller
 
     public function update(Request $request, Course $course, MockExam $mockExam)
     {
+        abort_unless($request->user()->canManageCourse($course), 403);
+
         $mockExam->update($this->validated($request));
 
         return back()->with('success', 'Mock exam updated.');
     }
 
-    public function destroy(Course $course, MockExam $mockExam)
+    public function destroy(Request $request, Course $course, MockExam $mockExam)
     {
+        abort_unless($request->user()->canManageCourse($course), 403);
+
         $mockExam->delete();
 
         return redirect()->route('admin.courses.mock-exams.index', $course)->with('success', 'Mock exam removed.');
@@ -96,6 +113,8 @@ class MockExamController extends Controller
 
     public function storeSection(Request $request, Course $course, MockExam $mockExam)
     {
+        abort_unless($request->user()->canManageCourse($course), 403);
+
         $data = $this->sectionValidated($request);
         $questionIds = $data['question_ids'] ?? [];
         unset($data['question_ids']);
@@ -109,6 +128,8 @@ class MockExamController extends Controller
 
     public function updateSection(Request $request, Course $course, MockExam $mockExam, MockExamSection $section)
     {
+        abort_unless($request->user()->canManageCourse($course), 403);
+
         $data = $this->sectionValidated($request);
         $questionIds = $data['question_ids'] ?? [];
         unset($data['question_ids']);
@@ -119,8 +140,10 @@ class MockExamController extends Controller
         return back()->with('success', 'Section updated.');
     }
 
-    public function destroySection(Course $course, MockExam $mockExam, MockExamSection $section)
+    public function destroySection(Request $request, Course $course, MockExam $mockExam, MockExamSection $section)
     {
+        abort_unless($request->user()->canManageCourse($course), 403);
+
         $section->delete();
 
         return back()->with('success', 'Section removed.');

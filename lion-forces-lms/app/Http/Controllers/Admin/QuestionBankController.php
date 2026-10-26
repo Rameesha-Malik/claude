@@ -19,9 +19,16 @@ class QuestionBankController extends Controller
 {
     public function index(Request $request): Response
     {
+        // Same scoping CourseController::index() already applies to the
+        // Courses list itself -- a content manager only ever sees/edits
+        // the question bank for courses they're assigned to.
+        $isContentManager = $request->user()->hasRole('content_manager');
+        $managedCourseIds = $isContentManager ? $request->user()->managedCourses()->pluck('courses.id') : null;
+
         return Inertia::render('Admin/QuestionBank/Index', [
             'questions' => QuestionBank::with(['subject', 'topic', 'course:id,title', 'options'])
                 ->when($request->subject_id, fn ($q, $s) => $q->where('subject_id', $s))
+                ->when($isContentManager, fn ($q) => $q->whereIn('course_id', $managedCourseIds))
                 ->latest()
                 ->paginate(10, ['*'], 'questions_page')
                 ->withQueryString(),
@@ -30,7 +37,7 @@ class QuestionBankController extends Controller
             // migration's own comment) -- Custom Quiz only shows a
             // student the subset of the bank tagged to the course whose
             // quiz module they actually bought.
-            'courses' => Course::orderBy('title')->get(['id', 'title']),
+            'courses' => Course::orderBy('title')->when($isContentManager, fn ($q) => $q->whereIn('id', $managedCourseIds))->get(['id', 'title']),
             // All topics, each carrying its subject_id -- the frontend
             // filters this client-side to whichever subject is picked in
             // the question form, same as it already does with Subjects
@@ -66,6 +73,7 @@ class QuestionBankController extends Controller
     public function storeQuestion(Request $request)
     {
         $data = $this->validateQuestion($request);
+        abort_unless($request->user()->canManageCourse(Course::findOrFail($data['course_id'])), 403);
         $this->assertOptionsHaveContent($data['options']);
 
         $question = QuestionBank::create([
@@ -100,6 +108,7 @@ class QuestionBankController extends Controller
             'csv' => 'required|file|mimes:csv,txt|max:2048',
             'course_id' => 'required|exists:courses,id',
         ]);
+        abort_unless($request->user()->canManageCourse(Course::findOrFail($data['course_id'])), 403);
 
         $handle = fopen($request->file('csv')->getRealPath(), 'r');
         $header = fgetcsv($handle);
@@ -176,7 +185,19 @@ class QuestionBankController extends Controller
 
     public function updateQuestion(Request $request, QuestionBank $question)
     {
+        // Untagged legacy question, no course to check against -- a
+        // content manager can't touch it (nothing proves it's theirs);
+        // owner/staff are unaffected either way.
+        abort_if($request->user()->hasRole('content_manager') && ! $question->course_id, 403);
+        if ($question->course) {
+            abort_unless($request->user()->canManageCourse($question->course), 403);
+        }
+
         $data = $this->validateQuestion($request);
+        // Also check the course they're re-tagging it to, if different --
+        // stops a content manager moving someone else's question into one
+        // of their own courses to gain edit rights over it.
+        abort_unless($request->user()->canManageCourse(Course::findOrFail($data['course_id'])), 403);
         $this->assertOptionsHaveContent($data['options']);
 
         $update = collect($data)->except(['options', 'image'])->toArray();
@@ -198,8 +219,13 @@ class QuestionBankController extends Controller
         return back()->with('success', 'Question updated. Change reflects in every course using it.');
     }
 
-    public function destroyQuestion(QuestionBank $question)
+    public function destroyQuestion(Request $request, QuestionBank $question)
     {
+        abort_if($request->user()->hasRole('content_manager') && ! $question->course_id, 403);
+        if ($question->course) {
+            abort_unless($request->user()->canManageCourse($question->course), 403);
+        }
+
         $question->delete();
 
         return back()->with('success', 'Question removed from the bank.');
