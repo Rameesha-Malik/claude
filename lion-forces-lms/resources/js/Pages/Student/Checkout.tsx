@@ -2,17 +2,29 @@ import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
 import StudentLayout from '@/Layouts/StudentLayout';
 
-type Module = 'full' | 'quiz' | 'tests' | 'assignments';
-const MODULE_LABELS: Record<Module, string> = { full: 'Full Course', quiz: 'Quiz Only', tests: 'Tests Only', assignments: 'Assignments Only' };
+type Module = 'lectures' | 'quiz' | 'tests' | 'assignments';
+const ALL_MODULES: Module[] = ['lectures', 'quiz', 'tests', 'assignments'];
+const MODULE_LABELS: Record<Module, string> = { lectures: 'Lectures', quiz: 'Quiz', tests: 'Tests', assignments: 'Assignments' };
 
-interface Package { id: number; name: string; module: Module; description: string | null; price: string; validity_days: number | null }
+function summarizeModules(modules: Module[]): string {
+    if (ALL_MODULES.every((m) => modules.includes(m))) return 'Full Course';
+    return modules.map((m) => MODULE_LABELS[m]).join(' + ') || 'Nothing selected';
+}
+
+// Same "covers" check as CheckoutController -- true if every module this
+// package would grant is already present in an existing enrollment.
+function covers(have: Module[], want: Module[]): boolean {
+    return want.every((m) => have.includes(m));
+}
+
+interface Package { id: number; name: string; modules: Module[]; description: string | null; price: string; validity_days: number | null }
+interface ExistingEnrollment { modules: Module[]; status: 'active' | 'pending' }
 interface Props {
     alreadyEnrolled?: 'active' | 'pending';
     course: { id?: number; title: string; slug: string; base_price?: string | null };
     packages?: Package[];
     selectedPackageId?: number | null;
-    /** module => status ('active'/'pending'), for modules this student already has a purchase covering. */
-    existingModules?: Record<string, string>;
+    existingEnrollments?: ExistingEnrollment[];
     payment?: { bankDetails: string | null; easypaisaNumber: string | null; jazzcashNumber: string | null };
 }
 
@@ -22,7 +34,7 @@ const METHODS = [
     { key: 'jazzcash' as const, label: 'JazzCash', detailsKey: 'jazzcashNumber' as const },
 ];
 
-export default function Checkout({ alreadyEnrolled, course, packages = [], selectedPackageId = null, existingModules = {}, payment }: Props) {
+export default function Checkout({ alreadyEnrolled, course, packages = [], selectedPackageId = null, existingEnrollments = [], payment }: Props) {
     if (alreadyEnrolled) {
         return (
             <StudentLayout header="Checkout">
@@ -84,7 +96,7 @@ export default function Checkout({ alreadyEnrolled, course, packages = [], selec
                             <p className="text-sm font-semibold text-text">Choose a package</p>
                             <div className="mt-2 space-y-2">
                                 {packages.map((pkg) => {
-                                    const owned = existingModules[pkg.module];
+                                    const owned = existingEnrollments.find((e) => covers(e.modules, pkg.modules))?.status;
                                     return (
                                         <label
                                             key={pkg.id}
@@ -107,9 +119,9 @@ export default function Checkout({ alreadyEnrolled, course, packages = [], selec
                                                 <div>
                                                     <div className="flex flex-wrap items-center gap-2">
                                                         <span className="font-semibold text-text">{pkg.name}</span>
-                                                        {pkg.module !== 'full' && (
+                                                        {summarizeModules(pkg.modules) !== 'Full Course' && (
                                                             <span className="rounded-full bg-primary-subtle px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-primary">
-                                                                {MODULE_LABELS[pkg.module]}
+                                                                {summarizeModules(pkg.modules)}
                                                             </span>
                                                         )}
                                                     </div>

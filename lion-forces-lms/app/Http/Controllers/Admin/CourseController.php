@@ -7,6 +7,7 @@ use App\Models\ActivityLog;
 use App\Models\Course;
 use App\Models\CourseCategory;
 use App\Models\CoursePackage;
+use App\Models\Enrollment;
 use App\Models\Instructor;
 use App\Models\Lesson;
 use Illuminate\Http\Request;
@@ -290,7 +291,8 @@ class CourseController extends Controller
 
         $data = $request->validate([
             'name' => 'required|string|max:150',
-            'module' => 'required|in:full,quiz,tests,assignments',
+            'modules' => 'required|array|min:1',
+            'modules.*' => 'in:'.implode(',', Enrollment::ALL_MODULES),
             'description' => 'nullable|string|max:500',
             'price' => 'required|numeric|min:0',
             'validity_days' => 'nullable|integer|min:1',
@@ -307,7 +309,8 @@ class CourseController extends Controller
 
         $package->update($request->validate([
             'name' => 'required|string|max:150',
-            'module' => 'required|in:full,quiz,tests,assignments',
+            'modules' => 'required|array|min:1',
+            'modules.*' => 'in:'.implode(',', Enrollment::ALL_MODULES),
             'description' => 'nullable|string|max:500',
             'price' => 'required|numeric|min:0',
             'validity_days' => 'nullable|integer|min:1',

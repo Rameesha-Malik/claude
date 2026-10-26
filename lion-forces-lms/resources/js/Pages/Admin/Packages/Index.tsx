@@ -4,23 +4,48 @@ import CloseButton from '@/Components/CloseButton';
 import StatusDot from '@/Components/StatusDot';
 import AdminLayout from '@/Layouts/AdminLayout';
 
-type Module = 'full' | 'quiz' | 'tests' | 'assignments';
-const MODULE_LABELS: Record<Module, string> = { full: 'Full Course', quiz: 'Quiz Only', tests: 'Tests Only', assignments: 'Assignments Only' };
+type Module = 'lectures' | 'quiz' | 'tests' | 'assignments';
+const ALL_MODULES: Module[] = ['lectures', 'quiz', 'tests', 'assignments'];
+const MODULE_LABELS: Record<Module, string> = { lectures: 'Lectures', quiz: 'Quiz', tests: 'Tests', assignments: 'Assignments' };
+
+// A package can grant any combination of modules now, not just one or
+// literally everything -- "Full Course" is just shorthand for all four
+// being checked, so it's summarized the same way any other combo is.
+function summarizeModules(modules: Module[]): string {
+    if (ALL_MODULES.every((m) => modules.includes(m))) return 'Full Course';
+    return modules.map((m) => MODULE_LABELS[m]).join(' + ') || 'Nothing selected';
+}
 
 interface PackageRow {
-    id: number; name: string; module: Module; description: string | null; price: string; validity_days: number | null; is_active: boolean;
+    id: number; name: string; modules: Module[]; description: string | null; price: string; validity_days: number | null; is_active: boolean;
     course: { id: number; title: string } | null;
 }
 interface CourseOption { id: number; title: string }
 interface Props { packages: PackageRow[]; courses: CourseOption[] }
 
-function ModuleSelect({ value, onChange }: { value: Module; onChange: (v: Module) => void }) {
+function ModulePicker({ value, onChange }: { value: Module[]; onChange: (v: Module[]) => void }) {
+    const isFull = ALL_MODULES.every((m) => value.includes(m));
+
+    function toggle(m: Module) {
+        onChange(value.includes(m) ? value.filter((x) => x !== m) : [...value, m]);
+    }
+
     return (
         <div>
-            <select value={value} onChange={(e) => onChange(e.target.value as Module)} className="w-full rounded-lg border border-border px-3 py-2 text-sm">
-                {(Object.keys(MODULE_LABELS) as Module[]).map((m) => <option key={m} value={m}>{MODULE_LABELS[m]}</option>)}
-            </select>
-            <p className="mt-1 text-xs text-text-muted">What this package actually unlocks for the student.</p>
+            <div className="flex flex-wrap gap-4 rounded-lg border border-border px-3 py-2.5">
+                {ALL_MODULES.map((m) => (
+                    <label key={m} className="flex items-center gap-1.5 text-sm text-text">
+                        <input type="checkbox" checked={value.includes(m)} onChange={() => toggle(m)} />
+                        {MODULE_LABELS[m]}
+                    </label>
+                ))}
+            </div>
+            <div className="mt-1.5 flex items-center justify-between">
+                <p className="text-xs text-text-muted">What this package actually unlocks for the student.</p>
+                <button type="button" onClick={() => onChange(isFull ? [] : ALL_MODULES)} className="text-xs font-bold uppercase text-primary hover:underline">
+                    {isFull ? 'Clear all' : 'Select all (Full Course)'}
+                </button>
+            </div>
         </div>
     );
 }
@@ -33,7 +58,7 @@ function AddPackageModal({ courses, onClose }: { courses: CourseOption[]; onClos
     // course, freshly loaded each time this page opens), so a course
     // added anywhere else in admin shows up here automatically -- nothing
     // to maintain in this list by hand.
-    const form = useForm({ course_id: '' as number | '', name: '', module: 'full' as Module, description: '', price: '', validity_days: '' });
+    const form = useForm({ course_id: '' as number | '', name: '', modules: ALL_MODULES as Module[], description: '', price: '', validity_days: '' });
 
     function submit(e: FormEvent) {
         e.preventDefault();
@@ -64,7 +89,7 @@ function AddPackageModal({ courses, onClose }: { courses: CourseOption[]; onClos
                     </div>
                     <input placeholder="Package Name" value={form.data.name} onChange={(e) => form.setData('name', e.target.value)} className="w-full rounded-lg border border-border px-3 py-2 text-sm" />
                     {form.errors.name && <p className="text-xs text-danger">{form.errors.name}</p>}
-                    <ModuleSelect value={form.data.module} onChange={(v) => form.setData('module', v)} />
+                    <ModulePicker value={form.data.modules} onChange={(v) => form.setData('modules', v)} />
                     <textarea
                         placeholder={'One feature per line (optional), e.g.\nComplete Notes\nVerbal Intelligence Live Lectures'}
                         rows={4}
@@ -95,7 +120,7 @@ function AddPackageModal({ courses, onClose }: { courses: CourseOption[]; onClos
 function PackageRow({ pkg }: { pkg: PackageRow }) {
     const [editing, setEditing] = useState(false);
     const form = useForm({
-        name: pkg.name, module: pkg.module, description: pkg.description ?? '', price: pkg.price, validity_days: pkg.validity_days ?? '', is_active: pkg.is_active,
+        name: pkg.name, modules: pkg.modules, description: pkg.description ?? '', price: pkg.price, validity_days: pkg.validity_days ?? '', is_active: pkg.is_active,
     });
 
     function submit(e: FormEvent) {
@@ -115,7 +140,7 @@ function PackageRow({ pkg }: { pkg: PackageRow }) {
                 <td colSpan={6} className="px-5 py-4">
                     <form onSubmit={submit} className="grid gap-3 sm:grid-cols-2">
                         <input value={form.data.name} onChange={(e) => form.setData('name', e.target.value)} placeholder="Package Name" className="rounded-lg border border-border px-3 py-2 text-sm sm:col-span-2" />
-                        <div className="sm:col-span-2"><ModuleSelect value={form.data.module} onChange={(v) => form.setData('module', v)} /></div>
+                        <div className="sm:col-span-2"><ModulePicker value={form.data.modules} onChange={(v) => form.setData('modules', v)} /></div>
                         <textarea
                             value={form.data.description}
                             onChange={(e) => form.setData('description', e.target.value)}
@@ -143,11 +168,9 @@ function PackageRow({ pkg }: { pkg: PackageRow }) {
         <tr>
             <td className="px-5 py-3">
                 <div className="font-medium text-text">{pkg.name}</div>
-                {pkg.module !== 'full' && (
-                    <span className="mt-1 inline-block rounded-full bg-primary-subtle px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-primary">
-                        {MODULE_LABELS[pkg.module]}
-                    </span>
-                )}
+                <span className="mt-1 inline-block rounded-full bg-primary-subtle px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-primary">
+                    {summarizeModules(pkg.modules)}
+                </span>
                 {pkg.description && <div className="whitespace-pre-line text-xs text-text-muted">{pkg.description}</div>}
             </td>
             <td className="px-5 py-3 text-text-secondary">{pkg.course?.title ?? 'N/A'}</td>

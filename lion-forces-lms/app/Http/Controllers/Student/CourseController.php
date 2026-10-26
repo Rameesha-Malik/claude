@@ -89,18 +89,17 @@ class CourseController extends Controller
         // Settings > Features global toggles are a master switch on top of
         // this course's own flashcards_enabled/tests_enabled checkboxes --
         // a course can only show a tab when BOTH are on. Module-scoped
-        // enrollments (Quiz Only / Tests Only) layer a third gate on top:
-        // a Quiz Only purchase shouldn't show lectures, notes, tests, or
-        // flashcards no matter what the course itself has enabled.
-        $module = $enrollment->module;
-        $course->flashcards_enabled = $course->flashcards_enabled && \App\Support\FeatureFlags::enabled('flashcards') && $module === 'full';
+        // enrollments layer a third gate on top: a purchase only unlocks
+        // the tabs for whatever combination of modules it actually grants
+        // (Enrollment::ALL_MODULES: lectures, quiz, tests, assignments).
+        // Flashcards isn't its own purchasable module -- it's study
+        // material for lecture content, so it rides along with "lectures"
+        // the same way Notes always has.
+        $course->flashcards_enabled = $course->flashcards_enabled && \App\Support\FeatureFlags::enabled('flashcards') && $enrollment->grantsModule('lectures');
         $course->tests_enabled = $course->tests_enabled && \App\Support\FeatureFlags::enabled('full_test') && $enrollment->grantsModule('tests');
         $course->quizzes_enabled = $course->quizzes_enabled && $enrollment->grantsModule('quiz');
         $course->assignments_enabled = $course->assignments_enabled && $enrollment->grantsModule('assignments');
-        // No existing toggle covers Lectures/Notes (every full enrollment
-        // always had them) -- this is the one new flag the frontend needs
-        // to also hide those two tabs for a module-only purchase.
-        $course->lectures_enabled = $module === 'full';
+        $course->lectures_enabled = $enrollment->grantsModule('lectures');
 
         return Inertia::render('Student/CourseLearning', [
             'course' => $course,

@@ -8,14 +8,21 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
-#[Fillable(['user_id', 'course_id', 'package_id', 'bundle_purchase_id', 'module', 'status', 'activated_at', 'expires_at'])]
+#[Fillable(['user_id', 'course_id', 'package_id', 'bundle_purchase_id', 'modules', 'status', 'activated_at', 'expires_at'])]
 class Enrollment extends Model
 {
     use HasFactory;
 
+    // Shorthand for "every module" -- what a package-less/"Full Course"
+    // purchase grants. "lectures" is a real, independently-grantable
+    // module like the other three (see the migration that introduced this
+    // column); it just also happens to be the one everyone expects a
+    // full-access purchase to include.
+    public const ALL_MODULES = ['lectures', 'quiz', 'tests', 'assignments'];
+
     protected function casts(): array
     {
-        return ['activated_at' => 'datetime', 'expires_at' => 'datetime'];
+        return ['activated_at' => 'datetime', 'expires_at' => 'datetime', 'modules' => 'array'];
     }
 
     public function user(): BelongsTo
@@ -60,18 +67,20 @@ class Enrollment extends Model
             ->where(fn ($q) => $q->whereNull('expires_at')->orWhere('expires_at', '>', now()));
     }
 
-    // A 'full' enrollment grants every module; a 'quiz' or 'tests'
-    // enrollment only grants that one. Used by both the query-builder
-    // gating in authorizeEnrollment() (scopeGrantingModule, below) and
-    // anywhere a loaded Enrollment needs the same check.
+    // `modules` holds whatever combination of lectures/quiz/tests/
+    // assignments this enrollment actually grants -- a "Full Course"
+    // purchase just means all four are present, same as any other combo.
+    // Used by both the query-builder gating in authorizeEnrollment()
+    // (scopeGrantingModule, below) and anywhere a loaded Enrollment needs
+    // the same check.
     public function grantsModule(string $module): bool
     {
-        return $this->module === 'full' || $this->module === $module;
+        return in_array($module, $this->modules ?? [], true);
     }
 
     public function scopeGrantingModule($query, string $module)
     {
-        return $query->where(fn ($q) => $q->where('module', 'full')->orWhere('module', $module));
+        return $query->whereJsonContains('modules', $module);
     }
 
     // Marks this enrollment active and computes its real expiry date from

@@ -82,8 +82,8 @@ class BundleCheckoutController extends Controller
             $hasFull = Enrollment::where('user_id', $request->user()->id)
                 ->where('course_id', $course->id)
                 ->whereIn('status', ['active', 'pending'])
-                ->where('module', 'full')
-                ->exists();
+                ->get()
+                ->contains(fn ($e) => count(array_diff(Enrollment::ALL_MODULES, $e->modules ?? [])) === 0);
 
             if ($hasFull) {
                 continue;
@@ -93,6 +93,7 @@ class BundleCheckoutController extends Controller
                 'user_id' => $request->user()->id,
                 'course_id' => $course->id,
                 'bundle_purchase_id' => $purchase->id,
+                'modules' => Enrollment::ALL_MODULES,
                 'status' => 'pending',
             ]);
         }

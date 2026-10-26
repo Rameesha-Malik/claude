@@ -25,18 +25,18 @@ class CheckoutController extends Controller
         // checked out of, before it's published.
         abort_unless($course->status === 'published', 404);
 
-        // A 'full' enrollment already covers everything a student could
-        // buy for this course, so it still blocks the whole checkout page.
-        // A 'quiz'-or'tests'-only enrollment only blocks buying that same
-        // module again -- the student can still come back here to buy the
-        // other one, so existingModules is sent down instead of a single
-        // blanket "already enrolled" flag.
+        // An enrollment that already grants every module blocks the whole
+        // checkout page. A narrower one (Quiz Only, Lectures+Tests, etc.)
+        // only blocks re-buying something it already covers -- the student
+        // can still come back here for whatever it doesn't, so
+        // existingEnrollments is sent down instead of a single blanket
+        // "already enrolled" flag.
         $existing = Enrollment::where('user_id', $request->user()->id)
             ->where('course_id', $course->id)
             ->whereIn('status', ['active', 'pending'])
             ->get();
 
-        $fullEnrollment = $existing->firstWhere('module', 'full');
+        $fullEnrollment = $existing->first(fn ($e) => $this->covers($e->modules ?? [], Enrollment::ALL_MODULES));
         if ($fullEnrollment) {
             return Inertia::render('Student/Checkout', [
                 'alreadyEnrolled' => $fullEnrollment->status,
@@ -55,10 +55,11 @@ class CheckoutController extends Controller
             'course' => $course->only('id', 'title', 'slug', 'base_price'),
             'packages' => $course->packages,
             'selectedPackageId' => $selectedPackageId,
-            // module => status, for whichever modules this student already
-            // has a pending/active purchase for -- lets the page grey out
-            // just those packages instead of blocking the whole checkout.
-            'existingModules' => $existing->pluck('status', 'module'),
+            // Each existing active/pending enrollment's modules + status --
+            // lets the page grey out just the packages those already fully
+            // cover, instead of blocking the whole checkout (same "covers"
+            // check as store(), below).
+            'existingEnrollments' => $existing->map(fn ($e) => ['modules' => $e->modules, 'status' => $e->status])->values(),
             'payment' => [
                 'bankDetails' => Setting::get('payment_bank_details'),
                 'easypaisaNumber' => Setting::get('payment_easypaisa_number'),
@@ -79,19 +80,20 @@ class CheckoutController extends Controller
         ]);
 
         $package = $data['package_id'] ? $course->packages()->find($data['package_id']) : null;
-        $module = $package->module ?? 'full';
+        $modules = $package->modules ?? Enrollment::ALL_MODULES;
 
-        // Blocks re-buying the exact module the student is about to pay
-        // for (or anything if they already have full access), but not a
-        // *different* module of the same course -- someone with Quiz Only
-        // can still come back and buy Tests Only separately.
-        $alreadyHasModule = Enrollment::where('user_id', $request->user()->id)
+        // Blocks re-buying something the student is about to pay for that
+        // an existing enrollment already fully covers (e.g. already have
+        // Quiz+Tests, trying to buy Quiz alone again), but not a purchase
+        // that still gets them something new -- someone with Quiz Only can
+        // still come back and buy Tests Only, or Quiz+Assignments, etc.
+        $alreadyCovered = Enrollment::where('user_id', $request->user()->id)
             ->where('course_id', $course->id)
             ->whereIn('status', ['active', 'pending'])
-            ->where(fn ($q) => $q->where('module', 'full')->orWhere('module', $module))
-            ->exists();
+            ->get()
+            ->contains(fn ($e) => $this->covers($e->modules ?? [], $modules));
 
-        if ($alreadyHasModule) {
+        if ($alreadyCovered) {
             return redirect()->route('student.courses')->with('success', 'You already have an enrollment that covers this.');
         }
 
@@ -103,7 +105,7 @@ class CheckoutController extends Controller
             'user_id' => $request->user()->id,
             'course_id' => $course->id,
             'package_id' => $package?->id,
-            'module' => $module,
+            'modules' => $modules,
             'status' => 'pending',
         ]);
 
@@ -125,5 +127,13 @@ class CheckoutController extends Controller
         }
 
         return redirect()->route('student.courses')->with('success', 'Payment submitted! We\'ll verify it and activate your course, usually within 1 hour.');
+    }
+
+    // True if everything in $want is already present in $have -- e.g. an
+    // existing ["lectures","quiz","tests"] enrollment covers a new
+    // ["quiz"] purchase, but not the other way around.
+    private function covers(array $have, array $want): bool
+    {
+        return count(array_diff($want, $have)) === 0;
     }
 }

@@ -6,9 +6,18 @@ import AdminLayout from '@/Layouts/AdminLayout';
 
 interface Category { id: number; name: string }
 interface Instructor { id: number; name: string }
-type Module = 'full' | 'quiz' | 'tests' | 'assignments';
-const MODULE_LABELS: Record<Module, string> = { full: 'Full Course', quiz: 'Quiz Only', tests: 'Tests Only', assignments: 'Assignments Only' };
-interface Package { id: number; name: string; module: Module; description: string | null; price: string; validity_days: number | null }
+type Module = 'lectures' | 'quiz' | 'tests' | 'assignments';
+const ALL_MODULES: Module[] = ['lectures', 'quiz', 'tests', 'assignments'];
+const MODULE_LABELS: Record<Module, string> = { lectures: 'Lectures', quiz: 'Quiz', tests: 'Tests', assignments: 'Assignments' };
+
+// A package can grant any combination of modules -- "Full Course" is just
+// shorthand for all four being checked, same idiom as Admin/Packages/Index.
+function summarizeModules(modules: Module[]): string {
+    if (ALL_MODULES.every((m) => modules.includes(m))) return 'Full Course';
+    return modules.map((m) => MODULE_LABELS[m]).join(' + ') || 'Nothing selected';
+}
+
+interface Package { id: number; name: string; modules: Module[]; description: string | null; price: string; validity_days: number | null }
 interface Lesson { id: number; title: string; type: string; is_free_preview: boolean; section_id: number | null }
 interface Section { id: number; title: string; description: string | null; lessons: Lesson[] }
 interface Tag { id: number; name: string }
@@ -271,7 +280,13 @@ export default function CourseForm({ course, categories, instructors }: Props) {
 }
 
 function PackagesPanel({ course }: { course: Course }) {
-    const addForm = useForm({ name: '', module: 'full' as Module, price: '', validity_days: '' });
+    const addForm = useForm({ name: '', modules: ALL_MODULES as Module[], price: '', validity_days: '' });
+
+    function toggleModule(m: Module) {
+        const current = addForm.data.modules;
+        addForm.setData('modules', current.includes(m) ? current.filter((x) => x !== m) : [...current, m]);
+    }
+    const isFull = ALL_MODULES.every((m) => addForm.data.modules.includes(m));
 
     return (
         <div className="rounded-2xl border border-border bg-surface p-5">
@@ -286,7 +301,7 @@ function PackagesPanel({ course }: { course: Course }) {
                         <div>
                             <div className="font-semibold text-text">{pkg.name}</div>
                             <div className="text-text-secondary">
-                                {MODULE_LABELS[pkg.module]} · Rs. {Number(pkg.price).toLocaleString()} · {pkg.validity_days ? `${pkg.validity_days}d` : 'Lifetime'}
+                                {summarizeModules(pkg.modules)} · Rs. {Number(pkg.price).toLocaleString()} · {pkg.validity_days ? `${pkg.validity_days}d` : 'Lifetime'}
                             </div>
                         </div>
                         <button onClick={() => router.delete(`/admin/courses/packages/${pkg.id}`)} className="text-xs font-bold uppercase text-danger hover:underline">Delete</button>
@@ -299,9 +314,23 @@ function PackagesPanel({ course }: { course: Course }) {
                 className="space-y-2"
             >
                 <input className={inputClass} placeholder="Package Name" value={addForm.data.name} onChange={(e) => addForm.setData('name', e.target.value)} />
-                <select className={inputClass} value={addForm.data.module} onChange={(e) => addForm.setData('module', e.target.value as Module)}>
-                    {(Object.keys(MODULE_LABELS) as Module[]).map((m) => <option key={m} value={m}>{MODULE_LABELS[m]}</option>)}
-                </select>
+                <div>
+                    <div className="flex flex-wrap gap-4 rounded-lg border border-border px-3 py-2.5">
+                        {ALL_MODULES.map((m) => (
+                            <label key={m} className="flex items-center gap-1.5 text-sm text-text">
+                                <input type="checkbox" checked={addForm.data.modules.includes(m)} onChange={() => toggleModule(m)} />
+                                {MODULE_LABELS[m]}
+                            </label>
+                        ))}
+                    </div>
+                    <button
+                        type="button"
+                        onClick={() => addForm.setData('modules', isFull ? [] : ALL_MODULES)}
+                        className="mt-1.5 text-xs font-bold uppercase text-primary hover:underline"
+                    >
+                        {isFull ? 'Clear all' : 'Select all (Full Course)'}
+                    </button>
+                </div>
                 <div className="flex gap-2">
                     <input type="number" className={inputClass} placeholder="Price" value={addForm.data.price} onChange={(e) => addForm.setData('price', e.target.value)} />
                     <input type="number" className={inputClass} placeholder="Validity (days)" value={addForm.data.validity_days} onChange={(e) => addForm.setData('validity_days', e.target.value)} />

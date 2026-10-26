@@ -4,9 +4,16 @@ import LiteMarkdown from '@/Components/LiteMarkdown';
 import PublicLayout from '@/Layouts/PublicLayout';
 import { PageProps } from '@/types';
 
-type Module = 'full' | 'quiz' | 'tests' | 'assignments';
-const MODULE_LABELS: Record<Module, string> = { full: 'Full Course', quiz: 'Quiz Only', tests: 'Tests Only', assignments: 'Assignments Only' };
-interface Package { id: number; name: string; module: Module; description: string | null; price: string; validity_days: number | null }
+type Module = 'lectures' | 'quiz' | 'tests' | 'assignments';
+const ALL_MODULES: Module[] = ['lectures', 'quiz', 'tests', 'assignments'];
+const MODULE_LABELS: Record<Module, string> = { lectures: 'Lectures', quiz: 'Quiz', tests: 'Tests', assignments: 'Assignments' };
+
+function summarizeModules(modules: Module[]): string {
+    if (ALL_MODULES.every((m) => modules.includes(m))) return 'Full Course';
+    return modules.map((m) => MODULE_LABELS[m]).join(' + ') || 'Nothing selected';
+}
+
+interface Package { id: number; name: string; modules: Module[]; description: string | null; price: string; validity_days: number | null }
 interface Lesson { id: number; title: string; type: string }
 interface Review { id: number; rating: number; review_text: string | null; user: { name: string } | null }
 interface Course {
@@ -234,9 +241,9 @@ export default function CourseDetail({ course }: { course: Course }) {
                                                 <span>{pkg.name}</span>
                                                 <span>Rs. {Number(pkg.price).toLocaleString()}</span>
                                             </div>
-                                            {pkg.module !== 'full' && (
+                                            {summarizeModules(pkg.modules) !== 'Full Course' && (
                                                 <span className="mt-1 inline-block rounded-full bg-primary-subtle px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-primary">
-                                                    {MODULE_LABELS[pkg.module]}
+                                                    {summarizeModules(pkg.modules)}
                                                 </span>
                                             )}
                                             {pkg.description && <p className="mt-1 text-xs text-text-secondary">{pkg.description}</p>}

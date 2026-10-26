@@ -54,7 +54,7 @@ class EnrollmentController extends Controller
                 'user' => $e->user?->only('name', 'email'),
                 'course' => $e->course?->only('title'),
                 'package' => $e->package?->only('name'),
-                'module' => $e->module,
+                'modules' => $e->modules,
                 'payment' => $payment ? ['amount' => $payment->amount, 'proof_file_path' => $payment->proof_file_path] : null,
             ];
         });
@@ -62,7 +62,7 @@ class EnrollmentController extends Controller
         return Inertia::render('Admin/Enrollments/Index', [
             'enrollments' => $enrollments,
             'courses' => Course::orderBy('title')->get(['id', 'title'])
-                ->map(fn ($c) => ['id' => $c->id, 'title' => $c->title, 'packages' => $c->packages()->where('is_active', true)->get(['id', 'name', 'module'])]),
+                ->map(fn ($c) => ['id' => $c->id, 'title' => $c->title, 'packages' => $c->packages()->where('is_active', true)->get(['id', 'name', 'modules'])]),
             'filters' => $request->only(['status', 'course_id', 'search']),
         ]);
     }
@@ -86,7 +86,7 @@ class EnrollmentController extends Controller
             'user_id' => $student->id,
             'course_id' => $data['course_id'],
             'package_id' => $package?->id,
-            'module' => $package->module ?? 'full',
+            'modules' => $package->modules ?? Enrollment::ALL_MODULES,
         ]);
         $enrollment->activate();
 

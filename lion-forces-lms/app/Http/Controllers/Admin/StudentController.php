@@ -235,7 +235,7 @@ class StudentController extends Controller
             'user_id' => $student->id,
             'course_id' => $data['course_id'],
             'package_id' => $package?->id,
-            'module' => $package->module ?? 'full',
+            'modules' => $package->modules ?? Enrollment::ALL_MODULES,
         ]);
         $enrollment->activate();
 

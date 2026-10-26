@@ -43,7 +43,7 @@ interface Course {
     mock_exams: MockExamSummary[]; staged_tests: StagedTestSummary[]; flashcards: FlashcardItem[];
     assignments: AssignmentItem[];
     quizzes_enabled: boolean; flashcards_enabled: boolean; tests_enabled: boolean; assignments_enabled: boolean;
-    /** False for a module-only enrollment (Quiz Only / Tests Only) -- those never include lectures or notes. */
+    /** False when this enrollment's modules don't include "lectures" -- Notes and Flashcards ride along with it too. */
     lectures_enabled: boolean;
     level: string | null; enrollments_count: number; approved_reviews: { rating: number }[];
 }

@@ -9,14 +9,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
-#[Fillable(['course_id', 'name', 'module', 'description', 'price', 'validity_days', 'order', 'is_active'])]
+#[Fillable(['course_id', 'name', 'modules', 'description', 'price', 'validity_days', 'order', 'is_active'])]
 class CoursePackage extends Model
 {
     use HasFactory;
 
     protected function casts(): array
     {
-        return ['is_active' => 'boolean', 'price' => 'decimal:2'];
+        return ['is_active' => 'boolean', 'price' => 'decimal:2', 'modules' => 'array'];
     }
 
     public function course(): BelongsTo
