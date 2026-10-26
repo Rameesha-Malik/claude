@@ -26,7 +26,7 @@ interface Props {
 // Client: couldn't find anywhere in the admin panel describing or showing
 // this feature -- there wasn't one. This page is the single place that
 // now exists for it: what the flow is, whether it's on, who's actually
-// using it, and where the two real controls for it live (Content Library
+// using it, and where the two real controls for it live (Question Bank
 // for the question bank itself, Settings for the on/off switch). Doesn't
 // duplicate either of those screens, just points at them.
 export default function AdminCustomQuizIndex({ configs, enabled, stats, courses }: Props) {
@@ -54,8 +54,8 @@ export default function AdminCustomQuizIndex({ configs, enabled, stats, courses 
                     <Link href="/admin/settings" className="text-xs font-bold uppercase text-primary hover:underline">
                         Change in Settings &rarr;
                     </Link>
-                    <Link href="/admin/content-library" className="text-xs font-bold uppercase text-primary hover:underline">
-                        Manage Subjects/Topics/Questions in Content Library &rarr;
+                    <Link href="/admin/question-bank" className="text-xs font-bold uppercase text-primary hover:underline">
+                        Manage Subjects/Topics/Questions in Question Bank &rarr;
                     </Link>
                 </div>
             </div>

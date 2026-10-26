@@ -32,7 +32,7 @@ export default function DemoQuizIndex({ quizzes }: { quizzes: Quiz[] }) {
                     <Link href="/admin/demo-quiz/page-content" className="rounded-xl border border-border bg-surface px-4 py-2.5 text-sm font-bold text-text hover:border-primary hover:text-primary">
                         Demo Page Content
                     </Link>
-                    <Link href="/admin/content-library" className="rounded-xl border border-border bg-surface px-4 py-2.5 text-sm font-bold text-text hover:border-primary hover:text-primary">
+                    <Link href="/admin/question-bank" className="rounded-xl border border-border bg-surface px-4 py-2.5 text-sm font-bold text-text hover:border-primary hover:text-primary">
                         Categories
                     </Link>
                     <Link href="/admin/demo-quiz/create" className="rounded-xl bg-secondary px-5 py-2.5 text-sm font-bold uppercase text-on-secondary hover:bg-teal-800">

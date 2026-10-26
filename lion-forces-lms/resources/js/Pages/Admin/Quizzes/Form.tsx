@@ -206,10 +206,10 @@ export default function QuizForm({ course, quiz, sections, subjects, topics, que
                             </div>
                         </div>
 
-                        {/* Both post straight to the Question Bank (Content Library's
-                            endpoints) and redirect back to this exact quiz-builder URL,
-                            so the newly added question shows up in the list below without
-                            losing whatever else was already typed into this form. */}
+                        {/* Both post straight to the Question Bank's own endpoints and
+                            redirect back to this exact quiz-builder URL, so the newly
+                            added question shows up in the list below without losing
+                            whatever else was already typed into this form. */}
                         {showBulkUpload && <QuestionBankBulkUploadForm course={course} onDone={() => setShowBulkUpload(false)} />}
                         {bulkUploadResult && <QuestionBankBulkUploadResult result={bulkUploadResult} />}
                         {showAddQuestion && <QuestionBankForm subjects={subjects} topics={topics} course={course} onDone={() => setShowAddQuestion(false)} />}
@@ -224,7 +224,7 @@ export default function QuizForm({ course, quiz, sections, subjects, topics, que
                                     </div>
                                 </label>
                             ))}
-                            {filteredBank.length === 0 && <p className="text-sm text-text-secondary">No questions in the bank yet. Add some in Content Library.</p>}
+                            {filteredBank.length === 0 && <p className="text-sm text-text-secondary">No questions in the bank yet. Add some in Question Bank.</p>}
                         </div>
                     </div>
                 )}

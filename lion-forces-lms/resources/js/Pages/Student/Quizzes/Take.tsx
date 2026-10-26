@@ -3,7 +3,7 @@ import { useState } from 'react';
 import QuestionRunner from '@/Components/QuestionRunner';
 import StudentLayout from '@/Layouts/StudentLayout';
 
-interface Option { id: number; option_text: string }
+interface Option { id: number; option_text: string; image_path: string | null }
 interface Question { id: number; question_text: string; image_path: string | null; options: Option[] }
 interface QuizRecord { id: number; title: string; description: string | null; syllabus: string | null; thumbnail_path: string | null; marks_per_question: string; negative_marking: string }
 interface Props { quiz: QuizRecord; questions: Question[] }

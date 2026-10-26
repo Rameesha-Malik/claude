@@ -28,8 +28,8 @@ function NoteModal({ note, subjects, onClose }: { note: Note | null; subjects: S
 
     function submit(e: FormEvent) {
         e.preventDefault();
-        if (note) form.put(`/admin/content-library/notes/${note.id}`, { onSuccess: onClose });
-        else form.post('/admin/content-library/notes', { onSuccess: onClose });
+        if (note) form.put(`/admin/guaranteed-notes/${note.id}`, { onSuccess: onClose });
+        else form.post('/admin/guaranteed-notes', { onSuccess: onClose });
     }
 
     return (
@@ -75,7 +75,7 @@ export default function GuaranteedNotesIndex({ notes, subjects, filters, stats }
 
     function destroyNote(n: Note) {
         if (confirm(`Delete "${n.title}"? This also removes any purchase history tied to it.`)) {
-            router.delete(`/admin/content-library/notes/${n.id}`, { preserveScroll: true });
+            router.delete(`/admin/guaranteed-notes/${n.id}`, { preserveScroll: true });
         }
     }
 
@@ -104,7 +104,7 @@ export default function GuaranteedNotesIndex({ notes, subjects, filters, stats }
                     <button onClick={() => setModalNote(null)} className="rounded-xl bg-secondary px-5 py-2.5 text-sm font-bold uppercase text-on-secondary hover:bg-teal-800">
                         + Add Note
                     </button>
-                    <Link href="/admin/content-library" className="rounded-xl border border-border bg-surface px-4 py-2.5 text-sm font-bold text-text hover:border-primary hover:text-primary">
+                    <Link href="/admin/question-bank" className="rounded-xl border border-border bg-surface px-4 py-2.5 text-sm font-bold text-text hover:border-primary hover:text-primary">
                         Categories
                     </Link>
                     <Link href="/admin/guaranteed-notes/purchase-requests" className="relative rounded-xl border border-border bg-surface px-4 py-2.5 text-sm font-bold text-text hover:border-primary hover:text-primary">

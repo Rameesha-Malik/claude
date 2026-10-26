@@ -26,7 +26,7 @@ export function QuestionBankBulkUploadForm({ course, courses = [], onDone }: { c
     function submit(e: React.FormEvent) {
         e.preventDefault();
         if (!form.data.csv || !form.data.course_id) return;
-        form.post('/admin/content-library/questions/bulk', { preserveState: true, onSuccess: () => { form.reset(); onDone(); } });
+        form.post('/admin/question-bank/questions/bulk', { preserveState: true, onSuccess: () => { form.reset(); onDone(); } });
     }
 
     return (

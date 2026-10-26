@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-#[Fillable(['question_id', 'option_text', 'is_correct', 'order'])]
+#[Fillable(['question_id', 'option_text', 'image_path', 'is_correct', 'order'])]
 class QuestionOption extends Model
 {
     use HasFactory;

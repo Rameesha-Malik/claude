@@ -150,7 +150,7 @@ export default function PracticeTestForm({ course, practiceTest, subjects, quest
                                     </div>
                                 </label>
                             ))}
-                            {filteredBank.length === 0 && <p className="text-sm text-text-secondary">No questions in the bank yet. Add some in Content Library.</p>}
+                            {filteredBank.length === 0 && <p className="text-sm text-text-secondary">No questions in the bank yet. Add some in Question Bank.</p>}
                         </div>
                     </div>
                 )}

@@ -4,7 +4,7 @@ import { ReactNode, useEffect, useState } from 'react';
 import { LiteMarkdownInline } from '@/Components/LiteMarkdown';
 import { PageProps } from '@/types';
 
-interface RunnerOption { id: number; option_text: string }
+interface RunnerOption { id: number; option_text: string; image_path: string | null }
 interface RunnerQuestion { id: number; question_text: string; image_path: string | null; options: RunnerOption[] }
 interface QuestionFeedback { correctOptionId: number | null; explanation: string | null }
 
@@ -565,7 +565,11 @@ export default function QuestionRunner({
                                             checked={isSelected}
                                             onChange={() => handleSelect(current.id, opt.id)}
                                         />
-                                        <span className="text-text">{opt.option_text}</span>
+                                        {opt.image_path ? (
+                                            <img src={`/storage/${opt.image_path}`} alt="" className="max-h-32 rounded-lg border border-border" />
+                                        ) : (
+                                            <span className="text-text">{opt.option_text}</span>
+                                        )}
                                         {currentFeedbackReady && hasAnswered && isRevealedCorrect && (
                                             <span className="ml-auto text-xs font-bold uppercase text-success">Correct answer</span>
                                         )}

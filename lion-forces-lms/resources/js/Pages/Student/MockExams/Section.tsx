@@ -3,7 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import QuestionRunner from '@/Components/QuestionRunner';
 import StudentLayout from '@/Layouts/StudentLayout';
 
-interface Option { id: number; option_text: string }
+interface Option { id: number; option_text: string; image_path: string | null }
 interface Question { id: number; question_text: string; image_path: string | null; options: Option[] }
 interface SectionInfo { id: number; name: string; order: number; duration_minutes: number | null; marks_per_question: string; negative_marking: string }
 interface SectionNav { id: number; name: string; order: number }

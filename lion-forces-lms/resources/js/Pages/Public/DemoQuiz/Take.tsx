@@ -3,7 +3,7 @@ import { useEffect, useState } from 'react';
 import QuestionRunner from '@/Components/QuestionRunner';
 import PublicLayout from '@/Layouts/PublicLayout';
 
-interface Option { id: number; option_text: string }
+interface Option { id: number; option_text: string; image_path: string | null }
 interface Question { id: number; question_text: string; image_path: string | null; options: Option[] }
 interface Quiz { id: number; title: string; duration_minutes: number }
 interface Props { quiz: Quiz; attemptId: number; questions: Question[] }

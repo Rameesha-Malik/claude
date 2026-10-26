@@ -4,7 +4,7 @@ import LiteMarkdown from '@/Components/LiteMarkdown';
 import QuestionRunner from '@/Components/QuestionRunner';
 import StudentLayout from '@/Layouts/StudentLayout';
 
-interface Option { id: number; option_text: string }
+interface Option { id: number; option_text: string; image_path: string | null }
 interface Question { id: number; question_text: string; image_path: string | null; options: Option[] }
 interface PracticeTest {
     id: number; title: string; timer_enabled: boolean; duration_minutes: number | null;

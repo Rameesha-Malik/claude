@@ -12,8 +12,9 @@ use Inertia\Response;
 
 /**
  * "Who added or edited course content, and when." Logged from
- * CourseController (Course/Topic/Lecture) and ContentLibraryController
- * (MCQ/Note) via ActivityLog::record() -- see app/Models/ActivityLog.php.
+ * CourseController (Course/Topic/Lecture), QuestionBankController (MCQ),
+ * and GuaranteedNotesController (Note) via ActivityLog::record() -- see
+ * app/Models/ActivityLog.php.
  */
 class ActivityController extends Controller
 {

@@ -72,7 +72,7 @@ class DemoQuizController extends Controller
             'id' => $q->id,
             'question_text' => $q->question_text,
             'image_path' => $q->image_path,
-            'options' => $q->options->map(fn ($o) => ['id' => $o->id, 'option_text' => $o->option_text])->values(),
+            'options' => $q->options->map(fn ($o) => ['id' => $o->id, 'option_text' => $o->option_text, 'image_path' => $o->image_path])->values(),
         ])->values();
 
         return Inertia::render('Public/DemoQuiz/Take', [

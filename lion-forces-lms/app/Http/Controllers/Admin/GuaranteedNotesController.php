@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\ActivityLog;
 use App\Models\Faq;
 use App\Models\NoteAssignment;
 use App\Models\NotePurchase;
@@ -14,13 +15,13 @@ use Inertia\Inertia;
 use Inertia\Response;
 
 /**
- * "Guaranteed Notes" as a sellable product line -- reuses the same
- * NotesBank table Content Library's Notes tab manages (price/is_published
- * added there), just surfaced here as a dedicated storefront-management
- * page with the commerce columns (category/type/access/status) and its
- * own Purchase Requests queue. Note creation/editing itself goes through
- * ContentLibraryController::storeNote/updateNote -- one table, one set of
- * CRUD endpoints, no duplicated logic.
+ * "Guaranteed Notes" as a sellable product line, built on the NotesBank
+ * table: this page owns the full lifecycle (create/edit/delete, plus the
+ * commerce columns -- category/type/access/status -- and its own Purchase
+ * Requests queue). Content Library used to own note creation/editing
+ * separately from this storefront view of the same notes; that split was
+ * the only real duplication in the admin -- folded in here as the single
+ * place to manage a note, so there's one page, not two.
  */
 class GuaranteedNotesController extends Controller
 {
@@ -44,6 +45,44 @@ class GuaranteedNotesController extends Controller
                 'pending_requests' => NotePurchase::where('status', 'pending')->count(),
             ],
         ]);
+    }
+
+    public function store(Request $request)
+    {
+        $data = $request->validate([
+            'subject_id' => 'nullable|exists:subjects,id',
+            'title' => 'required|string|max:255',
+            'content' => 'nullable|string',
+            'price' => 'nullable|numeric|min:0',
+            'is_published' => 'boolean',
+        ]);
+
+        $note = NotesBank::create($data + ['created_by' => $request->user()->id]);
+        ActivityLog::record('added', 'Note', $note->id, "Note \"{$note->title}\" was added.");
+
+        return back()->with('success', 'Note added.');
+    }
+
+    public function update(Request $request, NotesBank $note)
+    {
+        $note->update($request->validate([
+            'subject_id' => 'nullable|exists:subjects,id',
+            'title' => 'required|string|max:255',
+            'content' => 'nullable|string',
+            'price' => 'nullable|numeric|min:0',
+            'is_published' => 'boolean',
+        ]));
+
+        ActivityLog::record('edited', 'Note', $note->id, "Note \"{$note->title}\" was updated.");
+
+        return back()->with('success', 'Note updated.');
+    }
+
+    public function destroy(NotesBank $note)
+    {
+        $note->delete();
+
+        return back()->with('success', 'Note removed.');
     }
 
     public function purchaseRequests(Request $request): Response

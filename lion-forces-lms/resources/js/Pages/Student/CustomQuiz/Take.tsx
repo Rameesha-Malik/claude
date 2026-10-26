@@ -3,7 +3,7 @@ import { useState } from 'react';
 import QuestionRunner from '@/Components/QuestionRunner';
 import StudentLayout from '@/Layouts/StudentLayout';
 
-interface Option { id: number; option_text: string }
+interface Option { id: number; option_text: string; image_path: string | null }
 interface Question { id: number; question_text: string; image_path: string | null; options: Option[] }
 interface Config { id: number; question_count: number }
 interface Props { config: Config; subjectNames: string[]; topicNames: string[]; questions: Question[] }

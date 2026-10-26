@@ -292,7 +292,7 @@ export default function PerformanceIndex({ students, selectedStudentId, data }: 
                                 <ul className="space-y-2 text-sm">
                                     {data.weak_points.map((s) => (
                                         <li key={s.subject} className="rounded-xl bg-danger-bg px-3 py-2 text-danger">
-                                            <span className="font-bold">{s.subject}</span> ({s.accuracy}% accuracy). Revise this subject in the Content Library and retake a practice test.
+                                            <span className="font-bold">{s.subject}</span> ({s.accuracy}% accuracy). Revise this subject in the Question Bank and retake a practice test.
                                         </li>
                                     ))}
                                 </ul>

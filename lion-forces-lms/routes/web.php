@@ -6,7 +6,7 @@ use App\Http\Controllers\Admin\BundleController as AdminBundleController;
 use App\Http\Controllers\Admin\BundlePurchaseController as AdminBundlePurchaseController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\ContactInboxController as AdminContactInboxController;
-use App\Http\Controllers\Admin\ContentLibraryController as AdminContentLibraryController;
+use App\Http\Controllers\Admin\QuestionBankController as AdminQuestionBankController;
 use App\Http\Controllers\Admin\CustomQuizController as AdminCustomQuizController;
 use App\Http\Controllers\Admin\GuaranteedNotesController as AdminGuaranteedNotesController;
 use App\Http\Controllers\Admin\ContentManagerController as AdminContentManagerController;
@@ -312,21 +312,21 @@ Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->nam
 
     });
 
-    Route::prefix('content-library')->name('content-library.')->group(function () {
-        Route::get('/', [AdminContentLibraryController::class, 'index'])->name('index');
-        Route::post('/subjects', [AdminContentLibraryController::class, 'storeSubject'])->name('subjects.store');
-        Route::post('/topics', [AdminContentLibraryController::class, 'storeTopic'])->name('topics.store');
-        Route::post('/questions', [AdminContentLibraryController::class, 'storeQuestion'])->name('questions.store');
-        Route::post('/questions/bulk', [AdminContentLibraryController::class, 'bulkUploadQuestions'])->name('questions.bulk');
-        Route::put('/questions/{question}', [AdminContentLibraryController::class, 'updateQuestion'])->name('questions.update');
-        Route::delete('/questions/{question}', [AdminContentLibraryController::class, 'destroyQuestion'])->name('questions.destroy');
-        Route::post('/notes', [AdminContentLibraryController::class, 'storeNote'])->name('notes.store');
-        Route::put('/notes/{note}', [AdminContentLibraryController::class, 'updateNote'])->name('notes.update');
-        Route::delete('/notes/{note}', [AdminContentLibraryController::class, 'destroyNote'])->name('notes.destroy');
+    Route::prefix('question-bank')->name('question-bank.')->group(function () {
+        Route::get('/', [AdminQuestionBankController::class, 'index'])->name('index');
+        Route::post('/subjects', [AdminQuestionBankController::class, 'storeSubject'])->name('subjects.store');
+        Route::post('/topics', [AdminQuestionBankController::class, 'storeTopic'])->name('topics.store');
+        Route::post('/questions', [AdminQuestionBankController::class, 'storeQuestion'])->name('questions.store');
+        Route::post('/questions/bulk', [AdminQuestionBankController::class, 'bulkUploadQuestions'])->name('questions.bulk');
+        Route::put('/questions/{question}', [AdminQuestionBankController::class, 'updateQuestion'])->name('questions.update');
+        Route::delete('/questions/{question}', [AdminQuestionBankController::class, 'destroyQuestion'])->name('questions.destroy');
     });
 
     Route::prefix('guaranteed-notes')->name('guaranteed-notes.')->group(function () {
         Route::get('/', [AdminGuaranteedNotesController::class, 'index'])->name('index');
+        Route::post('/', [AdminGuaranteedNotesController::class, 'store'])->name('store');
+        Route::put('/{note}', [AdminGuaranteedNotesController::class, 'update'])->name('update');
+        Route::delete('/{note}', [AdminGuaranteedNotesController::class, 'destroy'])->name('destroy');
 
         // Reuses WebsiteController's Faq/Testimonial CRUD (note-scoped --
         // see storeFaq/storeTestimonial) under this prefix rather than

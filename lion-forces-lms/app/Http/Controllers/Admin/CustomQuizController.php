@@ -20,7 +20,7 @@ use Inertia\Response;
  * feature only ever had a toggle buried in Settings and no page of its
  * own. This is read-only oversight (who's using it, with what filters,
  * what they scored) plus pointers to the two places admin actually
- * manages the pieces underneath it -- Content Library for the question
+ * manages the pieces underneath it -- Question Bank for the question
  * bank/Subjects/Topics, and Settings for the on/off switch -- rather than
  * duplicating either of those screens here.
  */

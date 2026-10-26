@@ -5,28 +5,25 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\ActivityLog;
 use App\Models\Course;
-use App\Models\NotesBank;
 use App\Models\QuestionBank;
 use App\Models\Subject;
 use App\Models\Topic;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Str;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
-class ContentLibraryController extends Controller
+class QuestionBankController extends Controller
 {
     public function index(Request $request): Response
     {
-        return Inertia::render('Admin/ContentLibrary/Index', [
+        return Inertia::render('Admin/QuestionBank/Index', [
             'questions' => QuestionBank::with(['subject', 'topic', 'course:id,title', 'options'])
                 ->when($request->subject_id, fn ($q, $s) => $q->where('subject_id', $s))
                 ->latest()
                 ->paginate(10, ['*'], 'questions_page')
-                ->withQueryString(),
-            'notes' => NotesBank::with('subject')
-                ->latest()
-                ->paginate(10, ['*'], 'notes_page')
                 ->withQueryString(),
             'subjects' => Subject::orderBy('name')->get(),
             // Required on every question going forward (see this
@@ -49,7 +46,7 @@ class ContentLibraryController extends Controller
     public function storeSubject(Request $request)
     {
         $data = $request->validate(['name' => 'required|string|max:100|unique:subjects,name']);
-        Subject::create(['name' => $data['name'], 'slug' => \Illuminate\Support\Str::slug($data['name'])]);
+        Subject::create(['name' => $data['name'], 'slug' => Str::slug($data['name'])]);
 
         return back()->with('success', 'Subject added.');
     }
@@ -68,29 +65,17 @@ class ContentLibraryController extends Controller
     // --- Question Bank ---
     public function storeQuestion(Request $request)
     {
-        $data = $request->validate([
-            'subject_id' => 'nullable|exists:subjects,id',
-            'topic_id' => 'nullable|exists:topics,id',
-            'course_id' => 'required|exists:courses,id',
-            'question_text' => 'required|string|max:2000',
-            'explanation' => 'nullable|string|max:2000',
-            'difficulty' => 'required|in:easy,medium,hard',
-            'options' => 'required|array|min:2',
-            'options.*.option_text' => 'required|string|max:500',
-            'options.*.is_correct' => 'boolean',
-        ]);
+        $data = $this->validateQuestion($request);
+        $this->assertOptionsHaveContent($data['options']);
 
         $question = QuestionBank::create([
-            ...collect($data)->except('options')->toArray(),
+            ...collect($data)->except(['options', 'image'])->toArray(),
+            'image_path' => $request->hasFile('image') ? $request->file('image')->store('question-bank', 'public') : null,
             'created_by' => $request->user()->id,
         ]);
 
         foreach ($data['options'] as $i => $option) {
-            $question->options()->create([
-                'option_text' => $option['option_text'],
-                'is_correct' => $option['is_correct'] ?? false,
-                'order' => $i + 1,
-            ]);
+            $question->options()->create($this->optionAttributes($request, $i, $option));
         }
 
         ActivityLog::record('added', 'MCQ', $question->id, 'MCQ added.');
@@ -106,6 +91,9 @@ class ContentLibraryController extends Controller
     // matched by name (case-insensitive) or created on the fly, same as
     // typing a new one into the single-question form's dropdowns would
     // require doing by hand first -- this does it inline per row instead.
+    // Images aren't part of a CSV row -- those questions get added as
+    // plain text, same as today, and an admin can attach an image to one
+    // afterwards via Edit.
     public function bulkUploadQuestions(Request $request)
     {
         $data = $request->validate([
@@ -188,28 +176,21 @@ class ContentLibraryController extends Controller
 
     public function updateQuestion(Request $request, QuestionBank $question)
     {
-        $data = $request->validate([
-            'subject_id' => 'nullable|exists:subjects,id',
-            'topic_id' => 'nullable|exists:topics,id',
-            'course_id' => 'required|exists:courses,id',
-            'question_text' => 'required|string|max:2000',
-            'explanation' => 'nullable|string|max:2000',
-            'difficulty' => 'required|in:easy,medium,hard',
-            'options' => 'required|array|min:2',
-            'options.*.id' => 'nullable|exists:question_options,id',
-            'options.*.option_text' => 'required|string|max:500',
-            'options.*.is_correct' => 'boolean',
-        ]);
+        $data = $this->validateQuestion($request);
+        $this->assertOptionsHaveContent($data['options']);
 
-        $question->update(collect($data)->except('options')->toArray());
+        $update = collect($data)->except(['options', 'image'])->toArray();
+        if ($request->hasFile('image')) {
+            if ($question->image_path) {
+                Storage::disk('public')->delete($question->image_path);
+            }
+            $update['image_path'] = $request->file('image')->store('question-bank', 'public');
+        }
+        $question->update($update);
 
         $question->options()->delete();
         foreach ($data['options'] as $i => $option) {
-            $question->options()->create([
-                'option_text' => $option['option_text'],
-                'is_correct' => $option['is_correct'] ?? false,
-                'order' => $i + 1,
-            ]);
+            $question->options()->create($this->optionAttributes($request, $i, $option));
         }
 
         ActivityLog::record('edited', 'MCQ', $question->id, 'MCQ updated.');
@@ -224,42 +205,52 @@ class ContentLibraryController extends Controller
         return back()->with('success', 'Question removed from the bank.');
     }
 
-    // --- Notes Bank ---
-    public function storeNote(Request $request)
+    // Shared by storeQuestion/updateQuestion. image.*.* fields are files
+    // and validated separately per index below since Laravel's nested file
+    // input names (options[0][image]) don't validate well with a plain
+    // array rule alongside the other option fields.
+    private function validateQuestion(Request $request): array
     {
-        $data = $request->validate([
+        return $request->validate([
             'subject_id' => 'nullable|exists:subjects,id',
-            'title' => 'required|string|max:255',
-            'content' => 'nullable|string',
-            'price' => 'nullable|numeric|min:0',
-            'is_published' => 'boolean',
+            'topic_id' => 'nullable|exists:topics,id',
+            'course_id' => 'required|exists:courses,id',
+            'question_text' => 'required|string|max:2000',
+            'explanation' => 'nullable|string|max:2000',
+            'difficulty' => 'required|in:easy,medium,hard',
+            'image' => 'nullable|image|max:4096',
+            'options' => 'required|array|min:2',
+            'options.*.id' => 'nullable|exists:question_options,id',
+            'options.*.option_text' => 'nullable|string|max:500',
+            'options.*.existing_image_path' => 'nullable|string',
+            'options.*.is_correct' => 'boolean',
+            'options.*.image' => 'nullable|image|max:4096',
         ]);
-
-        $note = NotesBank::create($data + ['created_by' => $request->user()->id]);
-        ActivityLog::record('added', 'Note', $note->id, "Note \"{$note->title}\" was added.");
-
-        return back()->with('success', 'Note added to the bank.');
     }
 
-    public function updateNote(Request $request, NotesBank $note)
+    // A picture-only option (no text) is fine -- but an option with
+    // neither text nor any image (newly uploaded or carried over from
+    // before) isn't a usable answer choice at all.
+    private function assertOptionsHaveContent(array $options): void
     {
-        $note->update($request->validate([
-            'subject_id' => 'nullable|exists:subjects,id',
-            'title' => 'required|string|max:255',
-            'content' => 'nullable|string',
-            'price' => 'nullable|numeric|min:0',
-            'is_published' => 'boolean',
-        ]));
-
-        ActivityLog::record('edited', 'Note', $note->id, "Note \"{$note->title}\" was updated.");
-
-        return back()->with('success', 'Note updated. Change reflects in every course using it.');
+        foreach ($options as $i => $option) {
+            $hasText = trim((string) ($option['option_text'] ?? '')) !== '';
+            $hasImage = ! empty($option['existing_image_path']) || ! empty($option['image']);
+            if (! $hasText && ! $hasImage) {
+                throw ValidationException::withMessages(['options' => 'Each option needs either text or an image.']);
+            }
+        }
     }
 
-    public function destroyNote(NotesBank $note)
+    private function optionAttributes(Request $request, int $i, array $option): array
     {
-        $note->delete();
-
-        return back()->with('success', 'Note removed from the bank.');
+        return [
+            'option_text' => $option['option_text'] ?? null,
+            'image_path' => $request->hasFile("options.{$i}.image")
+                ? $request->file("options.{$i}.image")->store('question-bank/options', 'public')
+                : ($option['existing_image_path'] ?? null),
+            'is_correct' => $option['is_correct'] ?? false,
+            'order' => $i + 1,
+        ];
     }
 }
