@@ -146,7 +146,7 @@ export default function FlashcardsAllIndex({ flashcards, courses, subjects }: Pr
                         <tr>
                             <th className="px-5 py-3">Card</th>
                             <th className="px-5 py-3">Course</th>
-                            <th className="px-5 py-3">Category</th>
+                            <th className="px-5 py-3">Subject</th>
                             <th className="px-5 py-3">Status</th>
                             <th className="px-5 py-3" />
                         </tr>
