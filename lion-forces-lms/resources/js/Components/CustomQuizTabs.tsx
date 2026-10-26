@@ -1,12 +1,13 @@
 import { Link } from '@inertiajs/react';
 
-type Tab = 'create' | 'tests' | 'favorites' | 'browse';
+type Tab = 'create' | 'tests' | 'favorites' | 'browse' | 'progress';
 
 const TABS: { key: Tab; label: string; href: string }[] = [
     { key: 'create', label: 'Create Test', href: '/portal/custom-quiz' },
     { key: 'tests', label: 'Tests', href: '/portal/custom-quiz/tests' },
     { key: 'favorites', label: 'Favorites', href: '/portal/favourite-questions' },
     { key: 'browse', label: 'Browse', href: '/portal/custom-quiz/browse' },
+    { key: 'progress', label: 'Progress', href: '/portal/custom-quiz/progress' },
 ];
 
 // Client reference: UWorld's QBank app keeps Create Test / Tests /

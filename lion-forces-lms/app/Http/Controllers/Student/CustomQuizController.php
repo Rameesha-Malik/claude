@@ -163,6 +163,129 @@ class CustomQuizController extends Controller
         ]);
     }
 
+    // UWorld's own "Progress" tab -- cross-assessment analytics over the
+    // same question pool browse() exposes. TestAttemptAnswer already
+    // spans every assessment type this app has (Quiz, Practice Test,
+    // Mock Exam, Staged Test, Custom Quiz -- see matchingQuestionsQuery()
+    // above), so a question answered via a regular Quiz still counts
+    // here, not just ones answered inside a Custom Quiz. Gated the same
+    // way browse() is (a real purchased quiz module, no free-trial
+    // carve-out), since detailed analytics over the full bank would
+    // undercut the paywall far more than a 5-question quiz cap does.
+    //
+    // Computed entirely in PHP Collection logic rather than SQL window
+    // functions -- SQLite has none of the ones MySQL offers, and this
+    // app has already hit that exact portability gap twice this session
+    // (see LeaderboardController and the HAVING fix in create() above).
+    public function progress(Request $request): Response
+    {
+        abort_unless(FeatureFlags::enabled('custom_quiz'), 404);
+
+        $userId = $request->user()->id;
+
+        $courseIds = Course::whereHas('enrollments', fn ($q) => $q->where('user_id', $userId)->active()->grantingModule('quiz'))
+            ->where('quizzes_enabled', true)
+            ->pluck('id');
+
+        if ($courseIds->isEmpty()) {
+            return Inertia::render('Student/CustomQuiz/Progress', ['hasAccess' => false, 'stats' => null]);
+        }
+
+        $poolIds = QuestionBank::whereIn('course_id', $courseIds)->pluck('id');
+        $totalQuestions = $poolIds->count();
+
+        // Every answer this student has ever submitted for a question in
+        // this pool, oldest first per question -- grouped so each
+        // question's own history (first try, every retry, latest
+        // standing) can be read off in plain PHP instead of a SQL
+        // aggregate.
+        $answers = TestAttemptAnswer::whereIn('question_id', $poolIds)
+            ->whereHas('attempt', fn ($q) => $q->where('user_id', $userId))
+            ->orderBy('created_at')
+            ->get()
+            ->groupBy('question_id');
+
+        $usedCount = $answers->count();
+        $firstTryCount = 0;
+        $everWrongCount = 0;
+        $wrongToRightCount = 0;
+        $regressionCount = 0;
+        $latestCorrectCount = 0;
+        $skippedCount = 0;
+        $totalAttempts = 0;
+
+        foreach ($answers as $group) {
+            $ordered = $group->values();
+            $first = $ordered->first();
+            $latest = $ordered->last();
+            $totalAttempts += $ordered->count();
+
+            $everWrong = $ordered->contains(fn ($a) => $a->is_correct === false);
+            $everCorrect = $ordered->contains(fn ($a) => $a->is_correct === true);
+            $latestCorrect = $latest->is_correct === true;
+
+            if ($first->is_correct === true) {
+                $firstTryCount++;
+            }
+
+            if ($everWrong) {
+                $everWrongCount++;
+                if ($latestCorrect) {
+                    $wrongToRightCount++;
+                }
+            }
+
+            // Got it right at some point, but the most recent attempt on
+            // this exact question slipped back to wrong -- a worse
+            // signal than "never learned it" since it means the student
+            // forgot something they already had.
+            if ($everCorrect && ! $latestCorrect) {
+                $regressionCount++;
+            }
+
+            if ($latestCorrect) {
+                $latestCorrectCount++;
+            }
+
+            if ($latest->selected_option_id === null) {
+                $skippedCount++;
+            }
+        }
+
+        $customQuizAttempts = TestAttempt::where('user_id', $userId)
+            ->where('attemptable_type', CustomQuizConfig::class)
+            ->whereNotNull('submitted_at')
+            ->orderByDesc('submitted_at')
+            ->get();
+
+        return Inertia::render('Student/CustomQuiz/Progress', [
+            'hasAccess' => true,
+            'stats' => [
+                'totalQuestions' => $totalQuestions,
+                'usedCount' => $usedCount,
+                'unusedCount' => max($totalQuestions - $usedCount, 0),
+                'bankCoveragePct' => $totalQuestions > 0 ? round($usedCount / $totalQuestions * 100, 1) : 0,
+                'uniqueAccuracyPct' => $usedCount > 0 ? round($latestCorrectCount / $usedCount * 100, 1) : 0,
+                'firstTryPct' => $usedCount > 0 ? round($firstTryCount / $usedCount * 100, 1) : 0,
+                'wrongToRightCount' => $wrongToRightCount,
+                'wrongToRightPct' => $everWrongCount > 0 ? round($wrongToRightCount / $everWrongCount * 100, 1) : 0,
+                'regressionsCount' => $regressionCount,
+                'avgRetries' => $usedCount > 0 ? round($totalAttempts / $usedCount, 1) : 0,
+                'correctCount' => $latestCorrectCount,
+                'incorrectCount' => max($usedCount - $latestCorrectCount - $skippedCount, 0),
+                'skippedCount' => $skippedCount,
+                'sessionsCount' => $customQuizAttempts->count(),
+                // percentage is cast decimal:2 (a string like "65.00") --
+                // round to a plain number so the tile shows "65%", not
+                // "65.00%".
+                'lastTestPercentage' => $customQuizAttempts->first()?->percentage !== null
+                    ? round((float) $customQuizAttempts->first()->percentage, 1)
+                    : null,
+                'favoritesCount' => \App\Models\SavedQuestion::where('user_id', $userId)->whereIn('question_id', $poolIds)->count(),
+            ],
+        ]);
+    }
+
     public function store(Request $request)
     {
         abort_unless(FeatureFlags::enabled('custom_quiz'), 404);
