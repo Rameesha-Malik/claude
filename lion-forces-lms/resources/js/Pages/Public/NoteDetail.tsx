@@ -1,7 +1,9 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head, Link, usePage } from '@inertiajs/react';
 import { useState } from 'react';
 import LiteMarkdown from '@/Components/LiteMarkdown';
+import ProtectedPdfViewer from '@/Components/ProtectedPdfViewer';
 import PublicLayout from '@/Layouts/PublicLayout';
+import { PageProps } from '@/types';
 
 interface NoteRecord {
     id: number; title: string; content: string | null; file_path: string | null; price: string | null; is_paid: boolean; unlocked: boolean;
@@ -28,6 +30,8 @@ function FaqRow({ faq }: { faq: FaqItem }) {
 }
 
 export default function NoteDetail({ note, faqs, testimonials }: Props) {
+    const { auth } = usePage<PageProps>().props;
+
     return (
         <PublicLayout>
             <Head title={note.title} />
@@ -58,14 +62,12 @@ export default function NoteDetail({ note, faqs, testimonials }: Props) {
                             <>
                                 {note.content && <LiteMarkdown text={note.content} className="text-text-secondary" />}
                                 {note.file_path && (
-                                    <a
-                                        href={`/storage/${note.file_path}`}
-                                        target="_blank"
-                                        rel="noopener noreferrer"
-                                        className="mt-5 inline-flex items-center gap-2 rounded-full bg-primary px-6 py-3 text-sm font-bold uppercase tracking-wide text-on-primary hover:bg-primary-hover"
-                                    >
-                                        Download PDF
-                                    </a>
+                                    <div className="mt-5">
+                                        <ProtectedPdfViewer
+                                            src={`/notes/${note.id}/file`}
+                                            watermarkLines={auth.user ? [auth.user.name, auth.user.email] : undefined}
+                                        />
+                                    </div>
                                 )}
                             </>
                         ) : (

@@ -225,6 +225,33 @@ class PublicSiteController extends Controller
         ]);
     }
 
+    // Streams the raw PDF bytes for the protected in-page viewer
+    // (resources/js/Components/ProtectedPdfViewer.tsx) -- fetched via JS,
+    // never a navigable link, and the file itself lives on the 'local'
+    // disk so there's no direct /storage/... URL to it at all. Same
+    // unlock rule as noteDetail(), plus an admin bypass so an admin can
+    // preview what they just uploaded without needing a NoteAssignment.
+    public function noteFile(Request $request, \App\Models\NotesBank $note)
+    {
+        abort_unless(\App\Support\FeatureFlags::enabled('notes'), 404);
+        abort_unless($note->is_published, 404);
+        abort_unless($note->file_path, 404);
+
+        $isAdmin = $request->user()?->user_type === 'admin';
+        $unlocked = $isAdmin || ! $note->isPaid() || $this->unlockedNoteIds($request)->contains($note->id);
+        abort_unless($unlocked, 403);
+
+        abort_unless(\Illuminate\Support\Facades\Storage::disk('local')->exists($note->file_path), 404);
+
+        return response(\Illuminate\Support\Facades\Storage::disk('local')->get($note->file_path), 200, [
+            'Content-Type' => 'application/pdf',
+            'Content-Disposition' => 'inline',
+            'Cache-Control' => 'no-store, no-cache, must-revalidate, private',
+            'Pragma' => 'no-cache',
+            'X-Frame-Options' => 'SAMEORIGIN',
+        ]);
+    }
+
     // Access = free, or already granted via a purchase/package assignment
     // (App\Models\NoteAssignment -- the same tier-2 "Guaranteed Notes"
     // mechanism used for package-based access). Shared by notes() and

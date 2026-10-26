@@ -24,12 +24,15 @@ function NoteModal({ note, subjects, onClose }: { note: Note | null; subjects: S
         content: note?.content ?? '',
         price: note?.price ?? '',
         is_published: note?.is_published ?? true,
+        pdf: null as File | null,
+        remove_pdf: false,
     });
 
     function submit(e: FormEvent) {
         e.preventDefault();
-        if (note) form.put(`/admin/guaranteed-notes/${note.id}`, { onSuccess: onClose });
-        else form.post('/admin/guaranteed-notes', { onSuccess: onClose });
+        const options = { forceFormData: true, onSuccess: onClose };
+        if (note) form.put(`/admin/guaranteed-notes/${note.id}`, options);
+        else form.post('/admin/guaranteed-notes', options);
     }
 
     return (
@@ -55,6 +58,25 @@ function NoteModal({ note, subjects, onClose }: { note: Note | null; subjects: S
                         <input type="checkbox" checked={form.data.is_published} onChange={(e) => form.setData('is_published', e.target.checked)} />
                         Published (visible on the public Notes page)
                     </label>
+                    <div>
+                        <label className="mb-1 block text-xs font-bold uppercase text-text-muted">Guaranteed Note PDF (optional)</label>
+                        <input
+                            type="file"
+                            accept="application/pdf"
+                            className="w-full text-sm"
+                            onChange={(e) => form.setData('pdf', e.target.files?.[0] ?? null)}
+                        />
+                        <p className="mt-1 text-xs text-text-muted">
+                            Shown to students in a protected, non-downloadable viewer. Leave empty to keep the current file.
+                        </p>
+                        {form.errors.pdf && <p className="text-xs text-danger">{form.errors.pdf}</p>}
+                    </div>
+                    {note?.file_path && !form.data.pdf && (
+                        <label className="flex items-center gap-2 text-sm text-danger">
+                            <input type="checkbox" checked={form.data.remove_pdf} onChange={(e) => form.setData('remove_pdf', e.target.checked)} />
+                            Remove attached PDF
+                        </label>
+                    )}
                     <button type="submit" disabled={form.processing} className="w-full rounded-lg bg-primary px-4 py-2.5 text-sm font-bold uppercase text-on-primary hover:bg-primary-hover disabled:opacity-50">
                         {form.processing ? 'Saving…' : note ? 'Save Changes' : 'Add Note'}
                     </button>
@@ -128,7 +150,7 @@ export default function GuaranteedNotesIndex({ notes, subjects, filters, stats }
                     <thead className="border-b border-border bg-surface-sunken text-xs uppercase tracking-wide text-text-muted">
                         <tr>
                             <th className="px-5 py-3">Title &amp; Description</th>
-                            <th className="px-5 py-3">Category</th>
+                            <th className="px-5 py-3">Subject</th>
                             <th className="px-5 py-3">Type</th>
                             <th className="px-5 py-3">Access</th>
                             <th className="px-5 py-3">Status</th>

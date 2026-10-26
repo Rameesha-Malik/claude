@@ -70,6 +70,7 @@ Route::get('/how-to-buy', [PublicSiteController::class, 'howToBuy'])->name('how-
 Route::get('/practice-tests', [PublicSiteController::class, 'practiceTests'])->name('practice-tests');
 Route::get('/notes', [PublicSiteController::class, 'notes'])->name('notes');
 Route::get('/notes/{note}', [PublicSiteController::class, 'noteDetail'])->name('notes.show');
+Route::get('/notes/{note}/file', [PublicSiteController::class, 'noteFile'])->name('notes.file');
 Route::get('/bundles', [PublicSiteController::class, 'bundles'])->name('bundles');
 Route::get('/bundles/{bundle:slug}', [PublicSiteController::class, 'bundleDetail'])->name('bundles.show');
 Route::get('/pages/{slug}', [PublicSiteController::class, 'page'])->name('pages.show');

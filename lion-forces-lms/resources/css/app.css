@@ -11,3 +11,11 @@
     font-family: var(--font-sans);
   }
 }
+
+/* Blocks the "Ctrl+P -> Save as PDF" bypass on the protected note viewer --
+   canvas content would otherwise print/save fine, so just hide it. */
+@media print {
+  .protected-pdf-viewer {
+    display: none !important;
+  }
+}

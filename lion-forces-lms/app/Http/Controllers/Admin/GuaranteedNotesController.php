@@ -11,6 +11,7 @@ use App\Models\NotesBank;
 use App\Models\Subject;
 use App\Models\Testimonial;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -55,7 +56,17 @@ class GuaranteedNotesController extends Controller
             'content' => 'nullable|string',
             'price' => 'nullable|numeric|min:0',
             'is_published' => 'boolean',
+            'pdf' => 'nullable|file|mimes:pdf|max:20480',
         ]);
+
+        // 'local' disk, not 'public' -- a note's PDF is never reachable by a
+        // direct /storage/... URL. Students only ever see it rendered
+        // page-by-page through the protected viewer (see
+        // PublicSiteController::noteFile()).
+        if ($request->hasFile('pdf')) {
+            $data['file_path'] = $request->file('pdf')->store('notes-bank', 'local');
+        }
+        unset($data['pdf']);
 
         $note = NotesBank::create($data + ['created_by' => $request->user()->id]);
         ActivityLog::record('added', 'Note', $note->id, "Note \"{$note->title}\" was added.");
@@ -65,13 +76,30 @@ class GuaranteedNotesController extends Controller
 
     public function update(Request $request, NotesBank $note)
     {
-        $note->update($request->validate([
+        $data = $request->validate([
             'subject_id' => 'nullable|exists:subjects,id',
             'title' => 'required|string|max:255',
             'content' => 'nullable|string',
             'price' => 'nullable|numeric|min:0',
             'is_published' => 'boolean',
-        ]));
+            'pdf' => 'nullable|file|mimes:pdf|max:20480',
+            'remove_pdf' => 'boolean',
+        ]);
+
+        if ($request->hasFile('pdf')) {
+            if ($note->file_path) {
+                Storage::disk('local')->delete($note->file_path);
+            }
+            $data['file_path'] = $request->file('pdf')->store('notes-bank', 'local');
+        } elseif ($data['remove_pdf'] ?? false) {
+            if ($note->file_path) {
+                Storage::disk('local')->delete($note->file_path);
+            }
+            $data['file_path'] = null;
+        }
+        unset($data['pdf'], $data['remove_pdf']);
+
+        $note->update($data);
 
         ActivityLog::record('edited', 'Note', $note->id, "Note \"{$note->title}\" was updated.");
 
@@ -80,6 +108,9 @@ class GuaranteedNotesController extends Controller
 
     public function destroy(NotesBank $note)
     {
+        if ($note->file_path) {
+            Storage::disk('local')->delete($note->file_path);
+        }
         $note->delete();
 
         return back()->with('success', 'Note removed.');
