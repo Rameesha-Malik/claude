@@ -21,6 +21,11 @@ interface QuizSummary {
     latest_attempt_id: number | null; section_id: number | null;
 }
 interface FlashcardItem { id: number; front_text: string; back_text: string; subject: { id: number; name: string } | null }
+interface QuestionBankOption { id: number; option_text: string | null; image_path: string | null; is_correct: boolean }
+interface QuestionBankItem {
+    id: number; question_text: string; image_path: string | null; explanation: string | null; difficulty: string;
+    subject: { id: number; name: string } | null; topic: { id: number; name: string } | null; options: QuestionBankOption[];
+}
 interface MockExamSummary {
     id: number; title: string; target_exam_name: string | null; total_duration_minutes: number | null; sections_count: number;
     latest_attempt_id: number | null;
@@ -41,7 +46,7 @@ interface Course {
     id: number; slug: string; title: string; lessons: Lesson[]; sections: Section[]; shared_notes: Note[];
     instructor: { name: string } | null; practice_tests: PracticeTestSummary[]; quizzes: QuizSummary[];
     mock_exams: MockExamSummary[]; staged_tests: StagedTestSummary[]; flashcards: FlashcardItem[];
-    assignments: AssignmentItem[];
+    assignments: AssignmentItem[]; question_bank: QuestionBankItem[];
     quizzes_enabled: boolean; flashcards_enabled: boolean; tests_enabled: boolean; assignments_enabled: boolean;
     /** False when this enrollment's modules don't include "lectures" -- Notes and Flashcards ride along with it too. */
     lectures_enabled: boolean;
@@ -60,7 +65,7 @@ interface Props {
     enrollmentStatus?: string | null;
 }
 
-const TABS = ['Lectures', 'Notes', 'Quizzes', 'Flashcards', 'Tests', 'Assignments', 'Q&A'] as const;
+const TABS = ['Lectures', 'Notes', 'Quizzes', 'Question Bank', 'Flashcards', 'Tests', 'Assignments', 'Q&A'] as const;
 type Tab = (typeof TABS)[number];
 
 // Lectures is the sensible default for a full enrollment, but a Quiz Only
@@ -313,7 +318,7 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
     // are already further narrowed server-side to just what they paid for.
     const visibleTabs = TABS.filter((t) => {
         if (t === 'Lectures' || t === 'Notes') return course.lectures_enabled;
-        if (t === 'Quizzes') return course.quizzes_enabled;
+        if (t === 'Quizzes' || t === 'Question Bank') return course.quizzes_enabled;
         if (t === 'Flashcards') return course.flashcards_enabled;
         if (t === 'Tests') return course.tests_enabled;
         if (t === 'Assignments') return course.assignments_enabled;
@@ -652,6 +657,8 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
                 </RevealOnScroll>
             )}
 
+            {tab === 'Question Bank' && <QuestionBankPanel questions={course.question_bank} />}
+
             {tab === 'Flashcards' && <FlashcardsPanel cards={course.flashcards} />}
 
             {tab === 'Assignments' && (
@@ -839,6 +846,86 @@ function TestCard({
 // flip-tiles; now cards group by subject (category chips, skipped
 // entirely when there's only one category to choose from) and study one
 // card at a time with Prev/Next, the way a real flashcard deck works.
+// Pure reading material, not an attempt -- every answer is shown right
+// away, nothing is scored or recorded. Distinct from both the admin-built
+// Quizzes tab above (a fixed, named quiz to attempt) and Custom Quiz
+// (random-pick, repeatable, scored) -- this is just the bank itself, for
+// a student who wants to study the raw question/answer pairs directly.
+function QuestionBankPanel({ questions }: { questions: QuestionBankItem[] }) {
+    const subjects = Array.from(new Set(questions.map((q) => q.subject?.name ?? 'General')));
+    const [subject, setSubject] = useState<string | null>(null);
+
+    if (questions.length === 0) {
+        return (
+            <div className="rounded-3xl border border-dashed border-border bg-surface p-8 text-center text-text-secondary">
+                No questions in this course's bank yet.
+            </div>
+        );
+    }
+
+    const filtered = subject ? questions.filter((q) => (q.subject?.name ?? 'General') === subject) : questions;
+
+    return (
+        <div>
+            {subjects.length > 1 && (
+                <div className="mb-6 flex flex-wrap gap-2">
+                    <button
+                        onClick={() => setSubject(null)}
+                        className={`rounded-full px-4 py-2 text-sm font-bold uppercase tracking-wide transition-colors ${
+                            subject === null ? 'bg-primary text-on-primary' : 'bg-surface-sunken text-text-secondary hover:bg-primary-subtle'
+                        }`}
+                    >
+                        All <span className="opacity-70">({questions.length})</span>
+                    </button>
+                    {subjects.map((name) => (
+                        <button
+                            key={name}
+                            onClick={() => setSubject(name)}
+                            className={`rounded-full px-4 py-2 text-sm font-bold uppercase tracking-wide transition-colors ${
+                                subject === name ? 'bg-primary text-on-primary' : 'bg-surface-sunken text-text-secondary hover:bg-primary-subtle'
+                            }`}
+                        >
+                            {name} <span className="opacity-70">({questions.filter((q) => (q.subject?.name ?? 'General') === name).length})</span>
+                        </button>
+                    ))}
+                </div>
+            )}
+
+            <RevealOnScroll staggerMs={30} className="space-y-3">
+                {filtered.map((q) => (
+                    <div key={q.id} className="rounded-2xl border border-border bg-surface p-5">
+                        <div className="mb-2 flex flex-wrap gap-2">
+                            {q.subject && <span className="rounded-full bg-primary-subtle px-2 py-0.5 text-xs font-bold text-primary">{q.subject.name}</span>}
+                            {q.topic && <span className="rounded-full bg-surface-sunken px-2 py-0.5 text-xs font-bold text-text-secondary">{q.topic.name}</span>}
+                            <span className="rounded-full bg-surface-sunken px-2 py-0.5 text-xs font-bold uppercase text-text-muted">{q.difficulty}</span>
+                        </div>
+                        {q.image_path && (
+                            <img src={`/storage/${q.image_path}`} alt="" className="mb-2 max-h-48 rounded-lg border border-border" />
+                        )}
+                        <p className="font-medium text-text">{q.question_text}</p>
+                        <ul className="mt-3 space-y-1.5 text-sm">
+                            {q.options.map((o) => (
+                                <li
+                                    key={o.id}
+                                    className={`rounded-lg px-3 py-1.5 ${o.is_correct ? 'bg-success-bg font-semibold text-success' : 'bg-surface-sunken text-text-secondary'}`}
+                                >
+                                    {o.is_correct && '✓ '}
+                                    {o.image_path ? (
+                                        <img src={`/storage/${o.image_path}`} alt="" className="mt-1 inline-block max-h-16 rounded border border-border align-middle" />
+                                    ) : (
+                                        o.option_text
+                                    )}
+                                </li>
+                            ))}
+                        </ul>
+                        {q.explanation && <p className="mt-3 text-sm italic text-text-secondary">{q.explanation}</p>}
+                    </div>
+                ))}
+            </RevealOnScroll>
+        </div>
+    );
+}
+
 function FlashcardsPanel({ cards }: { cards: FlashcardItem[] }) {
     const categories = Array.from(new Set(cards.map((c) => c.subject?.name ?? 'General')));
     const [category, setCategory] = useState<string | null>(categories[0] ?? null);

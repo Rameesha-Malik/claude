@@ -125,6 +125,15 @@ class Course extends Model
         return $this->hasMany(CourseQuestion::class);
     }
 
+    // The shared Question Bank's own questions tagged to this course --
+    // not the Q&A thread above. Read-only study material for a student
+    // who bought this course's Quiz module, separate from both the
+    // admin-curated Quiz and student-generated Custom Quiz.
+    public function questionBank(): HasMany
+    {
+        return $this->hasMany(QuestionBank::class);
+    }
+
     public function testimonials(): HasMany
     {
         return $this->hasMany(Testimonial::class);

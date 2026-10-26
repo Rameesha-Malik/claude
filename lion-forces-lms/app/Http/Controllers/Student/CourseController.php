@@ -58,6 +58,7 @@ class CourseController extends Controller
             'flashcards' => fn ($q) => $q->where('status', 'approved')->with('subject:id,name'),
             'assignments' => fn ($q) => $q->where('is_active', true)->with(['submissions' => fn ($q2) => $q2->where('user_id', $user->id)]),
             'approvedReviews',
+            'questionBank' => fn ($q) => $q->with(['options', 'subject:id,name', 'topic:id,name'])->orderBy('subject_id'),
         ]);
         $course->loadCount(['enrollments' => fn ($q) => $q->where('status', 'active')]);
         $this->attachLatestAttempts($course, $user->id);
