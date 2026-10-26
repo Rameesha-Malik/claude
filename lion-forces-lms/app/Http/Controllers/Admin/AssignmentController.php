@@ -24,6 +24,17 @@ class AssignmentController extends Controller
         ]);
     }
 
+    public function adminIndex(): Response
+    {
+        return Inertia::render('Admin/Assignments/AllIndex', [
+            'assignments' => Assignment::with('course:id,title')->withCount([
+                'submissions',
+                'submissions as ungraded_count' => fn ($q) => $q->where('status', 'submitted'),
+            ])->orderByDesc('id')->get(),
+            'courses' => Course::orderBy('title')->get(['id', 'title']),
+        ]);
+    }
+
     public function store(Request $request, Course $course)
     {
         $data = $this->validateAssignment($request);

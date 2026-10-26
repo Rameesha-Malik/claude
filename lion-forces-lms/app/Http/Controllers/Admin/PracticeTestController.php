@@ -21,6 +21,14 @@ class PracticeTestController extends Controller
         ]);
     }
 
+    public function adminIndex(): Response
+    {
+        return Inertia::render('Admin/PracticeTests/AllIndex', [
+            'tests' => PracticeTest::with('course:id,title')->withCount('questions')->orderByDesc('id')->get(),
+            'courses' => Course::orderBy('title')->get(['id', 'title']),
+        ]);
+    }
+
     public function create(Course $course): Response
     {
         return $this->form($course);

@@ -21,6 +21,15 @@ class FlashcardController extends Controller
         ]);
     }
 
+    public function adminIndex(): Response
+    {
+        return Inertia::render('Admin/Flashcards/AllIndex', [
+            'flashcards' => Flashcard::with(['course:id,title', 'subject:id,name'])->orderByDesc('id')->get(),
+            'courses' => Course::orderBy('title')->get(['id', 'title']),
+            'subjects' => Subject::orderBy('name')->get(['id', 'name']),
+        ]);
+    }
+
     public function store(Request $request, Course $course)
     {
         $data = $request->validate([

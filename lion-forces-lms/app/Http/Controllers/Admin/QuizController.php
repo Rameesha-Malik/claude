@@ -22,6 +22,14 @@ class QuizController extends Controller
         ]);
     }
 
+    public function adminIndex(): Response
+    {
+        return Inertia::render('Admin/Quizzes/AllIndex', [
+            'quizzes' => Quiz::with(['course:id,title', 'section:id,title'])->withCount('questions')->orderByDesc('id')->get(),
+            'courses' => Course::orderBy('title')->get(['id', 'title']),
+        ]);
+    }
+
     public function create(Course $course): Response
     {
         return $this->form($course);

@@ -215,6 +215,16 @@ Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->nam
 
     Route::middleware('not.content_manager')->get('/packages', [AdminCourseController::class, 'packagesIndex'])->name('packages.index');
 
+    // Cross-course aggregate views -- one list of every record of a kind
+    // across all courses, same pattern as /admin/packages above. The
+    // per-course routes under courses/{course}/... (below) are untouched;
+    // these are additional read/create-launchpad/delete surfaces only.
+    Route::get('/practice-tests', [AdminPracticeTestController::class, 'adminIndex'])->name('practice-tests.index');
+    Route::get('/quizzes', [AdminQuizController::class, 'adminIndex'])->name('quizzes.index');
+    Route::get('/mock-exams', [AdminMockExamController::class, 'adminIndex'])->name('mock-exams.index');
+    Route::get('/flashcards', [AdminFlashcardController::class, 'adminIndex'])->name('flashcards.index');
+    Route::get('/assignments', [AdminAssignmentController::class, 'adminIndex'])->name('assignments.index');
+
     // "Full Test config" -- see StagedTestController's own comment.
     Route::prefix('full-test-config')->name('full-test-config.')->group(function () {
         Route::get('/', [AdminStagedTestController::class, 'index'])->name('index');

@@ -22,6 +22,14 @@ class MockExamController extends Controller
         ]);
     }
 
+    public function adminIndex(): Response
+    {
+        return Inertia::render('Admin/MockExams/AllIndex', [
+            'exams' => MockExam::with('course:id,title')->withCount('sections')->orderByDesc('id')->get(),
+            'courses' => Course::orderBy('title')->get(['id', 'title']),
+        ]);
+    }
+
     public function create(Course $course): Response
     {
         return $this->form($course);
