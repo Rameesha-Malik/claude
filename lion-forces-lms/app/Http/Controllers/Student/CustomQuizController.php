@@ -123,6 +123,46 @@ class CustomQuizController extends Controller
         ]);
     }
 
+    // UWorld's own "Browse questions" view -- distinct from Create Test's
+    // Subject picker (which only ever shows a subject name + count to
+    // build filters from, never an actual question) and from Favorites
+    // (only questions the student starred). This is read-only exploration
+    // of the real question bank: pick a subject, see every question in
+    // it with its answer. Gated the same way the per-course Question Bank
+    // tab already is -- a real purchased quiz module, no free-trial
+    // carve-out here, since unlimited answer browsing would undercut the
+    // paywall far more than a 5-question quiz cap does.
+    public function browse(Request $request): Response
+    {
+        abort_unless(FeatureFlags::enabled('custom_quiz'), 404);
+
+        $courseIds = Course::whereHas('enrollments', fn ($q) => $q->where('user_id', $request->user()->id)->active()->grantingModule('quiz'))
+            ->where('quizzes_enabled', true)
+            ->pluck('id');
+
+        $questions = QuestionBank::with(['subject:id,name', 'options'])
+            ->whereIn('course_id', $courseIds)
+            ->orderBy('subject_id')
+            ->get()
+            ->map(fn ($q) => [
+                'id' => $q->id,
+                'question_text' => $q->question_text,
+                'image_path' => $q->image_path,
+                'explanation' => $q->explanation,
+                'difficulty' => $q->difficulty,
+                'subject' => $q->subject,
+                'options' => $q->options->map(fn ($o) => [
+                    'id' => $o->id, 'option_text' => $o->option_text, 'image_path' => $o->image_path, 'is_correct' => $o->is_correct,
+                ])->values(),
+            ])
+            ->values();
+
+        return Inertia::render('Student/CustomQuiz/Browse', [
+            'questions' => $questions,
+            'hasAccess' => $courseIds->isNotEmpty(),
+        ]);
+    }
+
     public function store(Request $request)
     {
         abort_unless(FeatureFlags::enabled('custom_quiz'), 404);

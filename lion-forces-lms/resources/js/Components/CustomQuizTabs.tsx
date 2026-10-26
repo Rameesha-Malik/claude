@@ -1,18 +1,19 @@
 import { Link } from '@inertiajs/react';
 
-type Tab = 'create' | 'tests' | 'favorites';
+type Tab = 'create' | 'tests' | 'favorites' | 'browse';
 
 const TABS: { key: Tab; label: string; href: string }[] = [
     { key: 'create', label: 'Create Test', href: '/portal/custom-quiz' },
     { key: 'tests', label: 'Tests', href: '/portal/custom-quiz/tests' },
     { key: 'favorites', label: 'Favorites', href: '/portal/favourite-questions' },
+    { key: 'browse', label: 'Browse', href: '/portal/custom-quiz/browse' },
 ];
 
 // Client reference: UWorld's QBank app keeps Create Test / Tests /
-// Favorites behind one tab bar inside the QBank itself (not just reachable
-// from the outer app's own top-level nav, which also links Favorites
-// separately -- the reference does both at once, so this adds the
-// in-module bar without removing the existing standalone nav entries).
+// Favorites / Browse behind one tab bar inside the QBank itself (not just
+// reachable from the outer app's own top-level nav, which also links
+// Favorites separately -- the reference does both at once, so this adds
+// the in-module bar without removing the existing standalone nav entries).
 // Plain full-page <Link> navigation to each tab's own route, not a
 // client-side switch -- same pattern this app already uses everywhere
 // else for tabbed areas that are really separate pages (e.g. AdminLayout).
