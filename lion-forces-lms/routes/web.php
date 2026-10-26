@@ -141,6 +141,7 @@ Route::middleware(['auth', 'verified', 'user_type:student', 'check.active'])->pr
     Route::get('/custom-quiz', [StudentCustomQuizController::class, 'create'])->name('student.custom-quiz.create');
     Route::post('/custom-quiz', [StudentCustomQuizController::class, 'store'])->name('student.custom-quiz.store');
     Route::post('/custom-quiz/preview-count', [StudentCustomQuizController::class, 'previewCount'])->name('student.custom-quiz.preview-count');
+    Route::get('/custom-quiz/tests', [StudentCustomQuizController::class, 'tests'])->name('student.custom-quiz.tests');
     Route::get('/custom-quiz/{config}', [StudentCustomQuizController::class, 'show'])->name('student.custom-quiz.show');
     Route::post('/custom-quiz/{config}/submit', [StudentCustomQuizController::class, 'submit'])->name('student.custom-quiz.submit');
     Route::post('/custom-quiz/{config}/duplicate', [StudentCustomQuizController::class, 'duplicate'])->name('student.custom-quiz.duplicate');

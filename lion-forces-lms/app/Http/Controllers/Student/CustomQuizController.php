@@ -106,6 +106,19 @@ class CustomQuizController extends Controller
             'hasAccess' => $hasAccess,
             'freeTrialMax' => self::FREE_TRIAL_MAX_QUESTIONS,
             'course' => $course?->only('id', 'title', 'slug'),
+        ]);
+    }
+
+    // UWorld's own "Tests" tab -- previously folded inline under the
+    // Create Test form (same history data, see historyFor() below); now
+    // its own page so the three can sit behind one consistent tab bar
+    // (Create Test / Tests / Favorites) rather than history living only
+    // on the builder page.
+    public function tests(Request $request): Response
+    {
+        abort_unless(FeatureFlags::enabled('custom_quiz'), 404);
+
+        return Inertia::render('Student/CustomQuiz/Tests', [
             'history' => $this->historyFor($request->user()->id),
         ]);
     }

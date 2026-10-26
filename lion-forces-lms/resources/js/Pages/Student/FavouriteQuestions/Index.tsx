@@ -1,5 +1,6 @@
 import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
+import CustomQuizTabs from '@/Components/CustomQuizTabs';
 import { LiteMarkdownInline } from '@/Components/LiteMarkdown';
 import RevealOnScroll from '@/Components/RevealOnScroll';
 import StudentLayout from '@/Layouts/StudentLayout';
@@ -78,6 +79,8 @@ export default function FavouriteQuestionsIndex({ favourites }: Props) {
     return (
         <StudentLayout header="Favourite Questions">
             <Head title="Favourite Questions" />
+
+            <CustomQuizTabs active="favorites" />
 
             <div className="mb-6 flex flex-wrap items-end justify-between gap-2">
                 <p className="max-w-2xl text-sm text-text-secondary">
