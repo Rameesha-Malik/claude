@@ -166,16 +166,29 @@ export default function CourseForm({ course, categories, instructors }: Props) {
             </div>
 
             <div>
-                <label className={labelClass}>Modules (Lectures + Notes are always included)</label>
-                <div className="flex gap-4">
-                    {(['quizzes_enabled', 'flashcards_enabled', 'tests_enabled', 'assignments_enabled'] as const).map((key) => (
-                        <label key={key} className="flex items-center gap-2 text-sm text-text">
+                {/* "Course Features", not "Modules" -- distinct from the Modules
+                    checkboxes on the Packages tab (what a PRICE TIER grants);
+                    this is just whether the course HAS that content at all.
+                    Same bordered-box treatment as the Packages picker, though,
+                    so the two don't look like unrelated, differently-styled
+                    controls a few clicks apart. */}
+                <label className={labelClass}>Course Features (Lectures + Notes are always included)</label>
+                <div className="flex flex-wrap gap-4 rounded-lg border border-border px-3 py-2.5">
+                    {(
+                        [
+                            ['quizzes_enabled', 'Quizzes'],
+                            ['flashcards_enabled', 'Flashcards'],
+                            ['tests_enabled', 'Tests'],
+                            ['assignments_enabled', 'Assignments'],
+                        ] as const
+                    ).map(([key, label]) => (
+                        <label key={key} className="flex items-center gap-1.5 text-sm text-text">
                             <input type="checkbox" checked={form.data[key]} onChange={(e) => form.setData(key, e.target.checked)} />
-                            {key.replace('_enabled', '')}
+                            {label}
                         </label>
                     ))}
                 </div>
-                <p className="mt-1 text-xs text-text-muted">
+                <p className="mt-1.5 text-xs text-text-muted">
                     "Quizzes" also gates Custom Quiz -- a student enrolled in this course can only build/take a
                     Custom Quiz (Admin &rarr; Custom Quiz) while this is checked.
                 </p>
