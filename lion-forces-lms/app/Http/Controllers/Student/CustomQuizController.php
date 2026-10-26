@@ -78,10 +78,15 @@ class CustomQuizController extends Controller
         // QuestionBank.course_id now is, so scope through that. No course
         // in play (free trial, or a student with access to several
         // courses at once) keeps the old whole-bank behavior.
+        // whereHas() (a WHERE EXISTS, portable to both MySQL and SQLite)
+        // rather than HAVING on withCount()'s subquery-derived column --
+        // SQLite rejects a HAVING clause with no GROUP BY even when the
+        // referenced column is a valid select-list alias, which MySQL
+        // allows as a convenience. withCount() is kept only for display
+        // (the count badge each picker shows), not for filtering.
         $subjects = Subject::query()
-            ->when($course, fn ($q) => $q->whereHas('questions', fn ($qq) => $qq->where('course_id', $course->id)))
+            ->whereHas('questions', fn ($q) => $q->when($course, fn ($qq) => $qq->where('course_id', $course->id)))
             ->withCount(['questions' => fn ($q) => $q->when($course, fn ($qq) => $qq->where('course_id', $course->id))])
-            ->having('questions_count', '>', 0)
             ->orderBy('name')
             ->get(['id', 'name']);
 
@@ -89,9 +94,8 @@ class CustomQuizController extends Controller
         // this down client-side to whichever subject the student chose,
         // same pattern as the admin question form's topic dropdown.
         $topics = Topic::query()
-            ->when($course, fn ($q) => $q->whereHas('questions', fn ($qq) => $qq->where('course_id', $course->id)))
+            ->whereHas('questions', fn ($q) => $q->when($course, fn ($qq) => $qq->where('course_id', $course->id)))
             ->withCount(['questions' => fn ($q) => $q->when($course, fn ($qq) => $qq->where('course_id', $course->id))])
-            ->having('questions_count', '>', 0)
             ->orderBy('name')
             ->get(['id', 'subject_id', 'name']);
 
