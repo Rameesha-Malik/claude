@@ -88,7 +88,7 @@ export default function CreateCustomQuiz({ subjects, topics, hasAccess, freeTria
 
             <CustomQuizTabs active="create" />
 
-            <div className="mx-auto max-w-lg rounded-3xl border border-border bg-surface p-6 sm:p-8">
+            <div className="mx-auto max-w-3xl rounded-3xl border border-border bg-surface p-6 sm:p-8">
                 <h1 className="font-display text-2xl text-text">Build Your Own Quiz</h1>
                 <p className="mt-1 text-sm text-text-secondary">
                     {course ? `For "${course.title}": ` : ''}Pick a subject (and optionally a topic within it), difficulty, and how many questions. We'll
@@ -111,8 +111,14 @@ export default function CreateCustomQuiz({ subjects, topics, hasAccess, freeTria
                     </div>
                 )}
 
-                <form onSubmit={submit} className="mt-6 space-y-4">
-                    <div>
+                {/* Client: the form was one long stacked column -- taller
+                    than a desktop screen, forcing a scroll to find fields
+                    that were already visible at once in the UWorld
+                    reference. A 2-column grid from lg up fits the whole
+                    builder in view without scrolling; mobile stays a
+                    single column exactly as before. */}
+                <form onSubmit={submit} className="mt-6 grid gap-4 lg:grid-cols-2">
+                    <div className="lg:col-span-2">
                         <label className="mb-1 block text-sm font-medium text-text">Quiz Name (optional)</label>
                         <input
                             type="text"
@@ -124,7 +130,7 @@ export default function CreateCustomQuiz({ subjects, topics, hasAccess, freeTria
                         />
                     </div>
 
-                    <div>
+                    <div className={availableTopics.length > 0 ? '' : 'lg:col-span-2'}>
                         <div className="mb-1 flex items-center justify-between">
                             <label className="block text-sm font-medium text-text">Subjects</label>
                             <span className="text-xs text-text-muted">{form.data.subject_ids.length === 0 ? 'Any subject' : `${form.data.subject_ids.length} selected`}</span>
@@ -179,7 +185,7 @@ export default function CreateCustomQuiz({ subjects, topics, hasAccess, freeTria
                         </select>
                     </div>
 
-                    <p className="text-xs text-text-muted">
+                    <p className="-mt-2 text-xs text-text-muted lg:col-span-2">
                         {countLoading ? 'Checking…' : matchingCount !== null ? `${matchingCount} question${matchingCount === 1 ? '' : 's'} match these filters.` : ''}
                     </p>
 
@@ -191,18 +197,18 @@ export default function CreateCustomQuiz({ subjects, topics, hasAccess, freeTria
                         </select>
                     </div>
 
-                    <label className="flex items-center gap-2 text-sm text-text">
+                    <label className="flex items-center gap-2 self-end pb-2.5 text-sm text-text">
                         <input type="checkbox" checked={form.data.timer_enabled} onChange={(e) => form.setData('timer_enabled', e.target.checked)} />
                         Enable timer (1 minute per question)
                     </label>
 
-                    <div>
+                    <div className="lg:col-span-2">
                         <label className="mb-1 block text-sm font-medium text-text">Number of questions</label>
                         <input
                             type="number"
                             min={1}
                             max={maxQuestions}
-                            className={inputClass}
+                            className={`${inputClass} lg:max-w-xs`}
                             value={form.data.question_count}
                             onChange={(e) => form.setData('question_count', Math.min(Number(e.target.value), maxQuestions))}
                         />
@@ -214,12 +220,12 @@ export default function CreateCustomQuiz({ subjects, topics, hasAccess, freeTria
                         )}
                     </div>
 
-                    {form.errors.question_count && <p className="text-sm text-danger">{form.errors.question_count}</p>}
+                    {form.errors.question_count && <p className="text-sm text-danger lg:col-span-2">{form.errors.question_count}</p>}
 
                     <button
                         type="submit"
                         disabled={form.processing}
-                        className="w-full rounded-full bg-primary py-3 text-sm font-bold uppercase tracking-wide text-on-primary shadow-sm hover:bg-primary-hover disabled:opacity-50"
+                        className="w-full rounded-full bg-primary py-3 text-sm font-bold uppercase tracking-wide text-on-primary shadow-sm hover:bg-primary-hover disabled:opacity-50 lg:col-span-2"
                     >
                         {form.processing ? 'Building…' : 'Start Custom Quiz'}
                     </button>
