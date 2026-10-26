@@ -23,9 +23,8 @@ interface Section { id: number; title: string; description: string | null; lesso
 interface Tag { id: number; name: string }
 interface Course {
     id: number; title: string; category_id: number | null; instructor_id: number | null;
-    description: string | null; syllabus: string | null;
-    hours: number | null; base_price: string | null; status: string;
-    quizzes_enabled: boolean; flashcards_enabled: boolean; tests_enabled: boolean; assignments_enabled: boolean;
+    description: string | null;
+    hours: number | null; status: string;
     thumbnail_path: string | null;
     packages: Package[]; lessons: Lesson[]; sections: Section[]; tags: Tag[];
 }
@@ -51,20 +50,8 @@ export default function CourseForm({ course, categories, instructors }: Props) {
         category_id: course?.category_id ?? '',
         instructor_id: course?.instructor_id ?? '',
         description: course?.description ?? '',
-        syllabus: course?.syllabus ?? '',
         hours: course?.hours ?? '',
-        base_price: course?.base_price ?? '',
         status: course?.status ?? 'draft',
-        // Default ON for a brand-new course (not the courses.* column's
-        // own false default) -- the previous off-by-default caused
-        // several existing courses to silently lock Custom Quiz out
-        // until that was tracked down; defaulting checked here means an
-        // admin has to deliberately turn something off, not remember to
-        // turn it on.
-        quizzes_enabled: course?.quizzes_enabled ?? true,
-        flashcards_enabled: course?.flashcards_enabled ?? true,
-        tests_enabled: course?.tests_enabled ?? true,
-        assignments_enabled: course?.assignments_enabled ?? true,
         tags: course?.tags.map((t) => t.name).join(', ') ?? '',
         thumbnail: null as File | null,
     });
@@ -89,7 +76,16 @@ export default function CourseForm({ course, categories, instructors }: Props) {
                 <label className={labelClass}>Video Thumbnail</label>
                 <div className="flex items-center gap-4">
                     {course?.thumbnail_path && (
-                        <img src={`/storage/${course.thumbnail_path}`} alt="" className="h-16 w-28 rounded-lg border border-border object-cover" />
+                        <div className="flex-shrink-0 text-center">
+                            <img src={`/storage/${course.thumbnail_path}`} alt="" className="h-16 w-28 rounded-lg border border-border object-cover" />
+                            <button
+                                type="button"
+                                onClick={() => confirm('Remove the current thumbnail?') && router.delete(`/admin/courses/${course.id}/thumbnail`, { preserveScroll: true })}
+                                className="mt-1 text-xs font-bold uppercase text-danger hover:underline"
+                            >
+                                Delete
+                            </button>
+                        </div>
                     )}
                     <input
                         type="file"
@@ -129,20 +125,10 @@ export default function CourseForm({ course, categories, instructors }: Props) {
                 <label className={labelClass}>Description</label>
                 <RichTextArea rows={4} className={inputClass} value={form.data.description} onChange={(v) => form.setData('description', v)} />
             </div>
-            <div>
-                <label className={labelClass}>Syllabus</label>
-                <RichTextArea rows={3} className={inputClass} value={form.data.syllabus} onChange={(v) => form.setData('syllabus', v)} />
-            </div>
 
-            <div className="grid grid-cols-2 gap-4">
-                <div>
-                    <label className={labelClass}>Hours</label>
-                    <input type="number" className={inputClass} value={form.data.hours} onChange={(e) => form.setData('hours', e.target.value)} />
-                </div>
-                <div>
-                    <label className={labelClass}>Base Price (Rs.)</label>
-                    <input type="number" className={inputClass} value={form.data.base_price} onChange={(e) => form.setData('base_price', e.target.value)} />
-                </div>
+            <div>
+                <label className={labelClass}>Hours</label>
+                <input type="number" className={inputClass} value={form.data.hours} onChange={(e) => form.setData('hours', e.target.value)} />
             </div>
 
             <div>
@@ -165,34 +151,16 @@ export default function CourseForm({ course, categories, instructors }: Props) {
                 </select>
             </div>
 
-            <div>
-                {/* "Course Features", not "Modules" -- distinct from the Modules
-                    checkboxes on the Packages tab (what a PRICE TIER grants);
-                    this is just whether the course HAS that content at all.
-                    Same bordered-box treatment as the Packages picker, though,
-                    so the two don't look like unrelated, differently-styled
-                    controls a few clicks apart. */}
-                <label className={labelClass}>Course Features (Lectures + Notes are always included)</label>
-                <div className="flex flex-wrap gap-4 rounded-lg border border-border px-3 py-2.5">
-                    {(
-                        [
-                            ['quizzes_enabled', 'Quizzes'],
-                            ['flashcards_enabled', 'Flashcards'],
-                            ['tests_enabled', 'Tests'],
-                            ['assignments_enabled', 'Assignments'],
-                        ] as const
-                    ).map(([key, label]) => (
-                        <label key={key} className="flex items-center gap-1.5 text-sm text-text">
-                            <input type="checkbox" checked={form.data[key]} onChange={(e) => form.setData(key, e.target.checked)} />
-                            {label}
-                        </label>
-                    ))}
-                </div>
-                <p className="mt-1.5 text-xs text-text-muted">
-                    "Quizzes" also gates Custom Quiz -- a student enrolled in this course can only build/take a
-                    Custom Quiz (Admin &rarr; Custom Quiz) while this is checked.
+            {/* No course-level price field anymore -- a student always buys a
+                specific package now (see combo-module Packages tab), so price
+                lives there, not here. */}
+            {isEdit ? (
+                <p className="text-xs text-text-muted">
+                    Set pricing in the <strong>Packages</strong> tab, above -- a course needs at least one package before a student can buy it.
                 </p>
-            </div>
+            ) : (
+                <p className="text-xs text-text-muted">Pricing is set per package, once this course is created -- continue to the Packages tab next.</p>
+            )}
 
             <button type="submit" disabled={form.processing} className={btnClass}>
                 {isEdit ? 'Save Changes' : 'Create Course'}

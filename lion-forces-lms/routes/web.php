@@ -236,6 +236,7 @@ Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->nam
         Route::post('/', [AdminCourseController::class, 'store'])->name('store');
         Route::get('/{course}/edit', [AdminCourseController::class, 'edit'])->name('edit');
         Route::put('/{course}', [AdminCourseController::class, 'update'])->name('update');
+        Route::delete('/{course}/thumbnail', [AdminCourseController::class, 'destroyThumbnail'])->name('thumbnail.destroy');
         Route::post('/{course}/toggle-status', [AdminCourseController::class, 'toggleStatus'])->name('toggle-status');
         Route::post('/{course}/move', [AdminCourseController::class, 'move'])->name('move');
         Route::delete('/{course}', [AdminCourseController::class, 'destroy'])->name('destroy');

@@ -124,6 +124,17 @@ class CourseController extends Controller
         unset($data['tags'], $data['thumbnail']);
         $data['thumbnail_path'] = $request->hasFile('thumbnail') ? $request->file('thumbnail')->store('courses', 'public') : null;
 
+        // Client: remove the per-course Quizzes/Flashcards/Tests/Assignments
+        // checkboxes from the form -- what actually gates student access is
+        // the module-purchase system now (Enrollment::grantsModule()), so
+        // these just stay on for every course, same as Lectures/Notes
+        // already always were. Forced true here rather than left to the
+        // column's own false default -- that exact default silently broke
+        // Custom Quiz on several courses before (see the form's old
+        // comment), so a new course defaulting to "nothing enabled" is a
+        // known trap, not a safe thing to reintroduce.
+        $data += ['quizzes_enabled' => true, 'flashcards_enabled' => true, 'tests_enabled' => true, 'assignments_enabled' => true];
+
         $course = Course::create($data);
         $this->syncTags($course, $tags);
         ActivityLog::record('added', 'Course', $course->id, "Course \"{$course->title}\" was created.", $course->id);
@@ -172,6 +183,21 @@ class CourseController extends Controller
         return back()->with('success', 'Course updated.');
     }
 
+    // Uploading a new thumbnail already replaces the old one (see update()
+    // above) -- this is the other half, removing one with nothing to
+    // replace it, same pattern as WebsiteController::destroyLogo().
+    public function destroyThumbnail(Request $request, Course $course)
+    {
+        abort_unless($request->user()->canManageCourse($course), 403);
+
+        if ($course->thumbnail_path) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($course->thumbnail_path);
+            $course->update(['thumbnail_path' => null]);
+        }
+
+        return back()->with('success', 'Thumbnail removed.');
+    }
+
     // Free-text, comma-separated tags -- find-or-create by name so admins
     // can type "Army, Navy, PAF" without ever managing a separate tags
     // screen. Kept deliberately lightweight since tags are a search/filter
@@ -214,6 +240,15 @@ class CourseController extends Controller
         return redirect()->route('admin.courses.index')->with('success', 'Course removed.');
     }
 
+    // Syllabus, Base Price, and the per-course Quizzes/Flashcards/Tests/
+    // Assignments checkboxes are no longer admin-editable here (client:
+    // simplify the Details tab). Syllabus/Base Price just go unset for a
+    // new course -- both already degrade gracefully where they're read
+    // (Public/CourseDetail.tsx only renders a Syllabus section when one
+    // exists; a course with no Base Price and no package would correctly
+    // 422 at checkout with "no price set", which is why pricing now has
+    // to come from at least one Package). The four enabled flags are
+    // handled separately in store()/update() rather than here.
     private function validateCourse(Request $request): array
     {
         return $request->validate([
@@ -221,14 +256,8 @@ class CourseController extends Controller
             'category_id' => 'nullable|exists:course_categories,id',
             'instructor_id' => 'nullable|exists:instructors,id',
             'description' => 'nullable|string',
-            'syllabus' => 'nullable|string',
             'hours' => 'nullable|integer|min:0',
-            'base_price' => 'nullable|numeric|min:0',
             'status' => 'required|in:draft,published,hidden',
-            'quizzes_enabled' => 'boolean',
-            'flashcards_enabled' => 'boolean',
-            'tests_enabled' => 'boolean',
-            'assignments_enabled' => 'boolean',
             'tags' => 'nullable|string|max:500',
             'thumbnail' => 'nullable|image|max:2048',
         ]);
