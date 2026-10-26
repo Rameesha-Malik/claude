@@ -51,15 +51,26 @@ class LeaderboardController extends Controller
         $quizzesSubmitted = (clone $yearAttempts)->count();
         $averageScore = round((clone $yearAttempts)->avg('percentage') ?? 0, 1);
 
-        $monthly = (clone $yearAttempts)
-            ->selectRaw('MONTH(created_at) as month, COUNT(*) as total')
-            ->groupBy('month')
-            ->pluck('total', 'month');
-        $activityByMonth = collect(range(1, 12))->map(fn ($m) => (int) ($monthly[$m] ?? 0));
+        // DATE(created_at) rather than MySQL-only MONTH()/YEAR() -- see
+        // DashboardController's own version of this same fix -- so this
+        // also runs on SQLite during local review, not just the MySQL
+        // production database. Grouped by day, then rolled up into months
+        // here since neither driver's DATE() alone gives a month number.
+        $daily = (clone $yearAttempts)
+            ->selectRaw('DATE(created_at) as day, COUNT(*) as total')
+            ->groupBy('day')
+            ->pluck('total', 'day');
+        $activityByMonth = collect(range(1, 12))->map(
+            fn ($month) => (int) $daily->filter(fn ($total, $day) => (int) substr($day, 5, 2) === $month)->sum()
+        );
 
         $topPerformersCount = (int) ceil($leaderboard->count() * 0.1);
         $availableYears = TestAttempt::where('status', 'submitted')
-            ->selectRaw('DISTINCT YEAR(created_at) as y')->pluck('y')->sortDesc()->values();
+            ->selectRaw('DISTINCT substr(created_at, 1, 4) as y')
+            ->pluck('y')
+            ->map(fn ($y) => (int) $y)
+            ->sortDesc()
+            ->values();
         if ($availableYears->isEmpty() || ! $availableYears->contains(now()->year)) {
             $availableYears->prepend(now()->year);
         }
