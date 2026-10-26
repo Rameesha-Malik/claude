@@ -204,6 +204,13 @@ class CustomQuizController extends Controller
             'subjectNames' => $config->subjects()->pluck('name'),
             'topicNames' => $config->topics()->pluck('name'),
             'questions' => $questions,
+            // 1 minute per question -- Custom Quiz has no admin-configured
+            // duration (it's student-generated, with a size the student
+            // picks themselves), so the limit scales with however many
+            // questions they asked for rather than one fixed number that
+            // wouldn't make sense for both a 5-question free trial and a
+            // 50-question full attempt.
+            'timeLimitMinutes' => $config->question_count,
         ]);
     }
 

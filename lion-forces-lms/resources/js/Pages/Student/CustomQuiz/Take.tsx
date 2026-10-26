@@ -1,16 +1,23 @@
 import { Head, router } from '@inertiajs/react';
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import QuestionRunner from '@/Components/QuestionRunner';
 import StudentLayout from '@/Layouts/StudentLayout';
 
 interface Option { id: number; option_text: string; image_path: string | null }
 interface Question { id: number; question_text: string; image_path: string | null; options: Option[] }
 interface Config { id: number; question_count: number }
-interface Props { config: Config; subjectNames: string[]; topicNames: string[]; questions: Question[] }
+interface Props { config: Config; subjectNames: string[]; topicNames: string[]; questions: Question[]; timeLimitMinutes: number }
 
-export default function TakeCustomQuiz({ config, subjectNames, topicNames, questions }: Props) {
+function formatTime(totalSeconds: number): string {
+    const m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+    const s = Math.floor(totalSeconds % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+}
+
+export default function TakeCustomQuiz({ config, subjectNames, topicNames, questions, timeLimitMinutes }: Props) {
     const [answers, setAnswers] = useState<Record<number, number | null>>({});
     const [submitting, setSubmitting] = useState(false);
+    const [secondsLeft, setSecondsLeft] = useState(timeLimitMinutes * 60);
 
     function submit() {
         if (submitting) return;
@@ -19,6 +26,19 @@ export default function TakeCustomQuiz({ config, subjectNames, topicNames, quest
             answers: questions.map((q) => ({ question_id: q.id, selected_option_id: answers[q.id] ?? null })),
         }, { onError: () => setSubmitting(false) });
     }
+
+    // Same pattern as Practice Tests' timed attempts -- 1 minute per
+    // question (see CustomQuizController::show()), auto-submits at zero
+    // so a student can't just let the clock run out to avoid a score.
+    useEffect(() => {
+        if (secondsLeft <= 0) {
+            submit();
+            return;
+        }
+        const t = setTimeout(() => setSecondsLeft((s) => s - 1), 1000);
+        return () => clearTimeout(t);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [secondsLeft]);
 
     function selectOption(questionId: number, optionId: number) {
         setAnswers((prev) => ({ ...prev, [questionId]: optionId }));
@@ -40,7 +60,12 @@ export default function TakeCustomQuiz({ config, subjectNames, topicNames, quest
                 submitLabel="Submit Quiz"
                 emptyMessage="No questions matched your filters."
                 headerExtra={<>1 mark each · no negative marking</>}
-                timerNode={<span className="rounded-full bg-primary-subtle px-4 py-1.5 text-sm font-bold text-primary">No time limit</span>}
+                timerNode={
+                    <div className={`rounded-full px-4 py-1.5 text-sm font-bold ${secondsLeft <= 60 ? 'bg-danger-bg text-danger' : 'bg-primary-subtle text-primary'}`}>
+                        Time left: {formatTime(secondsLeft)}
+                    </div>
+                }
+                compact
             />
         </StudentLayout>
     );
