@@ -41,7 +41,7 @@ function NoteModal({ note, subjects, onClose }: { note: Note | null; subjects: S
                 </div>
                 <form onSubmit={submit} className="space-y-3">
                     <select value={form.data.subject_id} onChange={(e) => form.setData('subject_id', e.target.value ? Number(e.target.value) : '')} className="w-full rounded-lg border border-border px-3 py-2 text-sm">
-                        <option value="">No category</option>
+                        <option value="">No subject</option>
                         {subjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
                     </select>
                     <input placeholder="Title" value={form.data.title} onChange={(e) => form.setData('title', e.target.value)} className="w-full rounded-lg border border-border px-3 py-2 text-sm" />

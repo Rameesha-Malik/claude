@@ -32,9 +32,9 @@ export default function FlashcardsIndex({ course, flashcards, subjects }: Props)
                 <form onSubmit={submit} className="space-y-4 rounded-2xl border border-border bg-surface p-6 lg:col-span-1">
                     <h3 className="font-bold text-text">Add a Flashcard</h3>
                     <div>
-                        <label className="mb-1 block text-sm font-medium text-text">Category</label>
+                        <label className="mb-1 block text-sm font-medium text-text">Subject</label>
                         <select className={inputClass} value={form.data.subject_id} onChange={(e) => form.setData('subject_id', e.target.value ? Number(e.target.value) : '')}>
-                            <option value="">No category (shown under &quot;General&quot;)</option>
+                            <option value="">No subject (shown under &quot;General&quot;)</option>
                             {subjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
                         </select>
                     </div>
@@ -80,7 +80,7 @@ function FlashcardRow({ card, courseId, subjects }: { card: FlashcardRow; course
         return (
             <form onSubmit={submit} className="space-y-3 rounded-2xl border border-primary bg-surface p-5">
                 <select className={inputClass} value={form.data.subject_id} onChange={(e) => form.setData('subject_id', e.target.value ? Number(e.target.value) : '')}>
-                    <option value="">No category (shown under &quot;General&quot;)</option>
+                    <option value="">No subject (shown under &quot;General&quot;)</option>
                     {subjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
                 </select>
                 <div>

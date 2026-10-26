@@ -46,7 +46,7 @@ function AddFlashcardModal({ courses, subjects, onClose }: { courses: CourseOpti
                         onChange={(e) => form.setData('subject_id', e.target.value ? Number(e.target.value) : '')}
                         className="w-full rounded-lg border border-border px-3 py-2 text-sm"
                     >
-                        <option value="">No category (shown under &quot;General&quot;)</option>
+                        <option value="">No subject (shown under &quot;General&quot;)</option>
                         {subjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
                     </select>
                     <textarea placeholder="Front (question / prompt)" rows={3} value={form.data.front_text} onChange={(e) => form.setData('front_text', e.target.value)} className="w-full rounded-lg border border-border px-3 py-2 text-sm" />
@@ -87,7 +87,7 @@ function FlashcardTableRow({ card, subjects }: { card: FlashcardRow; subjects: S
                             onChange={(e) => form.setData('subject_id', e.target.value ? Number(e.target.value) : '')}
                             className="rounded-lg border border-border px-3 py-2 text-sm sm:col-span-2"
                         >
-                            <option value="">No category (shown under &quot;General&quot;)</option>
+                            <option value="">No subject (shown under &quot;General&quot;)</option>
                             {subjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
                         </select>
                         <textarea value={form.data.front_text} onChange={(e) => form.setData('front_text', e.target.value)} placeholder="Front" rows={3} className="rounded-lg border border-border px-3 py-2 text-sm sm:col-span-2" />
