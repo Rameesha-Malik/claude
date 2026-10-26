@@ -207,6 +207,13 @@ class WebsiteController extends Controller
             'question' => 'required|string|max:255',
             'answer' => 'required|string|max:2000',
         ]);
+        // This same endpoint also serves /admin/guaranteed-notes/faqs,
+        // which (unlike /admin/website) isn't blocked for content
+        // managers -- without this, omitting note_id there would create a
+        // general site FAQ, the exact thing /admin/website blocks them
+        // from doing. A content manager may only ever create a note-scoped
+        // FAQ through this endpoint.
+        abort_if($request->user()->hasRole('content_manager') && empty($data['note_id']), 403);
         $data['page'] = $data['note_id'] ?? null ? 'note' : ($data['page'] ?? 'home');
         $order = Faq::where('note_id', $data['note_id'] ?? null)->when(empty($data['note_id']), fn ($q) => $q->where('page', $data['page']))->max('order') + 1;
         Faq::create($data + ['order' => $order, 'is_active' => true]);
@@ -216,6 +223,12 @@ class WebsiteController extends Controller
 
     public function updateFaq(Request $request, Faq $faq)
     {
+        // Same reasoning as storeFaq -- the existing FAQ's own note_id
+        // (not just the submitted one) must be checked, otherwise a
+        // content manager could edit or delete any general site FAQ by ID
+        // via the unblocked guaranteed-notes route.
+        abort_if($request->user()->hasRole('content_manager') && ! $faq->note_id, 403);
+
         $data = $request->validate([
             'page' => 'required_without:note_id|nullable|string|max:50',
             'note_id' => 'nullable|exists:notes_bank,id',
@@ -223,14 +236,17 @@ class WebsiteController extends Controller
             'answer' => 'required|string|max:2000',
             'is_active' => 'boolean',
         ]);
+        abort_if($request->user()->hasRole('content_manager') && empty($data['note_id']), 403);
         $data['page'] = $data['note_id'] ?? null ? 'note' : ($data['page'] ?? 'home');
         $faq->update($data);
 
         return back()->with('success', 'FAQ updated.');
     }
 
-    public function destroyFaq(Faq $faq)
+    public function destroyFaq(Request $request, Faq $faq)
     {
+        abort_if($request->user()->hasRole('content_manager') && ! $faq->note_id, 403);
+
         $faq->delete();
 
         return back()->with('success', 'FAQ removed.');
@@ -251,6 +267,11 @@ class WebsiteController extends Controller
             'rating' => 'nullable|integer|min:1|max:5',
             'is_featured' => 'boolean',
         ]);
+        // Same reasoning as storeFaq above -- this endpoint also serves
+        // the unblocked /admin/guaranteed-notes/testimonials, so a content
+        // manager may only ever create a note-scoped testimonial through
+        // it, never a general-site or course one.
+        abort_if($request->user()->hasRole('content_manager') && empty($data['note_id']), 403);
         Testimonial::create($data + ['order' => Testimonial::max('order') + 1]);
 
         return back()->with('success', 'Testimonial added.');
@@ -258,20 +279,26 @@ class WebsiteController extends Controller
 
     public function updateTestimonial(Request $request, Testimonial $testimonial)
     {
-        $testimonial->update($request->validate([
+        abort_if($request->user()->hasRole('content_manager') && ! $testimonial->note_id, 403);
+
+        $data = $request->validate([
             'course_id' => 'nullable|exists:courses,id',
             'note_id' => 'nullable|exists:notes_bank,id',
             'student_name' => 'required|string|max:150',
             'testimonial_text' => 'required|string|max:1000',
             'rating' => 'nullable|integer|min:1|max:5',
             'is_featured' => 'boolean',
-        ]));
+        ]);
+        abort_if($request->user()->hasRole('content_manager') && empty($data['note_id']), 403);
+        $testimonial->update($data);
 
         return back()->with('success', 'Testimonial updated.');
     }
 
-    public function destroyTestimonial(Testimonial $testimonial)
+    public function destroyTestimonial(Request $request, Testimonial $testimonial)
     {
+        abort_if($request->user()->hasRole('content_manager') && ! $testimonial->note_id, 403);
+
         $testimonial->delete();
 
         return back()->with('success', 'Testimonial removed.');

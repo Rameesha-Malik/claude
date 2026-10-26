@@ -29,16 +29,28 @@ use Inertia\Response;
  */
 class StagedTestController extends Controller
 {
-    public function index(): Response
+    public function index(Request $request): Response
     {
+        // Same scoping as the other course-content admin pages -- a
+        // content manager only sees staged tests for their own courses.
+        // A staged test with no course at all (course_id is optional) is
+        // excluded for them too, same reasoning as Question Bank's
+        // untagged-question case: nothing proves it's theirs to manage.
+        $isContentManager = $request->user()->hasRole('content_manager');
+        $managedCourseIds = $isContentManager ? $request->user()->managedCourses()->pluck('courses.id') : null;
+
         return Inertia::render('Admin/FullTestConfig/Index', [
-            'tests' => StagedTest::with('course:id,title')->withCount('stages')->latest()->get(),
-            'courses' => Course::orderBy('title')->get(['id', 'title']),
+            'tests' => StagedTest::with('course:id,title')->withCount('stages')
+                ->when($isContentManager, fn ($q) => $q->whereIn('course_id', $managedCourseIds))
+                ->latest()->get(),
+            'courses' => Course::orderBy('title')->when($isContentManager, fn ($q) => $q->whereIn('id', $managedCourseIds))->get(['id', 'title']),
         ]);
     }
 
-    public function edit(StagedTest $stagedTest): Response
+    public function edit(Request $request, StagedTest $stagedTest): Response
     {
+        $this->assertManages($request, $stagedTest);
+
         $stagedTest->load(['stages.questions', 'stageGroups']);
 
         return Inertia::render('Admin/FullTestConfig/Edit', [
@@ -54,20 +66,43 @@ class StagedTestController extends Controller
 
     public function store(Request $request)
     {
-        $test = StagedTest::create($this->validated($request));
+        $data = $this->validated($request);
+        // No existing record to check here (this creates one) -- just the
+        // target course, and a content manager must pick one of their own
+        // rather than leaving it course-less.
+        abort_if(
+            $request->user()->hasRole('content_manager')
+                && (empty($data['course_id']) || ! $request->user()->canManageCourse(Course::findOrFail($data['course_id']))),
+            403
+        );
+
+        $test = StagedTest::create($data);
 
         return redirect()->route('admin.full-test-config.edit', $test)->with('success', 'Test created. Now add stages.');
     }
 
     public function update(Request $request, StagedTest $stagedTest)
     {
-        $stagedTest->update($this->validated($request));
+        $this->assertManages($request, $stagedTest);
+
+        $data = $this->validated($request);
+        // Also check the course they're re-tagging it to, if different --
+        // same re-tagging-to-escalate guard used in Question Bank's fix.
+        abort_if(
+            $request->user()->hasRole('content_manager')
+                && (empty($data['course_id']) || ! $request->user()->canManageCourse(Course::findOrFail($data['course_id']))),
+            403
+        );
+
+        $stagedTest->update($data);
 
         return back()->with('success', 'Test updated.');
     }
 
-    public function destroy(StagedTest $stagedTest)
+    public function destroy(Request $request, StagedTest $stagedTest)
     {
+        $this->assertManages($request, $stagedTest);
+
         $stagedTest->delete();
 
         return redirect()->route('admin.full-test-config.index')->with('success', 'Test removed.');
@@ -83,10 +118,25 @@ class StagedTestController extends Controller
         ]);
     }
 
+    // Shared by every action below that takes an existing StagedTest --
+    // a content manager may only touch one tagged to a course they manage;
+    // a course-less one (course_id is optional) is off-limits to them too,
+    // since nothing proves it's theirs.
+    private function assertManages(Request $request, StagedTest $stagedTest): void
+    {
+        abort_if(
+            $request->user()->hasRole('content_manager')
+                && (! $stagedTest->course_id || ! $request->user()->canManageCourse($stagedTest->course)),
+            403
+        );
+    }
+
     // --- Stages ---
 
     public function storeStage(Request $request, StagedTest $stagedTest)
     {
+        $this->assertManages($request, $stagedTest);
+
         $data = $this->stageValidated($request);
         $questionIds = $data['question_ids'] ?? [];
         unset($data['question_ids']);
@@ -100,6 +150,8 @@ class StagedTestController extends Controller
 
     public function updateStage(Request $request, StagedTest $stagedTest, StagedTestStage $stage)
     {
+        $this->assertManages($request, $stagedTest);
+
         $data = $this->stageValidated($request);
         $questionIds = $data['question_ids'] ?? [];
         unset($data['question_ids']);
@@ -110,8 +162,10 @@ class StagedTestController extends Controller
         return back()->with('success', 'Stage updated.');
     }
 
-    public function destroyStage(StagedTest $stagedTest, StagedTestStage $stage)
+    public function destroyStage(Request $request, StagedTest $stagedTest, StagedTestStage $stage)
     {
+        $this->assertManages($request, $stagedTest);
+
         $stage->delete();
 
         return back()->with('success', 'Stage removed.');
@@ -144,6 +198,8 @@ class StagedTestController extends Controller
 
     public function storeGroup(Request $request, StagedTest $stagedTest)
     {
+        $this->assertManages($request, $stagedTest);
+
         $data = $request->validate([
             'name' => 'nullable|string|max:255',
             'pass_threshold_percent' => 'required|numeric|min:0|max:100',
@@ -164,6 +220,8 @@ class StagedTestController extends Controller
 
     public function updateGroup(Request $request, StagedTest $stagedTest, StagedTestStageGroup $group)
     {
+        $this->assertManages($request, $stagedTest);
+
         $data = $request->validate([
             'name' => 'nullable|string|max:255',
             'pass_threshold_percent' => 'required|numeric|min:0|max:100',
@@ -174,8 +232,10 @@ class StagedTestController extends Controller
         return back()->with('success', 'Group updated.');
     }
 
-    public function destroyGroup(StagedTest $stagedTest, StagedTestStageGroup $group)
+    public function destroyGroup(Request $request, StagedTest $stagedTest, StagedTestStageGroup $group)
     {
+        $this->assertManages($request, $stagedTest);
+
         // Ungroups its stages (nullOnDelete on stage_group_id) rather than
         // deleting them -- "unmerge", not "remove these stages".
         $group->delete();
