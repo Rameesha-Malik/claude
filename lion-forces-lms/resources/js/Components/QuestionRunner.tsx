@@ -46,6 +46,16 @@ interface Props {
      * this file's own top comment).
      */
     instantFeedback?: boolean;
+    /**
+     * Custom Quiz's "per question" timer mode only -- a fresh countdown
+     * for whichever question is currently showing (not one countdown for
+     * the whole attempt, which stays the caller's own timerNode above).
+     * When set, this component owns the countdown itself since it's the
+     * only place that knows which question is current and can navigate
+     * (goTo()) -- undefined for every other caller, who keep rendering
+     * their own whole-attempt timerNode exactly as before.
+     */
+    perQuestionSeconds?: number;
 }
 
 function BackIcon() {
@@ -127,6 +137,12 @@ function NoteIcon() {
     );
 }
 
+function formatSeconds(totalSeconds: number): string {
+    const m = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+    const s = Math.floor(totalSeconds % 60).toString().padStart(2, '0');
+    return `${m}:${s}`;
+}
+
 const LEGEND = [
     { label: 'Current', className: 'bg-primary' },
     { label: 'Answered', className: 'bg-success' },
@@ -170,6 +186,7 @@ export default function QuestionRunner({
     resetKey,
     compact = false,
     instantFeedback = true,
+    perQuestionSeconds,
 }: Props) {
     const { auth } = usePage<PageProps>().props;
     const isAuthenticated = !!auth?.user;
@@ -186,6 +203,7 @@ export default function QuestionRunner({
     const [noteDrafts, setNoteDrafts] = useState<Record<number, string>>({});
     const [noteSavedIds, setNoteSavedIds] = useState<Set<number>>(new Set());
     const [noteSaving, setNoteSaving] = useState(false);
+    const [questionSecondsLeft, setQuestionSecondsLeft] = useState(perQuestionSeconds ?? 0);
 
     function saveNote(questionId: number) {
         if (noteSaving) return;
@@ -312,6 +330,33 @@ export default function QuestionRunner({
         setVisited((prev) => new Set(prev).add(clamped));
     }
 
+    // Per-question timer: resets to the full duration every time the
+    // CURRENT question changes, for any reason -- forward auto-advance
+    // below, Previous, Skip, or a direct navigator-grid click all change
+    // currentIndex, and this effect doesn't care which caused it.
+    useEffect(() => {
+        if (perQuestionSeconds === undefined) return;
+        setQuestionSecondsLeft(perQuestionSeconds);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [currentIndex, perQuestionSeconds]);
+
+    // The actual 1-second countdown -- advances to the next question (or
+    // submits, on the last one) when it hits zero, same auto-submit
+    // reasoning as a whole-quiz timer running out.
+    useEffect(() => {
+        if (perQuestionSeconds === undefined) return;
+        if (questionSecondsLeft <= 0) {
+            if (isLast) onSubmit();
+            else goTo(currentIndex + 1);
+
+            return;
+        }
+        const t = setTimeout(() => setQuestionSecondsLeft((s) => s - 1), 1000);
+
+        return () => clearTimeout(t);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [questionSecondsLeft, perQuestionSeconds]);
+
     if (total === 0) {
         return (
             <p className="rounded-2xl border border-dashed border-border bg-surface p-10 text-center text-text-secondary">
@@ -321,6 +366,12 @@ export default function QuestionRunner({
     }
 
     const current = questions[currentIndex];
+
+    const perQuestionTimerNode = perQuestionSeconds !== undefined && (
+        <span className={`rounded-full px-3 py-1 text-xs font-bold ${questionSecondsLeft <= 10 ? 'bg-danger-bg text-danger' : 'bg-primary-subtle text-primary'}`}>
+            {formatSeconds(questionSecondsLeft)}
+        </span>
+    );
 
     const statTiles = [
         ...(instantFeedback
@@ -353,7 +404,10 @@ export default function QuestionRunner({
         <div className="order-first space-y-3 lg:order-last lg:w-64 lg:flex-shrink-0 lg:sticky lg:top-4 lg:self-start">
             <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm">
                 {headerExtra && <div className="mb-2 text-sm text-text-secondary">{headerExtra}</div>}
-                {timerNode}
+                <div className="flex items-center gap-2">
+                    {timerNode}
+                    {perQuestionTimerNode}
+                </div>
                 <p className="mt-2 text-sm font-semibold text-text-secondary">
                     Question <span className="font-bold text-text">{currentIndex + 1}</span> of {total}
                 </p>
@@ -421,6 +475,7 @@ export default function QuestionRunner({
                                     Q {currentIndex + 1}/{total}
                                 </span>
                                 <span className="rounded-full bg-surface-sunken px-3 py-1 text-xs font-bold text-text-muted">ID: {current.id}</span>
+                                {perQuestionTimerNode}
                             </div>
 
                             <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-surface-sunken">

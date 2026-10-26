@@ -23,6 +23,9 @@ export default function CreateCustomQuiz({ subjects, topics, hasAccess, freeTria
         course_id: course?.id ?? ('' as number | ''),
         mode: 'tutor' as 'tutor' | 'timed',
         timer_enabled: false,
+        timer_mode: 'total' as 'total' | 'per_question',
+        timer_minutes: hasAccess ? 10 : freeTrialMax,
+        timer_seconds_per_question: 60,
         filter: '' as '' | 'unused' | 'wrong' | 'correct' | 'favorited',
     });
 
@@ -197,10 +200,53 @@ export default function CreateCustomQuiz({ subjects, topics, hasAccess, freeTria
                         </select>
                     </div>
 
-                    <label className="flex items-center gap-2 self-end pb-2.5 text-sm text-text">
-                        <input type="checkbox" checked={form.data.timer_enabled} onChange={(e) => form.setData('timer_enabled', e.target.checked)} />
-                        Enable timer (1 minute per question)
-                    </label>
+                    <div>
+                        <label className="flex items-center gap-2 text-sm text-text">
+                            <input type="checkbox" checked={form.data.timer_enabled} onChange={(e) => form.setData('timer_enabled', e.target.checked)} />
+                            Enable timer
+                        </label>
+
+                        {/* Client: the timer should be either one countdown
+                            for the whole attempt, or a fresh one per
+                            question that auto-advances when it runs out --
+                            two genuinely different behaviours, not one
+                            fixed 1-min-per-question rule. */}
+                        {form.data.timer_enabled && (
+                            <div className="mt-2 flex flex-wrap gap-2">
+                                <select
+                                    className={`${inputClass} w-auto flex-1`}
+                                    value={form.data.timer_mode}
+                                    onChange={(e) => form.setData('timer_mode', e.target.value as typeof form.data.timer_mode)}
+                                >
+                                    <option value="total">Whole quiz</option>
+                                    <option value="per_question">Per question</option>
+                                </select>
+                                {form.data.timer_mode === 'total' ? (
+                                    <div className="flex flex-1 items-center gap-2">
+                                        <input
+                                            type="number"
+                                            min={1}
+                                            max={180}
+                                            className={inputClass}
+                                            value={form.data.timer_minutes}
+                                            onChange={(e) => form.setData('timer_minutes', Number(e.target.value))}
+                                        />
+                                        <span className="flex-shrink-0 text-xs text-text-muted">minutes total</span>
+                                    </div>
+                                ) : (
+                                    <select
+                                        className={`${inputClass} flex-1`}
+                                        value={form.data.timer_seconds_per_question}
+                                        onChange={(e) => form.setData('timer_seconds_per_question', Number(e.target.value))}
+                                    >
+                                        {[30, 45, 60, 90, 120, 180].map((s) => (
+                                            <option key={s} value={s}>{s} seconds per question</option>
+                                        ))}
+                                    </select>
+                                )}
+                            </div>
+                        )}
+                    </div>
 
                     <div className="lg:col-span-2">
                         <label className="mb-1 block text-sm font-medium text-text">Number of questions</label>

@@ -8,7 +8,9 @@ interface Question { id: number; question_text: string; image_path: string | nul
 interface Config { id: number; question_count: number }
 interface Props {
     config: Config; subjectNames: string[]; topicNames: string[]; questions: Question[];
-    timeLimitMinutes: number | null; name: string | null; mode: 'tutor' | 'timed'; timerEnabled: boolean;
+    name: string | null; mode: 'tutor' | 'timed';
+    timerEnabled: boolean; timerMode: 'total' | 'per_question' | null;
+    timerMinutes: number | null; timerSecondsPerQuestion: number | null;
 }
 
 function formatTime(totalSeconds: number): string {
@@ -17,10 +19,14 @@ function formatTime(totalSeconds: number): string {
     return `${m}:${s}`;
 }
 
-export default function TakeCustomQuiz({ config, subjectNames, topicNames, questions, timeLimitMinutes, name, mode, timerEnabled }: Props) {
+export default function TakeCustomQuiz({
+    config, subjectNames, topicNames, questions, name, mode, timerEnabled, timerMode, timerMinutes, timerSecondsPerQuestion,
+}: Props) {
     const [answers, setAnswers] = useState<Record<number, number | null>>({});
     const [submitting, setSubmitting] = useState(false);
-    const [secondsLeft, setSecondsLeft] = useState((timeLimitMinutes ?? 0) * 60);
+
+    const wholeQuizTimed = timerEnabled && timerMode === 'total' && !!timerMinutes;
+    const [secondsLeft, setSecondsLeft] = useState((timerMinutes ?? 0) * 60);
 
     function submit() {
         if (submitting) return;
@@ -30,14 +36,12 @@ export default function TakeCustomQuiz({ config, subjectNames, topicNames, quest
         }, { onError: () => setSubmitting(false) });
     }
 
-    // Same pattern as Practice Tests' timed attempts -- 1 minute per
-    // question (see CustomQuizController::show()), auto-submits at zero
-    // so a student can't just let the clock run out to avoid a score.
-    // Only runs at all when the student turned the timer on -- UWorld's
-    // own Timer: None vs a duration dropdown, previously forced on for
-    // every attempt regardless.
+    // Whole-quiz countdown -- only ever active in "total" timer mode; a
+    // "per_question" config runs its own countdown inside QuestionRunner
+    // instead (it's the only place that knows which question is current),
+    // so this effect does nothing at all in that mode.
     useEffect(() => {
-        if (!timerEnabled || !timeLimitMinutes) return;
+        if (!wholeQuizTimed) return;
         if (secondsLeft <= 0) {
             submit();
             return;
@@ -45,7 +49,7 @@ export default function TakeCustomQuiz({ config, subjectNames, topicNames, quest
         const t = setTimeout(() => setSecondsLeft((s) => s - 1), 1000);
         return () => clearTimeout(t);
         // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, [secondsLeft, timerEnabled]);
+    }, [secondsLeft, wholeQuizTimed]);
 
     function selectOption(questionId: number, optionId: number) {
         setAnswers((prev) => ({ ...prev, [questionId]: optionId }));
@@ -73,12 +77,13 @@ export default function TakeCustomQuiz({ config, subjectNames, topicNames, quest
                     </>
                 }
                 timerNode={
-                    timerEnabled && timeLimitMinutes ? (
+                    wholeQuizTimed ? (
                         <div className={`rounded-full px-4 py-1.5 text-sm font-bold ${secondsLeft <= 60 ? 'bg-danger-bg text-danger' : 'bg-primary-subtle text-primary'}`}>
                             Time left: {formatTime(secondsLeft)}
                         </div>
                     ) : undefined
                 }
+                perQuestionSeconds={timerEnabled && timerMode === 'per_question' ? timerSecondsPerQuestion ?? undefined : undefined}
                 compact
                 instantFeedback={mode !== 'timed'}
             />

@@ -138,6 +138,9 @@ class CustomQuizController extends Controller
             'course_id' => 'nullable|exists:courses,id',
             'mode' => 'required|in:tutor,timed',
             'timer_enabled' => 'boolean',
+            'timer_mode' => 'required_if:timer_enabled,1|nullable|in:total,per_question',
+            'timer_minutes' => 'required_if:timer_mode,total|nullable|integer|min:1|max:180',
+            'timer_seconds_per_question' => 'required_if:timer_mode,per_question|nullable|integer|min:10|max:600',
             'filter' => 'nullable|in:unused,wrong,correct,favorited',
         ]);
 
@@ -164,6 +167,9 @@ class CustomQuizController extends Controller
             'question_ids' => $questionIds,
             'mode' => $data['mode'],
             'timer_enabled' => $data['timer_enabled'] ?? false,
+            'timer_mode' => ($data['timer_enabled'] ?? false) ? $data['timer_mode'] : null,
+            'timer_minutes' => ($data['timer_enabled'] ?? false) && $data['timer_mode'] === 'total' ? $data['timer_minutes'] : null,
+            'timer_seconds_per_question' => ($data['timer_enabled'] ?? false) && $data['timer_mode'] === 'per_question' ? $data['timer_seconds_per_question'] : null,
             'filter' => $data['filter'] ?? null,
         ]);
 
@@ -200,6 +206,9 @@ class CustomQuizController extends Controller
             'question_ids' => $questionIds,
             'mode' => $config->mode,
             'timer_enabled' => $config->timer_enabled,
+            'timer_mode' => $config->timer_mode,
+            'timer_minutes' => $config->timer_minutes,
+            'timer_seconds_per_question' => $config->timer_seconds_per_question,
             'filter' => $config->filter,
         ]);
 
@@ -258,16 +267,14 @@ class CustomQuizController extends Controller
             'questions' => $questions,
             'name' => $config->name,
             'mode' => $config->mode,
+            // Which of the two timer behaviours this config actually
+            // used -- a single whole-quiz countdown, or a fresh one per
+            // question that auto-advances when it hits zero. Take.tsx
+            // picks which (if either) to run from these four together.
             'timerEnabled' => $config->timer_enabled,
-            // 1 minute per question -- Custom Quiz has no admin-configured
-            // duration (it's student-generated, with a size the student
-            // picks themselves), so the limit scales with however many
-            // questions they asked for rather than one fixed number that
-            // wouldn't make sense for both a 5-question free trial and a
-            // 50-question full attempt. Only sent at all when the student
-            // actually turned the timer on (UWorld's own Timer: None vs a
-            // duration dropdown -- it was forced on for everyone before).
-            'timeLimitMinutes' => $config->timer_enabled ? $config->question_count : null,
+            'timerMode' => $config->timer_mode,
+            'timerMinutes' => $config->timer_minutes,
+            'timerSecondsPerQuestion' => $config->timer_seconds_per_question,
         ]);
     }
 

@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\MorphMany;
 
 #[Fillable([
     'user_id', 'name', 'subject_ids', 'topic_ids', 'course_id', 'difficulty', 'question_count', 'question_ids',
-    'mode', 'timer_enabled', 'filter',
+    'mode', 'timer_enabled', 'timer_mode', 'timer_minutes', 'timer_seconds_per_question', 'filter',
 ])]
 class CustomQuizConfig extends Model
 {
