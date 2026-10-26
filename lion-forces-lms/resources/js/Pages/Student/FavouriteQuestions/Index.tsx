@@ -79,10 +79,15 @@ export default function FavouriteQuestionsIndex({ favourites }: Props) {
         <StudentLayout header="Favourite Questions">
             <Head title="Favourite Questions" />
 
-            <p className="mb-6 max-w-2xl text-sm text-text-secondary">
-                Questions you've starred while attempting a quiz or test land here so you can find them again without
-                re-attempting the whole thing.
-            </p>
+            <div className="mb-6 flex flex-wrap items-end justify-between gap-2">
+                <p className="max-w-2xl text-sm text-text-secondary">
+                    Questions you've starred while attempting a quiz or test land here so you can find them again without
+                    re-attempting the whole thing.
+                </p>
+                <p className="flex-shrink-0 text-sm font-bold uppercase tracking-wide text-text-muted">
+                    {favourites.length} question{favourites.length === 1 ? '' : 's'}
+                </p>
+            </div>
 
             {favourites.length === 0 ? (
                 <div className="rounded-3xl border border-dashed border-border bg-surface p-10 text-center text-text-secondary">
