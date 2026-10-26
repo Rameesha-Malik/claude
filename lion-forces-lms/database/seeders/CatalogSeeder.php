@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Course;
 use App\Models\CourseCategory;
 use App\Models\CoursePackage;
+use App\Models\Enrollment;
 use App\Models\Instructor;
 use App\Models\Lesson;
 use App\Models\NotesBank;
@@ -97,6 +98,7 @@ class CatalogSeeder extends Seeder
                 'validity_days' => 180,
                 'order' => 1,
                 'is_active' => false,
+                'modules' => Enrollment::ALL_MODULES,
             ]);
             CoursePackage::firstOrCreate(['course_id' => $course->id, 'name' => "{$short} Guaranteed Package"], [
                 'description' => 'Everything in Standard, plus guaranteed notes and mock exams.',
@@ -104,6 +106,7 @@ class CatalogSeeder extends Seeder
                 'validity_days' => 365,
                 'order' => 2,
                 'is_active' => false,
+                'modules' => Enrollment::ALL_MODULES,
             ]);
 
             // Real priced packages (client WhatsApp paste, "Initial Test
@@ -135,6 +138,7 @@ class CatalogSeeder extends Seeder
                         'validity_days' => 180,
                         'order' => $i + 3,
                         'is_active' => true,
+                        'modules' => Enrollment::ALL_MODULES,
                     ]);
                 }
             }
