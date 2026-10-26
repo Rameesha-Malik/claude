@@ -40,7 +40,7 @@ const btnClass = 'rounded-lg bg-primary px-5 py-2.5 text-sm font-bold uppercase 
 // make it easy to understand, not complex." One tab open at a time, same
 // pattern as Settings/Website Management, instead of everything stacked in
 // a narrow sidebar simultaneously.
-const EDIT_TABS = ['Details', 'Curriculum', 'Tests', 'Flashcards', 'Assignments', 'Packages'] as const;
+const EDIT_TABS = ['Details', 'Curriculum', 'Packages'] as const;
 type EditTab = (typeof EDIT_TABS)[number];
 
 export default function CourseForm({ course, categories, instructors }: Props) {
@@ -197,62 +197,6 @@ export default function CourseForm({ course, categories, instructors }: Props) {
 
                     {tab === 'Details' && detailsForm}
                     {tab === 'Curriculum' && <CurriculumPanel course={course!} />}
-                    {tab === 'Tests' && (
-                        <div className="mx-auto max-w-2xl rounded-2xl border border-border bg-surface p-6">
-                            <h3 className="mb-1 font-bold text-text">Tests &amp; Quizzes</h3>
-                            <p className="mb-4 text-sm text-text-secondary">Build tests using questions from the Content Library.</p>
-                            <div className="grid gap-3 sm:grid-cols-2">
-                                <Link
-                                    href={`/admin/courses/${course!.id}/practice-tests`}
-                                    className="rounded-lg border border-primary py-3 text-center text-sm font-bold uppercase tracking-wide text-primary hover:bg-primary-subtle"
-                                >
-                                    Practice Tests
-                                </Link>
-                                <Link
-                                    href={`/admin/courses/${course!.id}/quizzes`}
-                                    className="rounded-lg border border-primary py-3 text-center text-sm font-bold uppercase tracking-wide text-primary hover:bg-primary-subtle"
-                                >
-                                    Quizzes
-                                </Link>
-                                <Link
-                                    href={`/admin/courses/${course!.id}/mock-exams`}
-                                    className="rounded-lg border border-primary py-3 text-center text-sm font-bold uppercase tracking-wide text-primary hover:bg-primary-subtle"
-                                >
-                                    Mock Exams
-                                </Link>
-                                <Link
-                                    href="/admin/full-test-config"
-                                    className="rounded-lg border border-primary py-3 text-center text-sm font-bold uppercase tracking-wide text-primary hover:bg-primary-subtle"
-                                >
-                                    Full Test Config
-                                </Link>
-                            </div>
-                        </div>
-                    )}
-                    {tab === 'Flashcards' && (
-                        <div className="mx-auto max-w-2xl rounded-2xl border border-border bg-surface p-6">
-                            <h3 className="mb-1 font-bold text-text">Flashcards</h3>
-                            <p className="mb-4 text-sm text-text-secondary">Quick front/back study cards for this course.</p>
-                            <Link
-                                href={`/admin/courses/${course!.id}/flashcards`}
-                                className="block rounded-lg border border-primary py-3 text-center text-sm font-bold uppercase tracking-wide text-primary hover:bg-primary-subtle"
-                            >
-                                Manage Flashcards
-                            </Link>
-                        </div>
-                    )}
-                    {tab === 'Assignments' && (
-                        <div className="mx-auto max-w-2xl rounded-2xl border border-border bg-surface p-6">
-                            <h3 className="mb-1 font-bold text-text">Assignments</h3>
-                            <p className="mb-4 text-sm text-text-secondary">Gradable file/text submissions, separate from MCQ tests.</p>
-                            <Link
-                                href={`/admin/courses/${course!.id}/assignments`}
-                                className="block rounded-lg border border-primary py-3 text-center text-sm font-bold uppercase tracking-wide text-primary hover:bg-primary-subtle"
-                            >
-                                Manage Assignments
-                            </Link>
-                        </div>
-                    )}
                     {tab === 'Packages' && <div className="mx-auto max-w-2xl"><PackagesPanel course={course!} /></div>}
                 </>
             )}
@@ -274,7 +218,7 @@ function PackagesPanel({ course }: { course: Course }) {
             <h3 className="mb-3 font-bold text-text">Packages</h3>
             <p className="mb-4 text-sm text-text-secondary">
                 For more fields (description, active/inactive), use the full{' '}
-                <Link href="/admin/courses/packages" className="font-semibold text-primary hover:underline">Packages</Link> page instead.
+                <Link href="/admin/packages" className="font-semibold text-primary hover:underline">Packages</Link> page instead.
             </p>
             <div className="mb-4 space-y-2">
                 {course.packages.map((pkg) => (
