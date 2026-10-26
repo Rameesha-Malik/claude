@@ -8,14 +8,17 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 
-#[Fillable(['user_id', 'subject_ids', 'topic_ids', 'course_id', 'difficulty', 'question_count', 'question_ids'])]
+#[Fillable([
+    'user_id', 'name', 'subject_ids', 'topic_ids', 'course_id', 'difficulty', 'question_count', 'question_ids',
+    'mode', 'timer_enabled', 'filter',
+])]
 class CustomQuizConfig extends Model
 {
     use HasFactory;
 
     protected function casts(): array
     {
-        return ['question_ids' => 'array', 'subject_ids' => 'array', 'topic_ids' => 'array'];
+        return ['question_ids' => 'array', 'subject_ids' => 'array', 'topic_ids' => 'array', 'timer_enabled' => 'boolean'];
     }
 
     public function user(): BelongsTo

@@ -9,6 +9,7 @@ use App\Models\QuestionBank;
 use App\Models\RevisionListItem;
 use App\Models\Subject;
 use App\Models\TestAttempt;
+use App\Models\TestAttemptAnswer;
 use App\Models\Topic;
 use App\Support\FeatureFlags;
 use Illuminate\Http\Request;
@@ -114,6 +115,7 @@ class CustomQuizController extends Controller
         abort_unless(FeatureFlags::enabled('custom_quiz'), 404);
 
         $data = $request->validate([
+            'name' => 'nullable|string|max:150',
             'subject_ids' => 'nullable|array',
             'subject_ids.*' => 'exists:subjects,id',
             'topic_ids' => 'nullable|array',
@@ -121,6 +123,9 @@ class CustomQuizController extends Controller
             'difficulty' => 'nullable|in:easy,medium,hard',
             'question_count' => 'required|integer|min:1|max:50',
             'course_id' => 'nullable|exists:courses,id',
+            'mode' => 'required|in:tutor,timed',
+            'timer_enabled' => 'boolean',
+            'filter' => 'nullable|in:unused,wrong,correct,favorited',
         ]);
 
         $course = ! empty($data['course_id']) ? Course::find($data['course_id']) : null;
@@ -133,16 +138,20 @@ class CustomQuizController extends Controller
             $data['question_count'] = min($data['question_count'], self::FREE_TRIAL_MAX_QUESTIONS);
         }
 
-        $questionIds = $this->pickQuestionIds($data);
+        $questionIds = $this->pickQuestionIds($data, $request->user()->id);
 
         $config = CustomQuizConfig::create([
             'user_id' => $request->user()->id,
+            'name' => $data['name'] ?? null,
             'subject_ids' => $data['subject_ids'] ?? [],
             'topic_ids' => $data['topic_ids'] ?? [],
             'course_id' => $course?->id,
             'difficulty' => $data['difficulty'] ?? null,
             'question_count' => count($questionIds),
             'question_ids' => $questionIds,
+            'mode' => $data['mode'],
+            'timer_enabled' => $data['timer_enabled'] ?? false,
+            'filter' => $data['filter'] ?? null,
         ]);
 
         return redirect()->route('student.custom-quiz.show', $config);
@@ -150,7 +159,9 @@ class CustomQuizController extends Controller
 
     // "Duplicate" (UWorld Tests tab): same filters, a fresh random pick --
     // not literally the same questions, since the point of retaking is
-    // practice, not memorizing one frozen set.
+    // practice, not memorizing one frozen set. Carries mode/timer/filter
+    // over too, so a retake behaves identically to the original attempt
+    // rather than silently reverting to tutor-mode-no-timer-no-filter.
     public function duplicate(Request $request, CustomQuizConfig $config)
     {
         abort_unless(FeatureFlags::enabled('custom_quiz'), 404);
@@ -162,19 +173,47 @@ class CustomQuizController extends Controller
             'course_id' => $config->course_id,
             'difficulty' => $config->difficulty,
             'question_count' => $config->question_count,
-        ]);
+            'filter' => $config->filter,
+        ], $request->user()->id);
 
         $copy = CustomQuizConfig::create([
             'user_id' => $request->user()->id,
+            'name' => $config->name,
             'subject_ids' => $config->subject_ids,
             'topic_ids' => $config->topic_ids,
             'course_id' => $config->course_id,
             'difficulty' => $config->difficulty,
             'question_count' => count($questionIds),
             'question_ids' => $questionIds,
+            'mode' => $config->mode,
+            'timer_enabled' => $config->timer_enabled,
+            'filter' => $config->filter,
         ]);
 
         return redirect()->route('student.custom-quiz.show', $copy);
+    }
+
+    // Live "X questions match these filters" preview on the create form,
+    // fetched as the student adjusts subjects/topics/difficulty/filter --
+    // shares matchingQuestionsQuery() with pickQuestionIds() so the two
+    // can never drift apart on what counts as a match.
+    public function previewCount(Request $request)
+    {
+        abort_unless(FeatureFlags::enabled('custom_quiz'), 404);
+
+        $data = $request->validate([
+            'subject_ids' => 'nullable|array',
+            'subject_ids.*' => 'exists:subjects,id',
+            'topic_ids' => 'nullable|array',
+            'topic_ids.*' => 'exists:topics,id',
+            'difficulty' => 'nullable|in:easy,medium,hard',
+            'course_id' => 'nullable|exists:courses,id',
+            'filter' => 'nullable|in:unused,wrong,correct,favorited',
+        ]);
+
+        $count = $this->matchingQuestionsQuery($data, $request->user()->id)->count();
+
+        return response()->json(['count' => $count]);
     }
 
     public function destroy(Request $request, CustomQuizConfig $config)
@@ -204,13 +243,18 @@ class CustomQuizController extends Controller
             'subjectNames' => $config->subjects()->pluck('name'),
             'topicNames' => $config->topics()->pluck('name'),
             'questions' => $questions,
+            'name' => $config->name,
+            'mode' => $config->mode,
+            'timerEnabled' => $config->timer_enabled,
             // 1 minute per question -- Custom Quiz has no admin-configured
             // duration (it's student-generated, with a size the student
             // picks themselves), so the limit scales with however many
             // questions they asked for rather than one fixed number that
             // wouldn't make sense for both a 5-question free trial and a
-            // 50-question full attempt.
-            'timeLimitMinutes' => $config->question_count,
+            // 50-question full attempt. Only sent at all when the student
+            // actually turned the timer on (UWorld's own Timer: None vs a
+            // duration dropdown -- it was forced on for everyone before).
+            'timeLimitMinutes' => $config->timer_enabled ? $config->question_count : null,
         ]);
     }
 
@@ -327,26 +371,67 @@ class CustomQuizController extends Controller
 
         return $configs->map(fn (CustomQuizConfig $c) => [
             'id' => $c->id,
+            'name' => $c->name,
             'subject' => CustomQuizConfig::summarizeNames(collect($c->subject_ids ?? [])->map(fn ($id) => $subjectNames->get($id))->filter()->all()),
             'topic' => CustomQuizConfig::summarizeNames(collect($c->topic_ids ?? [])->map(fn ($id) => $topicNames->get($id))->filter()->all()),
             'difficulty' => $c->difficulty,
             'question_count' => $c->question_count,
+            'mode' => $c->mode,
             'created_at' => $c->created_at,
             'attempt_id' => $c->attempts->first()?->id,
             'percentage' => $c->attempts->first()?->percentage,
         ]);
     }
 
-    // Shared by store() (new config) and duplicate() (retake with a fresh
-    // random pick, same filters) -- kept as one place so both can never
-    // drift apart on how a set of questions gets picked.
-    private function pickQuestionIds(array $data): array
+    // Shared by pickQuestionIds() and previewCount() -- every filter that
+    // narrows down which questions a config can draw from, minus the
+    // random-order/limit/pluck that only pickQuestionIds() needs. Kept as
+    // one place so the live "X questions found" count on the create form
+    // and the actual question pick can never drift apart on what counts
+    // as a match.
+    //
+    // 'unused'/'wrong'/'correct'/'favorited' reuse data this app already
+    // tracks rather than a new table: RevisionListItem.resolved=false is
+    // "still getting this wrong" (flipped to true the moment it's
+    // answered correctly since -- see submit() below), TestAttemptAnswer
+    // is this student's full answer history across every assessment type
+    // (not just Custom Quiz), SavedQuestion is the same favourites list
+    // QuestionRunner's star button already writes to.
+    private function matchingQuestionsQuery(array $data, int $userId): \Illuminate\Database\Eloquent\Builder
     {
-        $questionIds = QuestionBank::query()
+        return QuestionBank::query()
             ->when(! empty($data['subject_ids']), fn ($q) => $q->whereIn('subject_id', $data['subject_ids']))
             ->when(! empty($data['topic_ids']), fn ($q) => $q->whereIn('topic_id', $data['topic_ids']))
             ->when($data['difficulty'] ?? null, fn ($q, $d) => $q->where('difficulty', $d))
             ->when($data['course_id'] ?? null, fn ($q, $id) => $q->where('course_id', $id))
+            ->when($data['filter'] ?? null, function ($q, $filter) use ($userId) {
+                if ($filter === 'unused') {
+                    $attempted = TestAttemptAnswer::whereHas('attempt', fn ($aq) => $aq->where('user_id', $userId))
+                        ->distinct()
+                        ->pluck('question_id');
+                    $q->whereNotIn('id', $attempted);
+
+                    return;
+                }
+
+                $ids = match ($filter) {
+                    'wrong' => RevisionListItem::where('user_id', $userId)->where('resolved', false)->pluck('question_id'),
+                    'correct' => TestAttemptAnswer::where('is_correct', true)
+                        ->whereHas('attempt', fn ($aq) => $aq->where('user_id', $userId))
+                        ->distinct()
+                        ->pluck('question_id'),
+                    'favorited' => \App\Models\SavedQuestion::where('user_id', $userId)->pluck('question_id'),
+                };
+                $q->whereIn('id', $ids);
+            });
+    }
+
+    // Shared by store() (new config) and duplicate() (retake with a fresh
+    // random pick, same filters) -- kept as one place so both can never
+    // drift apart on how a set of questions gets picked.
+    private function pickQuestionIds(array $data, int $userId): array
+    {
+        $questionIds = $this->matchingQuestionsQuery($data, $userId)
             ->inRandomOrder()
             ->limit($data['question_count'])
             ->pluck('id')

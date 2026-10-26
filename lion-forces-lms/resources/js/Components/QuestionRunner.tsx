@@ -35,6 +35,17 @@ interface Props {
      * keeps the full layout unchanged.
      */
     compact?: boolean;
+    /**
+     * false suppresses per-question right/wrong feedback entirely (no
+     * check-answer request fires, no color-coded options, no explanation
+     * box, and the Correct/Wrong stat tiles are hidden) -- Custom Quiz's
+     * "Timed" mode only, true exam simulation where nothing is revealed
+     * until the whole attempt is submitted. Defaults to true: every other
+     * caller keeps the instant-feedback behavior that was an explicit,
+     * deliberate client decision applying to every other test type (see
+     * this file's own top comment).
+     */
+    instantFeedback?: boolean;
 }
 
 function BackIcon() {
@@ -158,6 +169,7 @@ export default function QuestionRunner({
     emptyMessage = 'No questions are available yet.',
     resetKey,
     compact = false,
+    instantFeedback = true,
 }: Props) {
     const { auth } = usePage<PageProps>().props;
     const isAuthenticated = !!auth?.user;
@@ -237,6 +249,7 @@ export default function QuestionRunner({
     // switching an answer never needs a second request.
     function handleSelect(questionId: number, optionId: number) {
         onSelect(questionId, optionId);
+        if (!instantFeedback) return;
         if (feedback[questionId] !== undefined) return;
         setFeedback((prev) => ({ ...prev, [questionId]: 'loading' }));
         axios
@@ -310,8 +323,12 @@ export default function QuestionRunner({
     const current = questions[currentIndex];
 
     const statTiles = [
-        { label: 'Correct', value: correctCount, icon: <CheckCircleIcon />, tone: 'border-success bg-success-bg text-success' },
-        { label: 'Wrong', value: wrongCount, icon: <XCircleIcon />, tone: 'border-danger bg-danger-bg text-danger' },
+        ...(instantFeedback
+            ? [
+                  { label: 'Correct', value: correctCount, icon: <CheckCircleIcon />, tone: 'border-success bg-success-bg text-success' },
+                  { label: 'Wrong', value: wrongCount, icon: <XCircleIcon />, tone: 'border-danger bg-danger-bg text-danger' },
+              ]
+            : []),
         { label: 'Answered', value: answeredCount, icon: <BadgeIcon />, tone: 'border-primary bg-primary-subtle text-primary' },
         { label: 'Skipped', value: skippedIndexes.length, icon: <FlagIcon />, tone: 'border-warning bg-warning-bg text-warning' },
         { label: 'Not Visited', value: notVisitedCount, icon: <CircleIcon />, tone: 'border-border bg-surface-sunken text-text-muted' },
@@ -349,16 +366,20 @@ export default function QuestionRunner({
             </div>
             <div className="rounded-2xl border border-border bg-surface p-3 shadow-sm">
                 <div className="grid grid-cols-2 gap-2">
-                    <div className="rounded-xl border border-success bg-success-bg p-3 text-center text-success">
-                        <CheckCircleIcon className="mx-auto h-4 w-4" />
-                        <p className="mt-1 text-lg font-bold leading-none">{correctCount}</p>
-                        <p className="text-[0.65rem] font-bold uppercase tracking-wide">Correct</p>
-                    </div>
-                    <div className="rounded-xl border border-danger bg-danger-bg p-3 text-center text-danger">
-                        <XCircleIcon className="mx-auto h-4 w-4" />
-                        <p className="mt-1 text-lg font-bold leading-none">{wrongCount}</p>
-                        <p className="text-[0.65rem] font-bold uppercase tracking-wide">Wrong</p>
-                    </div>
+                    {instantFeedback && (
+                        <>
+                            <div className="rounded-xl border border-success bg-success-bg p-3 text-center text-success">
+                                <CheckCircleIcon className="mx-auto h-4 w-4" />
+                                <p className="mt-1 text-lg font-bold leading-none">{correctCount}</p>
+                                <p className="text-[0.65rem] font-bold uppercase tracking-wide">Correct</p>
+                            </div>
+                            <div className="rounded-xl border border-danger bg-danger-bg p-3 text-center text-danger">
+                                <XCircleIcon className="mx-auto h-4 w-4" />
+                                <p className="mt-1 text-lg font-bold leading-none">{wrongCount}</p>
+                                <p className="text-[0.65rem] font-bold uppercase tracking-wide">Wrong</p>
+                            </div>
+                        </>
+                    )}
                     <div className="rounded-xl border border-primary bg-primary-subtle p-3 text-center text-primary">
                         <BadgeIcon className="mx-auto h-4 w-4" />
                         <p className="mt-1 text-lg font-bold leading-none">{answeredCount}</p>

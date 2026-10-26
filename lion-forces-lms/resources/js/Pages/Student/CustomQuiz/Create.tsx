@@ -1,5 +1,6 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
-import { FormEvent } from 'react';
+import axios from 'axios';
+import { FormEvent, useEffect, useState } from 'react';
 import Icon from '@/Components/Icon';
 import StudentLayout from '@/Layouts/StudentLayout';
 
@@ -7,8 +8,8 @@ interface SubjectOption { id: number; name: string; questions_count: number }
 interface TopicOption { id: number; subject_id: number; name: string }
 interface CourseInfo { id: number; title: string; slug: string }
 interface HistoryItem {
-    id: number; subject: string | null; topic: string | null; difficulty: string | null;
-    question_count: number; created_at: string; attempt_id: number | null; percentage: string | null;
+    id: number; name: string | null; subject: string | null; topic: string | null; difficulty: string | null;
+    question_count: number; mode: 'tutor' | 'timed'; created_at: string; attempt_id: number | null; percentage: string | null;
 }
 interface Props {
     subjects: SubjectOption[]; topics: TopicOption[]; hasAccess: boolean; freeTrialMax: number; course?: CourseInfo | null;
@@ -44,11 +45,12 @@ function TestHistory({ history }: { history: HistoryItem[] }) {
                     <div key={h.id} className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-surface p-4">
                         <div className="min-w-0">
                             <p className="truncate text-sm font-semibold text-text">
-                                {h.subject ?? 'Any subject'}{h.topic ? ` / ${h.topic}` : ''}
+                                {h.name ?? `${h.subject ?? 'Any subject'}${h.topic ? ` / ${h.topic}` : ''}`}
                             </p>
                             <p className="text-xs text-text-muted">
                                 {h.question_count} question{h.question_count === 1 ? '' : 's'}
-                                {h.difficulty ? ` · ${h.difficulty}` : ''} · {new Date(h.created_at).toLocaleDateString()}
+                                {h.difficulty ? ` · ${h.difficulty}` : ''}
+                                {h.mode === 'timed' ? ' · Timed' : ''} · {new Date(h.created_at).toLocaleDateString()}
                             </p>
                         </div>
                         <div className="flex flex-shrink-0 items-center gap-2">
@@ -81,11 +83,15 @@ function TestHistory({ history }: { history: HistoryItem[] }) {
 
 export default function CreateCustomQuiz({ subjects, topics, hasAccess, freeTrialMax, course = null, history = [] }: Props) {
     const form = useForm({
+        name: '',
         subject_ids: [] as number[],
         topic_ids: [] as number[],
         difficulty: '' as '' | 'easy' | 'medium' | 'hard',
         question_count: hasAccess ? 10 : freeTrialMax,
         course_id: course?.id ?? ('' as number | ''),
+        mode: 'tutor' as 'tutor' | 'timed',
+        timer_enabled: false,
+        filter: '' as '' | 'unused' | 'wrong' | 'correct' | 'favorited',
     });
 
     // Topic is scoped to whichever subjects are picked -- same reasoning
@@ -93,6 +99,31 @@ export default function CreateCustomQuiz({ subjects, topics, hasAccess, freeTria
     // "any of the selected subjects" now that more than one can be picked.
     const availableTopics = topics.filter((t) => form.data.subject_ids.includes(t.subject_id));
     const maxQuestions = hasAccess ? 50 : freeTrialMax;
+
+    // Live "X questions found" preview as filters change -- UWorld's own
+    // Create Test screen shows this before the student ever hits create,
+    // so they know if their filters are too narrow. Debounced since every
+    // checkbox click would otherwise fire its own request.
+    const [matchingCount, setMatchingCount] = useState<number | null>(null);
+    const [countLoading, setCountLoading] = useState(false);
+
+    useEffect(() => {
+        setCountLoading(true);
+        const t = setTimeout(() => {
+            axios
+                .post('/portal/custom-quiz/preview-count', {
+                    subject_ids: form.data.subject_ids,
+                    topic_ids: form.data.topic_ids,
+                    difficulty: form.data.difficulty || undefined,
+                    course_id: form.data.course_id || undefined,
+                    filter: form.data.filter || undefined,
+                })
+                .then(({ data }) => setMatchingCount(data.count))
+                .finally(() => setCountLoading(false));
+        }, 400);
+        return () => clearTimeout(t);
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [form.data.subject_ids, form.data.topic_ids, form.data.difficulty, form.data.filter]);
 
     // Client sent a video of UWorld's own "Create Test" screen: Subjects
     // (and Systems) there are multi-select -- "Anatomy | Behavioral
@@ -148,6 +179,18 @@ export default function CreateCustomQuiz({ subjects, topics, hasAccess, freeTria
 
                 <form onSubmit={submit} className="mt-6 space-y-4">
                     <div>
+                        <label className="mb-1 block text-sm font-medium text-text">Quiz Name (optional)</label>
+                        <input
+                            type="text"
+                            maxLength={150}
+                            placeholder="e.g. Pakistan Studies Review"
+                            className={inputClass}
+                            value={form.data.name}
+                            onChange={(e) => form.setData('name', e.target.value)}
+                        />
+                    </div>
+
+                    <div>
                         <div className="mb-1 flex items-center justify-between">
                             <label className="block text-sm font-medium text-text">Subjects</label>
                             <span className="text-xs text-text-muted">{form.data.subject_ids.length === 0 ? 'Any subject' : `${form.data.subject_ids.length} selected`}</span>
@@ -192,6 +235,34 @@ export default function CreateCustomQuiz({ subjects, topics, hasAccess, freeTria
                     </div>
 
                     <div>
+                        <label className="mb-1 block text-sm font-medium text-text">Only include</label>
+                        <select className={inputClass} value={form.data.filter} onChange={(e) => form.setData('filter', e.target.value as typeof form.data.filter)}>
+                            <option value="">All questions</option>
+                            <option value="unused">Unused (never attempted)</option>
+                            <option value="wrong">Previously wrong</option>
+                            <option value="correct">Previously correct</option>
+                            <option value="favorited">Favorited</option>
+                        </select>
+                    </div>
+
+                    <p className="text-xs text-text-muted">
+                        {countLoading ? 'Checking…' : matchingCount !== null ? `${matchingCount} question${matchingCount === 1 ? '' : 's'} match these filters.` : ''}
+                    </p>
+
+                    <div>
+                        <label className="mb-1 block text-sm font-medium text-text">Mode</label>
+                        <select className={inputClass} value={form.data.mode} onChange={(e) => form.setData('mode', e.target.value as typeof form.data.mode)}>
+                            <option value="tutor">Tutor -- see the answer after each question</option>
+                            <option value="timed">Timed -- no feedback until you submit (exam simulation)</option>
+                        </select>
+                    </div>
+
+                    <label className="flex items-center gap-2 text-sm text-text">
+                        <input type="checkbox" checked={form.data.timer_enabled} onChange={(e) => form.setData('timer_enabled', e.target.checked)} />
+                        Enable timer (1 minute per question)
+                    </label>
+
+                    <div>
                         <label className="mb-1 block text-sm font-medium text-text">Number of questions</label>
                         <input
                             type="number"
@@ -203,6 +274,9 @@ export default function CreateCustomQuiz({ subjects, topics, hasAccess, freeTria
                         />
                         {!hasAccess && (
                             <p className="mt-1 text-xs text-text-muted">Capped at {freeTrialMax} for the free preview.</p>
+                        )}
+                        {matchingCount !== null && form.data.question_count > matchingCount && (
+                            <p className="mt-1 text-xs text-warning">Only {matchingCount} question{matchingCount === 1 ? '' : 's'} available -- you'll get fewer than asked for.</p>
                         )}
                     </div>
 
