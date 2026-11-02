@@ -1,5 +1,5 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import LiteMarkdown from '@/Components/LiteMarkdown';
 import RevealOnScroll from '@/Components/RevealOnScroll';
 import RichTextArea from '@/Components/RichTextArea';
@@ -87,45 +87,89 @@ function youtubeVideoId(url: string): string | null {
 
 // Client: keep the admin workflow to just "paste a video link," and the
 // student should see a clean frame with nothing clickable leading out to
-// YouTube -- no "Watch on YouTube," no title/watermark link, nothing.
-// Rewritten to the simplest version of the standard lazy-load pattern
-// most LMS sites actually use (the same technique as the well-known
-// "lite-youtube-embed" approach): before a real click, there is no
-// iframe at all -- just YouTube's own public thumbnail image and our
-// play button, so there's nothing of YouTube's own UI on screen to
-// click through in the first place. The iframe (and YouTube's real
-// chrome) only gets created on an actual user click, with autoplay=1,
-// which is allowed because the click itself is the user gesture.
-// youtube-nocookie.com (no third-party cookies) + rel=0 (no
-// related-videos from other channels) + modestbranding=1 (smaller logo)
-// are the same standard minimal-chrome parameters any embed should use.
+// YouTube -- no "Watch on YouTube," no title/watermark link, nothing, in
+// any screen state. Rewritten to the simplest version of the standard
+// lazy-load pattern most LMS sites use (the same technique as the
+// well-known "lite-youtube-embed" approach): before a real click, there
+// is no iframe at all -- just YouTube's own public thumbnail image and
+// our play button, so there's nothing of YouTube's own UI on screen to
+// click through in the first place. youtube-nocookie.com (no
+// third-party cookies) + rel=0 (no related-videos from other channels) +
+// modestbranding=1 (smaller logo) are the standard minimal-chrome
+// parameters any embed should use.
+//
+// Fullscreen needed its own fix: clicking YOUTUBE's own fullscreen
+// button only fullscreens the iframe itself -- our blocking overlays are
+// sibling elements, not inside the iframe (can't be, it's a cross-origin
+// document we have no access into), so they were left behind the moment
+// a student used that native control. fs=0 removes that button from the
+// embed entirely, and a custom fullscreen button calls
+// requestFullscreen() on the OUTER wrapper instead, which contains the
+// iframe AND both overlays as children -- so whatever goes fullscreen
+// now, the overlays go with it, in every size: normal, half-screen, or
+// real browser fullscreen.
 function YoutubeEmbed({ videoId, title }: { videoId: string; title: string }) {
     const [clicked, setClicked] = useState(false);
     const [thumbnailBroken, setThumbnailBroken] = useState(false);
+    const [isFullscreen, setIsFullscreen] = useState(false);
+    const wrapperRef = useRef<HTMLDivElement>(null);
+
+    useEffect(() => {
+        function onFullscreenChange() {
+            setIsFullscreen(document.fullscreenElement === wrapperRef.current);
+        }
+        document.addEventListener('fullscreenchange', onFullscreenChange);
+        return () => document.removeEventListener('fullscreenchange', onFullscreenChange);
+    }, []);
+
+    function toggleFullscreen() {
+        if (document.fullscreenElement) {
+            document.exitFullscreen();
+        } else {
+            wrapperRef.current?.requestFullscreen();
+        }
+    }
 
     if (clicked) {
         const origin = typeof window !== 'undefined' ? encodeURIComponent(window.location.origin) : '';
-        const embedUrl = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&iv_load_policy=3&fs=1&origin=${origin}`;
+        const embedUrl = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&iv_load_policy=3&fs=0&origin=${origin}`;
 
         return (
-            <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-black">
+            <div
+                ref={wrapperRef}
+                className={`relative overflow-hidden bg-black ${isFullscreen ? 'h-full w-full' : 'aspect-video w-full rounded-xl'}`}
+            >
                 <iframe
                     src={embedUrl}
                     className="h-full w-full"
-                    allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
-                    allowFullScreen
+                    allow="autoplay; encrypted-media; picture-in-picture"
                     title={title}
                 />
                 {/* YouTube's own title-link (top-left, on hover/pause) and
                     its "YouTube" watermark badge (bottom-right, appears
                     during playback) both open youtube.com directly --
                     these two small blocking areas sit on top of them
-                    permanently, including while playing. Deliberately
-                    small and corner-only, not spanning the full control
-                    bar strip: volume/captions/settings/fullscreen all run
-                    along the very bottom edge and stay fully usable. */}
+                    permanently, including while playing. Corner-only, not
+                    spanning the full control bar: volume/captions/settings
+                    run along the very bottom edge and stay usable. */}
                 <div className="pointer-events-auto absolute left-0 top-0 h-10 w-2/5 max-w-[14rem]" />
                 <div className="pointer-events-auto absolute bottom-0 right-0 h-[14%] w-[32%] max-w-[11rem]" />
+                <button
+                    type="button"
+                    onClick={toggleFullscreen}
+                    aria-label={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
+                    className="absolute bottom-2 right-2 z-10 flex h-9 w-9 items-center justify-center rounded-lg bg-black/60 text-white transition-colors hover:bg-black/80"
+                >
+                    {isFullscreen ? (
+                        <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 9H4.5M9 9V4.5M9 9L3.75 3.75M15 9h4.5M15 9V4.5M15 9l5.25-5.25M9 15H4.5M9 15v4.5M9 15l-5.25 5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25" />
+                        </svg>
+                    ) : (
+                        <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 3.75H4.5a.75.75 0 00-.75.75v3.75m16.5 0V4.5a.75.75 0 00-.75-.75h-3.75M4.5 15.75v3.75c0 .414.336.75.75.75h3.75m7.5 0h3.75a.75.75 0 00.75-.75v-3.75" />
+                        </svg>
+                    )}
+                </button>
             </div>
         );
     }
