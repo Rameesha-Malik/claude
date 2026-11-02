@@ -18,7 +18,10 @@ function summarizeModules(modules: Module[]): string {
 }
 
 interface Package { id: number; name: string; modules: Module[]; description: string | null; price: string; validity_days: number | null }
-interface Lesson { id: number; title: string; type: string; is_free_preview: boolean; section_id: number | null }
+interface Lesson {
+    id: number; title: string; type: string; is_free_preview: boolean; section_id: number | null;
+    external_url: string | null; file_path: string | null;
+}
 interface Section { id: number; title: string; description: string | null; lessons: Lesson[] }
 interface Tag { id: number; name: string }
 interface Course {
@@ -280,15 +283,104 @@ const LESSON_TYPE_LABELS: Record<string, string> = {
     link: 'External Link',
 };
 
-function LessonRow({ lesson }: { lesson: Lesson }) {
-    return (
-        <div className="flex items-center justify-between rounded-lg border border-border p-3 text-sm">
-            <div>
-                <div className="font-semibold text-text">{lesson.title}</div>
-                <div className="text-xs uppercase text-text-muted">{LESSON_TYPE_LABELS[lesson.type] ?? lesson.type}{lesson.is_free_preview ? ' · Free Preview' : ''}</div>
+const URL_LESSON_TYPES = ['video_youtube', 'link'];
+
+// Client: a YouTube-embedded lecture can never fully hide where it's
+// hosted from a student determined enough to open DevTools -- the iframe's
+// real src is sitting right there in the page no matter how much the
+// player itself is covered up (see CourseLearning.tsx's YoutubeEmbed).
+// Switching a lesson to "Video (File Upload)" here is the only way to
+// remove that trace entirely, since the file then streams from this
+// site's own storage with no third-party URL anywhere in the page. This
+// edit form existed on the backend already (updateLesson) but had no UI
+// -- the Add Lesson form below was deliberately simplified to just a
+// YouTube link per earlier client feedback, so editing is the only way
+// to convert an existing lesson to a self-hosted file without losing its
+// position/order by deleting and re-adding it.
+function LessonRow({ lesson, sections }: { lesson: Lesson; sections: Section[] }) {
+    const [editing, setEditing] = useState(false);
+    const form = useForm<{
+        title: string; type: string; external_url: string; file: File | null;
+        section_id: string; is_free_preview: boolean;
+    }>({
+        title: lesson.title,
+        type: lesson.type,
+        external_url: lesson.external_url ?? '',
+        file: null,
+        section_id: lesson.section_id !== null ? String(lesson.section_id) : '',
+        is_free_preview: lesson.is_free_preview,
+    });
+
+    function changeType(type: string) {
+        // Clearing external_url when leaving a URL-based type isn't just
+        // tidiness -- an admin page shows it fine, but Course/Lesson props
+        // are the same model sent to the STUDENT-facing course player too,
+        // so a stale YouTube URL left in the field would still ship in
+        // that page's own JSON even though the UI no longer renders it.
+        form.setData((prev) => ({ ...prev, type, external_url: URL_LESSON_TYPES.includes(type) ? prev.external_url : '' }));
+    }
+
+    if (!editing) {
+        return (
+            <div className="flex items-center justify-between rounded-lg border border-border p-3 text-sm">
+                <div>
+                    <div className="font-semibold text-text">{lesson.title}</div>
+                    <div className="text-xs uppercase text-text-muted">{LESSON_TYPE_LABELS[lesson.type] ?? lesson.type}{lesson.is_free_preview ? ' · Free Preview' : ''}</div>
+                </div>
+                <div className="flex flex-shrink-0 gap-3">
+                    <button onClick={() => setEditing(true)} className="text-xs font-bold uppercase text-primary hover:underline">Edit</button>
+                    <button onClick={() => router.delete(`/admin/courses/lessons/${lesson.id}`)} className="text-xs font-bold uppercase text-danger hover:underline">Delete</button>
+                </div>
             </div>
-            <button onClick={() => router.delete(`/admin/courses/lessons/${lesson.id}`)} className="text-xs font-bold uppercase text-danger hover:underline">Delete</button>
-        </div>
+        );
+    }
+
+    return (
+        <form
+            onSubmit={(e) => {
+                e.preventDefault();
+                form.put(`/admin/courses/lessons/${lesson.id}`, { onSuccess: () => setEditing(false) });
+            }}
+            className="space-y-2 rounded-lg border border-primary p-3 text-sm"
+        >
+            <input className={inputClass} placeholder="Lesson Title" value={form.data.title} onChange={(e) => form.setData('title', e.target.value)} />
+            <select className={inputClass} value={form.data.type} onChange={(e) => changeType(e.target.value)}>
+                {Object.entries(LESSON_TYPE_LABELS).map(([value, label]) => <option key={value} value={value}>{label}</option>)}
+            </select>
+            <select className={inputClass} value={form.data.section_id} onChange={(e) => form.setData('section_id', e.target.value)}>
+                <option value="">No topic (ungrouped)</option>
+                {sections.map((s) => <option key={s.id} value={s.id}>{s.title}</option>)}
+            </select>
+            {URL_LESSON_TYPES.includes(form.data.type) ? (
+                <input
+                    className={inputClass}
+                    placeholder="Video link (e.g. an unlisted YouTube URL)"
+                    value={form.data.external_url}
+                    onChange={(e) => form.setData('external_url', e.target.value)}
+                />
+            ) : (
+                <div>
+                    <input
+                        type="file"
+                        accept={form.data.type === 'video_upload' ? 'video/mp4,video/quicktime,video/webm' : undefined}
+                        className={inputClass}
+                        onChange={(e) => form.setData('file', e.target.files?.[0] ?? null)}
+                    />
+                    {lesson.file_path && <p className="mt-1 text-xs text-text-muted">A file is already uploaded. Leave empty to keep it.</p>}
+                </div>
+            )}
+            <label className="flex items-center gap-2 text-sm text-text">
+                <input type="checkbox" checked={form.data.is_free_preview} onChange={(e) => form.setData('is_free_preview', e.target.checked)} />
+                Free preview
+            </label>
+            <div className="flex gap-2">
+                <button type="submit" disabled={form.processing} className="rounded-lg bg-primary px-4 py-1.5 text-xs font-bold uppercase text-on-primary hover:bg-primary-hover disabled:opacity-50">
+                    {form.processing ? 'Saving…' : 'Save'}
+                </button>
+                <button type="button" onClick={() => setEditing(false)} className="rounded-lg border border-border px-4 py-1.5 text-xs font-bold uppercase text-text-secondary hover:border-primary">Cancel</button>
+            </div>
+            {Object.values(form.errors).map((m, i) => <div key={i} className="text-sm text-danger">{m}</div>)}
+        </form>
     );
 }
 
@@ -377,6 +469,12 @@ function CurriculumPanel({ course }: { course: Course }) {
                 Lectures"), then add lessons into it -- a title and a video link (e.g. an unlisted YouTube link) is all each
                 lesson needs. Lessons left ungrouped still show to students, just not under a named topic.
             </p>
+            <p className="mb-3 text-sm text-text-secondary">
+                A YouTube link is quickest, but a determined student can still find it by inspecting the page. For a lesson
+                that must never reveal where it's hosted, click <strong>Edit</strong> on it after adding and switch it to
+                <strong> Video (File Upload)</strong> instead -- the file then streams from this site, with no outside link
+                anywhere on the page.
+            </p>
 
             <AddTopicForm courseId={course.id} />
 
@@ -385,7 +483,7 @@ function CurriculumPanel({ course }: { course: Course }) {
                     <div key={section.id} className="rounded-xl border border-border p-3">
                         <TopicHeader section={section} />
                         <div className="space-y-2">
-                            {section.lessons.map((lesson) => <LessonRow key={lesson.id} lesson={lesson} />)}
+                            {section.lessons.map((lesson) => <LessonRow key={lesson.id} lesson={lesson} sections={course.sections} />)}
                             {section.lessons.length === 0 && <p className="text-sm text-text-secondary">No lessons in this topic yet.</p>}
                         </div>
                     </div>
@@ -395,7 +493,7 @@ function CurriculumPanel({ course }: { course: Course }) {
                     <div>
                         {course.sections.length > 0 && <h4 className="mb-2 text-sm font-semibold uppercase tracking-wide text-text-muted">Ungrouped</h4>}
                         <div className="space-y-2">
-                            {ungrouped.map((lesson) => <LessonRow key={lesson.id} lesson={lesson} />)}
+                            {ungrouped.map((lesson) => <LessonRow key={lesson.id} lesson={lesson} sections={course.sections} />)}
                             {ungrouped.length === 0 && <p className="text-sm text-text-secondary">No lessons yet.</p>}
                         </div>
                     </div>
