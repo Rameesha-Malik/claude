@@ -164,6 +164,18 @@ function YoutubeEmbed({ embed, title }: { embed: string; title: string }) {
                     ref={iframeRef}
                     src={embed}
                     className="h-full w-full"
+                    // Pre-play, the iframe can't receive clicks at all --
+                    // not just "something's covering it": on some
+                    // browsers/WebViews a video iframe paints in its own
+                    // compositor layer and can still catch a click through
+                    // a same-origin overlay stacked above it in the DOM.
+                    // pointer-events: none strips its ability to receive
+                    // input at the browser's event-routing level, which a
+                    // z-index/stacking fix alone doesn't guarantee. Once
+                    // playback is confirmed started, this is lifted so the
+                    // real control bar (volume, captions, fullscreen)
+                    // underneath works normally.
+                    style={{ pointerEvents: started ? 'auto' : 'none' }}
                     allow="fullscreen; encrypted-media; picture-in-picture"
                     allowFullScreen
                     title={title}
@@ -174,7 +186,7 @@ function YoutubeEmbed({ embed, title }: { embed: string; title: string }) {
                         type="button"
                         onClick={startPlayback}
                         aria-label="Play video"
-                        className="group absolute inset-0 flex items-center justify-center bg-black/40 transition-colors hover:bg-black/55"
+                        className="group absolute inset-0 z-10 flex items-center justify-center bg-black/40 transition-colors hover:bg-black/55"
                     >
                         <span className="flex h-16 w-16 items-center justify-center rounded-full bg-primary shadow-lg transition-transform group-hover:scale-105">
                             <svg className="ml-1 h-7 w-7 text-on-primary" fill="currentColor" viewBox="0 0 24 24">
@@ -183,8 +195,8 @@ function YoutubeEmbed({ embed, title }: { embed: string; title: string }) {
                         </span>
                     </button>
                 )}
-                <div className="absolute left-0 top-0 h-10 w-2/5 max-w-[14rem]" />
-                <div className="absolute right-0 top-0 h-10 w-24" />
+                <div className="absolute left-0 top-0 z-10 h-10 w-2/5 max-w-[14rem]" />
+                <div className="absolute right-0 top-0 z-10 h-10 w-24" />
             </div>
             {showFallback && ! started && (
                 <p className="mt-2 text-sm text-text-secondary">
