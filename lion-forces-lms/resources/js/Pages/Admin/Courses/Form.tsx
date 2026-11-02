@@ -21,8 +21,6 @@ interface Package { id: number; name: string; modules: Module[]; description: st
 interface Lesson {
     id: number; title: string; type: string; is_free_preview: boolean; section_id: number | null;
     external_url: string | null; file_path: string | null;
-    video_import_status: 'pending' | 'processing' | 'ready' | 'failed' | null;
-    video_import_error: string | null;
 }
 interface Section { id: number; title: string; description: string | null; lessons: Lesson[] }
 interface Tag { id: number; name: string }
@@ -324,31 +322,15 @@ function LessonRow({ lesson, sections }: { lesson: Lesson; sections: Section[] }
 
     if (!editing) {
         return (
-            <div className="rounded-lg border border-border p-3 text-sm">
-                <div className="flex items-center justify-between">
-                    <div>
-                        <div className="font-semibold text-text">{lesson.title}</div>
-                        <div className="text-xs uppercase text-text-muted">{LESSON_TYPE_LABELS[lesson.type] ?? lesson.type}{lesson.is_free_preview ? ' · Free Preview' : ''}</div>
-                    </div>
-                    <div className="flex flex-shrink-0 gap-3">
-                        <button onClick={() => setEditing(true)} className="text-xs font-bold uppercase text-primary hover:underline">Edit</button>
-                        <button onClick={() => router.delete(`/admin/courses/lessons/${lesson.id}`)} className="text-xs font-bold uppercase text-danger hover:underline">Delete</button>
-                    </div>
+            <div className="flex items-center justify-between rounded-lg border border-border p-3 text-sm">
+                <div>
+                    <div className="font-semibold text-text">{lesson.title}</div>
+                    <div className="text-xs uppercase text-text-muted">{LESSON_TYPE_LABELS[lesson.type] ?? lesson.type}{lesson.is_free_preview ? ' · Free Preview' : ''}</div>
                 </div>
-                {/* A YouTube link is imported into this site's own storage
-                    server-side (see ImportYoutubeLessonVideo) rather than
-                    ever embedded -- this is the admin's only visibility
-                    into that, since the student side shows nothing until
-                    it's ready. */}
-                {(lesson.video_import_status === 'pending' || lesson.video_import_status === 'processing') && (
-                    <p className="mt-2 text-xs font-bold uppercase tracking-wide text-warning">Importing video -- this can take a few minutes.</p>
-                )}
-                {lesson.video_import_status === 'failed' && (
-                    <p className="mt-2 text-xs text-danger">
-                        <span className="font-bold uppercase tracking-wide">Import failed:</span> {lesson.video_import_error ?? 'Unknown error.'} Click
-                        Edit and Save again to retry.
-                    </p>
-                )}
+                <div className="flex flex-shrink-0 gap-3">
+                    <button onClick={() => setEditing(true)} className="text-xs font-bold uppercase text-primary hover:underline">Edit</button>
+                    <button onClick={() => router.delete(`/admin/courses/lessons/${lesson.id}`)} className="text-xs font-bold uppercase text-danger hover:underline">Delete</button>
+                </div>
             </div>
         );
     }

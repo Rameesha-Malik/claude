@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Jobs\ImportYoutubeLessonVideo;
 use App\Models\ActivityLog;
 use App\Models\Course;
 use App\Models\CourseCategory;
@@ -373,16 +372,11 @@ class CourseController extends Controller
         $data = collect($request->validate($this->lessonRules($request, required: true, course: $course)))->except('file')->toArray();
 
         $data['file_path'] = $this->handleLessonFile($request);
-        $data['video_import_status'] = $data['type'] === 'video_youtube' ? 'pending' : null;
 
         $lesson = $course->lessons()->create($data + ['order' => $course->lessons()->max('order') + 1]);
         ActivityLog::record('added', 'Lecture', $lesson->id, "Lecture \"{$lesson->title}\" was added to {$course->title}.", $course->id);
 
-        if ($lesson->video_import_status === 'pending') {
-            ImportYoutubeLessonVideo::dispatch($lesson->id);
-        }
-
-        return back()->with('success', $lesson->video_import_status === 'pending' ? 'Lesson added. Importing the video now -- this can take a few minutes.' : 'Lesson added.');
+        return back()->with('success', 'Lesson added.');
     }
 
     public function updateLesson(Request $request, Lesson $lesson)
@@ -398,34 +392,10 @@ class CourseController extends Controller
             $data['file_path'] = $newPath;
         }
 
-        // Re-import whenever the link changed, or a previous import never
-        // finished (null) or failed -- re-saving unchanged is the admin's
-        // way to retry a failed one, without a separate "Retry" endpoint.
-        // Leaving a non-video_youtube type alone here either way: its
-        // video_import_status stays whatever it already was (null for a
-        // lesson that was never YouTube-sourced, or left in place if an
-        // already-imported video_youtube lesson's file was simply
-        // re-uploaded by hand through the File Upload path instead).
-        $shouldImport = $data['type'] === 'video_youtube'
-            && ! empty($data['external_url'])
-            && ($data['external_url'] !== $lesson->external_url || ! in_array($lesson->video_import_status, ['pending', 'processing', 'ready'], true));
-        if ($data['type'] === 'video_youtube') {
-            $data['video_import_status'] = $shouldImport ? 'pending' : $lesson->video_import_status;
-        } elseif ($lesson->type === 'video_youtube') {
-            // Switched away from YouTube (e.g. to a manual File Upload) --
-            // the import pipeline no longer applies to this lesson.
-            $data['video_import_status'] = null;
-            $data['video_import_error'] = null;
-        }
-
         $lesson->update($data);
         ActivityLog::record('edited', 'Lecture', $lesson->id, "Lecture \"{$lesson->title}\" was updated.", $lesson->course_id);
 
-        if ($shouldImport) {
-            ImportYoutubeLessonVideo::dispatch($lesson->id);
-        }
-
-        return back()->with('success', $shouldImport ? 'Lesson updated. Importing the video now -- this can take a few minutes.' : 'Lesson updated.');
+        return back()->with('success', 'Lesson updated.');
     }
 
     public function destroyLesson(Request $request, Lesson $lesson)
