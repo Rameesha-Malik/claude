@@ -13,6 +13,7 @@ use App\Models\TestAttemptAnswer;
 use App\Models\Topic;
 use App\Support\FeatureFlags;
 use Illuminate\Http\Request;
+use Illuminate\Validation\ValidationException;
 use Inertia\Inertia;
 use Inertia\Response;
 
@@ -317,7 +318,7 @@ class CustomQuizController extends Controller
             $data['question_count'] = min($data['question_count'], self::FREE_TRIAL_MAX_QUESTIONS);
         }
 
-        $questionIds = $this->pickQuestionIds($data, $request->user()->id);
+        $questionIds = $this->pickQuestionIds($data, $request->user()->id, 'question_count');
 
         $config = CustomQuizConfig::create([
             'user_id' => $request->user()->id,
@@ -612,7 +613,17 @@ class CustomQuizController extends Controller
     // Shared by store() (new config) and duplicate() (retake with a fresh
     // random pick, same filters) -- kept as one place so both can never
     // drift apart on how a set of questions gets picked.
-    private function pickQuestionIds(array $data, int $userId): array
+    //
+    // $validationField: when the caller has a form field to attach this to
+    // (store()'s "Number of questions" field, which already renders
+    // form.errors.question_count), pass its name so the failure redirects
+    // back into that same form instead of crashing out of the Inertia SPA
+    // with a raw abort(422) page -- a plain HttpException has no
+    // redirect-back behaviour, ValidationException does. duplicate() has
+    // no form to attach to (it's a one-click retake), so it leaves this
+    // null and keeps the abort, which the global Inertia error page now
+    // renders gracefully instead of a crash.
+    private function pickQuestionIds(array $data, int $userId, ?string $validationField = null): array
     {
         $questionIds = $this->matchingQuestionsQuery($data, $userId)
             ->inRandomOrder()
@@ -621,7 +632,15 @@ class CustomQuizController extends Controller
             ->values()
             ->all();
 
-        abort_if(count($questionIds) === 0, 422, 'No questions match those filters yet. Try different subjects, topics, or a different difficulty.');
+        if (count($questionIds) === 0) {
+            $message = 'No questions match those filters yet. Try different subjects, topics, or a different difficulty.';
+
+            if ($validationField) {
+                throw ValidationException::withMessages([$validationField => $message]);
+            }
+
+            abort(422, $message);
+        }
 
         return $questionIds;
     }
