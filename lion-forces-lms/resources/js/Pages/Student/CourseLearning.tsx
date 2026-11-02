@@ -116,11 +116,16 @@ function YoutubeEmbed({ videoId, title }: { videoId: string; title: string }) {
                     allowFullScreen
                     title={title}
                 />
-                {/* The title/watermark link YouTube shows in the top-left
-                    on hover or pause stays blocked permanently, even
-                    while actually playing -- the rest of the control bar
-                    (volume, captions, fullscreen) is untouched. */}
-                <div className="pointer-events-none absolute left-0 top-0 h-10 w-2/5 max-w-[14rem]" />
+                {/* YouTube's own title-link (top-left, on hover/pause) and
+                    its "YouTube" watermark badge (bottom-right, appears
+                    during playback) both open youtube.com directly --
+                    these two small blocking areas sit on top of them
+                    permanently, including while playing. Deliberately
+                    small and corner-only, not spanning the full control
+                    bar strip: volume/captions/settings/fullscreen all run
+                    along the very bottom edge and stay fully usable. */}
+                <div className="pointer-events-auto absolute left-0 top-0 h-10 w-2/5 max-w-[14rem]" />
+                <div className="pointer-events-auto absolute bottom-[7%] right-0 h-[11%] w-[28%] max-w-[9rem]" />
             </div>
         );
     }
