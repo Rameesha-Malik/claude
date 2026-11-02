@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
 #[Fillable([
     'course_id', 'section_id', 'title', 'type', 'file_path', 'external_url',
-    'description', 'order', 'is_free_preview',
+    'description', 'order', 'is_free_preview', 'video_import_status', 'video_import_error',
 ])]
 class Lesson extends Model
 {
