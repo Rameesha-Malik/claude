@@ -261,16 +261,25 @@ export default function CreateCustomQuiz({ subjects, topics, hasAccess, freeTria
                         {!hasAccess && (
                             <p className="mt-1 text-xs text-text-muted">Capped at {freeTrialMax} for the free preview.</p>
                         )}
-                        {matchingCount !== null && form.data.question_count > matchingCount && (
-                            <p className="mt-1 text-xs text-warning">Only {matchingCount} question{matchingCount === 1 ? '' : 's'} available -- you'll get fewer than asked for.</p>
+                        {matchingCount === 0 ? (
+                            <p className="mt-1 text-xs text-danger">No questions match these filters -- try different subjects, topics, or a different difficulty/filter.</p>
+                        ) : (
+                            matchingCount !== null && form.data.question_count > matchingCount && (
+                                <p className="mt-1 text-xs text-warning">Only {matchingCount} question{matchingCount === 1 ? '' : 's'} available -- you'll get fewer than asked for.</p>
+                            )
                         )}
                     </div>
 
                     {form.errors.question_count && <p className="text-sm text-danger lg:col-span-2">{form.errors.question_count}</p>}
 
+                    {/* Catches the zero-match case before the student ever
+                        submits -- the server still rejects it too (see
+                        CustomQuizController::pickQuestionIds), this just
+                        saves the round trip once the live preview above
+                        already knows there's nothing to build from. */}
                     <button
                         type="submit"
-                        disabled={form.processing}
+                        disabled={form.processing || countLoading || matchingCount === 0}
                         className="w-full rounded-full bg-primary py-3 text-sm font-bold uppercase tracking-wide text-on-primary shadow-sm hover:bg-primary-hover disabled:opacity-50 lg:col-span-2"
                     >
                         {form.processing ? 'Building…' : 'Start Custom Quiz'}
