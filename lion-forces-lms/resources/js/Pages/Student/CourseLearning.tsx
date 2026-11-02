@@ -1,11 +1,10 @@
-import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
-import { useEffect, useRef, useState } from 'react';
+import { Head, Link, router, useForm } from '@inertiajs/react';
+import { useEffect, useState } from 'react';
 import LiteMarkdown from '@/Components/LiteMarkdown';
 import RevealOnScroll from '@/Components/RevealOnScroll';
 import RichTextArea from '@/Components/RichTextArea';
 import StatusDot from '@/Components/StatusDot';
 import StudentLayout from '@/Layouts/StudentLayout';
-import { PageProps } from '@/types';
 
 interface Lesson { id: number; title: string; type: string; external_url: string | null; file_path: string | null; description: string | null; section_id: number | null }
 interface Section { id: number; title: string; lessons: Lesson[] }
@@ -80,106 +79,73 @@ function initialTab(course: Partial<Course>): Tab {
     return 'Lectures';
 }
 
-// Client: keep the admin workflow to just "paste a video link" -- no
-// server-side download/import step, no waiting. Embed it the same way any
-// normal LMS does: youtube-nocookie.com (YouTube's own privacy-enhanced
-// embed domain, no third-party cookies) + rel=0 (limits "related videos"
-// at the end to this same channel) + modestbranding=1 (smaller logo) +
-// iv_load_policy=3 (no annotation overlays) -- the standard minimal-chrome
-// embed parameters, not a custom reinvention of one.
-function youtubeEmbedUrl(url: string): string | null {
+function youtubeVideoId(url: string): string | null {
     const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{6,})/);
-    if (! match) return null;
-    const origin = typeof window !== 'undefined' ? encodeURIComponent(window.location.origin) : '';
-    return `https://www.youtube-nocookie.com/embed/${match[1]}?rel=0&modestbranding=1&iv_load_policy=3&fs=1&enablejsapi=1&origin=${origin}`;
+
+    return match ? match[1] : null;
 }
 
-// A paused YouTube embed shows its own title-link/watermark in the top
-// corners, and -- for a video whose owner hasn't enabled embedding, shown
-// here as a big "Watch on YouTube" prompt covering most of the frame
-// instead of a normal thumbnail. No CSS trick reaches inside a cross-origin
-// iframe to remove that, so instead: a full-coverage overlay with our own
-// play button sits on top of the whole frame until playback is confirmed
-// started (via YouTube's postMessage API, not a native click reaching
-// whatever YouTube renders underneath), and the iframe itself gets
-// pointer-events: none pre-play so it structurally can't receive a click
-// regardless of stacking. Once actually playing, the overlay lifts and the
-// real control bar takes over; the top-corner strips stay blocking the
-// title/watermark permanently, since that reappears on hover/pause.
-function YoutubeEmbed({ embed, title }: { embed: string; title: string }) {
-    const { site } = usePage<PageProps>().props;
-    const [started, setStarted] = useState(false);
-    const [showFallback, setShowFallback] = useState(false);
-    const iframeRef = useRef<HTMLIFrameElement>(null);
+// Client: keep the admin workflow to just "paste a video link," and the
+// student should see a clean frame with nothing clickable leading out to
+// YouTube -- no "Watch on YouTube," no title/watermark link, nothing.
+// Rewritten to the simplest version of the standard lazy-load pattern
+// most LMS sites actually use (the same technique as the well-known
+// "lite-youtube-embed" approach): before a real click, there is no
+// iframe at all -- just YouTube's own public thumbnail image and our
+// play button, so there's nothing of YouTube's own UI on screen to
+// click through in the first place. The iframe (and YouTube's real
+// chrome) only gets created on an actual user click, with autoplay=1,
+// which is allowed because the click itself is the user gesture.
+// youtube-nocookie.com (no third-party cookies) + rel=0 (no
+// related-videos from other channels) + modestbranding=1 (smaller logo)
+// are the same standard minimal-chrome parameters any embed should use.
+function YoutubeEmbed({ videoId, title }: { videoId: string; title: string }) {
+    const [clicked, setClicked] = useState(false);
+    const [thumbnailBroken, setThumbnailBroken] = useState(false);
 
-    function startPlayback() {
-        iframeRef.current?.contentWindow?.postMessage(JSON.stringify({ event: 'command', func: 'playVideo', args: [] }), '*');
-    }
+    if (clicked) {
+        const origin = typeof window !== 'undefined' ? encodeURIComponent(window.location.origin) : '';
+        const embedUrl = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&iv_load_policy=3&fs=1&origin=${origin}`;
 
-    useEffect(() => {
-        function onMessage(e: MessageEvent) {
-            if (! e.origin.includes('youtube')) return;
-            let data: { event?: string; info?: number };
-            try {
-                data = JSON.parse(e.data);
-            } catch {
-                return;
-            }
-            if (data.event === 'onStateChange' && [1, 2, 3].includes(data.info ?? -1)) {
-                setStarted(true);
-            }
-        }
-        window.addEventListener('message', onMessage);
-        const fallbackTimer = setTimeout(() => setShowFallback(true), 10000);
-        return () => {
-            window.removeEventListener('message', onMessage);
-            clearTimeout(fallbackTimer);
-        };
-    }, []);
-
-    return (
-        <div>
+        return (
             <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-black">
                 <iframe
-                    ref={iframeRef}
-                    src={embed}
+                    src={embedUrl}
                     className="h-full w-full"
-                    style={{ pointerEvents: started ? 'auto' : 'none' }}
-                    allow="fullscreen; encrypted-media; picture-in-picture"
+                    allow="autoplay; fullscreen; encrypted-media; picture-in-picture"
                     allowFullScreen
                     title={title}
-                    onLoad={() => iframeRef.current?.contentWindow?.postMessage(JSON.stringify({ event: 'listening', id: 1 }), '*')}
                 />
-                {! started && (
-                    <button
-                        type="button"
-                        onClick={startPlayback}
-                        aria-label="Play video"
-                        className="group absolute inset-0 z-10 flex items-center justify-center bg-black/40 transition-colors hover:bg-black/55"
-                    >
-                        <span className="flex h-16 w-16 items-center justify-center rounded-full bg-primary shadow-lg transition-transform group-hover:scale-105">
-                            <svg className="ml-1 h-7 w-7 text-on-primary" fill="currentColor" viewBox="0 0 24 24">
-                                <path d="M8 5v14l11-7z" />
-                            </svg>
-                        </span>
-                    </button>
-                )}
-                <div className="absolute left-0 top-0 z-10 h-10 w-2/5 max-w-[14rem]" />
-                <div className="absolute right-0 top-0 z-10 h-10 w-24" />
+                {/* The title/watermark link YouTube shows in the top-left
+                    on hover or pause stays blocked permanently, even
+                    while actually playing -- the rest of the control bar
+                    (volume, captions, fullscreen) is untouched. */}
+                <div className="pointer-events-none absolute left-0 top-0 h-10 w-2/5 max-w-[14rem]" />
             </div>
-            {showFallback && ! started && (
-                <p className="mt-2 text-sm text-text-secondary">
-                    This video isn't loading right now.{' '}
-                    {site.supportEmail ? (
-                        <a href={`mailto:${site.supportEmail}`} className="font-semibold text-primary hover:underline">
-                            Contact support
-                        </a>
-                    ) : (
-                        'Please contact support.'
-                    )}
-                </p>
+        );
+    }
+
+    return (
+        <button
+            type="button"
+            onClick={() => setClicked(true)}
+            aria-label={`Play ${title}`}
+            className="group relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-xl bg-black"
+        >
+            {! thumbnailBroken && (
+                <img
+                    src={`https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`}
+                    alt=""
+                    onError={() => setThumbnailBroken(true)}
+                    className="absolute inset-0 h-full w-full object-cover opacity-80 transition-opacity group-hover:opacity-90"
+                />
             )}
-        </div>
+            <span className="relative flex h-16 w-16 items-center justify-center rounded-full bg-primary shadow-lg transition-transform group-hover:scale-105">
+                <svg className="ml-1 h-7 w-7 text-on-primary" fill="currentColor" viewBox="0 0 24 24">
+                    <path d="M8 5v14l11-7z" />
+                </svg>
+            </span>
+        </button>
     );
 }
 
@@ -214,9 +180,9 @@ function LessonPlayer({ lesson }: { lesson: Lesson }) {
 
     switch (lesson.type) {
         case 'video_youtube': {
-            const embed = lesson.external_url ? youtubeEmbedUrl(lesson.external_url) : null;
-            return embed ? (
-                <YoutubeEmbed embed={embed} title={lesson.title} />
+            const videoId = lesson.external_url ? youtubeVideoId(lesson.external_url) : null;
+            return videoId ? (
+                <YoutubeEmbed videoId={videoId} title={lesson.title} />
             ) : (
                 <p className="rounded-xl bg-surface-sunken p-6 text-sm text-text-muted">Video link not set yet.</p>
             );
