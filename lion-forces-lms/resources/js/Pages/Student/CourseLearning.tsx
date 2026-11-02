@@ -125,7 +125,7 @@ function YoutubeEmbed({ videoId, title }: { videoId: string; title: string }) {
                     bar strip: volume/captions/settings/fullscreen all run
                     along the very bottom edge and stay fully usable. */}
                 <div className="pointer-events-auto absolute left-0 top-0 h-10 w-2/5 max-w-[14rem]" />
-                <div className="pointer-events-auto absolute bottom-[7%] right-0 h-[11%] w-[28%] max-w-[9rem]" />
+                <div className="pointer-events-auto absolute bottom-0 right-0 h-[14%] w-[32%] max-w-[11rem]" />
             </div>
         );
     }
