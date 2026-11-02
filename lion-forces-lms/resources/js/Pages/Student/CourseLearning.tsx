@@ -1,10 +1,11 @@
-import { Head, Link, router, useForm } from '@inertiajs/react';
+import { Head, Link, router, useForm, usePage } from '@inertiajs/react';
 import { useEffect, useRef, useState } from 'react';
 import LiteMarkdown from '@/Components/LiteMarkdown';
 import RevealOnScroll from '@/Components/RevealOnScroll';
 import RichTextArea from '@/Components/RichTextArea';
 import StatusDot from '@/Components/StatusDot';
 import StudentLayout from '@/Layouts/StudentLayout';
+import { PageProps } from '@/types';
 
 interface Lesson { id: number; title: string; type: string; external_url: string | null; file_path: string | null; description: string | null; section_id: number | null }
 interface Section { id: number; title: string; lessons: Lesson[] }
@@ -99,29 +100,39 @@ function youtubeEmbedUrl(url: string): string | null {
     return `https://www.youtube-nocookie.com/embed/${match[1]}?rel=0&modestbranding=1&iv_load_policy=3&fs=1&enablejsapi=1&origin=${origin}`;
 }
 
-// Before a student presses play, YouTube's own paused frame shows a
-// "Watch on YouTube" link in the bottom-right -- a second escape hatch
-// the top-corner overlays below don't reach (those cover the watermark/
-// title link, a different spot). A bottom overlay can't just sit there
-// permanently, though: once playback starts, the real control bar
-// (volume, captions, settings, fullscreen) lives in that same bottom
-// strip, and covering it would silently break those -- fullscreen
-// especially, which was explicitly requested and already verified
-// working. So this listens for the player's own state via postMessage
-// (YouTube's lightweight embed protocol, no iframe_api.js needed) and
-// only shows the bottom block until the student actually presses play;
-// from then on the real control bar takes over underneath, uncovered.
-function YoutubeEmbed({ embed, title, rawUrl }: { embed: string; title: string; rawUrl: string | null }) {
+// Client: the source must never be reachable from here -- not the YouTube
+// chrome's own "Watch on YouTube" link/button (which can cover most of the
+// frame, not just a small corner, whenever the specific video can't play
+// inline at all) and not a fallback link out to the raw URL either. Before
+// playback starts, a single full-frame overlay blocks every pixel of the
+// iframe -- whatever YouTube is rendering underneath, working thumbnail or
+// its own "can't embed this" prompt -- with our own play button on top.
+// That button never navigates anywhere; it posts YouTube's documented
+// IFrame API "playVideo" command into the embed (enablejsapi=1 in the src
+// already set up for this) instead of relying on a native click reaching
+// YouTube's own UI. Once the player actually confirms it started (via the
+// same postMessage channel), the overlay comes off and the real control
+// bar underneath takes over -- still with the earlier top-corner strips
+// left in place permanently, blocking the title/watermark link that
+// reappears there on hover/pause during playback.
+function YoutubeEmbed({ embed, title }: { embed: string; title: string }) {
+    const { site } = usePage<PageProps>().props;
     const [started, setStarted] = useState(false);
-    // Client: a lecture video added as an unlisted/restricted YouTube link
-    // can fail to embed (region lock, sign-in required, wrong link) with
-    // nothing on screen to explain why -- the watermark/title overlays
-    // below are intentionally blocked so a *working* video can't be used
-    // to browse away to YouTube, but that same blocking left a *broken*
-    // embed with no way out at all. If no "playback has started" signal
-    // ever arrives, show a plain link to open the real video directly.
+    // A lecture video added as an unlisted/restricted/embedding-disabled
+    // YouTube link can simply never start -- our play button then does
+    // nothing forever with no explanation. After a timeout with no
+    // confirmed playback, say so, but point at our own support contact,
+    // never at YouTube or the raw URL.
     const [showFallback, setShowFallback] = useState(false);
     const iframeRef = useRef<HTMLIFrameElement>(null);
+
+    function postToPlayer(func: string) {
+        iframeRef.current?.contentWindow?.postMessage(JSON.stringify({ event: 'command', func, args: [] }), '*');
+    }
+
+    function startPlayback() {
+        postToPlayer('playVideo');
+    }
 
     useEffect(() => {
         function onMessage(e: MessageEvent) {
@@ -158,16 +169,33 @@ function YoutubeEmbed({ embed, title, rawUrl }: { embed: string; title: string; 
                     title={title}
                     onLoad={() => iframeRef.current?.contentWindow?.postMessage(JSON.stringify({ event: 'listening', id: 1 }), '*')}
                 />
+                {! started && (
+                    <button
+                        type="button"
+                        onClick={startPlayback}
+                        aria-label="Play video"
+                        className="group absolute inset-0 flex items-center justify-center bg-black/40 transition-colors hover:bg-black/55"
+                    >
+                        <span className="flex h-16 w-16 items-center justify-center rounded-full bg-primary shadow-lg transition-transform group-hover:scale-105">
+                            <svg className="ml-1 h-7 w-7 text-on-primary" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M8 5v14l11-7z" />
+                            </svg>
+                        </span>
+                    </button>
+                )}
                 <div className="absolute left-0 top-0 h-10 w-2/5 max-w-[14rem]" />
                 <div className="absolute right-0 top-0 h-10 w-24" />
-                {! started && <div className="absolute bottom-0 right-0 h-[15%] w-1/3 max-w-[16rem]" />}
             </div>
-            {showFallback && ! started && rawUrl && (
+            {showFallback && ! started && (
                 <p className="mt-2 text-sm text-text-secondary">
-                    Video not loading? It's hosted on YouTube.{' '}
-                    <a href={rawUrl} target="_blank" rel="noopener noreferrer" className="font-semibold text-primary hover:underline">
-                        Open it directly &rarr;
-                    </a>
+                    This video isn't loading right now.{' '}
+                    {site.supportEmail ? (
+                        <a href={`mailto:${site.supportEmail}`} className="font-semibold text-primary hover:underline">
+                            Contact support
+                        </a>
+                    ) : (
+                        'Please contact support.'
+                    )}
                 </p>
             )}
         </div>
@@ -207,7 +235,7 @@ function LessonPlayer({ lesson }: { lesson: Lesson }) {
         case 'video_youtube': {
             const embed = lesson.external_url ? youtubeEmbedUrl(lesson.external_url) : null;
             return embed ? (
-                <YoutubeEmbed embed={embed} title={lesson.title} rawUrl={lesson.external_url} />
+                <YoutubeEmbed embed={embed} title={lesson.title} />
             ) : (
                 <p className="rounded-xl bg-surface-sunken p-6 text-sm text-text-muted">Video link not set yet.</p>
             );
