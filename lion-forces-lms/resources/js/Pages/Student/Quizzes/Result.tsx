@@ -1,7 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
 import AnimatedCounter from '@/Components/AnimatedCounter';
-import AnswerReviewCard, { WrongAnswersReview } from '@/Components/AnswerReviewCard';
-import RevealOnScroll from '@/Components/RevealOnScroll';
+import AnswerReviewRunner from '@/Components/AnswerReviewRunner';
 import StudentLayout from '@/Layouts/StudentLayout';
 
 interface Option { id: number; option_text: string; is_correct: boolean }
@@ -71,14 +70,8 @@ export default function QuizResult({ attempt, quizTitle, isRepeatable, quizId }:
                 </div>
             </div>
 
-            <WrongAnswersReview answers={attempt.answers} />
-
-            <h2 className="mb-4 font-display text-xl uppercase tracking-wide text-text">All Questions</h2>
-            <RevealOnScroll staggerMs={40} className="space-y-5">
-                {attempt.answers.map((a, i) => (
-                    <AnswerReviewCard key={a.id} a={a} index={i} />
-                ))}
-            </RevealOnScroll>
+            <h2 className="mb-4 font-display text-xl uppercase tracking-wide text-text">Question Review</h2>
+            <AnswerReviewRunner answers={attempt.answers} />
         </StudentLayout>
     );
 }

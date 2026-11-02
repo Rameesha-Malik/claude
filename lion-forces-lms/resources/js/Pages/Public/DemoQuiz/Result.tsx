@@ -1,7 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
-import AnswerReviewCard from '@/Components/AnswerReviewCard';
+import AnswerReviewRunner from '@/Components/AnswerReviewRunner';
 import GradientMesh from '@/Components/GradientMesh';
-import RevealOnScroll from '@/Components/RevealOnScroll';
 import SectionKicker from '@/Components/SectionKicker';
 import WaveRibbon from '@/Components/WaveRibbon';
 import PublicLayout from '@/Layouts/PublicLayout';
@@ -120,17 +119,18 @@ export default function DemoQuizResult({ attempt, quizTitle }: Props) {
                         </div>
                     )}
 
-                    {attempt.answers.length > 0 && (
-                        <div className="mt-10">
-                            <h2 className="mb-4 text-center font-display text-2xl uppercase tracking-wide text-text">Review Your Answers</h2>
-                            <RevealOnScroll staggerMs={40} className="space-y-5">
-                                {attempt.answers.map((a, i) => (
-                                    <AnswerReviewCard key={a.id} a={a} index={i} />
-                                ))}
-                            </RevealOnScroll>
-                        </div>
-                    )}
                 </div>
+
+                {/* Wider than the score card above (max-w-2xl) -- the
+                    one-by-one review runner has a question card plus a
+                    stat sidebar side by side, same width DemoQuiz/Take.tsx
+                    itself uses for the live quiz. */}
+                {attempt.answers.length > 0 && (
+                    <div className="mx-auto mt-10 max-w-5xl">
+                        <h2 className="mb-4 text-center font-display text-2xl uppercase tracking-wide text-text">Review Your Answers</h2>
+                        <AnswerReviewRunner answers={attempt.answers} />
+                    </div>
+                )}
             </section>
         </PublicLayout>
     );

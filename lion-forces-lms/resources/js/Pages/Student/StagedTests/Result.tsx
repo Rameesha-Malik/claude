@@ -1,6 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
 import { useState } from 'react';
-import AnswerReviewCard, { WrongAnswersReview } from '@/Components/AnswerReviewCard';
+import AnswerReviewRunner from '@/Components/AnswerReviewRunner';
 import StatusDot from '@/Components/StatusDot';
 import StudentLayout from '@/Layouts/StudentLayout';
 
@@ -37,8 +37,6 @@ export default function StagedTestResult({ attempt, testTitle, stages }: Props) 
                 </Link>
             </div>
 
-            <WrongAnswersReview answers={stages.flatMap((s) => s.answers)} />
-
             <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {stages.map((s) => {
                     const pct = Number(s.total_marks) > 0 ? Math.round((Math.max(Number(s.score), 0) / Number(s.total_marks)) * 100) : 0;
@@ -64,12 +62,13 @@ export default function StagedTestResult({ attempt, testTitle, stages }: Props) 
             </div>
 
             {stages.filter((s) => s.id === openStage).map((s) => (
-                <div key={s.id} className="space-y-5">
-                    <h3 className="font-bold text-text">{s.name}: Question Review</h3>
-                    {s.answers.map((a, i) => (
-                        <AnswerReviewCard key={a.id} a={a} index={i} />
-                    ))}
-                    {s.answers.length === 0 && <p className="text-sm text-text-secondary">No questions in this stage.</p>}
+                <div key={s.id}>
+                    <h3 className="mb-4 font-bold text-text">{s.name}: Question Review</h3>
+                    {s.answers.length > 0 ? (
+                        <AnswerReviewRunner answers={s.answers} resetKey={s.id} />
+                    ) : (
+                        <p className="text-sm text-text-secondary">No questions in this stage.</p>
+                    )}
                 </div>
             ))}
         </StudentLayout>

@@ -1,6 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
 import { useState } from 'react';
-import AnswerReviewCard, { WrongAnswersReview } from '@/Components/AnswerReviewCard';
+import AnswerReviewRunner from '@/Components/AnswerReviewRunner';
 import StudentLayout from '@/Layouts/StudentLayout';
 
 interface Option { id: number; option_text: string; is_correct: boolean }
@@ -31,8 +31,6 @@ export default function MockExamResult({ attempt, examTitle, sections }: Props) 
                 </Link>
             </div>
 
-            <WrongAnswersReview answers={sections.flatMap((s) => s.answers)} />
-
             <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {sections.map((s) => {
                     const pct = Number(s.total_marks) > 0 ? Math.round((Math.max(Number(s.score), 0) / Number(s.total_marks)) * 100) : 0;
@@ -50,12 +48,13 @@ export default function MockExamResult({ attempt, examTitle, sections }: Props) 
             </div>
 
             {sections.filter((s) => s.id === openSection).map((s) => (
-                <div key={s.id} className="space-y-5">
-                    <h3 className="font-bold text-text">{s.name}: Question Review</h3>
-                    {s.answers.map((a, i) => (
-                        <AnswerReviewCard key={a.id} a={a} index={i} />
-                    ))}
-                    {s.answers.length === 0 && <p className="text-sm text-text-secondary">No questions in this section.</p>}
+                <div key={s.id}>
+                    <h3 className="mb-4 font-bold text-text">{s.name}: Question Review</h3>
+                    {s.answers.length > 0 ? (
+                        <AnswerReviewRunner answers={s.answers} resetKey={s.id} />
+                    ) : (
+                        <p className="text-sm text-text-secondary">No questions in this section.</p>
+                    )}
                 </div>
             ))}
         </StudentLayout>
