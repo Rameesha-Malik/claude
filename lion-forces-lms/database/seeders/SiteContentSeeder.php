@@ -38,6 +38,16 @@ class SiteContentSeeder extends Seeder
         Setting::set('primary_color', '#04A79D'); // client brand swatch
         Setting::set('secondary_color', '#054F4C'); // client brand swatch
 
+        // REAL — the client's actual logo files (not a placeholder), sent
+        // directly as images, committed to storage/app/public/branding so
+        // they ship with the app instead of needing a manual admin upload.
+        // Admin > Website > Settings > Site Logo and Admin > Settings >
+        // Logos & branding > Favicon still work exactly the same if the
+        // client wants to replace either later — this just seeds the
+        // starting value instead of launching with no logo at all.
+        Setting::set('site_logo_path', 'branding/site-logo.png');
+        Setting::set('favicon_path', 'branding/favicon.png');
+
         // --- Payment accounts (Settings > Payment Settings) -- REAL,
         // pasted verbatim from the client's own WhatsApp payment-options
         // message. These feed both Checkout/BundleCheckout/NoteCheckout
