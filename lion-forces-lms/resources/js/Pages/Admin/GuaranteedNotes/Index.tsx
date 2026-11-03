@@ -118,7 +118,7 @@ export default function GuaranteedNotesIndex({ notes, subjects, filters, stats }
                         </h1>
                         <p className="text-xs font-bold uppercase tracking-wide text-text-muted">Asset management</p>
                         <p className="mt-2 max-w-xl text-sm text-text-secondary">
-                            Manage premium study resources for students. Organize by categories and set pricing for individual assets.
+                            Manage premium study resources for students and set pricing for individual assets.
                         </p>
                     </div>
                 </div>
@@ -126,9 +126,6 @@ export default function GuaranteedNotesIndex({ notes, subjects, filters, stats }
                     <button onClick={() => setModalNote(null)} className="rounded-xl bg-secondary px-5 py-2.5 text-sm font-bold uppercase text-on-secondary hover:bg-teal-800">
                         + Add Note
                     </button>
-                    <Link href="/admin/question-bank" className="rounded-xl border border-border bg-surface px-4 py-2.5 text-sm font-bold text-text hover:border-primary hover:text-primary">
-                        Categories
-                    </Link>
                     <Link href="/admin/guaranteed-notes/purchase-requests" className="relative rounded-xl border border-border bg-surface px-4 py-2.5 text-sm font-bold text-text hover:border-primary hover:text-primary">
                         Purchase Requests
                         {stats.pending_requests > 0 && (
@@ -192,7 +189,7 @@ export default function GuaranteedNotesIndex({ notes, subjects, filters, stats }
             {notes.data.length === 0 && (
                 <div className="mt-4 rounded-3xl border border-dashed border-border bg-surface p-10 text-center text-text-secondary">
                     <p className="font-bold text-text">No notes yet</p>
-                    <p className="mt-1 text-sm">Create categories first, then add notes for the public registry.</p>
+                    <p className="mt-1 text-sm">Add a note to start the public registry.</p>
                     <button onClick={() => setModalNote(null)} className="mt-4 rounded-xl bg-secondary px-5 py-2.5 text-sm font-bold uppercase text-on-secondary hover:bg-teal-800">
                         + Create first note
                     </button>
