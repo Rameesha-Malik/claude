@@ -109,7 +109,10 @@ export default function DemoQuizResult({ attempt, quizTitle }: Props) {
                     </div>
 
                     {attempt.wrong_count > 0 && (
-                        <div className="mt-10 rounded-2xl border border-warning bg-warning-bg p-5 text-left">
+                        <div className="mt-8 flex items-start gap-3 rounded-2xl border border-warning bg-warning-bg p-5 text-left">
+                            <svg className="mt-0.5 h-5 w-5 flex-shrink-0 text-warning" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.75a.75.75 0 110 1.5.75.75 0 010-1.5zM11.25 12h.75v4.5h.75M12 21a9 9 0 100-18 9 9 0 000 18z" />
+                            </svg>
                             <p className="font-bold text-text">
                                 Enrolled students get every wrong answer saved to a personal{' '}
                                 <span className="text-primary">Revision List</span> automatically, so it's easy to come back and
@@ -121,14 +124,15 @@ export default function DemoQuizResult({ attempt, quizTitle }: Props) {
 
                 </div>
 
-                {/* Wider than the score card above (max-w-2xl) -- the
-                    one-by-one review runner has a question card plus a
-                    stat sidebar side by side, same width DemoQuiz/Take.tsx
-                    itself uses for the live quiz. */}
+                {/* hideStats: the hero card above already shows Correct/
+                    Wrong/Skipped prominently -- repeating those same three
+                    numbers again in a sidebar here was pure duplication,
+                    so this stays at the hero's own max-w-2xl rhythm
+                    instead of widening for a now-empty stat column. */}
                 {attempt.answers.length > 0 && (
-                    <div className="mx-auto mt-10 max-w-5xl">
+                    <div className="mx-auto mt-10 max-w-2xl">
                         <h2 className="mb-4 text-center font-display text-2xl uppercase tracking-wide text-text">Review Your Answers</h2>
-                        <AnswerReviewRunner answers={attempt.answers} />
+                        <AnswerReviewRunner answers={attempt.answers} hideStats />
                     </div>
                 )}
             </section>

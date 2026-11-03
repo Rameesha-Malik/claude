@@ -16,6 +16,11 @@ interface Props {
      * test's stage tab) jumps back to question 1 of the newly selected
      * group, instead of keeping whatever index the previous group was on. */
     resetKey?: string | number;
+    /** True when the caller already shows its own Correct/Wrong/Skipped
+     * tally above this component (e.g. Demo Quiz's result header) -- skips
+     * the redundant sidebar copy and lets the question card use the full
+     * width instead of sharing it with a now-empty column. */
+    hideStats?: boolean;
 }
 
 function BackIcon() {
@@ -56,7 +61,7 @@ const LEGEND = [
  * this is its own small component rather than QuestionRunner in some
  * "read-only" mode.
  */
-export default function AnswerReviewRunner({ answers, resetKey }: Props) {
+export default function AnswerReviewRunner({ answers, resetKey, hideStats = false }: Props) {
     const [currentIndex, setCurrentIndex] = useState(0);
 
     useEffect(() => {
@@ -86,8 +91,8 @@ export default function AnswerReviewRunner({ answers, resetKey }: Props) {
     }
 
     return (
-        <div className="grid gap-6 lg:grid-cols-3">
-            <div className="space-y-6 lg:col-span-2">
+        <div className={hideStats ? 'mx-auto max-w-3xl' : 'grid gap-6 lg:grid-cols-3'}>
+            <div className={hideStats ? 'space-y-6' : 'space-y-6 lg:col-span-2'}>
                 <div className="rounded-2xl border border-border bg-surface p-5">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                         <span className="rounded-full bg-primary-subtle px-3 py-1 text-xs font-bold text-primary">
@@ -198,20 +203,22 @@ export default function AnswerReviewRunner({ answers, resetKey }: Props) {
                 </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-3 lg:grid-cols-1">
-                <div className="rounded-2xl border border-success bg-success-bg p-4 text-success">
-                    <p className="text-xl font-bold">{correctCount}</p>
-                    <p className="text-xs font-bold uppercase tracking-wide opacity-80">Correct</p>
+            {!hideStats && (
+                <div className="grid grid-cols-3 gap-3 lg:grid-cols-1">
+                    <div className="rounded-2xl border border-success bg-success-bg p-4 text-success">
+                        <p className="text-xl font-bold">{correctCount}</p>
+                        <p className="text-xs font-bold uppercase tracking-wide opacity-80">Correct</p>
+                    </div>
+                    <div className="rounded-2xl border border-danger bg-danger-bg p-4 text-danger">
+                        <p className="text-xl font-bold">{wrongCount}</p>
+                        <p className="text-xs font-bold uppercase tracking-wide opacity-80">Wrong</p>
+                    </div>
+                    <div className="rounded-2xl border border-border bg-surface-sunken p-4 text-text-muted">
+                        <p className="text-xl font-bold">{skippedCount}</p>
+                        <p className="text-xs font-bold uppercase tracking-wide opacity-80">Skipped</p>
+                    </div>
                 </div>
-                <div className="rounded-2xl border border-danger bg-danger-bg p-4 text-danger">
-                    <p className="text-xl font-bold">{wrongCount}</p>
-                    <p className="text-xs font-bold uppercase tracking-wide opacity-80">Wrong</p>
-                </div>
-                <div className="rounded-2xl border border-border bg-surface-sunken p-4 text-text-muted">
-                    <p className="text-xl font-bold">{skippedCount}</p>
-                    <p className="text-xs font-bold uppercase tracking-wide opacity-80">Skipped</p>
-                </div>
-            </div>
+            )}
         </div>
     );
 }
