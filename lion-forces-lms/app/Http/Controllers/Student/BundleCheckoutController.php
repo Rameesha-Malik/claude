@@ -24,17 +24,25 @@ class BundleCheckoutController extends Controller
         // Already enrolled in every course this bundle includes? Don't sell
         // it again. Partial overlap is still allowed through — the
         // enrollment loop below simply skips courses already active.
-        $alreadyActiveCount = Enrollment::where('user_id', $request->user()->id)
+        //
+        // Counts distinct courses, not enrollment rows: a course can have
+        // more than one active enrollment at once (module-scoped partial
+        // purchases, e.g. "Quiz Only" + "Tests Only" bought separately for
+        // the same course) -- comparing row count to course count would
+        // treat that as "2 courses fully covered" when it's really one
+        // course twice and another course not covered at all.
+        $alreadyActiveCourseCount = Enrollment::where('user_id', $request->user()->id)
             ->whereIn('course_id', $courseIds)
-            ->where('status', 'active')
-            ->count();
+            ->active()
+            ->distinct()
+            ->count('course_id');
 
         $pendingPurchase = BundlePurchase::where('user_id', $request->user()->id)
             ->where('bundle_id', $bundle->id)
             ->where('status', 'pending')
             ->exists();
 
-        if ($alreadyActiveCount === $courseIds->count()) {
+        if ($alreadyActiveCourseCount === $courseIds->count()) {
             return Inertia::render('Student/BundleCheckout', ['alreadyEnrolled' => 'active', 'bundle' => $bundle->only('title', 'slug')]);
         }
         if ($pendingPurchase) {

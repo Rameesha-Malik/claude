@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\DemoQuiz;
+use App\Models\Enrollment;
 use App\Models\QuestionBank;
 use App\Models\QuestionNote;
 use App\Models\QuestionReport;
@@ -31,6 +33,14 @@ class QuestionCheckController extends Controller
             'option_id' => 'required|integer|exists:question_options,id',
         ]);
 
+        // This route has no auth middleware at all (the demo quiz is a
+        // guest flow) and $question is bound by plain id with no scoping
+        // -- without this check, anyone, logged in or not, could loop
+        // every id in the whole question bank and read back
+        // correct_option_id for free, extracting the entire answer key
+        // for every paid course's bank.
+        abort_unless($this->hasQuestionAccess($request, $question), 403);
+
         $options = $question->options;
         $selected = $options->firstWhere('id', (int) $data['option_id']);
         abort_unless($selected, 404);
@@ -42,6 +52,34 @@ class QuestionCheckController extends Controller
             'correct_option_id' => $correctOption?->id,
             'explanation' => $question->explanation,
         ]);
+    }
+
+    // A guest (no account) only has a legitimate reason to check a
+    // question if it's part of some currently-public demo quiz's curated
+    // set -- demo quizzes pick their own explicit question list
+    // (DemoQuiz::questions()), not just "any question in this subject",
+    // so this stays a real, bounded allowlist rather than reopening the
+    // whole bank to anyone. A logged-in user needs an active enrollment
+    // in the question's course; a question with no course_id at all (not
+    // tied to any paid course) just needs a real account.
+    private function hasQuestionAccess(Request $request, QuestionBank $question): bool
+    {
+        $user = $request->user();
+
+        if (! $user) {
+            return DemoQuiz::where('is_active', true)
+                ->whereHas('questions', fn ($q) => $q->where('question_bank.id', $question->id))
+                ->exists();
+        }
+
+        if (! $question->course_id) {
+            return true;
+        }
+
+        return Enrollment::where('user_id', $user->id)
+            ->where('course_id', $question->course_id)
+            ->active()
+            ->exists();
     }
 
     // "Reported questions" (admin reference screenshot): a candidate flags

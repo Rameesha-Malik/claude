@@ -350,12 +350,21 @@ class CustomQuizController extends Controller
         abort_unless(FeatureFlags::enabled('custom_quiz'), 404);
         abort_unless($config->user_id === $request->user()->id, 403);
 
+        // Same free-trial cap store() enforces -- without this, a config
+        // created while the student had real access stays retakeable at
+        // its original (possibly full, up to 50) question_count forever,
+        // even after the enrollment that granted access expires.
+        $course = $config->course_id ? Course::find($config->course_id) : null;
+        $questionCount = $this->hasQuizAccess($request, $course)
+            ? $config->question_count
+            : min($config->question_count, self::FREE_TRIAL_MAX_QUESTIONS);
+
         $questionIds = $this->pickQuestionIds([
             'subject_ids' => $config->subject_ids,
             'topic_ids' => $config->topic_ids,
             'course_id' => $config->course_id,
             'difficulty' => $config->difficulty,
-            'question_count' => $config->question_count,
+            'question_count' => $questionCount,
             'filter' => $config->filter,
         ], $request->user()->id);
 

@@ -48,7 +48,8 @@ class MockExam extends Model
     {
         $now = now();
 
-        return (! $this->available_from || $now->gte($this->available_from))
+        return $this->is_active
+            && (! $this->available_from || $now->gte($this->available_from))
             && (! $this->available_until || $now->lte($this->available_until));
     }
 }

@@ -15,7 +15,7 @@ class AssignmentController extends Controller
     {
         $enrolled = Enrollment::where('user_id', $request->user()->id)
             ->where('course_id', $assignment->course_id)
-            ->where('status', 'active')
+            ->active()
             ->exists();
         abort_unless($enrolled, 403);
 

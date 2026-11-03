@@ -102,6 +102,22 @@ class CourseController extends Controller
         $course->assignments_enabled = $course->assignments_enabled && $enrollment->grantsModule('assignments');
         $course->lectures_enabled = $enrollment->grantsModule('lectures');
 
+        // The Lectures tab is hidden client-side when lectures_enabled is
+        // false, but that alone doesn't stop the lesson data itself from
+        // shipping in this page's JSON -- Inertia sends the whole prop
+        // regardless of what the UI renders, readable via View Source.
+        // An enrollment scoped to e.g. Quiz Only shouldn't receive actual
+        // watchable video links/files for lecture content it was never
+        // sold, even if the lesson titles stay visible for context.
+        if (! $course->lectures_enabled) {
+            $stripSource = function ($lesson): void {
+                $lesson->external_url = null;
+                $lesson->file_path = null;
+            };
+            $course->lessons->each($stripSource);
+            $course->sections->each(fn ($section) => $section->lessons->each($stripSource));
+        }
+
         return Inertia::render('Student/CourseLearning', [
             'course' => $course,
             'enrollment' => $enrollment,
@@ -147,7 +163,7 @@ class CourseController extends Controller
 
     public function submitReview(Request $request, Course $course)
     {
-        Enrollment::where('user_id', $request->user()->id)->where('course_id', $course->id)->where('status', 'active')->firstOrFail();
+        Enrollment::where('user_id', $request->user()->id)->where('course_id', $course->id)->active()->firstOrFail();
 
         $data = $request->validate([
             'rating' => 'required|integer|min:1|max:5',
@@ -174,6 +190,13 @@ class CourseController extends Controller
 
     public function markLessonComplete(Request $request, \App\Models\Lesson $lesson)
     {
+        $enrolled = Enrollment::where('user_id', $request->user()->id)
+            ->where('course_id', $lesson->course_id)
+            ->active()
+            ->grantingModule('lectures')
+            ->exists();
+        abort_unless($enrolled, 403);
+
         \App\Models\LessonProgress::updateOrCreate(
             ['user_id' => $request->user()->id, 'lesson_id' => $lesson->id],
             ['is_completed' => true, 'completed_at' => now()],

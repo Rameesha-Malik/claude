@@ -40,6 +40,7 @@ class StagedTestController extends Controller
     public function start(Request $request, StagedTest $stagedTest)
     {
         $this->authorizeEnrollment($request, $stagedTest);
+        abort_unless($stagedTest->is_active, 403, 'This staged test is not currently available.');
 
         $firstStage = $stagedTest->stages()->orderBy('order')->first();
         abort_unless($firstStage, 422, 'This staged test has no stages yet.');
@@ -58,6 +59,7 @@ class StagedTestController extends Controller
     public function showStage(Request $request, StagedTest $stagedTest, TestAttempt $attempt, StagedTestStage $stage): Response
     {
         $this->authorizeAttempt($request, $attempt, $stagedTest);
+        abort_unless($stage->staged_test_id === $stagedTest->id, 404);
 
         $stages = $stagedTest->stages()->orderBy('order')->get();
         $alreadyCompleted = StagedTestAttemptStage::where('attempt_id', $attempt->id)->where('stage_id', $stage->id)->exists();
@@ -90,6 +92,7 @@ class StagedTestController extends Controller
     public function submitStage(Request $request, StagedTest $stagedTest, TestAttempt $attempt, StagedTestStage $stage)
     {
         $this->authorizeAttempt($request, $attempt, $stagedTest);
+        abort_unless($stage->staged_test_id === $stagedTest->id, 404);
 
         $data = $request->validate([
             'answers' => 'required|array',

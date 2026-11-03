@@ -66,6 +66,7 @@ class MockExamController extends Controller
     public function showSection(Request $request, MockExam $mockExam, TestAttempt $attempt, MockExamSection $section): Response
     {
         $this->authorizeAttempt($request, $attempt, $mockExam);
+        abort_unless($section->mock_exam_id === $mockExam->id, 404);
 
         $sections = $mockExam->sections()->orderBy('order')->get();
         $answeredQuestionIds = $attempt->answers()->pluck('question_id');
@@ -108,6 +109,7 @@ class MockExamController extends Controller
     public function submitSection(Request $request, MockExam $mockExam, TestAttempt $attempt, MockExamSection $section)
     {
         $this->authorizeAttempt($request, $attempt, $mockExam);
+        abort_unless($section->mock_exam_id === $mockExam->id, 404);
 
         $data = $request->validate([
             'answers' => 'required|array',
