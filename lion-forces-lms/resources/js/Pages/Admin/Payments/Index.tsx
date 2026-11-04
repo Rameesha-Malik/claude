@@ -108,7 +108,16 @@ export default function PaymentsIndex({ payments, filters }: Props) {
                             <th className="px-5 py-3">Amount</th>
                             <th className="px-5 py-3">Proof</th>
                             <th className="px-5 py-3">Status</th>
-                            <th className="px-5 py-3" />
+                            {/* Client: Verify/Reject -- the one action this whole
+                                page exists for -- sat in the last column of an
+                                8-column table wider than the screen, with nothing
+                                indicating there was more to scroll to. Pinned to
+                                the right edge so it's visible at any scroll
+                                position, matching the row background underneath
+                                with a border to read as a separate, "always
+                                there" strip rather than part of the scrolling
+                                content. */}
+                            <th className="sticky right-0 border-l border-border bg-surface-sunken px-5 py-3">Action</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y divide-border">
@@ -135,12 +144,14 @@ export default function PaymentsIndex({ payments, filters }: Props) {
                                 <td className="px-5 py-3">
                                     <StatusDot label={p.status} tone={p.status === 'verified' ? 'positive' : p.status === 'pending' ? 'warning' : 'negative'} />
                                 </td>
-                                <td className="px-5 py-3 text-right">
-                                    {p.status === 'pending' && (
+                                <td className="sticky right-0 border-l border-border bg-surface px-5 py-3 text-right">
+                                    {p.status === 'pending' ? (
                                         <div className="flex justify-end gap-2">
                                             <button onClick={() => router.post(`/admin/payments/${p.id}/verify`)} className="text-xs font-bold uppercase text-success hover:underline">Verify</button>
                                             <button onClick={() => router.post(`/admin/payments/${p.id}/reject`)} className="text-xs font-bold uppercase text-danger hover:underline">Reject</button>
                                         </div>
+                                    ) : (
+                                        <span className="text-xs text-text-muted">—</span>
                                     )}
                                 </td>
                             </tr>
