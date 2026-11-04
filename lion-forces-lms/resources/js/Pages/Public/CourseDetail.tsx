@@ -111,12 +111,20 @@ export default function CourseDetail({ course }: { course: Course }) {
                 </div>
             </section>
 
+            {/* Client: the banner was a 21:9 box at the page's full 1280px
+                container width -- over 500px tall, which dwarfed the page
+                for any thumbnail that wasn't itself a dense, wide photo (a
+                logo-on-white upload just became a mostly-empty slab). A
+                flatter, lower aspect ratio (7:2, a cover-photo style
+                proportion) reads as a deliberate banner rather than an
+                arbitrary box -- capped with max-h so it can't balloon back
+                up on very wide screens either, same reasoning as before. */}
             {course.thumbnail_path && (
                 <div className="mx-auto -mt-8 max-w-container px-4 sm:px-6 lg:px-8">
                     <img
                         src={`/storage/${course.thumbnail_path}`}
                         alt=""
-                        className="aspect-[21/9] w-full rounded-2xl border border-border object-cover shadow-lg"
+                        className="aspect-[7/2] max-h-56 w-full rounded-2xl border border-border object-cover shadow-md"
                     />
                 </div>
             )}
