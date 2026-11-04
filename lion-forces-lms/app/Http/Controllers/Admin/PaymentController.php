@@ -12,7 +12,7 @@ class PaymentController extends Controller
 {
     public function index(Request $request): Response
     {
-        $payments = Payment::with(['enrollment.user:id,name,email', 'enrollment.course:id,title'])
+        $payments = Payment::with(['enrollment.user:id,name,email', 'enrollment.course:id,title', 'verifier:id,name'])
             ->when($request->status, fn ($q, $s) => $q->where('status', $s))
             ->when($request->search, fn ($q, $s) => $q->whereHas(
                 'enrollment.user',

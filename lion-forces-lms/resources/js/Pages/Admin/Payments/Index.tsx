@@ -5,7 +5,9 @@ import AdminLayout from '@/Layouts/AdminLayout';
 
 interface Payment {
     id: number; amount: string; method: string; status: string; reference_number: string | null; proof_file_path: string | null; created_at: string;
+    verified_at: string | null; notes: string | null;
     enrollment: { user: { name: string; email: string } | null; course: { title: string } | null } | null;
+    verifier: { name: string } | null;
 }
 interface Props {
     payments: { data: Payment[]; links: { url: string | null; label: string; active: boolean }[]; total: number };
@@ -34,6 +36,17 @@ export default function PaymentsIndex({ payments, filters }: Props) {
 
     function setStatus(s: string | null) {
         router.get('/admin/payments', { ...filters, status: s ?? undefined }, { preserveState: true });
+    }
+
+    // Client: no way to tell who approved/rejected a payment or when --
+    // the backend already recorded verifier + verified_at on every
+    // verify/reject, it just never reached this page. Rejecting now also
+    // asks why, so that reason is visible here too (not just captured and
+    // hidden), the same accountability gap for the other half of this.
+    function rejectPayment(id: number) {
+        const reason = window.prompt('Why is this payment being rejected? (shown to you here later, not to the student)');
+        if (reason === null) return;
+        router.post(`/admin/payments/${id}/reject`, { notes: reason });
     }
 
     return (
@@ -143,12 +156,24 @@ export default function PaymentsIndex({ payments, filters }: Props) {
                                 </td>
                                 <td className="px-5 py-3">
                                     <StatusDot label={p.status} tone={p.status === 'verified' ? 'positive' : p.status === 'pending' ? 'warning' : 'negative'} />
+                                    {/* Who decided this and when -- was recorded on
+                                        every verify/reject from the start, just never
+                                        shown anywhere on this page. */}
+                                    {p.verifier && p.verified_at && (
+                                        <div className="mt-1 text-xs text-text-muted">
+                                            by {p.verifier.name} ·{' '}
+                                            {new Date(p.verified_at).toLocaleString('en-US', { day: '2-digit', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' })}
+                                        </div>
+                                    )}
+                                    {p.status === 'rejected' && p.notes && (
+                                        <div className="mt-1 max-w-[14rem] text-xs text-danger">Reason: {p.notes}</div>
+                                    )}
                                 </td>
                                 <td className="sticky right-0 border-l border-border bg-surface px-5 py-3 text-right">
                                     {p.status === 'pending' ? (
                                         <div className="flex justify-end gap-2">
                                             <button onClick={() => router.post(`/admin/payments/${p.id}/verify`)} className="text-xs font-bold uppercase text-success hover:underline">Verify</button>
-                                            <button onClick={() => router.post(`/admin/payments/${p.id}/reject`)} className="text-xs font-bold uppercase text-danger hover:underline">Reject</button>
+                                            <button onClick={() => rejectPayment(p.id)} className="text-xs font-bold uppercase text-danger hover:underline">Reject</button>
                                         </div>
                                     ) : (
                                         <span className="text-xs text-text-muted">—</span>
