@@ -14,8 +14,16 @@ export default function AnimatedCounter({ value, className = '' }: Props) {
         const el = ref.current;
         if (!el) return;
 
-        const numeric = parseInt(value.replace(/[^0-9]/g, ''), 10);
-        const suffix = value.replace(/[0-9,]/g, '');
+        // parseInt + stripping every non-digit used to also strip the
+        // decimal point itself -- "66.50%" became the digit string
+        // "6650", so the counter animated up to (and landed on) "6,650%"
+        // instead of "66.5%". Keeping "." in the strip-allowlist and
+        // using parseFloat preserves it; the earlier 0.00%-only testing
+        // never caught this because stripping "0.00" still parses as 0,
+        // which falls into the !numeric early-return below either way.
+        const numeric = parseFloat(value.replace(/[^0-9.]/g, ''));
+        const suffix = value.replace(/[0-9,.]/g, '');
+        const decimals = value.match(/\.(\d+)/)?.[1]?.length ?? 0;
         const prefersReduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
         if (!numeric || prefersReduced) {
@@ -32,7 +40,7 @@ export default function AnimatedCounter({ value, className = '' }: Props) {
             ease: 'outExpo',
             autoplay: onScroll({ enter: 'bottom top' }),
             onUpdate: () => {
-                el.textContent = Math.round(counter.val).toLocaleString() + suffix;
+                el.textContent = (decimals > 0 ? counter.val.toFixed(decimals) : Math.round(counter.val).toLocaleString()) + suffix;
             },
         });
     }, [value]);

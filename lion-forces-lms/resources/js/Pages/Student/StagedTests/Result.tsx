@@ -3,6 +3,7 @@ import { useState } from 'react';
 import AnswerReviewRunner from '@/Components/AnswerReviewRunner';
 import StatusDot from '@/Components/StatusDot';
 import StudentLayout from '@/Layouts/StudentLayout';
+import { trimDecimal } from '@/lib/format';
 
 interface Option { id: number; option_text: string; is_correct: boolean }
 interface Question { id: number; question_text: string; explanation: string | null; options: Option[] }
@@ -27,8 +28,8 @@ export default function StagedTestResult({ attempt, testTitle, stages }: Props) 
                 <p className={`text-sm font-bold uppercase tracking-wide ${attempt.passed ? 'text-success' : 'text-danger'}`}>
                     {attempt.passed ? 'All Stages Passed' : 'Did Not Clear All Stages'}
                 </p>
-                <p className="mt-1 font-display text-4xl text-text">{attempt.percentage}%</p>
-                <p className="mt-1 text-sm text-text-secondary">Overall Score: {attempt.score} / {attempt.total_marks}</p>
+                <p className="mt-1 font-display text-4xl text-text">{trimDecimal(attempt.percentage)}%</p>
+                <p className="mt-1 text-sm text-text-secondary">Overall Score: {trimDecimal(attempt.score)} / {trimDecimal(attempt.total_marks)}</p>
                 {stoppedAt && (
                     <p className="mt-2 text-sm font-semibold text-danger">Stopped at "{stoppedAt.name}": its pass threshold wasn't met.</p>
                 )}

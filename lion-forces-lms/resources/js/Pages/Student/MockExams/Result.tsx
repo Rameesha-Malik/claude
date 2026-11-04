@@ -2,6 +2,7 @@ import { Head, Link } from '@inertiajs/react';
 import { useState } from 'react';
 import AnswerReviewRunner from '@/Components/AnswerReviewRunner';
 import StudentLayout from '@/Layouts/StudentLayout';
+import { trimDecimal } from '@/lib/format';
 
 interface Option { id: number; option_text: string; is_correct: boolean }
 interface Question { id: number; question_text: string; explanation: string | null; options: Option[] }
@@ -24,8 +25,8 @@ export default function MockExamResult({ attempt, examTitle, sections }: Props) 
                 <p className={`text-sm font-bold uppercase tracking-wide ${attempt.passed ? 'text-success' : 'text-danger'}`}>
                     {attempt.passed ? 'Passed' : 'Needs Improvement'}
                 </p>
-                <p className="mt-1 font-display text-4xl text-text">{attempt.percentage}%</p>
-                <p className="mt-1 text-sm text-text-secondary">Overall Score: {attempt.score} / {attempt.total_marks}</p>
+                <p className="mt-1 font-display text-4xl text-text">{trimDecimal(attempt.percentage)}%</p>
+                <p className="mt-1 text-sm text-text-secondary">Overall Score: {trimDecimal(attempt.score)} / {trimDecimal(attempt.total_marks)}</p>
                 <Link href="/portal/my-courses" className="mt-4 inline-block rounded-lg border border-border px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-text hover:border-primary">
                     Back to My Courses
                 </Link>

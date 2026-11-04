@@ -2,6 +2,7 @@ import { Head, Link } from '@inertiajs/react';
 import AnimatedCounter from '@/Components/AnimatedCounter';
 import AnswerReviewRunner from '@/Components/AnswerReviewRunner';
 import StudentLayout from '@/Layouts/StudentLayout';
+import { trimDecimal } from '@/lib/format';
 
 interface Option { id: number; option_text: string; is_correct: boolean }
 interface Question { id: number; question_text: string; explanation: string | null; options: Option[] }
@@ -31,10 +32,10 @@ export default function QuizResult({ attempt, quizTitle, isRepeatable, quizId }:
                             {attempt.passed ? 'Passed' : 'Needs Improvement'}
                         </p>
                         <p className="mt-1 font-display text-5xl text-text">
-                            <AnimatedCounter value={`${attempt.percentage}%`} />
+                            <AnimatedCounter value={`${trimDecimal(attempt.percentage)}%`} />
                         </p>
                         <p className="mt-1 text-sm text-text-secondary">
-                            Score: {attempt.score} / {attempt.total_marks}
+                            Score: {trimDecimal(attempt.score)} / {trimDecimal(attempt.total_marks)}
                         </p>
                     </div>
                     <div className="flex gap-4 text-center text-sm">
@@ -71,7 +72,7 @@ export default function QuizResult({ attempt, quizTitle, isRepeatable, quizId }:
             </div>
 
             <h2 className="mb-4 font-display text-xl uppercase tracking-wide text-text">Question Review</h2>
-            <AnswerReviewRunner answers={attempt.answers} />
+            <AnswerReviewRunner answers={attempt.answers} hideStats />
         </StudentLayout>
     );
 }
