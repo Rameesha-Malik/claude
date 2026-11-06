@@ -53,6 +53,13 @@ export default function StudentLayout({ children, header }: PropsWithChildren<{ 
                 })}
             </nav>
             <div className="border-t border-white/10 p-4">
+                <Link
+                    href="/"
+                    className="mb-1 flex items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-medium text-teal-200 transition-colors hover:bg-white/10 hover:text-white"
+                >
+                    <Icon d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" />
+                    View Site
+                </Link>
                 <button
                     onClick={() => router.post('/logout')}
                     className="flex w-full items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-medium text-teal-200 transition-colors hover:bg-white/10 hover:text-white"
