@@ -19,3 +19,23 @@
     display: none !important;
   }
 }
+
+/* Thin, rounded, low-contrast scrollbars everywhere instead of each
+   browser's bulky default -- applied globally so every scrollable table,
+   panel and nav gets it automatically, with one override for the dark
+   admin sidebar (a stock light-gray thumb looks wrong on a dark teal
+   background, so it needs a pale thumb instead). */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-strong) transparent;
+}
+*::-webkit-scrollbar { width: 6px; height: 6px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background-color: var(--color-border-strong); border-radius: 999px; }
+*::-webkit-scrollbar-thumb:hover { background-color: var(--color-text-muted); }
+
+.scrollbar-thin-dark {
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+.scrollbar-thin-dark::-webkit-scrollbar-thumb { background-color: rgba(255, 255, 255, 0.2); }
+.scrollbar-thin-dark::-webkit-scrollbar-thumb:hover { background-color: rgba(255, 255, 255, 0.35); }

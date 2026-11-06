@@ -151,7 +151,7 @@ export default function AdminLayout({ children, header }: PropsWithChildren<{ he
                 <SiteLogo site={site} shape="rounded" />
                 <span className="truncate">Admin Panel</span>
             </Link>
-            <nav className="flex-1 space-y-4 overflow-y-auto px-2.5 py-3">
+            <nav className="scrollbar-thin-dark flex-1 space-y-4 overflow-y-auto px-2.5 py-3">
                 {visibleGroups.map((group, gi) => (
                     <div key={group.section ?? `ungrouped-${gi}`}>
                         {group.section && (
@@ -164,12 +164,13 @@ export default function AdminLayout({ children, header }: PropsWithChildren<{ he
                                     <Link
                                         key={item.href}
                                         href={item.href}
-                                        className={`group flex items-center gap-3 rounded-2xl px-3 py-2 text-sm font-medium transition-all duration-normal ${
+                                        className={`group relative flex items-center gap-3 rounded-2xl px-3 py-2 text-sm font-medium transition-all duration-normal ${
                                             active
                                                 ? 'bg-primary text-on-primary shadow-md'
                                                 : 'text-teal-200 hover:translate-x-0.5 hover:bg-white/10 hover:text-white'
                                         }`}
                                     >
+                                        {active && <span className="absolute -left-2.5 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-accent" />}
                                         <span className={`transition-transform duration-normal ${active ? '' : 'group-hover:scale-110'}`}>{item.icon}</span>
                                         {item.label}
                                     </Link>

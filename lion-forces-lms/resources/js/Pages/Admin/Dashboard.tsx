@@ -1,9 +1,7 @@
 import { Head, Link } from '@inertiajs/react';
-import { ReactNode } from 'react';
 import AnimatedCounter from '@/Components/AnimatedCounter';
 import BarChart from '@/Components/BarChart';
 import DonutChart from '@/Components/DonutChart';
-import Icon from '@/Components/Icon';
 import RevealOnScroll from '@/Components/RevealOnScroll';
 import RingStat from '@/Components/RingStat';
 import StatusDot from '@/Components/StatusDot';
@@ -37,15 +35,6 @@ interface Props {
     pendingReviewsCount: number;
 }
 
-const ICONS = {
-    students: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253',
-    clock: 'M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z',
-    warningTriangle: 'M12 9v3.75m-9.303 3.376c-.866 1.5.217 3.374 1.948 3.374h14.71c1.73 0 2.813-1.874 1.948-3.374L13.949 3.378c-.866-1.5-3.032-1.5-3.898 0L2.697 16.126zM12 15.75h.007v.008H12v-.008z',
-    star: 'M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z',
-    cash: 'M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z',
-    chatBubble: 'M8.625 12a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H8.25m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0H12m4.125 0a.375.375 0 11-.75 0 .375.375 0 01.75 0zm0 0h-.375M21 12c0 4.556-4.03 8.25-9 8.25a9.764 9.764 0 01-2.555-.337A5.972 5.972 0 015.41 20.97a5.969 5.969 0 01-.474-.065 4.48 4.48 0 00.978-2.025c.09-.457-.133-.901-.467-1.226C3.93 16.178 3 14.189 3 12c0-4.556 4.03-8.25 9-8.25s9 3.694 9 8.25z',
-};
-
 const METHOD_LABELS: Record<string, string> = {
     bank_transfer: 'Bank Transfer',
     easypaisa: 'Easypaisa',
@@ -60,15 +49,17 @@ function initials(name: string): string {
 }
 
 /**
- * Client reference: two dashboard screenshots (a smart-home app, and a
- * generic "Arion" admin template) with the request to make the admin and
- * student dashboards look less "vibecoded" -- a welcome banner, ring/donut
- * progress instead of plain stat numbers, and a real trend chart. Kept in
- * the site's own teal/gold brand colors rather than the references' purple
- * palette. Deliberately does NOT duplicate the "bank coverage" stat that
- * already lives on Admin > Custom Quiz (see that controller's comment) --
- * the two ring stats here (active students, platform accuracy) are chosen
- * from data this page already had, just re-presented.
+ * Visual system revised after client feedback that the dashboard still
+ * read as a generic AI-template ("vibecoded") layout even after the
+ * earlier icon-badge/pill-badge cleanup. The specific tells identified:
+ * a decorative gradient banner with a blurred accent "blob" (a very
+ * recognizable AI-SaaS trope), and eight visually-identical stat cards
+ * in a row with no hierarchy. Fixed by: dropping the gradient banner for
+ * a plain bold headline with real actions, promoting the single most
+ * actionable number (pending payments) into one filled card instead of
+ * repeating it in both the quick-access row and the stat row, and
+ * flattening the remaining cards (thinner radius, no shadow) so the one
+ * filled card actually reads as emphasis rather than decoration.
  */
 export default function Dashboard({
     stats,
@@ -91,50 +82,59 @@ export default function Dashboard({
         <AdminLayout header="Dashboard">
             <Head title="Admin Dashboard" />
 
-            <div className="relative overflow-hidden rounded-3xl p-7 text-on-primary" style={{ background: 'linear-gradient(120deg, var(--color-secondary), var(--color-primary))' }}>
-                <div className="relative z-10 max-w-lg">
-                    <p className="text-sm font-semibold opacity-80">Welcome back</p>
-                    <h1 className="mt-1 text-3xl font-extrabold">Admin Dashboard</h1>
-                    <p className="mt-2 text-sm opacity-90">
-                        {stats.total_students.toLocaleString()} students, {questionBank.total_questions.toLocaleString()} questions in the bank.
-                        {stats.pending_payments > 0 ? ` ${stats.pending_payments} payment${stats.pending_payments === 1 ? '' : 's'} need review.` : ' Everything looks healthy.'}
-                    </p>
+            <div className="flex flex-wrap items-end justify-between gap-4">
+                <div>
+                    <h1 className="text-[28px] font-extrabold tracking-tight text-text">Admin Dashboard</h1>
+                    <p className="mt-1.5 text-sm text-text-secondary">Overview of students, content and revenue.</p>
                 </div>
-                <div className="absolute right-0 top-0 h-full w-64 opacity-20" style={{ background: 'radial-gradient(circle at 70% 30%, var(--color-accent), transparent 60%)' }} />
+                <div className="flex gap-2.5">
+                    <Link
+                        href="/admin/courses/create"
+                        className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4.5 py-2.5 text-sm font-bold text-on-primary transition-colors duration-fast hover:bg-primary-hover"
+                    >
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.4} className="h-3.5 w-3.5"><path strokeLinecap="round" strokeLinejoin="round" d="M12 4.5v15m7.5-7.5h-15" /></svg>
+                        Add Course
+                    </Link>
+                    <Link
+                        href="/admin/reports"
+                        className="inline-flex items-center rounded-full border border-border px-4.5 py-2.5 text-sm font-bold text-text transition-colors duration-fast hover:border-primary"
+                    >
+                        View Reports
+                    </Link>
+                </div>
             </div>
 
-            <RevealOnScroll staggerMs={60} className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <QuickAccessCard
+            <RevealOnScroll staggerMs={60} className="mt-6 grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
+                <HeroStatCard
                     href="/admin/payments"
-                    icon={<Icon d={ICONS.cash} />}
-                    title="Pending Payments"
-                    subtitle={stats.pending_payments > 0 ? `${stats.pending_payments} pending` : 'All verified'}
-                    isAttention={stats.pending_payments > 0}
+                    label="Pending Payments"
+                    value={stats.pending_payments}
+                    subtitle={stats.pending_payments > 0 ? 'Needs review' : 'All verified'}
                 />
                 <QuickAccessCard
                     href="/admin/reported-questions"
-                    icon={<Icon d={ICONS.warningTriangle} />}
                     title="Reported Questions"
-                    subtitle={reportedQuestionsCount > 0 ? `${reportedQuestionsCount} pending` : 'Nothing reported'}
+                    count={reportedQuestionsCount}
+                    subtitle={reportedQuestionsCount > 0 ? 'pending review' : 'Nothing reported'}
                     isAttention={reportedQuestionsCount > 0}
                 />
                 <QuickAccessCard
                     href="/admin/qa"
-                    icon={<Icon d={ICONS.chatBubble} />}
                     title="Student Q&A"
-                    subtitle={unansweredQACount > 0 ? `${unansweredQACount} unanswered` : 'All answered'}
+                    count={unansweredQACount}
+                    subtitle={unansweredQACount > 0 ? 'unanswered' : 'All answered'}
                     isAttention={unansweredQACount > 0}
                 />
                 <QuickAccessCard
                     href="/admin/reviews"
-                    icon={<Icon d={ICONS.star} />}
                     title="Pending Reviews"
-                    subtitle={pendingReviewsCount > 0 ? `${pendingReviewsCount} pending` : 'Nothing pending'}
+                    count={pendingReviewsCount}
+                    subtitle={pendingReviewsCount > 0 ? 'pending' : 'All clear'}
                     isAttention={pendingReviewsCount > 0}
                 />
             </RevealOnScroll>
 
-            <RevealOnScroll staggerMs={60} className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <RevealOnScroll staggerMs={60} className="mt-3.5 grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
                 <RingTile
                     label="Active Students"
                     percentage={activePercent}
@@ -149,17 +149,12 @@ export default function Dashboard({
                     color="var(--color-primary)"
                     sub={questionBank.total_answered > 0 ? `${questionBank.total_answered.toLocaleString()} answers` : 'No answers yet'}
                 />
-                <Stat label="Total Enrollments" value={stats.total_enrollments} icon={<Icon d={ICONS.students} />} />
-                <Stat
-                    label="Pending Payments"
-                    value={stats.pending_payments}
-                    icon={<Icon d={ICONS.clock} />}
-                    tone={stats.pending_payments > 0 ? 'warning' : 'primary'}
-                />
+                <Stat label="Total Enrollments" value={stats.total_enrollments} />
+                <Stat label="New This Week" value={stats.new_this_week} />
             </RevealOnScroll>
 
             <div className="mt-6 grid gap-6 lg:grid-cols-3">
-                <div className="rounded-3xl border border-border bg-surface p-6 lg:col-span-2">
+                <div className="rounded-2xl border border-border bg-surface p-6 lg:col-span-2">
                     <div className="mb-1 flex items-center justify-between">
                         <h2 className="font-bold text-text">Enrollments, Last 30 Days</h2>
                         <span className="rounded-full bg-success-bg px-2.5 py-1 text-xs font-bold text-success">
@@ -171,7 +166,7 @@ export default function Dashboard({
                     </div>
                 </div>
 
-                <div className="rounded-3xl border border-border bg-surface p-6">
+                <div className="rounded-2xl border border-border bg-surface p-6">
                     <h2 className="mb-4 font-bold text-text">Revenue by Method, 30d</h2>
                     {revenueBreakdown.length === 0 ? (
                         <p className="text-sm text-text-secondary">No verified payments in the last 30 days.</p>
@@ -199,7 +194,7 @@ export default function Dashboard({
             </div>
 
             <div className="mt-6 grid gap-6 lg:grid-cols-3">
-                <div className="rounded-3xl border border-border bg-surface p-5 lg:col-span-1">
+                <div className="rounded-2xl border border-border bg-surface p-5 lg:col-span-1">
                     <h2 className="mb-4 font-bold text-text">Question Bank</h2>
                     <div className="space-y-4">
                         <div>
@@ -217,7 +212,7 @@ export default function Dashboard({
                     </div>
                 </div>
 
-                <div className="min-w-0 rounded-3xl border border-border bg-surface p-5 lg:col-span-2">
+                <div className="min-w-0 rounded-2xl border border-border bg-surface p-5 lg:col-span-2">
                     <h2 className="mb-4 font-bold text-text">Most-Missed Questions</h2>
                     {mostMissedQuestions.length === 0 ? (
                         <p className="text-sm text-text-secondary">No wrong answers recorded yet.</p>
@@ -237,7 +232,7 @@ export default function Dashboard({
             </div>
 
             <div className="mt-6 grid gap-6 lg:grid-cols-3">
-                <div className="min-w-0 rounded-3xl border border-border bg-surface p-5 lg:col-span-2">
+                <div className="min-w-0 rounded-2xl border border-border bg-surface p-5 lg:col-span-2">
                     <h2 className="mb-4 font-bold text-text">Recent Enrollments</h2>
                     {recentEnrollments.length === 0 ? (
                         <p className="text-sm text-text-secondary">No enrollments yet.</p>
@@ -261,7 +256,7 @@ export default function Dashboard({
                     )}
                 </div>
 
-                <div className="min-w-0 rounded-3xl border border-border bg-surface p-5">
+                <div className="min-w-0 rounded-2xl border border-border bg-surface p-5">
                     <div className="mb-4 flex items-center justify-between">
                         <h2 className="font-bold text-text">Team</h2>
                         <span className="text-xs text-text-secondary">{adminsCount} with access</span>
@@ -300,7 +295,7 @@ export default function Dashboard({
                 </div>
             </div>
 
-            <div className="mt-6 rounded-3xl border border-border bg-surface p-5">
+            <div className="mt-6 rounded-2xl border border-border bg-surface p-5">
                 <h2 className="mb-4 font-bold text-text">Recent Payments</h2>
                 {recentPayments.length === 0 ? (
                     <p className="text-sm text-text-secondary">No payments yet.</p>
@@ -328,21 +323,41 @@ export default function Dashboard({
     );
 }
 
-/** Clickable shortcut to a page that needs admin attention. Plain icon
- * (no colored circle) to stay consistent with Stat below; the accent
- * color itself carries the "needs attention" signal instead. */
-function QuickAccessCard({ href, icon, title, subtitle, isAttention }: { href: string; icon: ReactNode; title: string; subtitle: string; isAttention: boolean }) {
-    const accentColor = isAttention ? 'var(--color-warning)' : 'var(--color-text-muted)';
+/** The one card on this page that's filled solid instead of flat -- it
+ * carries the dashboard's single most actionable number (pending
+ * payments), so it's the only thing here that should pull the eye first.
+ * Everything else in this row and the one below it is deliberately flat
+ * (border only, no shadow) so this card reads as emphasis, not decoration. */
+function HeroStatCard({ href, label, value, subtitle }: { href: string; label: string; value: number; subtitle: string }) {
     return (
-        <Link href={href} className="group rounded-3xl border border-border bg-surface p-5 transition-colors duration-fast hover:border-primary">
+        <Link href={href} className="group rounded-2xl bg-secondary p-5 text-text-inverse transition-transform duration-fast hover:-translate-y-0.5">
             <div className="flex items-center justify-between">
-                <span className="flex h-5 w-5 flex-shrink-0" style={{ color: accentColor }}>{icon}</span>
-                <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5 text-text-muted transition-transform duration-fast group-hover:translate-x-0.5">
-                    <path d="M11.3 3.3a1 1 0 011.4 0l5 5a1 1 0 010 1.4l-5 5a1 1 0 11-1.4-1.4L14.6 10H4a1 1 0 010-2h10.6l-3.3-3.3a1 1 0 010-1.4z" />
+                <span className="text-sm font-semibold opacity-80">{label}</span>
+                <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={2} className="h-4 w-4 opacity-70 transition-transform duration-fast group-hover:translate-x-0.5 group-hover:-translate-y-0.5">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M5.833 14.167L14.167 5.833M5.833 5.833h8.334v8.334" />
                 </svg>
             </div>
-            <div className="mt-3 text-sm font-semibold text-text">{title}</div>
-            <div className="text-xs text-text-muted">{subtitle}</div>
+            <div className="mt-2.5 font-display text-4xl">
+                <AnimatedCounter value={String(value)} />
+            </div>
+            <div className="mt-3 inline-flex rounded-full bg-white/10 px-2.5 py-1 text-xs font-semibold">{subtitle}</div>
+        </Link>
+    );
+}
+
+/** Flat card -- border only, no shadow, no icon -- so the filled
+ * HeroStatCard next to it is the thing that actually stands out. Client
+ * feedback was that a row of eight visually-identical cards (icon badge +
+ * shadow + rounded-3xl, repeated) read as a generic AI-dashboard template;
+ * removing the per-card icon and shadow here was part of fixing that. */
+function QuickAccessCard({ href, title, count, subtitle, isAttention }: { href: string; title: string; count: number; subtitle: string; isAttention: boolean }) {
+    return (
+        <Link href={href} className="group rounded-2xl border border-border bg-surface p-5 transition-colors duration-fast hover:border-primary">
+            <div className="text-sm font-semibold text-text-secondary">{title}</div>
+            <div className="mt-2.5 font-display text-3xl text-text">
+                <AnimatedCounter value={String(count)} />
+            </div>
+            <div className={`mt-2 text-xs font-semibold ${isAttention ? 'text-warning' : 'text-text-muted'}`}>{subtitle}</div>
         </Link>
     );
 }
@@ -353,7 +368,7 @@ function QuickAccessCard({ href, icon, title, subtitle, isAttention }: { href: s
  * colored, semibold treatment; routine states stay muted. */
 function RingTile({ label, percentage, valueLabel, color, sub }: { label: string; percentage: number; valueLabel: string; color: string; sub: string }) {
     return (
-        <div className="flex items-center gap-4 rounded-3xl border border-border bg-surface p-5">
+        <div className="flex items-center gap-4 rounded-2xl border border-border bg-surface p-5">
             <RingStat percentage={percentage} color={color} size={52} strokeWidth={6} />
             <div className="min-w-0">
                 <div className="font-display text-2xl text-text">{valueLabel}</div>
@@ -364,19 +379,15 @@ function RingTile({ label, percentage, valueLabel, color, sub }: { label: string
     );
 }
 
-/** Plain inline icon next to the label, no colored circular badge behind
- * it -- client feedback was that the pastel icon-in-a-circle treatment
- * read as a generic AI-dashboard template rather than something a
- * designer actually chose. The number stays the hero element. */
-function Stat({ label, value, icon, tone = 'primary' }: { label: string; value: string | number; icon: ReactNode; tone?: 'primary' | 'warning' }) {
-    const accentColor = tone === 'warning' ? 'var(--color-warning)' : 'var(--color-primary)';
+/** No icon, no colored badge -- client feedback was that the pastel
+ * icon-in-a-circle treatment read as a generic AI-dashboard template
+ * rather than something a designer actually chose. The number stays the
+ * only thing doing the work. */
+function Stat({ label, value }: { label: string; value: string | number }) {
     return (
-        <div className="rounded-3xl border border-border bg-surface p-5">
-            <div className="flex items-center gap-2">
-                <span className="flex h-5 w-5 flex-shrink-0" style={{ color: accentColor }}>{icon}</span>
-                <span className="text-sm font-semibold text-text-secondary">{label}</span>
-            </div>
-            <div className="mt-3 font-display text-3xl text-text">
+        <div className="rounded-2xl border border-border bg-surface p-5">
+            <span className="text-sm font-semibold text-text-secondary">{label}</span>
+            <div className="mt-2.5 font-display text-3xl text-text">
                 <AnimatedCounter value={String(value)} />
             </div>
         </div>

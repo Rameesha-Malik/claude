@@ -75,9 +75,11 @@ function CourseCountdown({ course }: { course: EnrollmentCard }) {
     );
 }
 
-/** See Admin/Dashboard.tsx for the shared design reasoning (client
- * reference screenshots, welcome banner + ring stats + trend chart
- * instead of plain stat tiles, in the site's own teal/gold brand colors). */
+/** Visual system matches Admin/Dashboard.tsx (see that file's comment for
+ * the full reasoning): no decorative gradient banner, one filled card to
+ * carry the single most actionable number, everything else flat (border
+ * only, no shadow) so that one card reads as emphasis instead of being
+ * lost in a row of identical tiles. */
 export default function Dashboard({ enrollments, performance, activityTrend, revisionCount, unreadNotifications, recentBroadcasts }: Props) {
     const { auth } = usePage<PageProps>().props;
     const firstName = auth.user?.name?.split(' ')[0] ?? 'there';
@@ -87,36 +89,26 @@ export default function Dashboard({ enrollments, performance, activityTrend, rev
         <StudentLayout>
             <Head title="Dashboard" />
 
-            <div className="relative overflow-hidden rounded-3xl p-7 text-on-primary" style={{ background: 'linear-gradient(120deg, var(--color-secondary), var(--color-primary))' }}>
-                <div className="relative z-10 flex flex-wrap items-end justify-between gap-4">
-                    <div className="max-w-lg">
-                        <p className="text-sm font-semibold opacity-80">{greeting()}</p>
-                        <h1 className="mt-1 text-3xl font-extrabold">{firstName}</h1>
-                        <p className="mt-2 text-sm opacity-90">
-                            {enrollments.length > 0
-                                ? `You're ${overallProgress}% through your course${enrollments.length > 1 ? 's' : ''}.`
-                                : "You're not enrolled in any courses yet."}
-                            {revisionCount > 0 ? ` ${revisionCount} question${revisionCount === 1 ? '' : 's'} need${revisionCount === 1 ? 's' : ''} revision.` : ''}
-                        </p>
-                    </div>
-                    <Link
-                        href="/courses"
-                        className="relative z-10 inline-flex items-center gap-2 rounded-full bg-accent px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-on-accent shadow-sm transition-all duration-fast hover:-translate-y-0.5 hover:shadow-md"
-                    >
-                        Browse Courses
-                        <Icon d={ICONS.arrow} className="h-4 w-4" />
-                    </Link>
+            <div className="flex flex-wrap items-end justify-between gap-4">
+                <div>
+                    <p className="text-sm font-semibold text-text-secondary">{greeting()}</p>
+                    <h1 className="text-[28px] font-extrabold tracking-tight text-text">{firstName}</h1>
                 </div>
-                <div className="absolute right-0 top-0 h-full w-64 opacity-20" style={{ background: 'radial-gradient(circle at 70% 30%, var(--color-accent), transparent 60%)' }} />
+                <Link
+                    href="/courses"
+                    className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4.5 py-2.5 text-sm font-bold text-on-primary transition-colors duration-fast hover:bg-primary-hover"
+                >
+                    Browse Courses
+                    <Icon d={ICONS.arrow} className="h-3.5 w-3.5" />
+                </Link>
             </div>
 
-            <RevealOnScroll staggerMs={80} className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                <RingTile
+            <RevealOnScroll staggerMs={80} className="mt-6 grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
+                <HeroStatCard
                     label="Overall Progress"
-                    percentage={overallProgress}
-                    valueLabel={`${overallProgress}%`}
-                    color="var(--color-primary)"
-                    sub={`${enrollments.length} course${enrollments.length === 1 ? '' : 's'}`}
+                    value={overallProgress}
+                    suffix="%"
+                    subtitle={enrollments.length > 0 ? `${enrollments.length} course${enrollments.length === 1 ? '' : 's'}` : 'Not enrolled yet'}
                 />
                 <RingTile
                     label="Accuracy"
@@ -128,20 +120,18 @@ export default function Dashboard({ enrollments, performance, activityTrend, rev
                 <SummaryCard
                     label="Questions to Revise"
                     value={revisionCount}
-                    icon={<Icon d={ICONS.flag} />}
                     tone={revisionCount > 0 ? 'warning' : 'primary'}
                     href="/portal/revision-list"
                 />
                 <SummaryCard
                     label="Unread Notifications"
                     value={unreadNotifications.length}
-                    icon={<Icon d={ICONS.bell} />}
                     tone={unreadNotifications.length > 0 ? 'warning' : 'primary'}
                 />
             </RevealOnScroll>
 
             <div className="mt-6 grid gap-6 lg:grid-cols-3">
-                <div className="rounded-3xl border border-border bg-surface p-6 lg:col-span-2">
+                <div className="rounded-2xl border border-border bg-surface p-6 lg:col-span-2">
                     <div className="mb-1 flex items-center justify-between">
                         <h2 className="font-bold text-text">Your Activity, Last 14 Days</h2>
                         <span className="rounded-full bg-primary-subtle px-2.5 py-1 text-xs font-bold text-primary">
@@ -153,7 +143,7 @@ export default function Dashboard({ enrollments, performance, activityTrend, rev
                     </div>
                 </div>
 
-                <div className="rounded-3xl border border-border bg-surface p-6">
+                <div className="rounded-2xl border border-border bg-surface p-6">
                     <h2 className="mb-4 font-bold text-text">Performance</h2>
                     <div className="grid grid-cols-2 gap-4">
                         <PerfStat label="Correct" value={performance.correct} tone="success" />
@@ -173,7 +163,7 @@ export default function Dashboard({ enrollments, performance, activityTrend, rev
                 <div className="lg:col-span-2">
                     <h2 className="mb-4 text-lg font-bold text-text">My Courses</h2>
                     {enrollments.length === 0 ? (
-                        <div className="rounded-3xl border border-dashed border-border bg-surface p-10 text-center text-text-secondary">
+                        <div className="rounded-2xl border border-dashed border-border bg-surface p-10 text-center text-text-secondary">
                             You're not enrolled in any courses yet.{' '}
                             <Link href="/courses" className="font-semibold text-primary hover:underline">Browse courses &rarr;</Link>
                         </div>
@@ -183,7 +173,7 @@ export default function Dashboard({ enrollments, performance, activityTrend, rev
                                 <Link
                                     key={course.id}
                                     href={`/portal/my-courses/${course.slug}`}
-                                    className="group block rounded-3xl border border-border bg-surface p-5 shadow-xs transition-all duration-normal hover:-translate-y-0.5 hover:border-primary hover:shadow-lg"
+                                    className="group block rounded-2xl border border-border bg-surface p-5 transition-all duration-normal hover:-translate-y-0.5 hover:border-primary hover:shadow-md"
                                 >
                                     <div className="flex items-center gap-4">
                                         <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-primary-subtle text-primary transition-transform duration-normal group-hover:scale-110">
@@ -222,7 +212,7 @@ export default function Dashboard({ enrollments, performance, activityTrend, rev
                     <h2 className="mb-4 text-lg font-bold text-text">Announcements</h2>
                     <div className="space-y-3">
                         {recentBroadcasts.length === 0 && (
-                            <div className="rounded-3xl border border-dashed border-border bg-surface p-6 text-center text-sm text-text-secondary">
+                            <div className="rounded-2xl border border-dashed border-border bg-surface p-6 text-center text-sm text-text-secondary">
                                 Nothing new right now.
                             </div>
                         )}
@@ -246,9 +236,25 @@ export default function Dashboard({ enrollments, performance, activityTrend, rev
     );
 }
 
+/** The one filled card on this page -- carries overall course progress,
+ * the single number a student cares most about. Everything else here is
+ * flat (border only, no shadow) so this stays the thing that stands out,
+ * same reasoning as Admin/Dashboard.tsx's HeroStatCard. */
+function HeroStatCard({ label, value, suffix = '', subtitle }: { label: string; value: number; suffix?: string; subtitle: string }) {
+    return (
+        <div className="rounded-2xl bg-secondary p-5 text-text-inverse">
+            <span className="text-sm font-semibold opacity-80">{label}</span>
+            <div className="mt-2.5 font-display text-4xl">
+                <AnimatedCounter value={`${value}${suffix}`} />
+            </div>
+            <div className="mt-3 inline-flex rounded-full bg-white/10 px-2.5 py-1 text-xs font-semibold">{subtitle}</div>
+        </div>
+    );
+}
+
 function RingTile({ label, percentage, valueLabel, color, sub }: { label: string; percentage: number; valueLabel: string; color: string; sub: string }) {
     return (
-        <div className="flex items-center gap-4 rounded-3xl border border-border bg-surface p-5">
+        <div className="flex items-center gap-4 rounded-2xl border border-border bg-surface p-5">
             <RingStat percentage={percentage} color={color} size={52} strokeWidth={6} />
             <div className="min-w-0">
                 <div className="font-display text-2xl text-text">{valueLabel}</div>
@@ -259,30 +265,25 @@ function RingTile({ label, percentage, valueLabel, color, sub }: { label: string
     );
 }
 
+/** No icon, no colored badge -- see Admin/Dashboard.tsx's Stat for why. */
 function SummaryCard({
     label,
     value,
-    icon,
     tone = 'primary',
     href,
 }: {
     label: string;
     value: string | number;
-    icon: ReactNode;
     tone?: 'primary' | 'warning';
     /** Makes the whole card a link -- e.g. the revision count previously had
      *  nowhere to click through to. */
     href?: string;
 }) {
     const Wrapper = href ? Link : 'div';
-    const accentColor = tone === 'warning' ? 'var(--color-warning)' : 'var(--color-primary)';
     return (
-        <Wrapper {...(href ? { href } : {})} className="rounded-3xl border border-border bg-surface p-5 transition-all duration-normal hover:-translate-y-1 hover:shadow-lg">
-            <div className="flex items-center gap-2">
-                <span className="flex h-5 w-5 flex-shrink-0" style={{ color: accentColor }}>{icon}</span>
-                <span className="text-sm font-semibold text-text-secondary">{label}</span>
-            </div>
-            <div className="mt-3 font-display text-3xl text-text">
+        <Wrapper {...(href ? { href } : {})} className="rounded-2xl border border-border bg-surface p-5 transition-colors duration-fast hover:border-primary">
+            <span className="text-sm font-semibold text-text-secondary">{label}</span>
+            <div className={`mt-2.5 font-display text-3xl ${tone === 'warning' && Number(value) > 0 ? 'text-warning' : 'text-text'}`}>
                 <AnimatedCounter value={String(value)} />
             </div>
         </Wrapper>
