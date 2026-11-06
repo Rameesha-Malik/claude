@@ -1,5 +1,5 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
-import { useEffect, useRef, useState } from 'react';
+import { useState } from 'react';
 import LiteMarkdown from '@/Components/LiteMarkdown';
 import RevealOnScroll from '@/Components/RevealOnScroll';
 import RichTextArea from '@/Components/RichTextArea';
@@ -79,125 +79,6 @@ function initialTab(course: Partial<Course>): Tab {
     return 'Lectures';
 }
 
-function youtubeVideoId(url: string): string | null {
-    const match = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{6,})/);
-
-    return match ? match[1] : null;
-}
-
-// Client: keep the admin workflow to just "paste a video link," and the
-// student should see a clean frame with nothing clickable leading out to
-// YouTube -- no "Watch on YouTube," no title/watermark link, nothing, in
-// any screen state. Rewritten to the simplest version of the standard
-// lazy-load pattern most LMS sites use (the same technique as the
-// well-known "lite-youtube-embed" approach): before a real click, there
-// is no iframe at all -- just YouTube's own public thumbnail image and
-// our play button, so there's nothing of YouTube's own UI on screen to
-// click through in the first place. youtube-nocookie.com (no
-// third-party cookies) + rel=0 (no related-videos from other channels) +
-// modestbranding=1 (smaller logo) are the standard minimal-chrome
-// parameters any embed should use.
-//
-// Fullscreen needed its own fix: clicking YOUTUBE's own fullscreen
-// button only fullscreens the iframe itself -- our blocking overlays are
-// sibling elements, not inside the iframe (can't be, it's a cross-origin
-// document we have no access into), so they were left behind the moment
-// a student used that native control. fs=0 removes that button from the
-// embed entirely, and a custom fullscreen button calls
-// requestFullscreen() on the OUTER wrapper instead, which contains the
-// iframe AND both overlays as children -- so whatever goes fullscreen
-// now, the overlays go with it, in every size: normal, half-screen, or
-// real browser fullscreen.
-function YoutubeEmbed({ videoId, title }: { videoId: string; title: string }) {
-    const [clicked, setClicked] = useState(false);
-    const [thumbnailBroken, setThumbnailBroken] = useState(false);
-    const [isFullscreen, setIsFullscreen] = useState(false);
-    const wrapperRef = useRef<HTMLDivElement>(null);
-
-    useEffect(() => {
-        function onFullscreenChange() {
-            setIsFullscreen(document.fullscreenElement === wrapperRef.current);
-        }
-        document.addEventListener('fullscreenchange', onFullscreenChange);
-        return () => document.removeEventListener('fullscreenchange', onFullscreenChange);
-    }, []);
-
-    function toggleFullscreen() {
-        if (document.fullscreenElement) {
-            document.exitFullscreen();
-        } else {
-            wrapperRef.current?.requestFullscreen();
-        }
-    }
-
-    if (clicked) {
-        const origin = typeof window !== 'undefined' ? encodeURIComponent(window.location.origin) : '';
-        const embedUrl = `https://www.youtube-nocookie.com/embed/${videoId}?autoplay=1&rel=0&modestbranding=1&iv_load_policy=3&fs=0&origin=${origin}`;
-
-        return (
-            <div
-                ref={wrapperRef}
-                className={`relative overflow-hidden bg-black ${isFullscreen ? 'h-full w-full' : 'aspect-video w-full rounded-xl'}`}
-            >
-                <iframe
-                    src={embedUrl}
-                    className="h-full w-full"
-                    allow="autoplay; encrypted-media; picture-in-picture"
-                    title={title}
-                />
-                {/* YouTube's own title-link (top-left, on hover/pause) and
-                    its "YouTube" watermark badge (bottom-right, appears
-                    during playback) both open youtube.com directly --
-                    these two small blocking areas sit on top of them
-                    permanently, including while playing. Corner-only, not
-                    spanning the full control bar: volume/captions/settings
-                    run along the very bottom edge and stay usable. */}
-                <div className="pointer-events-auto absolute left-0 top-0 h-10 w-2/5 max-w-[14rem]" />
-                <div className="pointer-events-auto absolute bottom-0 right-0 h-[14%] w-[32%] max-w-[11rem]" />
-                <button
-                    type="button"
-                    onClick={toggleFullscreen}
-                    aria-label={isFullscreen ? 'Exit fullscreen' : 'Fullscreen'}
-                    className="absolute bottom-2 right-2 z-10 flex h-9 w-9 items-center justify-center rounded-lg bg-black/60 text-white transition-colors hover:bg-black/80"
-                >
-                    {isFullscreen ? (
-                        <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 9H4.5M9 9V4.5M9 9L3.75 3.75M15 9h4.5M15 9V4.5M15 9l5.25-5.25M9 15H4.5M9 15v4.5M9 15l-5.25 5.25M15 15h4.5M15 15v4.5m0-4.5l5.25 5.25" />
-                        </svg>
-                    ) : (
-                        <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 3.75H4.5a.75.75 0 00-.75.75v3.75m16.5 0V4.5a.75.75 0 00-.75-.75h-3.75M4.5 15.75v3.75c0 .414.336.75.75.75h3.75m7.5 0h3.75a.75.75 0 00.75-.75v-3.75" />
-                        </svg>
-                    )}
-                </button>
-            </div>
-        );
-    }
-
-    return (
-        <button
-            type="button"
-            onClick={() => setClicked(true)}
-            aria-label={`Play ${title}`}
-            className="group relative flex aspect-video w-full items-center justify-center overflow-hidden rounded-xl bg-black"
-        >
-            {! thumbnailBroken && (
-                <img
-                    src={`https://i.ytimg.com/vi/${videoId}/hqdefault.jpg`}
-                    alt=""
-                    onError={() => setThumbnailBroken(true)}
-                    className="absolute inset-0 h-full w-full object-cover opacity-80 transition-opacity group-hover:opacity-90"
-                />
-            )}
-            <span className="relative flex h-16 w-16 items-center justify-center rounded-full bg-primary shadow-lg transition-transform group-hover:scale-105">
-                <svg className="ml-1 h-7 w-7 text-on-primary" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M8 5v14l11-7z" />
-                </svg>
-            </span>
-        </button>
-    );
-}
-
 // Small type indicator on each sidebar row -- "make it better" feedback on
 // this page: the list was just a number circle + title, no hint of what
 // kind of content it is before clicking. Same lesson types the admin
@@ -206,6 +87,53 @@ function YoutubeEmbed({ videoId, title }: { videoId: string; title: string }) {
 const LESSON_TYPE_LABELS: Record<string, string> = {
     video_youtube: 'Video Lecture', video_upload: 'Video Lecture', pdf: 'PDF', audio: 'Audio', document: 'Document', link: 'Link',
 };
+
+/** Description/Materials tabs under the active lesson, matching the
+ * reference dashboard's lesson-page layout. Materials reuses this course's
+ * shared notes (the same content the page-level "Notes" tab already
+ * shows) rather than duplicating data -- there's no separate
+ * per-lesson materials list in this app's data model. No third
+ * "Home task" tab: there's no per-lesson homework/assignment data to show
+ * there honestly (Assignments is its own separate feature elsewhere on
+ * this page, not tied to a specific lesson). key={lesson.id} on the
+ * caller resets back to Description when the student switches lessons. */
+function LessonContentTabs({ lesson, notes }: { lesson: Lesson; notes: Note[] }) {
+    const [tab, setTab] = useState<'Description' | 'Materials'>('Description');
+
+    return (
+        <div className="mt-4 border-t border-border pt-4">
+            <div className="flex gap-2">
+                {(['Description', 'Materials'] as const).map((t) => (
+                    <button
+                        key={t}
+                        onClick={() => setTab(t)}
+                        className={`rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-wide transition-colors ${
+                            tab === t ? 'bg-primary text-on-primary' : 'border border-border text-text-secondary hover:border-primary hover:text-primary'
+                        }`}
+                    >
+                        {t}
+                    </button>
+                ))}
+            </div>
+            <div className="mt-3 text-sm leading-relaxed text-text-secondary">
+                {tab === 'Description' ? (
+                    lesson.description || 'No description for this lesson yet.'
+                ) : notes.length === 0 ? (
+                    'No notes published for this course yet.'
+                ) : (
+                    <div className="space-y-3">
+                        {notes.map((note) => (
+                            <div key={note.id} className="rounded-xl border border-border bg-surface-sunken p-4">
+                                <h4 className="font-semibold text-text">{note.title}</h4>
+                                <LiteMarkdown text={note.content ?? ''} className="mt-1.5 text-sm text-text-secondary" />
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+        </div>
+    );
+}
 
 function LessonTypeIcon({ type }: { type: string }) {
     const d = {
@@ -228,14 +156,21 @@ function LessonPlayer({ lesson }: { lesson: Lesson }) {
     const fileUrl = lesson.file_path ? `/storage/${lesson.file_path}` : null;
 
     switch (lesson.type) {
-        case 'video_youtube': {
-            const videoId = lesson.external_url ? youtubeVideoId(lesson.external_url) : null;
-            return videoId ? (
-                <YoutubeEmbed videoId={videoId} title={lesson.title} />
+        // A lesson pasted as a YouTube link is imported server-side into
+        // this site's own storage (see ImportYoutubeLessonVideo) rather
+        // than ever being embedded -- the backend doesn't even send
+        // external_url for this type (Student/CourseController redacts
+        // it), so there's nothing here to build an iframe from in the
+        // first place. Renders exactly like video_upload once the import
+        // finishes (fileUrl set); until then, a plain "still importing"
+        // message, no player at all.
+        case 'video_youtube':
+            return fileUrl ? (
+                // eslint-disable-next-line jsx-a11y/media-has-caption
+                <video controls src={fileUrl} className="w-full rounded-xl bg-black" />
             ) : (
-                <p className="rounded-xl bg-surface-sunken p-6 text-sm text-text-muted">Video link not set yet.</p>
+                <p className="rounded-xl bg-surface-sunken p-6 text-sm text-text-muted">This video is still being imported -- check back in a few minutes.</p>
             );
-        }
         case 'video_upload':
             return fileUrl ? (
                 // eslint-disable-next-line jsx-a11y/media-has-caption
@@ -499,7 +434,7 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
                                         </span>
                                     </div>
                                     <h3 className="mt-1 font-display text-xl text-text">{activeLesson.title}</h3>
-                                    {activeLesson.description && <p className="mt-2 text-sm leading-relaxed text-text-secondary">{activeLesson.description}</p>}
+                                    <LessonContentTabs key={activeLesson.id} lesson={activeLesson} notes={course.shared_notes} />
 
                                     <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-border pt-5">
                                         <button

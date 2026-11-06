@@ -62,6 +62,7 @@ class CourseController extends Controller
         ]);
         $course->loadCount(['enrollments' => fn ($q) => $q->where('status', 'active')]);
         $this->attachLatestAttempts($course, $user->id);
+        $this->redactLessonSources($course);
 
         // Personal/Guaranteed notes: assigned directly to this student, or
         // to the package they're enrolled under.
@@ -159,6 +160,29 @@ class CourseController extends Controller
                 $item->latest_attempt_id = $latestByAttemptable->get($item->id)?->id;
             });
         }
+    }
+
+    // Client requirement: a video lesson's source must never be
+    // discoverable by a student, full stop -- not just unclickable in the
+    // UI. Inertia ships this whole Course (lessons included) as plain JSON
+    // in the page, readable via View Source with no DevTools needed, so
+    // CourseLearning.tsx not rendering external_url for video_youtube
+    // lessons was never enough on its own -- the raw link was still
+    // sitting right there in the payload. This strips it from every
+    // lesson except 'link' (an intentional external-resource lesson,
+    // where showing/opening the URL is the whole point) before the
+    // response is built, so there is nothing to find regardless of what
+    // the frontend does or doesn't render.
+    private function redactLessonSources(Course $course): void
+    {
+        $redact = function ($lesson): void {
+            if ($lesson->type !== 'link') {
+                $lesson->external_url = null;
+            }
+        };
+
+        $course->lessons->each($redact);
+        $course->sections->each(fn ($section) => $section->lessons->each($redact));
     }
 
     public function submitReview(Request $request, Course $course)

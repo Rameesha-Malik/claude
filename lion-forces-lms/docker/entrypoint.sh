@@ -29,6 +29,20 @@ php artisan storage:link || true
 php artisan config:cache
 php artisan route:cache
 
+# QUEUE_CONNECTION=database (see config/queue.php) writes dispatched jobs
+# -- ImportYoutubeLessonVideo, currently the only one -- to a database
+# table, but nothing processes that table without a worker actually
+# polling it. This container has no supervisor/multi-process manager, so
+# the worker is simply backgrounded here, before exec replaces this shell
+# with `php artisan serve` below; wrapped in a restart loop since nothing
+# else will bring it back if it ever dies.
+(
+    while true; do
+        php artisan queue:work --queue=default --tries=1
+        sleep 2
+    done
+) &
+
 # public/.user.ini's upload limits are only honored by CGI/FPM SAPIs, not
 # the CLI built-in server `artisan serve` uses -- so they're re-applied
 # here via -d flags, otherwise lecture video uploads would silently fail
