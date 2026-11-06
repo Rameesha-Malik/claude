@@ -52,6 +52,26 @@ export default function StudentLayout({ children, header }: PropsWithChildren<{ 
                     );
                 })}
             </nav>
+
+            {/* Same "bottom promo card" slot the reference sidebar uses for an
+                "Upgrade to Pro" pitch -- this app has no such tier, so the real
+                equivalent is pointing at the actual thing a student can do
+                next: browse and enroll in more courses. */}
+            <div className="mx-3 mb-3 rounded-2xl bg-white/10 p-4">
+                <p className="text-sm font-bold text-white">Explore More Courses</p>
+                <p className="mt-1 text-xs text-teal-200">New courses are added regularly -- see what's available.</p>
+                {/* Explicit gold/dark-text, not bg-accent -- this card is on the
+                    dark sidebar, and accent now means oxblood with light text,
+                    which would go nearly invisible here (same fix applied to
+                    every other dark-surface accent button this session). */}
+                <Link
+                    href="/courses"
+                    className="mt-3 inline-flex items-center justify-center rounded-full bg-gold-400 px-4 py-2 text-xs font-bold uppercase tracking-wide text-secondary transition-colors hover:bg-gold-300"
+                >
+                    Browse Courses
+                </Link>
+            </div>
+
             <div className="border-t border-white/10 p-4">
                 <Link
                     href="/"

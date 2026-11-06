@@ -59,7 +59,7 @@ class DashboardController extends Controller
 
         $enrollments = $user->enrollments()
             ->where('status', 'active')
-            ->with(['course.category', 'course.lessons'])
+            ->with(['course.category', 'course.lessons', 'course.instructor'])
             ->get()
             ->map(function ($enrollment) use ($user) {
                 $course = $enrollment->course;
@@ -76,6 +76,7 @@ class DashboardController extends Controller
                     'title' => $course->title,
                     'slug' => $course->slug,
                     'category' => $course->category?->name,
+                    'instructor_name' => $course->instructor?->name,
                     'progress' => $totalLessons > 0 ? round(($completedLessons / $totalLessons) * 100) : 0,
                     'completed_lessons' => $completedLessons,
                     'total_lessons' => $totalLessons,
@@ -101,6 +102,15 @@ class DashboardController extends Controller
             ->filter(fn ($e) => $e['target_exam_date'] !== null && now()->lt($e['target_exam_date']))
             ->sortBy('target_exam_date')
             ->first();
+
+        // Which course gets the highlighted "current" treatment on its card:
+        // the one with the nearest upcoming exam, falling back to one that's
+        // been started but not finished, then just the first enrollment.
+        $currentCourseId = $nextExam['id']
+            ?? $enrollments->first(fn ($e) => $e['progress'] > 0 && $e['progress'] < 100)['id']
+            ?? $enrollments->first()['id']
+            ?? null;
+        $enrollments = $enrollments->map(fn ($e) => [...$e, 'is_current' => $e['id'] === $currentCourseId]);
 
         return Inertia::render('Student/Dashboard', [
             'enrollments' => $enrollments,

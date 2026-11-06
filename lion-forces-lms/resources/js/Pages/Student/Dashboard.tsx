@@ -9,8 +9,8 @@ import StudentLayout from '@/Layouts/StudentLayout';
 import { PageProps } from '@/types';
 
 interface EnrollmentCard {
-    id: number; title: string; slug: string; category: string | null;
-    progress: number; completed_lessons: number; total_lessons: number;
+    id: number; title: string; slug: string; category: string | null; instructor_name: string | null;
+    progress: number; completed_lessons: number; total_lessons: number; is_current: boolean;
     target_exam_name: string | null; target_exam_date: string | null;
 }
 interface Broadcast { title: string; body: string; sent_at: string | null }
@@ -46,6 +46,19 @@ function greeting(): string {
     return 'Good evening';
 }
 
+/** Live date/time, same header element the client's reference dashboard
+ * shows. No weather icon alongside it like that reference has -- this app
+ * has no weather data or API integration, and a fake weather reading would
+ * be a worse fabrication than a decorative icon ever was. */
+function useClock() {
+    const [now, setNow] = useState(new Date());
+    useEffect(() => {
+        const id = setInterval(() => setNow(new Date()), 30000);
+        return () => clearInterval(id);
+    }, []);
+    return now;
+}
+
 function useCountdown(targetDate: string | null) {
     const [remaining, setRemaining] = useState<{ days: number; hours: number } | null>(null);
 
@@ -65,6 +78,48 @@ function useCountdown(targetDate: string | null) {
     }, [targetDate]);
 
     return remaining;
+}
+
+// Glossy badge icon per course -- gradient fill + a highlight overlay and
+// drop shadow for a dimensional "3D" feel (the client's reference dashboards
+// use rendered 3D illustrations; these are hand-built SVG instead, so there's
+// no external image asset to source or keep in sync, and they stay in this
+// app's own brand colors rather than the references' purple/orange/pink).
+// Picked by keyword where the category/title names a specific service --
+// Navy gets an anchor, Air Force gets wings, ISSB gets a compass, everything
+// else cycles through shield/flag/book so cards still look varied.
+const COURSE_GLYPHS = {
+    compass: 'M12 21a9 9 0 100-18 9 9 0 000 18zM12 8l2 4-2 4-2-4z',
+    anchor: 'M12 3v4m0 0a2 2 0 100 4 2 2 0 000-4zm0 4v11m-7-6a7 7 0 0014 0M5 12H3m18 0h-2',
+    wings: 'M3 12l9-7 9 7M3 12l9 7 9-7',
+    shield: 'M12 3l7 3v6c0 4.5-3 8-7 9-4-1-7-4.5-7-9V6l7-3z',
+    flag: 'M5 3v18m0-16h10l-2 4 2 4H5',
+    book: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253',
+};
+const FALLBACK_GLYPH_CYCLE = ['shield', 'flag', 'book'] as const;
+const BADGE_GRADIENTS = [
+    'linear-gradient(135deg, var(--color-primary), var(--color-secondary))',
+    'linear-gradient(135deg, var(--oxblood-500), var(--oxblood-600))',
+];
+
+function courseGlyph(course: EnrollmentCard, index: number): keyof typeof COURSE_GLYPHS {
+    const text = `${course.category ?? ''} ${course.title}`.toLowerCase();
+    if (text.includes('navy')) return 'anchor';
+    if (text.includes('air force')) return 'wings';
+    if (text.includes('issb')) return 'compass';
+    return FALLBACK_GLYPH_CYCLE[index % FALLBACK_GLYPH_CYCLE.length];
+}
+
+function CourseIconBadge({ course, index }: { course: EnrollmentCard; index: number }) {
+    return (
+        <div
+            className="relative flex h-12 w-12 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl text-white shadow-md"
+            style={{ background: BADGE_GRADIENTS[index % BADGE_GRADIENTS.length] }}
+        >
+            <div aria-hidden className="absolute inset-0" style={{ background: 'linear-gradient(135deg, rgba(255,255,255,.3), transparent 60%)' }} />
+            <Icon d={COURSE_GLYPHS[courseGlyph(course, index)]} className="relative h-6 w-6" />
+        </div>
+    );
 }
 
 function CourseCountdown({ course }: { course: EnrollmentCard }) {
@@ -138,6 +193,7 @@ export default function Dashboard({ enrollments, performance, activityTrend, rev
     const { auth } = usePage<PageProps>().props;
     const firstName = auth.user?.name?.split(' ')[0] ?? 'there';
     const overallProgress = enrollments.length ? Math.round(enrollments.reduce((a, c) => a + c.progress, 0) / enrollments.length) : 0;
+    const now = useClock();
 
     return (
         <StudentLayout>
@@ -148,13 +204,19 @@ export default function Dashboard({ enrollments, performance, activityTrend, rev
                     <p className="text-sm font-semibold text-text-secondary">{greeting()}</p>
                     <h1 className="text-[28px] font-extrabold tracking-tight text-text">{firstName}</h1>
                 </div>
-                <Link
-                    href="/courses"
-                    className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4.5 py-2.5 text-sm font-bold text-on-primary transition-colors duration-fast hover:bg-primary-hover"
-                >
-                    Browse Courses
-                    <Icon d={ICONS.arrow} className="h-3.5 w-3.5" />
-                </Link>
+                <div className="flex items-center gap-4">
+                    <div className="text-right">
+                        <p className="text-sm font-semibold text-text">{now.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}</p>
+                        <p className="text-xs text-text-muted">{now.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}</p>
+                    </div>
+                    <Link
+                        href="/courses"
+                        className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4.5 py-2.5 text-sm font-bold text-on-primary transition-colors duration-fast hover:bg-primary-hover"
+                    >
+                        Browse Courses
+                        <Icon d={ICONS.arrow} className="h-3.5 w-3.5" />
+                    </Link>
+                </div>
             </div>
 
             <RevealOnScroll staggerMs={80} className="mt-6 grid gap-3.5 sm:grid-cols-2 lg:grid-cols-4">
@@ -195,7 +257,7 @@ export default function Dashboard({ enrollments, performance, activityTrend, rev
                         </span>
                     </div>
                     <div className="mt-3">
-                        <BarChart data={activityTrend} color="var(--color-primary)" height={150} />
+                        <BarChart data={activityTrend} color="var(--color-primary)" gradientTo="var(--color-primary-subtle)" showPeak height={150} />
                     </div>
                 </div>
 
@@ -224,42 +286,71 @@ export default function Dashboard({ enrollments, performance, activityTrend, rev
                             <Link href="/courses" className="font-semibold text-primary hover:underline">Browse courses &rarr;</Link>
                         </div>
                     ) : (
-                        /* Was p-5 with a 48px decorative book icon (same icon on every card,
-                           no information of its own) plus generous gaps between every row --
-                           with several courses enrolled that added up to a lot of scroll for
-                           not much content. Dropped the icon (same reasoning as removing the
-                           icon-in-circle stat badges elsewhere) and tightened the spacing. */
+                        /* The decorative icon was dropped earlier this session (one
+                           identical icon repeated on every card, no information of its
+                           own, just wasted space) and is now reintroduced as a varied
+                           per-course glyph via CourseIconBadge -- padding/gaps stay
+                           tight, which is what was actually wasteful before. */
                         <RevealOnScroll staggerMs={80} className="space-y-3">
-                            {enrollments.map((course) => (
+                            {enrollments.map((course, i) => (
                                 <Link
                                     key={course.id}
                                     href={`/portal/my-courses/${course.slug}`}
-                                    className="group block rounded-2xl border border-border bg-surface p-4 transition-colors duration-fast hover:border-primary"
+                                    className={`group block rounded-2xl p-4 transition-colors duration-fast ${
+                                        course.is_current ? 'bg-secondary text-white' : 'border border-border bg-surface hover:border-primary'
+                                    }`}
                                 >
-                                    <div className="flex flex-wrap items-center justify-between gap-2">
-                                        <div className="flex min-w-0 items-center gap-2">
-                                            {course.category && (
-                                                <span className="flex-shrink-0 rounded-full bg-primary-subtle px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide text-primary">
-                                                    {course.category}
+                                    <div className="flex items-center gap-3">
+                                        <CourseIconBadge course={course} index={i} />
+                                        <div className="min-w-0 flex-1">
+                                            <div className="flex flex-wrap items-center justify-between gap-2">
+                                                <div className="flex min-w-0 items-center gap-2">
+                                                    {course.category && (
+                                                        <span
+                                                            className={`flex-shrink-0 rounded-full px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide ${
+                                                                course.is_current ? 'bg-white/15 text-white' : 'bg-primary-subtle text-primary'
+                                                            }`}
+                                                        >
+                                                            {course.category}
+                                                        </span>
+                                                    )}
+                                                    <h3 className={`truncate font-bold ${course.is_current ? 'text-white' : 'text-text group-hover:text-primary'}`}>
+                                                        {course.title}
+                                                    </h3>
+                                                </div>
+                                                <span className={`flex-shrink-0 font-display text-xl ${course.is_current ? 'text-white' : 'text-primary'}`}>
+                                                    <AnimatedCounter value={`${course.progress}%`} />
                                                 </span>
+                                            </div>
+                                            {course.instructor_name && (
+                                                <p className={`truncate text-xs ${course.is_current ? 'text-teal-200' : 'text-text-muted'}`}>
+                                                    Prof. {course.instructor_name}
+                                                </p>
                                             )}
-                                            <h3 className="truncate font-bold text-text group-hover:text-primary">{course.title}</h3>
                                         </div>
-                                        <span className="flex-shrink-0 font-display text-xl text-primary">
-                                            <AnimatedCounter value={`${course.progress}%`} />
-                                        </span>
                                     </div>
-                                    <div className="mt-2.5 h-2 overflow-hidden rounded-full bg-surface-sunken">
-                                        <div className="h-full rounded-full bg-primary transition-all duration-slow" style={{ width: `${course.progress}%` }} />
+                                    <div className={`mt-3 h-2 overflow-hidden rounded-full ${course.is_current ? 'bg-white/15' : 'bg-surface-sunken'}`}>
+                                        <div
+                                            className={`h-full rounded-full transition-all duration-slow ${course.is_current ? 'bg-gold-400' : 'bg-primary'}`}
+                                            style={{ width: `${course.progress}%` }}
+                                        />
                                     </div>
-                                    <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+                                    <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2">
                                         {course.total_lessons > 0 ? (
-                                            <span className="text-xs text-text-muted">{course.completed_lessons}/{course.total_lessons} lessons</span>
+                                            <span className={`text-xs ${course.is_current ? 'text-teal-200' : 'text-text-muted'}`}>
+                                                Lessons left: {course.total_lessons - course.completed_lessons} &middot; Completed: {course.progress}%
+                                            </span>
                                         ) : <span />}
                                         {/* Visual affordance only, not a real link -- the whole card above is
                                             already the click target, and nesting an <a> inside one is invalid
                                             HTML. */}
-                                        <span className="rounded-full bg-primary-subtle px-3 py-1 text-xs font-bold uppercase tracking-wide text-primary transition-colors group-hover:bg-primary group-hover:text-on-primary">
+                                        <span
+                                            className={`rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide transition-colors ${
+                                                course.is_current
+                                                    ? 'bg-gold-400 text-secondary group-hover:bg-gold-300'
+                                                    : 'bg-primary-subtle text-primary group-hover:bg-primary group-hover:text-on-primary'
+                                            }`}
+                                        >
                                             Continue
                                         </span>
                                     </div>
