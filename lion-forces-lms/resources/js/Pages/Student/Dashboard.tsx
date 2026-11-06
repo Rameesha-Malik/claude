@@ -33,9 +33,7 @@ interface Props {
 }
 
 const ICONS = {
-    book: 'M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253',
     flag: 'M5 3v18m0-16h10l-2 4 2 4H5',
-    bell: 'M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0',
     arrow: 'M11.3 3.3a1 1 0 011.4 0l5 5a1 1 0 010 1.4l-5 5a1 1 0 11-1.4-1.4L14.6 10H4a1 1 0 010-2h10.6l-3.3-3.3a1 1 0 010-1.4z',
     megaphone: 'M3 11l18-5v12L3 13v-2zm0 0v6a2 2 0 002 2h1a1 1 0 001-1v-5',
     star: 'M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z',
@@ -226,54 +224,46 @@ export default function Dashboard({ enrollments, performance, activityTrend, rev
                             <Link href="/courses" className="font-semibold text-primary hover:underline">Browse courses &rarr;</Link>
                         </div>
                     ) : (
-                        <RevealOnScroll staggerMs={80} className="space-y-4">
+                        /* Was p-5 with a 48px decorative book icon (same icon on every card,
+                           no information of its own) plus generous gaps between every row --
+                           with several courses enrolled that added up to a lot of scroll for
+                           not much content. Dropped the icon (same reasoning as removing the
+                           icon-in-circle stat badges elsewhere) and tightened the spacing. */
+                        <RevealOnScroll staggerMs={80} className="space-y-3">
                             {enrollments.map((course) => (
                                 <Link
                                     key={course.id}
                                     href={`/portal/my-courses/${course.slug}`}
-                                    className="group block rounded-2xl border border-border bg-surface p-5 transition-all duration-normal hover:-translate-y-0.5 hover:border-primary hover:shadow-md"
+                                    className="group block rounded-2xl border border-border bg-surface p-4 transition-colors duration-fast hover:border-primary"
                                 >
-                                    <div className="flex items-center gap-4">
-                                        <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-primary-subtle text-primary transition-transform duration-normal group-hover:scale-110">
-                                            <Icon d={ICONS.book} />
-                                        </span>
-                                        <div className="min-w-0 flex-1">
-                                            <div className="flex flex-wrap items-center justify-between gap-2">
-                                                <div className="min-w-0">
-                                                    {course.category && (
-                                                        <span className="rounded-full bg-primary-subtle px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide text-primary">
-                                                            {course.category}
-                                                        </span>
-                                                    )}
-                                                    <h3 className="mt-2 truncate font-bold text-text group-hover:text-primary">{course.title}</h3>
-                                                </div>
-                                                <span className="font-display text-2xl text-primary">
-                                                    <AnimatedCounter value={`${course.progress}%`} />
+                                    <div className="flex flex-wrap items-center justify-between gap-2">
+                                        <div className="flex min-w-0 items-center gap-2">
+                                            {course.category && (
+                                                <span className="flex-shrink-0 rounded-full bg-primary-subtle px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide text-primary">
+                                                    {course.category}
                                                 </span>
-                                            </div>
-                                            {/* Was a from-accent to-primary gradient -- gold-to-teal stayed
-                                                vibrant since both are light/bright, but oxblood (dark) to teal
-                                                mixes into a muddy brown in the middle. Solid primary instead. */}
-                                            <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-surface-sunken">
-                                                <div
-                                                    className="h-full rounded-full bg-primary transition-all duration-slow"
-                                                    style={{ width: `${course.progress}%` }}
-                                                />
-                                            </div>
-                                            <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2">
-                                                {course.total_lessons > 0 ? (
-                                                    <span className="text-xs text-text-muted">{course.completed_lessons}/{course.total_lessons} lessons</span>
-                                                ) : <span />}
-                                                {/* Visual affordance only, not a real link -- the whole card above is
-                                                    already the click target, and nesting an <a> inside one is invalid
-                                                    HTML. */}
-                                                <span className="rounded-full bg-primary-subtle px-3 py-1 text-xs font-bold uppercase tracking-wide text-primary transition-colors group-hover:bg-primary group-hover:text-on-primary">
-                                                    Continue
-                                                </span>
-                                            </div>
-                                            <CourseCountdown course={course} />
+                                            )}
+                                            <h3 className="truncate font-bold text-text group-hover:text-primary">{course.title}</h3>
                                         </div>
+                                        <span className="flex-shrink-0 font-display text-xl text-primary">
+                                            <AnimatedCounter value={`${course.progress}%`} />
+                                        </span>
                                     </div>
+                                    <div className="mt-2.5 h-2 overflow-hidden rounded-full bg-surface-sunken">
+                                        <div className="h-full rounded-full bg-primary transition-all duration-slow" style={{ width: `${course.progress}%` }} />
+                                    </div>
+                                    <div className="mt-2 flex flex-wrap items-center justify-between gap-2">
+                                        {course.total_lessons > 0 ? (
+                                            <span className="text-xs text-text-muted">{course.completed_lessons}/{course.total_lessons} lessons</span>
+                                        ) : <span />}
+                                        {/* Visual affordance only, not a real link -- the whole card above is
+                                            already the click target, and nesting an <a> inside one is invalid
+                                            HTML. */}
+                                        <span className="rounded-full bg-primary-subtle px-3 py-1 text-xs font-bold uppercase tracking-wide text-primary transition-colors group-hover:bg-primary group-hover:text-on-primary">
+                                            Continue
+                                        </span>
+                                    </div>
+                                    <CourseCountdown course={course} />
                                 </Link>
                             ))}
                         </RevealOnScroll>
