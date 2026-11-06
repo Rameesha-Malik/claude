@@ -10,7 +10,8 @@ import { PageProps } from '@/types';
 
 interface EnrollmentCard {
     id: number; title: string; slug: string; category: string | null;
-    progress: number; target_exam_name: string | null; target_exam_date: string | null;
+    progress: number; completed_lessons: number; total_lessons: number;
+    target_exam_name: string | null; target_exam_date: string | null;
 }
 interface Broadcast { title: string; body: string; sent_at: string | null }
 interface Performance {
@@ -18,11 +19,15 @@ interface Performance {
     favourites: number; sessions: number; last_test_percentage: string | null;
 }
 interface TrendPoint { label: string; value: number }
+interface RevisionItem { id: number; question_text: string; times_wrong: number }
+interface NextExam { name: string | null; date: string }
 interface Props {
     enrollments: EnrollmentCard[];
     performance: Performance;
     activityTrend: TrendPoint[];
     revisionCount: number;
+    revisionItems: RevisionItem[];
+    nextExam: NextExam | null;
     unreadNotifications: { id: string; data: { message?: string }; created_at: string }[];
     recentBroadcasts: Broadcast[];
 }
@@ -75,12 +80,63 @@ function CourseCountdown({ course }: { course: EnrollmentCard }) {
     );
 }
 
+/** Real "what needs attention" items -- the actual flagged questions and
+ * the nearest upcoming exam, not decorative stat tiles. Inspired by the
+ * todo-list / exam-schedule idea from the reference dashboards the client
+ * sent, but built from data this app already has rather than inventing a
+ * live-class or recommendation feature it doesn't have. */
+function NeedsAttention({ revisionItems, nextExam }: { revisionItems: RevisionItem[]; nextExam: NextExam | null }) {
+    const remaining = useCountdown(nextExam?.date ?? null);
+
+    return (
+        <div className="mt-6 grid gap-6 lg:grid-cols-3">
+            <div className="rounded-2xl border border-border bg-surface p-6 lg:col-span-2">
+                <div className="mb-1 flex items-center justify-between">
+                    <h2 className="font-bold text-text">Needs Revision</h2>
+                    <Link href="/portal/revision-list" className="text-xs font-bold uppercase tracking-wide text-primary hover:underline">
+                        View All
+                    </Link>
+                </div>
+                {revisionItems.length === 0 ? (
+                    <p className="mt-3 text-sm text-text-secondary">Nothing flagged right now -- you're all caught up.</p>
+                ) : (
+                    <div className="mt-3 space-y-2.5">
+                        {revisionItems.map((item) => (
+                            <div key={item.id} className="flex items-start justify-between gap-3 rounded-xl bg-surface-sunken px-3.5 py-2.5 text-sm">
+                                <span className="min-w-0 flex-1 truncate text-text">{item.question_text}</span>
+                                <span className="flex-shrink-0 rounded-full bg-warning-bg px-2.5 py-0.5 text-xs font-bold text-warning">
+                                    Missed {item.times_wrong}&times;
+                                </span>
+                            </div>
+                        ))}
+                    </div>
+                )}
+            </div>
+
+            <div className="rounded-2xl bg-secondary p-6 text-white">
+                <h2 className="font-bold">Next Exam</h2>
+                {nextExam && remaining ? (
+                    <>
+                        <p className="mt-1 text-sm text-teal-200">{nextExam.name ?? 'Target exam'}</p>
+                        <div className="mt-3 font-display text-3xl">
+                            <AnimatedCounter value={String(remaining.days)} /> <span className="text-lg">days</span>
+                        </div>
+                        <p className="mt-1 text-xs text-teal-200">{remaining.hours}h left in the day</p>
+                    </>
+                ) : (
+                    <p className="mt-3 text-sm text-teal-200">No exam date set for your courses yet.</p>
+                )}
+            </div>
+        </div>
+    );
+}
+
 /** Visual system matches Admin/Dashboard.tsx (see that file's comment for
  * the full reasoning): no decorative gradient banner, one filled card to
  * carry the single most actionable number, everything else flat (border
  * only, no shadow) so that one card reads as emphasis instead of being
  * lost in a row of identical tiles. */
-export default function Dashboard({ enrollments, performance, activityTrend, revisionCount, unreadNotifications, recentBroadcasts }: Props) {
+export default function Dashboard({ enrollments, performance, activityTrend, revisionCount, revisionItems, nextExam, unreadNotifications, recentBroadcasts }: Props) {
     const { auth } = usePage<PageProps>().props;
     const firstName = auth.user?.name?.split(' ')[0] ?? 'there';
     const overallProgress = enrollments.length ? Math.round(enrollments.reduce((a, c) => a + c.progress, 0) / enrollments.length) : 0;
@@ -129,6 +185,8 @@ export default function Dashboard({ enrollments, performance, activityTrend, rev
                     tone={unreadNotifications.length > 0 ? 'warning' : 'primary'}
                 />
             </RevealOnScroll>
+
+            <NeedsAttention revisionItems={revisionItems} nextExam={nextExam} />
 
             <div className="mt-6 grid gap-6 lg:grid-cols-3">
                 <div className="rounded-2xl border border-border bg-surface p-6 lg:col-span-2">
@@ -193,11 +251,25 @@ export default function Dashboard({ enrollments, performance, activityTrend, rev
                                                     <AnimatedCounter value={`${course.progress}%`} />
                                                 </span>
                                             </div>
+                                            {/* Was a from-accent to-primary gradient -- gold-to-teal stayed
+                                                vibrant since both are light/bright, but oxblood (dark) to teal
+                                                mixes into a muddy brown in the middle. Solid primary instead. */}
                                             <div className="mt-3 h-2.5 overflow-hidden rounded-full bg-surface-sunken">
                                                 <div
-                                                    className="h-full rounded-full bg-gradient-to-r from-accent to-primary transition-all duration-slow"
+                                                    className="h-full rounded-full bg-primary transition-all duration-slow"
                                                     style={{ width: `${course.progress}%` }}
                                                 />
+                                            </div>
+                                            <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2">
+                                                {course.total_lessons > 0 ? (
+                                                    <span className="text-xs text-text-muted">{course.completed_lessons}/{course.total_lessons} lessons</span>
+                                                ) : <span />}
+                                                {/* Visual affordance only, not a real link -- the whole card above is
+                                                    already the click target, and nesting an <a> inside one is invalid
+                                                    HTML. */}
+                                                <span className="rounded-full bg-primary-subtle px-3 py-1 text-xs font-bold uppercase tracking-wide text-primary transition-colors group-hover:bg-primary group-hover:text-on-primary">
+                                                    Continue
+                                                </span>
                                             </div>
                                             <CourseCountdown course={course} />
                                         </div>

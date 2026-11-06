@@ -77,16 +77,38 @@ class DashboardController extends Controller
                     'slug' => $course->slug,
                     'category' => $course->category?->name,
                     'progress' => $totalLessons > 0 ? round(($completedLessons / $totalLessons) * 100) : 0,
+                    'completed_lessons' => $completedLessons,
+                    'total_lessons' => $totalLessons,
                     'target_exam_name' => $user->target_exam_name ?? $course->target_exam_name,
                     'target_exam_date' => $user->target_exam_date ?? $course->target_exam_date,
                 ];
             });
+
+        // Real "what needs attention" items instead of decorative stat tiles --
+        // the actual questions flagged for revision (worst-missed first), not
+        // just the count that was already shown elsewhere on this page.
+        $revisionItems = RevisionListItem::where('user_id', $user->id)
+            ->where('resolved', false)
+            ->with('question:id,question_text')
+            ->orderByDesc('times_wrong')
+            ->limit(4)
+            ->get()
+            ->filter(fn ($item) => $item->question !== null)
+            ->map(fn ($item) => ['id' => $item->id, 'question_text' => $item->question->question_text, 'times_wrong' => $item->times_wrong])
+            ->values();
+
+        $nextExam = $enrollments
+            ->filter(fn ($e) => $e['target_exam_date'] !== null && now()->lt($e['target_exam_date']))
+            ->sortBy('target_exam_date')
+            ->first();
 
         return Inertia::render('Student/Dashboard', [
             'enrollments' => $enrollments,
             'performance' => $performance,
             'activityTrend' => $activityTrend,
             'revisionCount' => RevisionListItem::where('user_id', $user->id)->where('resolved', false)->count(),
+            'revisionItems' => $revisionItems,
+            'nextExam' => $nextExam ? ['name' => $nextExam['target_exam_name'], 'date' => $nextExam['target_exam_date']] : null,
             'unreadNotifications' => $user->unreadNotifications()->limit(5)->get(['id', 'data', 'created_at']),
             'recentBroadcasts' => NotificationBroadcast::latest('sent_at')->limit(3)->get(['title', 'body', 'sent_at']),
         ]);

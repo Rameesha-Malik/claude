@@ -487,9 +487,16 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
                                     <LessonPlayer lesson={activeLesson} />
                                 </div>
                                 <div className="p-6">
-                                    <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-primary">
-                                        <LessonTypeIcon type={activeLesson.type} />
-                                        {LESSON_TYPE_LABELS[activeLesson.type] ?? 'Lesson'}
+                                    <div className="flex flex-wrap items-center justify-between gap-2">
+                                        <div className="flex items-center gap-1.5 text-xs font-bold uppercase tracking-wide text-primary">
+                                            <LessonTypeIcon type={activeLesson.type} />
+                                            {LESSON_TYPE_LABELS[activeLesson.type] ?? 'Lesson'}
+                                        </div>
+                                        {/* Orientation within the course -- real position, not decoration,
+                                            same information BrightPath's reference shows as a breadcrumb. */}
+                                        <span className="text-xs font-semibold text-text-muted">
+                                            Lesson {course.lessons.findIndex((l) => l.id === activeLesson.id) + 1} of {totalLessons}
+                                        </span>
                                     </div>
                                     <h3 className="mt-1 font-display text-xl text-text">{activeLesson.title}</h3>
                                     {activeLesson.description && <p className="mt-2 text-sm leading-relaxed text-text-secondary">{activeLesson.description}</p>}

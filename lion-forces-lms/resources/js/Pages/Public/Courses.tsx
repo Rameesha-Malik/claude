@@ -162,11 +162,21 @@ export default function Courses({ courses, categories, tags, filters }: Props) {
                         <div key={course.id} className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-sm transition-all duration-normal hover:-translate-y-1.5 hover:border-primary hover:shadow-2xl">
                             <div className="relative h-40 overflow-hidden bg-gradient-to-br from-teal-600 via-teal-800 to-teal-950">
                                 {course.thumbnail_path ? (
-                                    <img
-                                        src={`/storage/${course.thumbnail_path}`}
-                                        alt=""
-                                        className="h-full w-full object-cover transition-transform duration-slow group-hover:scale-110"
-                                    />
+                                    <>
+                                        <img
+                                            src={`/storage/${course.thumbnail_path}`}
+                                            alt=""
+                                            className="h-full w-full object-cover transition-transform duration-slow group-hover:scale-110"
+                                        />
+                                        {/* A thumbnail photo otherwise hides the category entirely -- the
+                                            no-photo fallback below already shows it as a watermark, this is
+                                            the equivalent for the common case where a course does have one. */}
+                                        {course.category && (
+                                            <span className="absolute left-3 top-3 rounded-full bg-surface/90 px-2.5 py-1 text-[0.65rem] font-bold uppercase tracking-wide text-secondary shadow-sm backdrop-blur-sm">
+                                                {course.category.name}
+                                            </span>
+                                        )}
+                                    </>
                                 ) : (
                                     <>
                                         <div
