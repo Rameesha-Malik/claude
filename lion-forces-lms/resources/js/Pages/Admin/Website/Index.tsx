@@ -70,8 +70,13 @@ export default function WebsiteIndex(props: Props) {
     );
 }
 
-function Panel({ children }: { children: React.ReactNode }) {
-    return <div className="max-w-3xl rounded-2xl border border-border bg-surface p-6">{children}</div>;
+// Was capped at max-w-3xl regardless of the page's actual width, which left
+// a large dead gap on anything wider than a laptop screen -- every panel on
+// this page used that same fixed cap. Panels now fill whatever column the
+// caller gives them (a 2-up grid for short panels, full width for long
+// forms and list-management panels), so the page uses the space it has.
+function Panel({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+    return <div className={`rounded-2xl border border-border bg-surface p-6 ${className}`}>{children}</div>;
 }
 
 // A failed add/edit submission (validation error, network issue) must never
@@ -164,10 +169,36 @@ function SettingsPanel({ settings, logoPath, announcement }: { settings: Setting
     }
 
     return (
-        <div className="space-y-6">
+        <div className="grid gap-6 lg:grid-cols-2">
             <LogoPanel logoPath={logoPath} />
 
             <Panel>
+                <h2 className="mb-1 font-bold text-text">Announcement Bar</h2>
+                <p className="mb-4 text-sm text-text-secondary">Shown at the top of every public page when active.</p>
+                <form onSubmit={submitAnnouncement} className="space-y-4">
+                    <div>
+                        <label className={labelClass}>Message</label>
+                        <input className={inputClass} value={announcementForm.data.message} onChange={(e) => announcementForm.setData('message', e.target.value)} />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className={labelClass}>Link URL (optional)</label>
+                            <input className={inputClass} value={announcementForm.data.link_url ?? ''} onChange={(e) => announcementForm.setData('link_url', e.target.value)} />
+                        </div>
+                        <div>
+                            <label className={labelClass}>Expires At (optional)</label>
+                            <input type="date" className={inputClass} value={announcementForm.data.expires_at ?? ''} onChange={(e) => announcementForm.setData('expires_at', e.target.value)} />
+                        </div>
+                    </div>
+                    <label className="flex items-center gap-2 text-sm text-text">
+                        <input type="checkbox" checked={announcementForm.data.is_active} onChange={(e) => announcementForm.setData('is_active', e.target.checked)} />
+                        Show announcement bar
+                    </label>
+                    <button type="submit" disabled={announcementForm.processing} className={btnClass}>Save Announcement</button>
+                </form>
+            </Panel>
+
+            <Panel className="lg:col-span-2">
                 <h2 className="mb-4 font-bold text-text">Site Settings</h2>
                 <form onSubmit={submitSettings} className="space-y-4">
                     <div>
@@ -239,32 +270,6 @@ function SettingsPanel({ settings, logoPath, announcement }: { settings: Setting
                     <button type="submit" disabled={settingsForm.processing} className={btnClass}>Save Settings</button>
                 </form>
             </Panel>
-
-            <Panel>
-                <h2 className="mb-1 font-bold text-text">Announcement Bar</h2>
-                <p className="mb-4 text-sm text-text-secondary">Shown at the top of every public page when active.</p>
-                <form onSubmit={submitAnnouncement} className="space-y-4">
-                    <div>
-                        <label className={labelClass}>Message</label>
-                        <input className={inputClass} value={announcementForm.data.message} onChange={(e) => announcementForm.setData('message', e.target.value)} />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className={labelClass}>Link URL (optional)</label>
-                            <input className={inputClass} value={announcementForm.data.link_url ?? ''} onChange={(e) => announcementForm.setData('link_url', e.target.value)} />
-                        </div>
-                        <div>
-                            <label className={labelClass}>Expires At (optional)</label>
-                            <input type="date" className={inputClass} value={announcementForm.data.expires_at ?? ''} onChange={(e) => announcementForm.setData('expires_at', e.target.value)} />
-                        </div>
-                    </div>
-                    <label className="flex items-center gap-2 text-sm text-text">
-                        <input type="checkbox" checked={announcementForm.data.is_active} onChange={(e) => announcementForm.setData('is_active', e.target.checked)} />
-                        Show announcement bar
-                    </label>
-                    <button type="submit" disabled={announcementForm.processing} className={btnClass}>Save Announcement</button>
-                </form>
-            </Panel>
         </div>
     );
 }
@@ -274,7 +279,7 @@ function HomePagePanel({ hero, cta }: { hero: HomeSection; cta: HomeSection }) {
     const ctaForm = useForm({ ...cta.content });
 
     return (
-        <div className="space-y-6">
+        <div className="grid gap-6 lg:grid-cols-2">
             <Panel>
                 <h2 className="mb-4 font-bold text-text">Hero Section</h2>
                 <form
@@ -347,7 +352,7 @@ function HowToBuyPanel({ hero, paymentMethods }: { hero: HomeSection; paymentMet
     const addForm = useForm({ icon: '', name: '', description: '' });
 
     return (
-        <div className="space-y-6">
+        <div className="grid gap-6 lg:grid-cols-2">
             <Panel>
                 <h2 className="mb-4 font-bold text-text">How to Buy: Hero</h2>
                 <form

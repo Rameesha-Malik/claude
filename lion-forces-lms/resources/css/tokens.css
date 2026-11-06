@@ -29,6 +29,9 @@
   --teal-200: #a8e5e0; /* (derived) borders on mint surfaces                */
   --teal-100: #d2f5f2; /* (derived) badge fill                              */
   --teal-50:  #e4fdfb; /* CLIENT — mint tint: section bg, badge             */
+  --teal-25:  #ecf9f8; /* (derived) canvas tint, between teal-50 and        */
+                        /* neutral-50 — distinct from teal-50 so badges     */
+                        /* that use teal-50 as a fill still show up on it   */
 
   /* ---------------------------------------------------------------------
      1. PRIMITIVE — neutral ramp
@@ -135,7 +138,11 @@
      --------------------------------------------------------------------- */
 
   /* surfaces */
-  --color-canvas:          var(--neutral-50);
+  /* Was plain neutral-50 (flat gray) -- every page read as colorless except
+     for buttons. A faint teal tint instead means the brand color is present
+     everywhere, not just in a few accents, without introducing a new hue or
+     touching any component. */
+  --color-canvas:          var(--teal-25);
   --color-surface:         var(--neutral-0);
   --color-surface-raised:  var(--neutral-0);
   --color-surface-sunken:  var(--neutral-100);
