@@ -18,7 +18,7 @@ class NewsSeeder extends Seeder
         $pma = CourseCategory::where('slug', 'pma')->first();
         $issb = CourseCategory::where('slug', 'issb')->first();
 
-        NewsAnnouncement::updateOrCreate(['title' => 'Lady Cadet Course — Applications Open'], [
+        NewsAnnouncement::updateOrCreate(['title' => 'Lady Cadet Course: Applications Open'], [
             'description' => 'LCC applications are now open. Apply before the deadline to secure your seat.',
             'organization' => 'LCC',
             'category_id' => $lcc?->id,
@@ -27,7 +27,7 @@ class NewsSeeder extends Seeder
             'is_active' => true,
         ]);
 
-        NewsAnnouncement::updateOrCreate(['title' => 'PMA Long Course — Registration Window'], [
+        NewsAnnouncement::updateOrCreate(['title' => 'PMA Long Course: Registration Window'], [
             'description' => 'Pakistan Military Academy Long Course registration is open for eligible candidates.',
             'organization' => 'PMA',
             'category_id' => $pma?->id,
@@ -37,7 +37,7 @@ class NewsSeeder extends Seeder
         ]);
 
         NewsAnnouncement::updateOrCreate(['title' => 'ISSB Test Batch Announced'], [
-            'description' => 'A new ISSB preparation batch starts soon — limited seats available.',
+            'description' => 'A new ISSB preparation batch starts soon. Limited seats available.',
             'organization' => 'ISSB',
             'category_id' => $issb?->id,
             'deadline_date' => now()->addDays(10),

@@ -45,7 +45,7 @@ export default function Contact({ faqs }: { faqs: FaqItem[] }) {
         <PublicLayout>
             <Head title="Contact Us" />
 
-            <section className="relative overflow-hidden bg-gradient-to-br from-secondary to-teal-950 py-20 text-center">
+            <section className="relative overflow-hidden bg-secondary py-20 text-center">
                 <div
                     aria-hidden
                     className="absolute inset-0 opacity-[0.15]"
@@ -54,7 +54,7 @@ export default function Contact({ faqs }: { faqs: FaqItem[] }) {
                 <GradientMesh className="opacity-70" />
 
                 <div className="relative mx-auto max-w-container px-4 sm:px-6 lg:px-8">
-                    <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-wide text-teal-200 backdrop-blur-sm">
+                    <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-wide text-teal-200">
                         We're here to help
                     </span>
                     <h1 className="mt-5 font-display text-5xl uppercase tracking-wide text-white">Get in Touch</h1>
@@ -64,7 +64,7 @@ export default function Contact({ faqs }: { faqs: FaqItem[] }) {
 
                     <div className="relative mx-auto mt-10 flex max-w-md flex-wrap items-center justify-center gap-4">
                         {site.supportEmail && (
-                            <div className="flex items-center gap-2.5 rounded-full border border-white/15 bg-white/[0.06] px-4 py-2.5 text-left backdrop-blur-sm">
+                            <div className="flex items-center gap-2.5 rounded-full border border-white/15 bg-white/10 px-4 py-2.5 text-left">
                                 <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary text-on-primary">
                                     <MailIcon className="h-4 w-4" />
                                 </span>
@@ -74,9 +74,9 @@ export default function Contact({ faqs }: { faqs: FaqItem[] }) {
                                 </div>
                             </div>
                         )}
-                        <div className="flex items-center gap-2.5 rounded-full border border-white/15 bg-white/[0.06] px-4 py-2.5 text-left backdrop-blur-sm">
+                        <div className="flex items-center gap-2.5 rounded-full border border-white/15 bg-white/10 px-4 py-2.5 text-left">
                             {/* Explicit gold, not bg-accent/text-accent-fg -- this icon sits in a
-                                glass-on-dark card, and accent now means oxblood (light-surface),
+                                card on the dark hero, and accent now means oxblood (light-surface),
                                 which would barely show here. */}
                             <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gold-400 text-secondary">
                                 <ClockIcon className="h-4 w-4" />
@@ -122,7 +122,7 @@ export default function Contact({ faqs }: { faqs: FaqItem[] }) {
                             )}
                             {site.officeLocation && (
                                 <div className="flex items-center gap-3 rounded-xl border border-border bg-surface p-4">
-                                    <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-primary-subtle text-primary">
+                                    <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-secondary/10 text-secondary">
                                         <PinIcon />
                                     </span>
                                     <div>
@@ -133,7 +133,7 @@ export default function Contact({ faqs }: { faqs: FaqItem[] }) {
                             )}
                             {site.officeHours && (
                                 <div className="flex items-center gap-3 rounded-xl border border-border bg-surface p-4">
-                                    <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-primary-subtle text-primary">
+                                    <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-surface-sunken text-text-secondary">
                                         <ClockIcon />
                                     </span>
                                     <div>

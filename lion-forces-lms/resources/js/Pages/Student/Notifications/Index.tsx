@@ -2,14 +2,6 @@ import { Head, Link, router } from '@inertiajs/react';
 import RevealOnScroll from '@/Components/RevealOnScroll';
 import StudentLayout from '@/Layouts/StudentLayout';
 
-function BellIcon() {
-    return (
-        <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
-        </svg>
-    );
-}
-
 interface NotificationItem {
     id: string;
     data: { title: string; body: string; broadcast_id: number };
@@ -47,9 +39,7 @@ export default function NotificationsIndex({ notifications }: Props) {
                         className={`group rounded-3xl border p-5 transition-all duration-normal hover:shadow-md ${n.read_at ? 'border-border bg-surface' : 'border-primary bg-primary-subtle'}`}
                     >
                         <div className="flex items-start gap-3.5">
-                            <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-2xl bg-primary text-on-primary transition-transform duration-normal group-hover:scale-110">
-                                <BellIcon />
-                            </span>
+                            {!n.read_at && <span className="mt-1.5 h-2 w-2 flex-shrink-0 rounded-full bg-primary" aria-hidden />}
                             <div className="min-w-0 flex-1">
                                 <div className="flex items-start justify-between gap-3">
                                     <div className="min-w-0">

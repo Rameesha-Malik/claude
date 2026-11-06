@@ -82,7 +82,7 @@ export default function CourseDetail({ course }: { course: Course }) {
         <PublicLayout>
             <Head title={course.title} />
 
-            <section className="bg-gradient-to-br from-secondary to-teal-950 py-14 text-text-inverse">
+            <section className="bg-secondary py-14 text-text-inverse">
                 <div className="mx-auto max-w-container px-4 sm:px-6 lg:px-8">
                     <nav className="flex items-center gap-1.5 text-sm text-teal-300">
                         <Link href="/" className="hover:text-white">Home</Link>

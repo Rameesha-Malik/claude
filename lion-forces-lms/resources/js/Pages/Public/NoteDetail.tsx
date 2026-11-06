@@ -36,7 +36,7 @@ export default function NoteDetail({ note, faqs, testimonials }: Props) {
         <PublicLayout>
             <Head title={note.title} />
 
-            <section className="bg-gradient-to-br from-secondary to-teal-950 py-16 text-white">
+            <section className="bg-secondary py-16 text-white">
                 <div className="mx-auto max-w-container px-4 sm:px-6 lg:px-8">
                     <Link href="/notes" className="text-sm text-teal-200 hover:underline">← All Notes</Link>
                     <div className="mt-3 flex flex-wrap items-center gap-2">

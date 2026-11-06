@@ -23,7 +23,7 @@ export default function MockExamsAllIndex({ exams, courses }: Props) {
             <Head title="Mock Exams" />
 
             <p className="mb-4 text-sm text-text-secondary">
-                Every mock exam across all courses. Pick a course below to create a new one -- its sections are still built on that course&apos;s own page.
+                Every mock exam across all courses. Pick a course below to create a new one. Its sections are still built on that course&apos;s own page.
             </p>
 
             <form onSubmit={addNew} className="mb-4 flex flex-wrap items-center gap-2">

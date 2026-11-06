@@ -1,6 +1,8 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
 import AdminLayout from '@/Layouts/AdminLayout';
+import AdminPageHeader from '@/Components/AdminPageHeader';
+import EmptyState from '@/Components/EmptyState';
 
 interface Course {
     id: number; title: string; slug: string; status: string; base_price: string | null;
@@ -63,38 +65,27 @@ export default function CoursesIndex({ courses, filters, stats }: Props) {
         <AdminLayout header="Courses">
             <Head title="Courses" />
 
-            <div className="mb-6 flex flex-wrap items-start justify-between gap-4 rounded-3xl border border-border bg-gradient-to-br from-primary-subtle to-surface p-6 sm:p-8">
-                <div className="flex gap-4">
-                    <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-primary text-on-primary">
-                        <svg className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.746 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                        </svg>
-                    </span>
-                    <div>
-                        <span className="inline-flex items-center gap-1.5 rounded-full bg-surface px-3 py-1 text-xs font-bold uppercase tracking-wide text-primary shadow-sm">
-                            Course Management
-                        </span>
-                        <h1 className="mt-3 font-display text-3xl text-text">Courses</h1>
-                        <p className="mt-2 max-w-xl text-sm text-text-secondary">
-                            Manage course records, browse topics, and jump into quiz management from one place.
-                        </p>
-                    </div>
-                </div>
-                <div className="flex flex-shrink-0 gap-3">
-                    <div className="rounded-2xl border border-border bg-surface px-5 py-3 text-center shadow-sm">
-                        <p className="text-xs font-bold uppercase tracking-wide text-text-muted">Total</p>
-                        <p className="font-display text-2xl text-text">{stats.total}</p>
-                    </div>
-                    <div className="rounded-2xl border border-success bg-success-bg px-5 py-3 text-center shadow-sm">
-                        <p className="text-xs font-bold uppercase tracking-wide text-success">Active</p>
-                        <p className="font-display text-2xl text-text">{stats.active}</p>
-                    </div>
-                    <div className="rounded-2xl border border-border bg-surface-sunken px-5 py-3 text-center shadow-sm">
-                        <p className="text-xs font-bold uppercase tracking-wide text-text-muted">Enrolled</p>
-                        <p className="font-display text-2xl text-text">{stats.enrolled}</p>
-                    </div>
-                </div>
-            </div>
+            <AdminPageHeader
+                eyebrow="Course Management"
+                title="Courses"
+                description="Browse topics, manage packages, and jump into quiz management for any course."
+                right={
+                    <>
+                        <div className="rounded-2xl border border-border bg-surface px-5 py-3 text-center shadow-sm">
+                            <p className="text-xs font-bold uppercase tracking-wide text-text-muted">Total</p>
+                            <p className="font-display text-2xl text-text">{stats.total}</p>
+                        </div>
+                        <div className="rounded-2xl border border-success bg-success-bg px-5 py-3 text-center shadow-sm">
+                            <p className="text-xs font-bold uppercase tracking-wide text-success">Active</p>
+                            <p className="font-display text-2xl text-text">{stats.active}</p>
+                        </div>
+                        <div className="rounded-2xl border border-border bg-surface-sunken px-5 py-3 text-center shadow-sm">
+                            <p className="text-xs font-bold uppercase tracking-wide text-text-muted">Enrolled</p>
+                            <p className="font-display text-2xl text-text">{stats.enrolled}</p>
+                        </div>
+                    </>
+                }
+            />
 
             <div className="mb-4 rounded-3xl border border-border bg-surface p-5">
                 <form onSubmit={submitSearch} className="flex flex-wrap gap-3">
@@ -130,12 +121,12 @@ export default function CoursesIndex({ courses, filters, stats }: Props) {
             <div className="mb-3 text-sm text-text-secondary">{courses.total} course{courses.total === 1 ? '' : 's'}</div>
 
             {courses.data.length === 0 ? (
-                <div className="rounded-3xl border border-dashed border-border bg-surface p-10 text-center text-text-secondary">No courses found.</div>
+                <EmptyState>No courses found.</EmptyState>
             ) : (
                 <div className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                     {courses.data.map((c) => (
                         <div key={c.id} className="overflow-hidden rounded-3xl border border-border bg-surface shadow-sm">
-                            <div className="relative bg-gradient-to-br from-teal-600 via-teal-800 to-teal-950 p-5 text-white">
+                            <div className="relative bg-secondary p-5 text-white">
                                 {c.status === 'published' ? (
                                     <span className="absolute right-4 top-4 flex items-center gap-1.5 text-xs font-medium text-teal-100">
                                         <span className="h-1.5 w-1.5 rounded-full bg-success" />

@@ -36,7 +36,7 @@ export default function UpdateBiodataForm({ className = '' }: { className?: stri
             <header>
                 <h2 className="text-lg font-bold text-text">Additional Details</h2>
                 <p className="mt-1 text-sm text-text-secondary">
-                    Optional -- fill in whatever's relevant to you. None of this is required.
+                    Optional. Fill in whatever's relevant to you. None of this is required.
                 </p>
             </header>
 

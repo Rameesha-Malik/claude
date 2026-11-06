@@ -28,7 +28,7 @@ class SiteContentSeeder extends Seeder
     {
         // --- Global settings ---
         Setting::set('site_name', 'Lion Forces Academy');
-        Setting::set('tagline', "Pakistan's largest online forces preparation platform — preparing candidates for Pak Army, Navy and PAF since 2021."); // REAL
+        Setting::set('tagline', "Pakistan's largest online forces preparation platform. Preparing candidates for Pak Army, Navy and PAF since 2021."); // REAL
         Setting::set('support_email', 'support.lionforcesacademy@gmail.com'); // REAL
         Setting::set('office_location', 'Pakistan'); // REAL
         Setting::set('office_hours', '9:00 AM – 12:00 AM'); // REAL
@@ -59,7 +59,7 @@ class SiteContentSeeder extends Seeder
 
         // --- Announcement bar (off by default — admin activates per SRS §2.2) ---
         AnnouncementBar::updateOrCreate(['id' => 1], [
-            'message' => 'Lady Cadet Course open — apply before the deadline.', // PLACEHOLDER
+            'message' => 'Lady Cadet Course open. Apply before the deadline.', // PLACEHOLDER
             'link_url' => '/courses',
             'is_active' => false,
             'expires_at' => null,
@@ -90,7 +90,7 @@ class SiteContentSeeder extends Seeder
             'is_enabled' => true,
             'content' => [
                 'headline' => 'Train Like You Mean to Get Selected', // PLACEHOLDER
-                'subheading' => "Pakistan's largest online forces preparation platform — preparing candidates for Pak Army, Navy and PAF since 2021.", // REAL tagline
+                'subheading' => "Pakistan's largest online forces preparation platform. Preparing candidates for Pak Army, Navy and PAF since 2021.", // REAL tagline
                 'cta_primary_text' => 'Explore Courses',
                 'cta_primary_link' => '/courses',
                 'cta_secondary_text' => 'Try Free Demo Quiz',
@@ -109,7 +109,7 @@ class SiteContentSeeder extends Seeder
                     ['icon' => 'infinity', 'title' => 'Unlimited Practice Tests', 'description' => 'Attempt as many tests as you need with no restrictions.'],
                     ['icon' => 'chart', 'title' => 'Performance Graph', 'description' => 'Track your progress visually and identify weak areas fast.'],
                     ['icon' => 'play', 'title' => 'Video Lectures', 'description' => 'Concept-focused video lessons for every topic and subject.'],
-                    ['icon' => 'gift', 'title' => 'Free Demos', 'description' => 'Try before you buy — explore courses with no commitment.'],
+                    ['icon' => 'gift', 'title' => 'Free Demos', 'description' => 'Try before you buy. Explore courses with no commitment.'],
                     ['icon' => 'headset', 'title' => '24/7 Support', 'description' => 'Get help from our team at any time, any day of the week.'],
                     ['icon' => 'tag', 'title' => 'Reasonable Fee', 'description' => 'Premium preparation at a price every candidate can afford.'],
                     ['icon' => 'shield-check', 'title' => 'Test Guarantee', 'description' => "Retake key assessments risk-free until you're confident and ready."],
@@ -122,7 +122,7 @@ class SiteContentSeeder extends Seeder
             'order' => 6,
             'is_enabled' => true,
             'content' => [
-                'paragraph' => 'Register, prepare, and track your progress with structured courses, unlimited practice, and expert-designed mock exams — all in one place.',
+                'paragraph' => 'Register, prepare, and track your progress with structured courses, unlimited practice, and expert-designed mock exams, all in one place.',
                 'steps' => [ // REAL — from the old site's "Why use this platform"
                     ['title' => 'Register', 'description' => 'Structured curriculum so you learn in the right order.'],
                     ['title' => 'Learn & Test', 'description' => 'Quizzes and assessments to reinforce knowledge, with progress saved as you go.'],
@@ -136,7 +136,7 @@ class SiteContentSeeder extends Seeder
             'order' => 8,
             'is_enabled' => true,
             'content' => [
-                'banner_text' => 'Try a free demo quiz — no login required.',
+                'banner_text' => 'Try a free demo quiz, no login required.',
                 'button_text' => 'Start Demo Quiz',
                 'button_link' => '/demo-quiz',
             ],
@@ -188,9 +188,9 @@ class SiteContentSeeder extends Seeder
             ],
         ]);
 
-        PaymentMethod::updateOrCreate(['name' => 'Allied Bank'], ['description' => 'Account No: 0123-0010077805860010 — Account Name: Sadeed Ahsan', 'order' => 1]); // REAL — client's own WhatsApp payment-options message
-        PaymentMethod::updateOrCreate(['name' => 'Easypaisa'], ['description' => '0348-1154174 — Account Name: Sadeed Ahsan', 'order' => 2]); // REAL
-        PaymentMethod::updateOrCreate(['name' => 'JazzCash'], ['description' => '0321-7646526 — Account Name: Sadeed Ihsan', 'order' => 3]); // REAL
+        PaymentMethod::updateOrCreate(['name' => 'Allied Bank'], ['description' => "Account No: 0123-0010077805860010\nAccount Name: Sadeed Ahsan", 'order' => 1]); // REAL — client's own WhatsApp payment-options message
+        PaymentMethod::updateOrCreate(['name' => 'Easypaisa'], ['description' => "0348-1154174\nAccount Name: Sadeed Ahsan", 'order' => 2]); // REAL
+        PaymentMethod::updateOrCreate(['name' => 'JazzCash'], ['description' => "0321-7646526\nAccount Name: Sadeed Ihsan", 'order' => 3]); // REAL
 
         // --- FAQs — REAL question from the old site's Contact page, the
         // rest PLACEHOLDER pending the full FAQ page content ---
@@ -205,7 +205,7 @@ class SiteContentSeeder extends Seeder
             'is_active' => true,
         ]);
         Faq::updateOrCreate(['question' => 'Can I get a certificate?', 'page' => 'contact'], [
-            'answer' => 'Yes — a certificate is issued on completion of a course.', // PLACEHOLDER, confirm wording
+            'answer' => 'Yes, a certificate is issued on completion of a course.', // PLACEHOLDER, confirm wording
             'order' => 2,
             'is_active' => true,
         ]);
@@ -215,7 +215,7 @@ class SiteContentSeeder extends Seeder
             'is_active' => true,
         ]);
         Faq::updateOrCreate(['question' => 'How long do I have access after payment?', 'page' => 'how_to_buy'], [
-            'answer' => 'Access duration depends on the package you choose — see validity on each package above.',
+            'answer' => 'Access duration depends on the package you choose. See validity on each package above.',
             'order' => 2,
             'is_active' => true,
         ]);
@@ -225,7 +225,7 @@ class SiteContentSeeder extends Seeder
             'is_active' => true,
         ]);
         Faq::updateOrCreate(['question' => 'Can I download the course material?', 'page' => 'how_to_buy'], [
-            'answer' => 'No — everything (lectures, notes and practice questions) is available online inside your account only. There is no downloadable or printed (hard copy) material.', // REAL — client instruction
+            'answer' => 'No, everything (lectures, notes and practice questions) is available online inside your account only. There is no downloadable or printed (hard copy) material.', // REAL — client instruction
             'order' => 4,
             'is_active' => true,
         ]);
@@ -250,7 +250,7 @@ class SiteContentSeeder extends Seeder
             'is_published' => true,
             'content' => <<<'MD'
 ## What we collect
-When you register or buy a course on Lion Forces Academy, we collect the details you provide — name, contact number, email and the biodata fields on your profile (father's name, CNIC, education, address, etc., where you choose to fill them in) — along with your course progress, quiz attempts and payment confirmation details.
+When you register or buy a course on Lion Forces Academy, we collect the details you provide: name, contact number, email and the biodata fields on your profile (father's name, CNIC, education, address, etc., where you choose to fill them in), along with your course progress, quiz attempts and payment confirmation details.
 
 ## How we use it
 Your information is used only to run your account, track your course progress and results, verify payments, and contact you about your enrollment. We do not sell your information to third parties.
@@ -271,7 +271,7 @@ MD,
             'is_published' => true,
             'content' => <<<'MD'
 ## Access
-A course purchase gives you **online access only**, for the validity period shown on the package you bought. There is nothing to download — all lectures, notes and practice questions are viewed inside your account, and no PDF or printed (hard copy) material is provided.
+A course purchase gives you **online access only**, for the validity period shown on the package you bought. There is nothing to download. All lectures, notes and practice questions are viewed inside your account, and no PDF or printed (hard copy) material is provided.
 
 ## Payments
 All payments are **non-refundable**. Please check a course's details and try the free demo quiz before purchasing. Access is activated after your payment is verified, usually within 1 hour.

@@ -45,19 +45,19 @@ export default function CustomQuizProgress({ hasAccess, stats }: Props) {
             signals.push(`${stats.unusedCount} question(s) in your bank you haven't tried yet.`);
         }
         if (stats.regressionsCount > 0) {
-            signals.push(`${stats.regressionsCount} question(s) you'd gotten right before have slipped back to wrong -- worth a quick review.`);
+            signals.push(`${stats.regressionsCount} question(s) you'd gotten right before have slipped back to wrong, so they're worth a quick review.`);
         }
         if (stats.wrongToRightCount > 0) {
-            signals.push(`${stats.wrongToRightCount} question(s) you once got wrong are now correct -- keep it up.`);
+            signals.push(`${stats.wrongToRightCount} question(s) you once got wrong are now correct. Keep it up.`);
         }
         if (stats.usedCount > 0 && stats.firstTryPct < 50) {
-            signals.push("Less than half of your first attempts are correct -- consider reviewing fundamentals before taking on more new questions.");
+            signals.push("Less than half of your first attempts are correct, so consider reviewing fundamentals before taking on more new questions.");
         }
         if (stats.skippedCount > 0) {
             signals.push(`${stats.skippedCount} question(s) left unanswered on your latest attempt.`);
         }
         if (signals.length === 0 && stats.usedCount > 0) {
-            signals.push('No red flags right now -- keep up the practice.');
+            signals.push('No red flags right now. Keep up the practice.');
         }
     }
 
@@ -77,12 +77,12 @@ export default function CustomQuizProgress({ hasAccess, stats }: Props) {
                 </div>
             ) : !stats || stats.usedCount === 0 ? (
                 <div className="rounded-3xl border border-dashed border-border bg-surface p-10 text-center text-text-secondary">
-                    No answered questions yet -- take a test or quiz to start building your progress.
+                    No answered questions yet. Take a test or quiz to start building your progress.
                 </div>
             ) : (
                 <div>
                     <p className="mb-4 text-sm text-text-secondary">
-                        Based on every question you've answered from this bank, across Quizzes, Practice Tests, Mock Exams and Custom Quizzes -- not just Custom Quiz attempts.
+                        Based on every question you've answered from this bank, across Quizzes, Practice Tests, Mock Exams and Custom Quizzes, not just Custom Quiz attempts.
                     </p>
 
                     <div className="mb-8 grid grid-cols-2 gap-3 sm:grid-cols-3 lg:grid-cols-4">

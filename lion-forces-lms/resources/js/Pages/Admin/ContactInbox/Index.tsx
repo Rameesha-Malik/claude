@@ -1,5 +1,6 @@
 import { Head, router } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
+import EmptyState from '@/Components/EmptyState';
 
 interface Submission { id: number; name: string; email: string; phone: string | null; subject: string | null; message: string; is_handled: boolean; created_at: string }
 interface Props {
@@ -78,9 +79,7 @@ export default function ContactInboxIndex({ submissions, counts, filters }: Prop
                     </div>
                 ))}
                 {submissions.data.length === 0 && (
-                    <div className="rounded-3xl border border-dashed border-border bg-surface p-10 text-center text-text-secondary">
-                        No inquiries yet. When visitors use the public Contact form, entries will appear here for your team to respond.
-                    </div>
+                    <EmptyState>No inquiries yet. When visitors use the public Contact form, entries will appear here for your team to respond.</EmptyState>
                 )}
             </div>
 

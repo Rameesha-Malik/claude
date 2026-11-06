@@ -1,6 +1,8 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
 import AdminLayout from '@/Layouts/AdminLayout';
+import AdminPageHeader from '@/Components/AdminPageHeader';
+import EmptyState from '@/Components/EmptyState';
 
 const inputClass = 'rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:shadow-glow focus:outline-none';
 
@@ -85,29 +87,25 @@ export default function StudentsIndex({ students, filters }: Props) {
         <AdminLayout header="Students">
             <Head title="Students" />
 
-            <div className="mb-6 flex flex-wrap items-start justify-between gap-4 rounded-3xl border border-border bg-gradient-to-br from-primary-subtle to-surface p-6 sm:p-8">
-                <div>
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-surface px-3 py-1 text-xs font-bold uppercase tracking-wide text-primary shadow-sm">
-                        Student Management
-                    </span>
-                    <h1 className="mt-4 font-display text-3xl text-text">Students</h1>
-                    <p className="mt-2 max-w-xl text-sm text-text-secondary">
-                        Manage student accounts, monitor enrollments, and control access from one place.
-                    </p>
-                </div>
-                <div className="flex flex-shrink-0 items-center gap-3">
-                    <div className="rounded-2xl border border-border bg-surface px-5 py-3 text-center shadow-sm">
-                        <p className="text-xs font-bold uppercase tracking-wide text-text-muted">Total</p>
-                        <p className="font-display text-2xl text-text">{students.total}</p>
-                    </div>
-                    <button
-                        onClick={() => setAddOpen((v) => !v)}
-                        className="rounded-xl bg-secondary px-5 py-3 text-sm font-bold uppercase text-on-secondary shadow-sm hover:bg-teal-800"
-                    >
-                        + Add Student
-                    </button>
-                </div>
-            </div>
+            <AdminPageHeader
+                eyebrow="Student Management"
+                title="Students"
+                description="Every registered student, their enrollments, and account access in one list."
+                right={
+                    <>
+                        <div className="rounded-2xl border border-border bg-surface px-5 py-3 text-center shadow-sm">
+                            <p className="text-xs font-bold uppercase tracking-wide text-text-muted">Total</p>
+                            <p className="font-display text-2xl text-text">{students.total}</p>
+                        </div>
+                        <button
+                            onClick={() => setAddOpen((v) => !v)}
+                            className="rounded-xl bg-secondary px-5 py-3 text-sm font-bold uppercase text-on-secondary shadow-sm hover:bg-teal-800"
+                        >
+                            + Add Student
+                        </button>
+                    </>
+                }
+            />
 
             <AddStudentForm open={addOpen} setOpen={setAddOpen} />
 
@@ -141,9 +139,7 @@ export default function StudentsIndex({ students, filters }: Props) {
             </div>
 
             {students.data.length === 0 ? (
-                <div className="rounded-3xl border border-dashed border-border bg-surface p-10 text-center text-text-secondary">
-                    No students found.
-                </div>
+                <EmptyState>No students found.</EmptyState>
             ) : (
                 <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
                     {students.data.map((s) => (

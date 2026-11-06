@@ -232,7 +232,7 @@ class BulkDemoDataSeeder extends Seeder
                     'method' => $methods[array_rand($methods)],
                     'status' => $status,
                     'reference_number' => 'TXN'.str_pad((string) $enrollment->id, 6, '0', STR_PAD_LEFT),
-                    'notes' => $status === 'rejected' ? 'Receipt did not match the amount due -- re-upload requested.' : null,
+                    'notes' => $status === 'rejected' ? 'Receipt did not match the amount due. Re-upload requested.' : null,
                     'verified_by' => in_array($status, ['verified', 'rejected'], true) ? $admin?->id : null,
                     'verified_at' => in_array($status, ['verified', 'rejected'], true) ? now()->subDays(random_int(1, 60)) : null,
                 ]
@@ -268,7 +268,7 @@ class BulkDemoDataSeeder extends Seeder
                 $assignment = Assignment::updateOrCreate(
                     ['course_id' => $course->id, 'title' => $title],
                     [
-                        'instructions' => "Complete and submit \"{$title}\" before the due date. Placeholder instructions -- replace via Admin -> Assignments.",
+                        'instructions' => "Complete and submit \"{$title}\" before the due date. Placeholder instructions; replace via Admin -> Assignments.",
                         'max_marks' => 20,
                         'due_date' => now()->addDays(random_int(10, 30)),
                         'is_active' => true,
@@ -372,7 +372,7 @@ class BulkDemoDataSeeder extends Seeder
             ['Guaranteed Current Affairs 2026', 800],
         ])->map(fn ($def) => NotesBank::updateOrCreate(
             ['title' => $def[0]],
-            ['subject_id' => $englishSubjectId, 'content' => 'Placeholder paid note content -- replace via Admin -> Question Bank -> Notes.', 'price' => $def[1], 'is_published' => true]
+            ['subject_id' => $englishSubjectId, 'content' => 'Placeholder paid note content; replace via Admin -> Question Bank -> Notes.', 'price' => $def[1], 'is_published' => true]
         ));
 
         $methods = ['bank_transfer', 'easypaisa', 'jazzcash'];
@@ -457,7 +457,7 @@ class BulkDemoDataSeeder extends Seeder
             ['Is the mock exam timed the same way as the real test?', 'Yes, section durations and negative marking mirror the real exam pattern as closely as possible.'],
             ['When will the guaranteed notes be updated for this year?', null],
             ['Can I switch my target exam date after enrolling?', null],
-            ['Are the flashcards covering the full syllabus?', 'They currently cover the core topics -- more are added regularly.'],
+            ['Are the flashcards covering the full syllabus?', 'They currently cover the core topics. More are added regularly.'],
         ];
 
         $courseList = $courses->values();
@@ -502,7 +502,7 @@ class BulkDemoDataSeeder extends Seeder
         $notesPool = $students->values()->random(min(10, $students->count()));
         $noteTexts = [
             'Remember the trick: eliminate the obviously wrong options first.',
-            'Came up in a past paper -- review this one again before the test.',
+            'Came up in a past paper. Review this one again before the test.',
             'Mixed this up with a similar question, double-check the wording.',
             'Easy one, just reviewing to stay sharp.',
         ];

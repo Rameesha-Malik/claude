@@ -93,7 +93,7 @@ function AnnouncementRow({ item, categories }: { item: NewsItem; categories: Cat
                     onChange={(e) => form.setData('application_link', e.target.value)}
                 />
                 {isPastDeadline(form.data.deadline_date) && (
-                    <p className="text-xs text-warning">This date has already passed -- the post won't be visible to students.</p>
+                    <p className="text-xs text-warning">This date has already passed, so the post won't be visible to students.</p>
                 )}
                 <div>
                     <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-text-muted">Image (optional)</label>
@@ -135,7 +135,7 @@ function AnnouncementRow({ item, categories }: { item: NewsItem; categories: Cat
                         {item.application_link ? (
                             <p className="mt-1 text-xs text-primary">Apply Now &rarr; {item.application_link}</p>
                         ) : (
-                            <p className="mt-1 text-xs text-warning">No Apply Now link set -- the button won&apos;t show publicly.</p>
+                            <p className="mt-1 text-xs text-warning">No Apply Now link set, so the button won&apos;t show publicly.</p>
                         )}
                     </div>
                 </div>
@@ -213,7 +213,7 @@ export default function NewsIndex({ announcements, categories, filters }: Props)
                     <input type="date" className={inputClass} value={addForm.data.deadline_date} onChange={(e) => addForm.setData('deadline_date', e.target.value)} />
                 </div>
                 {isPastDeadline(addForm.data.deadline_date) && (
-                    <p className="text-xs text-warning">This date has already passed -- the post won't be visible to students.</p>
+                    <p className="text-xs text-warning">This date has already passed, so the post won't be visible to students.</p>
                 )}
                 <select className={inputClass} value={addForm.data.category_id} onChange={(e) => addForm.setData('category_id', e.target.value ? Number(e.target.value) : '')}>
                     <option value="">No exam category</option>

@@ -44,7 +44,7 @@ class CatalogSeeder extends Seeder
         $instructor = Instructor::updateOrCreate(['name' => 'Lead Instructor'], [
             'qualification' => 'M.Phil, Ex-Services', // PLACEHOLDER
             'experience' => '10+ years training academy candidates', // PLACEHOLDER
-            'bio' => 'Placeholder instructor profile — replace with real faculty details via Admin -> Instructors.',
+            'bio' => 'Placeholder instructor profile. Replace with real faculty details via Admin -> Instructors.',
             'order' => 1,
             'is_active' => true,
         ]);
@@ -118,15 +118,15 @@ class CatalogSeeder extends Seeder
             // edits to these aren't overwritten by a re-seed.
             if ($short === 'AFNS') {
                 $fscPackages = [
-                    ['name' => 'FSc — Notes + App Access', 'price' => 6000, 'features' => [
+                    ['name' => 'FSc: Notes + App Access', 'price' => 6000, 'features' => [
                         'Android App Access', 'Verbal Intelligence Notes', 'Non-Verbal Intelligence Notes',
                         'Academic Notes', 'Past Papers', 'Teacher Support',
                     ]],
-                    ['name' => 'FSc — Crash Course Classes', 'price' => 11000, 'features' => [
+                    ['name' => 'FSc: Crash Course Classes', 'price' => 11000, 'features' => [
                         'Complete Notes', 'Verbal Intelligence Live Lectures', 'Non-Verbal Intelligence Live Lectures',
                         'Guess Papers', 'Teacher Support',
                     ]],
-                    ['name' => 'FSc — Full Online Classes', 'price' => 16000, 'features' => [
+                    ['name' => 'FSc: Full Online Classes', 'price' => 16000, 'features' => [
                         'Complete Notes', 'Verbal + Non-Verbal Lectures', 'Academic Lectures',
                         'Past Paper Lectures', 'Practice MCQs',
                     ]],

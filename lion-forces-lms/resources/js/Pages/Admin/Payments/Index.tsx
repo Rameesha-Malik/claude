@@ -2,6 +2,7 @@ import { Head, router } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
 import StatusDot from '@/Components/StatusDot';
 import AdminLayout from '@/Layouts/AdminLayout';
+import AdminPageHeader from '@/Components/AdminPageHeader';
 
 interface Payment {
     id: number; amount: string; method: string; status: string; reference_number: string | null; proof_file_path: string | null; created_at: string;
@@ -53,25 +54,16 @@ export default function PaymentsIndex({ payments, filters }: Props) {
         <AdminLayout header="Transactions">
             <Head title="Transactions" />
 
-            <div className="mb-6 flex flex-wrap items-center justify-between gap-4 rounded-3xl bg-gradient-to-br from-secondary to-teal-800 p-6 text-white sm:p-8">
-                <div className="flex gap-4">
-                    <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-white/15">
-                        <svg className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M2.25 8.25h19.5M2.25 9h19.5m-16.5 5.25h6m-6 2.25h3m-3.75 3h15a2.25 2.25 0 002.25-2.25V6.75A2.25 2.25 0 0019.5 4.5h-15a2.25 2.25 0 00-2.25 2.25v10.5A2.25 2.25 0 004.5 19.5z" />
-                        </svg>
-                    </span>
-                    <div>
-                        <h1 className="font-display text-3xl">Transactions</h1>
-                        <p className="mt-2 max-w-xl text-sm text-teal-100">
-                            Payment and received records, created from enrollments or student payment assignments.
-                        </p>
+            <AdminPageHeader
+                title="Transactions"
+                description="Payment and received records, created from enrollments or student payment assignments."
+                right={
+                    <div className="rounded-2xl border border-border bg-surface px-5 py-3 text-center shadow-sm">
+                        <p className="text-xs font-bold uppercase tracking-wide text-text-muted">Total</p>
+                        <p className="font-display text-2xl text-text">{payments.total}</p>
                     </div>
-                </div>
-                <div className="flex items-center gap-2 rounded-full bg-white/15 px-4 py-2 text-sm font-bold">
-                    <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
-                    {payments.total} total
-                </div>
-            </div>
+                }
+            />
 
             <form onSubmit={applyFilters} className="mb-6 rounded-3xl border border-border bg-surface p-5">
                 <p className="mb-3 flex items-center gap-1.5 text-sm font-bold text-text">
@@ -176,7 +168,7 @@ export default function PaymentsIndex({ payments, filters }: Props) {
                                             <button onClick={() => rejectPayment(p.id)} className="text-xs font-bold uppercase text-danger hover:underline">Reject</button>
                                         </div>
                                     ) : (
-                                        <span className="text-xs text-text-muted">—</span>
+                                        <span className="text-xs text-text-muted">N/A</span>
                                     )}
                                 </td>
                             </tr>

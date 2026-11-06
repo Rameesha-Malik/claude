@@ -232,7 +232,7 @@ class CourseController extends Controller
         $activeCount = $course->enrollments()->where('status', 'active')->count();
         if ($activeCount > 0) {
             throw \Illuminate\Validation\ValidationException::withMessages([
-                'course' => "Can't delete \"{$course->title}\" -- it has {$activeCount} active student".($activeCount === 1 ? '' : 's').' enrolled. Deactivate or transfer them first.',
+                'course' => "Can't delete \"{$course->title}\": it has {$activeCount} active student".($activeCount === 1 ? '' : 's').' enrolled. Deactivate or transfer them first.',
             ]);
         }
 
@@ -382,7 +382,7 @@ class CourseController extends Controller
             ImportYoutubeLessonVideo::dispatch($lesson->id);
         }
 
-        return back()->with('success', $lesson->video_import_status === 'pending' ? 'Lesson added. Importing the video now -- this can take a few minutes.' : 'Lesson added.');
+        return back()->with('success', $lesson->video_import_status === 'pending' ? 'Lesson added. Importing the video now; this can take a few minutes.' : 'Lesson added.');
     }
 
     public function updateLesson(Request $request, Lesson $lesson)
@@ -425,7 +425,7 @@ class CourseController extends Controller
             ImportYoutubeLessonVideo::dispatch($lesson->id);
         }
 
-        return back()->with('success', $shouldImport ? 'Lesson updated. Importing the video now -- this can take a few minutes.' : 'Lesson updated.');
+        return back()->with('success', $shouldImport ? 'Lesson updated. Importing the video now; this can take a few minutes.' : 'Lesson updated.');
     }
 
     public function destroyLesson(Request $request, Lesson $lesson)

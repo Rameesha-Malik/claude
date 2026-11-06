@@ -1,6 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
 import AnimatedCounter from '@/Components/AnimatedCounter';
-import GradientMesh from '@/Components/GradientMesh';
 import RevealOnScroll from '@/Components/RevealOnScroll';
 import SectionKicker from '@/Components/SectionKicker';
 import ShieldMark from '@/Components/ShieldMark';
@@ -168,8 +167,7 @@ export default function About({ instructors, section, stats }: Props) {
 
             {/* ---------------- Impact — dark stat block, real numbers ---------------- */}
             {stats.length > 0 && (
-                <section className="relative overflow-hidden bg-gradient-to-br from-secondary to-teal-950 py-20 text-center text-white">
-                    <GradientMesh className="opacity-60" />
+                <section className="relative overflow-hidden bg-secondary py-20 text-center text-white">
                     <div className="relative mx-auto max-w-container px-4 sm:px-6 lg:px-8">
                         <SectionKicker dark>
                             <span className="mx-auto">Our Impact</span>
@@ -178,7 +176,7 @@ export default function About({ instructors, section, stats }: Props) {
 
                         <RevealOnScroll className="mx-auto mt-12 grid max-w-4xl grid-cols-2 gap-6 md:grid-cols-4">
                             {stats.map((stat, i) => (
-                                <div key={i} className="rounded-2xl border border-white/15 bg-white/[0.06] p-6 backdrop-blur-glass">
+                                <div key={i} className="rounded-2xl border border-white/15 bg-white/10 p-6">
                                     <div className="font-display text-4xl text-gold-400">
                                         <AnimatedCounter value={stat.number} />
                                     </div>
@@ -242,7 +240,7 @@ export default function About({ instructors, section, stats }: Props) {
                         <h2 className="relative font-display text-4xl uppercase tracking-wide text-secondary sm:text-5xl">
                             Start Your Preparation Today
                         </h2>
-                        <p className="relative mt-3 text-text-secondary">Join thousands of candidates training with structured, expert-led courses.</p>
+                        <p className="relative mt-3 text-text-secondary">Structured courses, unlimited practice, and guidance from retired officers who've been through the selection themselves.</p>
                         <div className="relative mt-8 flex flex-wrap justify-center gap-4">
                             <Link
                                 href="/courses"

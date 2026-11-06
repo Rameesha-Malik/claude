@@ -63,8 +63,8 @@ class DemoContentSeeder extends Seeder
     {
         $bank = [
             'English' => [
-                ['Choose the correctly spelled word.', ['Recieve', 'Receive', 'Receeve', 'Receve'], 1, 'The correct spelling is "Receive" — i before e except after c.'],
-                ['Choose the best synonym for "Abundant".', ['Scarce', 'Plentiful', 'Empty', 'Modest'], 1, '"Abundant" means existing in large quantities — "Plentiful" is the closest synonym.'],
+                ['Choose the correctly spelled word.', ['Recieve', 'Receive', 'Receeve', 'Receve'], 1, 'The correct spelling is "Receive": i before e except after c.'],
+                ['Choose the best synonym for "Abundant".', ['Scarce', 'Plentiful', 'Empty', 'Modest'], 1, '"Abundant" means existing in large quantities. "Plentiful" is the closest synonym.'],
                 ['Fill in the blank: "She ___ to the market every day."', ['go', 'goes', 'going', 'gone'], 1, 'Third-person singular present tense takes "goes".'],
             ],
             'Current Affairs' => [
@@ -132,7 +132,7 @@ class DemoContentSeeder extends Seeder
             $instructors->push(Instructor::updateOrCreate(['name' => $name], [
                 'qualification' => $details['qualification'],
                 'experience' => $details['experience'],
-                'bio' => 'Placeholder instructor profile — replace with real faculty details via Admin -> Instructors.',
+                'bio' => 'Placeholder instructor profile. Replace with real faculty details via Admin -> Instructors.',
                 'order' => $order++,
                 'is_active' => true,
             ]));
@@ -154,7 +154,7 @@ class DemoContentSeeder extends Seeder
             ['Verbal & Non-Verbal Reasoning Shortcuts', 'Intelligence / IQ', 'Placeholder notes content covering common reasoning patterns and shortcuts.'],
             ['Quick Math Formulas', 'Mathematics', 'Placeholder notes content with commonly-used formulas for quick revision.'],
             ['Pakistan Studies Key Facts', 'Pakistan Studies', 'Placeholder notes content summarizing key dates, figures, and facts.'],
-            ['Current Affairs Digest', 'Current Affairs', 'Placeholder notes content — replace with a real, regularly-updated digest.'],
+            ['Current Affairs Digest', 'Current Affairs', 'Placeholder notes content. Replace with a real, regularly-updated digest.'],
         ];
 
         $created = collect();
@@ -215,7 +215,7 @@ class DemoContentSeeder extends Seeder
             $flashcards = [
                 ["What does {$short} stand for?", $course->category->description ?? $course->title],
                 ['What is the recommended first step in preparation?', 'Understand the exact test pattern and syllabus before starting practice.'],
-                ['How should negative marking change your strategy?', "Skip a question rather than guess if you aren't reasonably confident — wrong answers cost more than skips."],
+                ['How should negative marking change your strategy?', "Skip a question rather than guess if you aren't reasonably confident, since wrong answers cost more than skips."],
             ];
             foreach ($flashcards as [$front, $back]) {
                 Flashcard::updateOrCreate(['course_id' => $course->id, 'front_text' => $front], [
@@ -488,7 +488,7 @@ class DemoContentSeeder extends Seeder
             $broadcast = \App\Models\NotificationBroadcast::updateOrCreate(
                 ['title' => 'Welcome to Lion Forces Academy'],
                 [
-                    'body' => 'Your demo account has been set up with sample courses -- explore your dashboard to get started.',
+                    'body' => 'Your demo account has been set up with sample courses. Explore your dashboard to get started.',
                     'target_type' => 'all',
                     'sent_by' => User::where('user_type', 'admin')->value('id'),
                     'recipient_count' => 1,

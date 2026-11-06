@@ -63,7 +63,7 @@ export default function DemoQuizIntro({ quiz, quizzes, pageContent }: Props) {
             <Head title="Free Demo Quiz" />
 
             {/* Dark wavy-ribbon hero, matching the "Start your journey" reference */}
-            <section className="relative overflow-hidden bg-gradient-to-br from-teal-700 via-teal-800 to-teal-950 pb-24 pt-24 text-center text-white sm:pt-28">
+            <section className="relative overflow-hidden bg-secondary pb-24 pt-24 text-center text-white sm:pt-28">
                 <GradientMesh className="opacity-40" />
                 <WaveRibbon />
                 <div className="relative mx-auto max-w-2xl px-4 sm:px-6 lg:px-8">

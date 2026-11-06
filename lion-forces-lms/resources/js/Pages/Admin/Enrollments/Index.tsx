@@ -3,6 +3,7 @@ import { FormEvent, useEffect, useState } from 'react';
 import CloseButton from '@/Components/CloseButton';
 import StatusDot from '@/Components/StatusDot';
 import AdminLayout from '@/Layouts/AdminLayout';
+import AdminPageHeader from '@/Components/AdminPageHeader';
 
 type Module = 'lectures' | 'quiz' | 'tests' | 'assignments';
 const ALL_MODULES: Module[] = ['lectures', 'quiz', 'tests', 'assignments'];
@@ -193,26 +194,22 @@ export default function EnrollmentsIndex({ enrollments, courses, filters }: Prop
         <AdminLayout header="Enrollments">
             <Head title="Enrollments" />
 
-            <div className="mb-6 flex flex-wrap items-start justify-between gap-4 rounded-3xl border border-border bg-gradient-to-br from-primary-subtle to-surface p-6 sm:p-8">
-                <div>
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-surface px-3 py-1 text-xs font-bold uppercase tracking-wide text-primary shadow-sm">
-                        Offline Payments
-                    </span>
-                    <h1 className="mt-4 font-display text-3xl text-text">Enrollments</h1>
-                    <p className="mt-2 max-w-xl text-sm text-text-secondary">
-                        Enroll any student to any course after receiving offline payment. View, approve, cancel, or remove enrollments. Use bulk actions for multiple rows.
-                    </p>
-                </div>
-                <div className="flex flex-shrink-0 items-center gap-3">
-                    <div className="rounded-2xl border border-border bg-surface px-5 py-3 text-center shadow-sm">
-                        <p className="text-xs font-bold uppercase tracking-wide text-text-muted">Total</p>
-                        <p className="font-display text-2xl text-text">{enrollments.total}</p>
-                    </div>
-                    <button onClick={() => setModalOpen(true)} className="rounded-xl bg-secondary px-5 py-3 text-sm font-bold uppercase text-on-secondary shadow-sm hover:bg-teal-800">
-                        + Enroll Student
-                    </button>
-                </div>
-            </div>
+            <AdminPageHeader
+                eyebrow="Offline Payments"
+                title="Enrollments"
+                description="Enroll any student to any course after receiving offline payment. View, approve, cancel, or remove enrollments. Use bulk actions for multiple rows."
+                right={
+                    <>
+                        <div className="rounded-2xl border border-border bg-surface px-5 py-3 text-center shadow-sm">
+                            <p className="text-xs font-bold uppercase tracking-wide text-text-muted">Total</p>
+                            <p className="font-display text-2xl text-text">{enrollments.total}</p>
+                        </div>
+                        <button onClick={() => setModalOpen(true)} className="rounded-xl bg-secondary px-5 py-3 text-sm font-bold uppercase text-on-secondary shadow-sm hover:bg-teal-800">
+                            + Enroll Student
+                        </button>
+                    </>
+                }
+            />
 
             <form onSubmit={applyFilters} className="mb-6 rounded-3xl border border-border bg-surface p-5">
                 <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">

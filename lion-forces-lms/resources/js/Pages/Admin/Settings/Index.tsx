@@ -268,12 +268,12 @@ function GeneralTab({ general }: { general: Props['general'] }) {
 
             <Card
                 title="Logos & branding"
-                description="The site-wide logo (Website Management) is used everywhere by default. Set any of these only if one logo doesn't look right in every spot -- a wide logo cropped into a tiny favicon, for example."
+                description="The site-wide logo (Website Management) is used everywhere by default. Set any of these only if one logo doesn't look right in every spot, like a wide logo cropped into a tiny favicon."
             >
                 <div className="grid gap-4 sm:grid-cols-2">
                     <LogoSlotField slot="header_logo" label="Header logo" path={general.header_logo_path} hint="Site header + both dashboards. Leave empty to use the site logo." onUpload={uploadSlot} />
                     <LogoSlotField slot="footer_logo" label="Footer logo" path={general.footer_logo_path} hint="Public site footer. Leave empty to use the site logo." onUpload={uploadSlot} />
-                    <LogoSlotField slot="favicon" label="Favicon" path={general.favicon_path} hint="Browser tab icon -- needs to read clearly very small, so usually a simplified mark rather than the full logo." onUpload={uploadSlot} square />
+                    <LogoSlotField slot="favicon" label="Favicon" path={general.favicon_path} hint="Browser tab icon. Needs to read clearly very small, so usually a simplified mark rather than the full logo." onUpload={uploadSlot} square />
                     <LogoSlotField slot="email_logo" label="Email logo" path={general.email_logo_path} hint="Shown at the top of every email the system sends (password reset, test email). Leave empty to use the site logo." onUpload={uploadSlot} />
                     <LogoSlotField slot="og_image" label="Open Graph image" path={general.og_image_path} hint="Preview image when a page is shared on social media or WhatsApp. Works best as a wide image, not a logo mark." onUpload={uploadSlot} />
                 </div>
@@ -363,7 +363,7 @@ function NotificationsTab({ notifications }: { notifications: Props['notificatio
     return (
         <Card title="Notifications" description="Choose when to receive admin alerts (in-app bell + email if configured).">
             <form onSubmit={submit} className="space-y-4">
-                <Field label="Notification email" hint="Optional -- admin alerts already appear in the bell inbox for every owner/staff account.">
+                <Field label="Notification email" hint="Optional. Admin alerts already appear in the bell inbox for every owner/staff account.">
                     <input className={inputClass} placeholder="admin@example.com" value={form.data.admin_email} onChange={(e) => form.setData('admin_email', e.target.value)} />
                 </Field>
 
@@ -436,7 +436,7 @@ function SecurityTab({ security }: { security: Props['security'] }) {
                         Reset devices
                     </button>
                 </div>
-                <p className="mt-2 text-xs text-text-muted">Tip: resetting only clears known devices -- the student can then log in from a new one immediately.</p>
+                <p className="mt-2 text-xs text-text-muted">Tip: resetting only clears known devices. The student can then log in from a new one immediately.</p>
             </Card>
         </div>
     );

@@ -59,7 +59,7 @@ export default function StudentLayout({ children, header }: PropsWithChildren<{ 
                 next: browse and enroll in more courses. */}
             <div className="mx-3 mb-3 rounded-2xl bg-white/10 p-4">
                 <p className="text-sm font-bold text-white">Explore More Courses</p>
-                <p className="mt-1 text-xs text-teal-200">New courses are added regularly -- see what's available.</p>
+                <p className="mt-1 text-xs text-teal-200">New courses are added regularly. See what's available.</p>
                 {/* Explicit gold/dark-text, not bg-accent -- this card is on the
                     dark sidebar, and accent now means oxblood with light text,
                     which would go nearly invisible here (same fix applied to

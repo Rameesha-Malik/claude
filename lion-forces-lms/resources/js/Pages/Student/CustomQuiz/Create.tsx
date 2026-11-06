@@ -195,8 +195,8 @@ export default function CreateCustomQuiz({ subjects, topics, hasAccess, freeTria
                     <div>
                         <label className="mb-1 block text-sm font-medium text-text">Mode</label>
                         <select className={inputClass} value={form.data.mode} onChange={(e) => form.setData('mode', e.target.value as typeof form.data.mode)}>
-                            <option value="tutor">Tutor -- see the answer after each question</option>
-                            <option value="timed">Timed -- no feedback until you submit (exam simulation)</option>
+                            <option value="tutor">Tutor: see the answer after each question</option>
+                            <option value="timed">Timed: no feedback until you submit (exam simulation)</option>
                         </select>
                     </div>
 
@@ -262,10 +262,10 @@ export default function CreateCustomQuiz({ subjects, topics, hasAccess, freeTria
                             <p className="mt-1 text-xs text-text-muted">Capped at {freeTrialMax} for the free preview.</p>
                         )}
                         {matchingCount === 0 ? (
-                            <p className="mt-1 text-xs text-danger">No questions match these filters -- try different subjects, topics, or a different difficulty/filter.</p>
+                            <p className="mt-1 text-xs text-danger">No questions match these filters. Try different subjects, topics, or a different difficulty/filter.</p>
                         ) : (
                             matchingCount !== null && form.data.question_count > matchingCount && (
-                                <p className="mt-1 text-xs text-warning">Only {matchingCount} question{matchingCount === 1 ? '' : 's'} available -- you'll get fewer than asked for.</p>
+                                <p className="mt-1 text-xs text-warning">Only {matchingCount} question{matchingCount === 1 ? '' : 's'} available, so you'll get fewer than asked for.</p>
                             )
                         )}
                     </div>

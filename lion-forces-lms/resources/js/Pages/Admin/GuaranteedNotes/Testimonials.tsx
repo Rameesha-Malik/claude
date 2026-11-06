@@ -4,6 +4,7 @@ import CloseButton from '@/Components/CloseButton';
 import LiteMarkdown from '@/Components/LiteMarkdown';
 import RichTextArea from '@/Components/RichTextArea';
 import AdminLayout from '@/Layouts/AdminLayout';
+import EmptyState from '@/Components/EmptyState';
 
 interface NoteOption { id: number; title: string }
 interface TestimonialRow {
@@ -90,10 +91,7 @@ export default function NoteTestimonialsIndex({ testimonials, notes }: Props) {
             </div>
 
             {testimonials.length === 0 ? (
-                <div className="rounded-3xl border border-dashed border-border bg-surface p-10 text-center text-text-secondary">
-                    <p className="font-bold text-text">No testimonials yet</p>
-                    <p className="mt-1 text-sm">Add testimonials to show on guaranteed note detail pages.</p>
-                </div>
+                <EmptyState title="No testimonials yet" message="Add testimonials to show on guaranteed note detail pages." />
             ) : (
                 <div className="grid gap-3 sm:grid-cols-2">
                     {testimonials.map((t) => (

@@ -4,6 +4,8 @@ import CloseButton from '@/Components/CloseButton';
 import RichTextArea from '@/Components/RichTextArea';
 import StatusDot from '@/Components/StatusDot';
 import AdminLayout from '@/Layouts/AdminLayout';
+import AdminPageHeader from '@/Components/AdminPageHeader';
+import EmptyState from '@/Components/EmptyState';
 
 interface Subject { id: number; name: string }
 interface Note {
@@ -105,37 +107,26 @@ export default function GuaranteedNotesIndex({ notes, subjects, filters, stats }
         <AdminLayout header="Guaranteed Notes">
             <Head title="Guaranteed Notes" />
 
-            <div className="mb-6 flex flex-wrap items-start justify-between gap-4 rounded-3xl border border-border bg-surface p-6 sm:p-8">
-                <div className="flex gap-4">
-                    <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-primary text-on-primary">
-                        <svg className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M19.5 14.25v-2.625a3.375 3.375 0 00-3.375-3.375h-1.5A1.125 1.125 0 0113.5 7.125v-1.5a3.375 3.375 0 00-3.375-3.375H8.25m0 12.75h7.5m-7.5 3H12M10.5 2.25H5.625c-.621 0-1.125.504-1.125 1.125v17.25c0 .621.504 1.125 1.125 1.125h12.75c.621 0 1.125-.504 1.125-1.125V11.25a9 9 0 00-9-9z" />
-                        </svg>
-                    </span>
-                    <div>
-                        <h1 className="font-display text-3xl text-text">
-                            Guaranteed <span className="text-primary">Notes</span>
-                        </h1>
-                        <p className="text-xs font-bold uppercase tracking-wide text-text-muted">Asset management</p>
-                        <p className="mt-2 max-w-xl text-sm text-text-secondary">
-                            Manage premium study resources for students and set pricing for individual assets.
-                        </p>
-                    </div>
-                </div>
-                <div className="flex flex-shrink-0 flex-wrap gap-2">
-                    <button onClick={() => setModalNote(null)} className="rounded-xl bg-secondary px-5 py-2.5 text-sm font-bold uppercase text-on-secondary hover:bg-teal-800">
-                        + Add Note
-                    </button>
-                    <Link href="/admin/guaranteed-notes/purchase-requests" className="relative rounded-xl border border-border bg-surface px-4 py-2.5 text-sm font-bold text-text hover:border-primary hover:text-primary">
-                        Purchase Requests
-                        {stats.pending_requests > 0 && (
-                            <span className="absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-danger px-1 text-[10px] font-bold text-white">
-                                {stats.pending_requests}
-                            </span>
-                        )}
-                    </Link>
-                </div>
-            </div>
+            <AdminPageHeader
+                eyebrow="Asset management"
+                title="Guaranteed Notes"
+                description="Manage premium study resources for students and set pricing for individual assets."
+                right={
+                    <>
+                        <button onClick={() => setModalNote(null)} className="rounded-xl bg-secondary px-5 py-2.5 text-sm font-bold uppercase text-on-secondary hover:bg-teal-800">
+                            + Add Note
+                        </button>
+                        <Link href="/admin/guaranteed-notes/purchase-requests" className="relative rounded-xl border border-border bg-surface px-4 py-2.5 text-sm font-bold text-text hover:border-primary hover:text-primary">
+                            Purchase Requests
+                            {stats.pending_requests > 0 && (
+                                <span className="absolute -right-2 -top-2 flex h-5 min-w-5 items-center justify-center rounded-full bg-danger px-1 text-[10px] font-bold text-white">
+                                    {stats.pending_requests}
+                                </span>
+                            )}
+                        </Link>
+                    </>
+                }
+            />
 
             <form onSubmit={submitSearch} className="mb-4 flex gap-2">
                 <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search notes…" className="flex-1 rounded-lg border border-border px-3 py-2.5 text-sm" />
@@ -187,12 +178,16 @@ export default function GuaranteedNotesIndex({ notes, subjects, filters, stats }
             </div>
 
             {notes.data.length === 0 && (
-                <div className="mt-4 rounded-3xl border border-dashed border-border bg-surface p-10 text-center text-text-secondary">
-                    <p className="font-bold text-text">No notes yet</p>
-                    <p className="mt-1 text-sm">Add a note to start the public registry.</p>
-                    <button onClick={() => setModalNote(null)} className="mt-4 rounded-xl bg-secondary px-5 py-2.5 text-sm font-bold uppercase text-on-secondary hover:bg-teal-800">
-                        + Create first note
-                    </button>
+                <div className="mt-4">
+                    <EmptyState
+                        title="No notes yet"
+                        message="Add a note to start the public registry."
+                        action={
+                            <button onClick={() => setModalNote(null)} className="rounded-xl bg-secondary px-5 py-2.5 text-sm font-bold uppercase text-on-secondary hover:bg-teal-800">
+                                + Create first note
+                            </button>
+                        }
+                    />
                 </div>
             )}
 

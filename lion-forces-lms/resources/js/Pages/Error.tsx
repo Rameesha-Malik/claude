@@ -12,7 +12,7 @@ const DEFAULT_MESSAGES: Record<number, string> = {
     403: "You don't have permission to view that.",
     404: "We couldn't find the page you're looking for.",
     419: 'Your session expired. Please try again.',
-    422: "That didn't go through -- check the details and try again.",
+    422: "That didn't go through. Check the details and try again.",
     429: 'Too many requests. Please slow down and try again shortly.',
     500: 'Something went wrong on our end. Please try again.',
     503: "We're down for maintenance. Please check back shortly.",
@@ -35,7 +35,7 @@ export default function ErrorPage({ status, message }: Props) {
                 backgroundSize: '18px 18px',
             }}
         >
-            <Head title={`${status} -- ${site.name}`} />
+            <Head title={`${status} · ${site.name}`} />
 
             <div className="relative w-full max-w-md rounded-3xl border border-border bg-surface p-8 text-center shadow-2xl sm:p-10">
                 <Link href="/" className="flex flex-col items-center gap-2">

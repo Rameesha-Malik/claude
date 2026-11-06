@@ -496,7 +496,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                             {featuredCourses.map((course) => (
                                 <TiltCard key={course.id} max={5} className="group h-full rounded-2xl">
                                     <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-sm transition-all duration-normal group-hover:-translate-y-1.5 group-hover:border-primary group-hover:shadow-2xl">
-                                        <div className="relative h-40 overflow-hidden bg-gradient-to-br from-teal-600 via-teal-800 to-teal-950">
+                                        <div className="relative h-40 overflow-hidden bg-secondary">
                                             {course.thumbnail_path ? (
                                                 <img
                                                     src={`/storage/${course.thumbnail_path}`}
@@ -611,7 +611,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
 
             {/* ---------------- How It Works ---------------- */}
             {howItWorks.steps && (
-                <section className="relative overflow-hidden bg-gradient-to-br from-secondary to-teal-950 py-24 text-text-inverse">
+                <section className="relative overflow-hidden bg-secondary py-24 text-text-inverse">
                     <GradientMesh className="opacity-60" />
                     <div className="relative mx-auto max-w-container px-4 sm:px-6 lg:px-8">
                         <RevealOnScroll className="mx-auto mb-16 max-w-2xl text-center">
@@ -623,7 +623,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                         </RevealOnScroll>
                         <RevealOnScroll className="grid gap-8 md:grid-cols-3">
                             {howItWorks.steps.map((step: { title: string; description: string }, i: number) => (
-                                <div key={i} className="relative rounded-2xl border border-white/15 bg-white/[0.06] p-6 backdrop-blur-glass transition-transform duration-normal hover:-translate-y-1">
+                                <div key={i} className="relative rounded-2xl border border-white/15 bg-white/10 p-6 transition-transform duration-normal hover:-translate-y-1">
                                     <div className="mb-4 flex items-start justify-between">
                                         <div>
                                             <h3 className="text-lg font-bold">{step.title}</h3>
@@ -703,7 +703,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
             {/* ---------------- Demo Quiz Teaser ---------------- */}
             <section className="mx-auto max-w-container px-4 pb-8 sm:px-6 lg:px-8">
                 <RevealOnScroll>
-                    <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-teal-700 via-teal-800 to-teal-950 p-10 text-center text-white shadow-2xl sm:p-16">
+                    <div className="relative overflow-hidden rounded-3xl bg-secondary p-10 text-center text-white shadow-2xl sm:p-16">
                         <GradientMesh />
                         <WaveRibbon />
                         <div className="relative">
@@ -736,7 +736,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                         </RevealOnScroll>
 
                         <RevealOnScroll className="mx-auto grid max-w-4xl gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)]">
-                            <div className="relative overflow-hidden rounded-2xl bg-gradient-to-br from-teal-600 to-teal-950 p-8 text-white shadow-lg">
+                            <div className="relative overflow-hidden rounded-2xl bg-secondary p-8 text-white shadow-lg">
                                 <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} className="h-7 w-7">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M4 5h13a2 2 0 012 2v7a2 2 0 01-2 2H10l-4 3v-3H5a2 2 0 01-2-2V7a2 2 0 012-2z" />

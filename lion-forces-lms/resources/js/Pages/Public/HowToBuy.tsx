@@ -67,7 +67,7 @@ export default function HowToBuy({ hero, packages, paymentMethods, faqs }: { her
         <PublicLayout>
             <Head title="How to Buy" />
 
-            <section className="relative overflow-hidden bg-gradient-to-br from-secondary to-teal-950 py-20 text-center text-white">
+            <section className="relative overflow-hidden bg-secondary py-20 text-center text-white">
                 <div className="relative mx-auto max-w-container px-4 sm:px-6 lg:px-8">
                     <SectionKicker dark><span className="mx-auto">Get Started</span></SectionKicker>
                     <h1 className="font-display text-5xl uppercase tracking-wide sm:text-6xl">{hero.headline}</h1>

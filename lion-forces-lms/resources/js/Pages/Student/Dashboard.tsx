@@ -151,7 +151,7 @@ function NeedsAttention({ revisionItems, nextExam }: { revisionItems: RevisionIt
                     </Link>
                 </div>
                 {revisionItems.length === 0 ? (
-                    <p className="mt-3 text-sm text-text-secondary">Nothing flagged right now -- you're all caught up.</p>
+                    <p className="mt-3 text-sm text-text-secondary">Nothing flagged right now. You're all caught up.</p>
                 ) : (
                     <div className="mt-3 space-y-2.5">
                         {revisionItems.map((item) => (

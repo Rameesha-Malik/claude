@@ -2,6 +2,8 @@ import { Head, router } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
 import Icon from '@/Components/Icon';
 import AdminLayout from '@/Layouts/AdminLayout';
+import AdminPageHeader from '@/Components/AdminPageHeader';
+import EmptyState from '@/Components/EmptyState';
 
 const ICONS = {
     trophy: 'M16.5 18.75h-9m9 0a3 3 0 013 3h-15a3 3 0 013-3m9 0v-3.375c0-.621-.503-1.125-1.125-1.125h-.871M7.5 18.75v-3.375c0-.621.504-1.125 1.125-1.125h.872m5.007 0H9.497m5.007 0a7.454 7.454 0 01-.982-3.172M9.497 14.25a7.454 7.454 0 00.981-3.172M5.25 4.236c-.982.143-1.954.317-2.916.52A6.003 6.003 0 007.73 9.728M5.25 4.236V4.5c0 2.108.966 3.99 2.48 5.228M5.25 4.236V2.721C7.456 2.41 9.71 2.25 12 2.25c2.291 0 4.545.16 6.75.47v1.516M7.73 9.728a6.726 6.726 0 002.748 1.35m8.272-6.842V4.5c0 2.108-.966 3.99-2.48 5.228m2.48-5.492a46.32 46.32 0 012.916.52 6.003 6.003 0 01-5.395 4.972m0 0a6.726 6.726 0 01-2.749 1.35m0 0a6.772 6.772 0 01-3.044 0',
@@ -60,41 +62,36 @@ export default function LeaderboardIndex({ leaderboard, year, availableYears, fi
         <AdminLayout header="Leaderboard">
             <Head title="Leaderboard" />
 
-            <div className="mb-6 flex flex-wrap items-start justify-between gap-4 rounded-3xl border border-border bg-gradient-to-br from-primary-subtle to-surface p-6 sm:p-8">
-                <div>
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-surface px-3 py-1 text-xs font-bold uppercase tracking-wide text-primary shadow-sm">
-                        <Icon d={ICONS.trophy} className="h-3.5 w-3.5" /> Performance
-                    </span>
-                    <h1 className="mt-4 font-display text-3xl text-text">Leaderboard</h1>
-                    <p className="mt-2 max-w-xl text-sm text-text-secondary">Top performers by quiz score for the selected year.</p>
-                </div>
-                <div className="flex flex-shrink-0 flex-wrap items-center gap-2">
-                    <select
-                        value={year}
-                        onChange={(e) => changeYear(e.target.value)}
-                        className="rounded-lg border border-border bg-surface px-3 py-2.5 text-sm font-bold text-text"
-                    >
-                        {availableYears.map((y) => <option key={y} value={y}>{y}</option>)}
-                    </select>
-                    <form onSubmit={submitSearch}>
-                        <input
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            placeholder="Search name or email…"
-                            className="w-64 rounded-lg border border-border bg-surface px-3 py-2.5 text-sm"
-                        />
-                    </form>
-                </div>
-            </div>
+            <AdminPageHeader
+                title="Leaderboard"
+                description="Top performers by quiz score for the selected year."
+                right={
+                    <>
+                        <select
+                            value={year}
+                            onChange={(e) => changeYear(e.target.value)}
+                            className="rounded-lg border border-border bg-surface px-3 py-2.5 text-sm font-bold text-text"
+                        >
+                            {availableYears.map((y) => <option key={y} value={y}>{y}</option>)}
+                        </select>
+                        <form onSubmit={submitSearch}>
+                            <input
+                                value={search}
+                                onChange={(e) => setSearch(e.target.value)}
+                                placeholder="Search name or email…"
+                                className="w-64 rounded-lg border border-border bg-surface px-3 py-2.5 text-sm"
+                            />
+                        </form>
+                    </>
+                }
+            />
 
             <div className="grid gap-6 lg:grid-cols-3">
                 <div className="space-y-6 lg:col-span-2">
                     <div>
                         <p className="mb-3 text-xs font-bold uppercase tracking-wide text-text-muted">Best performers for {year}</p>
                         {top3.length === 0 ? (
-                            <div className="rounded-3xl border border-dashed border-border bg-surface p-10 text-center text-text-secondary">
-                                No submitted test attempts in {year} yet.
-                            </div>
+                            <EmptyState>No submitted test attempts in {year} yet.</EmptyState>
                         ) : (
                             <div className="grid gap-4 sm:grid-cols-3">
                                 {top3.map((row) => (

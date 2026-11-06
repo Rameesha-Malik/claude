@@ -130,7 +130,7 @@ export default function QuestionBankForm({ subjects, topics, course, courses = [
             </div>
 
             <div>
-                <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-text-muted">Options -- pick the radio for the correct one</label>
+                <label className="mb-1 block text-xs font-bold uppercase tracking-wide text-text-muted">Options: pick the radio for the correct one</label>
                 <div className="space-y-2">
                     {form.data.options.map((opt, i) => (
                         <div key={i} className="flex items-start gap-2 rounded-lg border border-border p-2">

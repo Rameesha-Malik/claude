@@ -17,7 +17,7 @@ export default function BundleDetail({ bundle }: { bundle: Bundle }) {
         <PublicLayout>
             <Head title={bundle.title} />
 
-            <section className="bg-gradient-to-br from-secondary to-teal-950 py-20 text-text-inverse">
+            <section className="bg-secondary py-20 text-text-inverse">
                 <div className="mx-auto max-w-container px-4 sm:px-6 lg:px-8">
                     <span className="rounded-full bg-primary px-3 py-1 text-xs font-bold uppercase tracking-wide text-on-primary">
                         {bundle.courses.length}-Course Bundle

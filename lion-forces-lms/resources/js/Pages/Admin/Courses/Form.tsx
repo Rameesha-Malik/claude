@@ -161,10 +161,10 @@ export default function CourseForm({ course, categories, instructors }: Props) {
                 lives there, not here. */}
             {isEdit ? (
                 <p className="text-xs text-text-muted">
-                    Set pricing in the <strong>Packages</strong> tab, above -- a course needs at least one package before a student can buy it.
+                    Set pricing in the <strong>Packages</strong> tab, above. A course needs at least one package before a student can buy it.
                 </p>
             ) : (
-                <p className="text-xs text-text-muted">Pricing is set per package, once this course is created -- continue to the Packages tab next.</p>
+                <p className="text-xs text-text-muted">Pricing is set per package, once this course is created. Continue to the Packages tab next.</p>
             )}
 
             <button type="submit" disabled={form.processing} className={btnClass}>
@@ -341,7 +341,7 @@ function LessonRow({ lesson, sections }: { lesson: Lesson; sections: Section[] }
                     into that, since the student side shows nothing until
                     it's ready. */}
                 {(lesson.video_import_status === 'pending' || lesson.video_import_status === 'processing') && (
-                    <p className="mt-2 text-xs font-bold uppercase tracking-wide text-warning">Importing video -- this can take a few minutes.</p>
+                    <p className="mt-2 text-xs font-bold uppercase tracking-wide text-warning">Importing video. This can take a few minutes.</p>
                 )}
                 {lesson.video_import_status === 'failed' && (
                     <p className="mt-2 text-xs text-danger">
@@ -484,13 +484,13 @@ function CurriculumPanel({ course }: { course: Course }) {
             <h3 className="mb-1 font-bold text-text">Curriculum: Topics &amp; Video Lectures</h3>
             <p className="mb-3 text-sm text-text-secondary">
                 This is where video lectures live: <strong>Course → Topic → Lesson</strong>. Add a topic below (e.g. "Chemistry
-                Lectures"), then add lessons into it -- a title and a video link (e.g. an unlisted YouTube link) is all each
+                Lectures"), then add lessons into it: a title and a video link (e.g. an unlisted YouTube link) is all each
                 lesson needs. Lessons left ungrouped still show to students, just not under a named topic.
             </p>
             <p className="mb-3 text-sm text-text-secondary">
                 A YouTube link is quickest, but a determined student can still find it by inspecting the page. For a lesson
                 that must never reveal where it's hosted, click <strong>Edit</strong> on it after adding and switch it to
-                <strong> Video (File Upload)</strong> instead -- the file then streams from this site, with no outside link
+                <strong> Video (File Upload)</strong> instead. The file then streams from this site, with no outside link
                 anywhere on the page.
             </p>
 

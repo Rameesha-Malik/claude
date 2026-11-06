@@ -1,6 +1,8 @@
 import { Head, router } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
 import AdminLayout from '@/Layouts/AdminLayout';
+import AdminPageHeader from '@/Components/AdminPageHeader';
+import EmptyState from '@/Components/EmptyState';
 
 interface LogEntry {
     id: number; action: string; subject_type: string; description: string; created_at: string;
@@ -49,15 +51,10 @@ export default function ActivityIndex({ logs, courses, users, filters }: Props) 
         <AdminLayout header="Activity">
             <Head title="Activity" />
 
-            <div className="mb-6 rounded-3xl border border-border bg-gradient-to-br from-primary-subtle to-surface p-6 sm:p-8">
-                <span className="inline-flex items-center gap-1.5 rounded-full bg-surface px-3 py-1 text-xs font-bold uppercase tracking-wide text-primary shadow-sm">
-                    Admin Logs
-                </span>
-                <h1 className="mt-4 font-display text-3xl text-text">Content Activity</h1>
-                <p className="mt-2 max-w-2xl text-sm text-text-secondary">
-                    Who added or edited course content, and when. Example: MCQ added by Ali Khan, Date: 5 March 2026.
-                </p>
-            </div>
+            <AdminPageHeader
+                title="Content Activity"
+                description="Who added or edited course content, and when. Example: MCQ added by Ali Khan, Date: 5 March 2026."
+            />
 
             <form onSubmit={apply} className="mb-6 rounded-3xl border border-border bg-surface p-5">
                 <p className="mb-4 text-sm font-bold text-text">Filters</p>
@@ -149,8 +146,8 @@ export default function ActivityIndex({ logs, courses, users, filters }: Props) 
             </div>
 
             {logs.data.length === 0 && (
-                <div className="mt-6 rounded-3xl border border-dashed border-border bg-surface p-10 text-center text-text-secondary">
-                    No activity recorded yet.
+                <div className="mt-6">
+                    <EmptyState>No activity recorded yet.</EmptyState>
                 </div>
             )}
 

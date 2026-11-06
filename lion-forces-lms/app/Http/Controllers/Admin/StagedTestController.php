@@ -240,6 +240,6 @@ class StagedTestController extends Controller
         // deleting them -- "unmerge", not "remove these stages".
         $group->delete();
 
-        return back()->with('success', 'Group removed -- its stages now pass individually again.');
+        return back()->with('success', 'Group removed. Its stages now pass individually again.');
     }
 }

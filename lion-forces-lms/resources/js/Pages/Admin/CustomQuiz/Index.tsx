@@ -39,7 +39,7 @@ export default function AdminCustomQuizIndex({ configs, enabled, stats, courses 
                 <h2 className="mb-2 font-bold text-text">How this works</h2>
                 <p className="text-sm text-text-secondary">
                     A student picks a Subject (and optionally a Topic within it), a Difficulty, and how many
-                    questions -- the system pulls a fresh random set straight from the shared Question Bank. No
+                    questions. The system pulls a fresh random set straight from the shared Question Bank. No
                     admin needs to hand-build a quiz for every combination.
                 </p>
                 <div className="mt-4 flex flex-wrap items-center gap-2 text-sm text-text-secondary">

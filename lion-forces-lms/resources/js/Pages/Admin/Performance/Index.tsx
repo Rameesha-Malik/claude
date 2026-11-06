@@ -1,6 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
 import Icon from '@/Components/Icon';
 import AdminLayout from '@/Layouts/AdminLayout';
+import EmptyState from '@/Components/EmptyState';
 
 const ICONS = {
     graduationCap: 'M4.26 10.147a60.436 60.436 0 00-.491 6.347A48.627 48.627 0 0112 20.904a48.627 48.627 0 018.232-4.41 60.46 60.46 0 00-.491-6.347m-15.482 0a50.57 50.57 0 00-2.658-.813A59.905 59.905 0 0112 3.493a59.902 59.902 0 0110.399 5.84c-.896.248-1.783.52-2.658.814m-15.482 0A50.697 50.697 0 0112 13.489a50.702 50.702 0 017.74-3.342M6.75 15a.75.75 0 100-1.5.75.75 0 000 1.5zm0 0v-3.675A55.378 55.378 0 0112 8.443',
@@ -149,17 +150,13 @@ export default function PerformanceIndex({ students, selectedStudentId, data }: 
             </div>
 
             {!data ? (
-                <div className="rounded-3xl border border-dashed border-border bg-surface p-10 text-center text-text-secondary">
-                    No students to show yet.
-                </div>
+                <EmptyState>No students to show yet.</EmptyState>
             ) : (
                 <>
-                    <div className="relative mb-6 flex flex-wrap items-center justify-between gap-6 overflow-hidden rounded-3xl bg-gradient-to-br from-secondary to-teal-800 p-6 text-white sm:p-8">
+                    <div className="relative mb-6 flex flex-wrap items-center justify-between gap-6 overflow-hidden rounded-3xl bg-secondary p-6 text-white sm:p-8">
                         <div>
-                            <span className="inline-flex items-center gap-1.5 rounded-full bg-white/15 px-3 py-1 text-xs font-bold uppercase tracking-wide">
-                                Performance Index
-                            </span>
-                            <h2 className="mt-4 font-display text-2xl sm:text-3xl">{data.student.name}: Overall score</h2>
+                            <p className="text-xs font-bold uppercase tracking-wide text-teal-200">Performance Index</p>
+                            <h2 className="mt-1 font-display text-2xl sm:text-3xl">{data.student.name}: Overall score</h2>
                             <p className="mt-2 max-w-lg text-sm text-teal-100">
                                 Lion Forces Academy algorithm-based index from quizzes, pass rate, lectures &amp; course completion.
                             </p>

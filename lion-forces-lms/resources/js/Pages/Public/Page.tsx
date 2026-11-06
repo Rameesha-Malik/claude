@@ -9,7 +9,7 @@ export default function StaticPage({ page }: Props) {
         <PublicLayout>
             <Head title={page.title} />
 
-            <section className="bg-gradient-to-br from-secondary to-teal-950 py-16 text-white">
+            <section className="bg-secondary py-16 text-white">
                 <div className="mx-auto max-w-container px-4 sm:px-6 lg:px-8">
                     <h1 className="font-display text-4xl uppercase tracking-wide sm:text-5xl">{page.title}</h1>
                 </div>

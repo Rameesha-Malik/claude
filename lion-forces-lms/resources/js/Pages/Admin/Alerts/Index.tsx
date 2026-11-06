@@ -1,7 +1,8 @@
 import { Head, router } from '@inertiajs/react';
 import axios from 'axios';
-import Icon from '@/Components/Icon';
 import AdminLayout from '@/Layouts/AdminLayout';
+import AdminPageHeader from '@/Components/AdminPageHeader';
+import EmptyState from '@/Components/EmptyState';
 
 interface AlertItem {
     id: string;
@@ -31,30 +32,24 @@ export default function AlertsIndex({ notifications }: Props) {
         <AdminLayout header="My Alerts">
             <Head title="My Alerts" />
 
-            <div className="mb-6 flex flex-wrap items-start justify-between gap-4 rounded-3xl border border-border bg-gradient-to-br from-primary-subtle to-surface p-6 sm:p-8">
-                <div>
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-surface px-3 py-1 text-xs font-bold uppercase tracking-wide text-primary shadow-sm">
-                        <Icon d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" className="h-3.5 w-3.5" /> Inbox
-                    </span>
-                    <h1 className="mt-4 font-display text-3xl text-text">My Alerts</h1>
-                    <p className="mt-2 max-w-xl text-sm text-text-secondary">
-                        Your latest alerts and updates. Click any notification to go to the relevant page.
-                    </p>
-                </div>
-                {hasUnread && (
-                    <button
-                        onClick={() => router.post('/admin/alerts/mark-all-read', {}, { preserveScroll: true })}
-                        className="flex-shrink-0 rounded-xl border border-border bg-surface px-4 py-2.5 text-sm font-bold text-text hover:border-primary hover:text-primary"
-                    >
-                        Mark all as read
-                    </button>
-                )}
-            </div>
+            <AdminPageHeader
+                eyebrow="Inbox"
+                title="My Alerts"
+                description="Your latest alerts and updates. Click any notification to go to the relevant page."
+                right={
+                    hasUnread && (
+                        <button
+                            onClick={() => router.post('/admin/alerts/mark-all-read', {}, { preserveScroll: true })}
+                            className="flex-shrink-0 rounded-xl border border-border bg-surface px-4 py-2.5 text-sm font-bold text-text hover:border-primary hover:text-primary"
+                        >
+                            Mark all as read
+                        </button>
+                    )
+                }
+            />
 
             {notifications.data.length === 0 ? (
-                <div className="rounded-3xl border border-dashed border-border bg-surface p-10 text-center text-text-secondary">
-                    No notifications yet.
-                </div>
+                <EmptyState>No notifications yet.</EmptyState>
             ) : (
                 <div className="space-y-2">
                     {notifications.data.map((n) => (

@@ -10,7 +10,7 @@ export default function FaqPage({ faqs }: Props) {
         <PublicLayout>
             <Head title="FAQ" />
 
-            <section className="bg-gradient-to-br from-secondary to-teal-950 py-16 text-white">
+            <section className="bg-secondary py-16 text-white">
                 <div className="mx-auto max-w-container px-4 sm:px-6 lg:px-8">
                     <h1 className="font-display text-4xl uppercase tracking-wide sm:text-5xl">Frequently Asked Questions</h1>
                 </div>

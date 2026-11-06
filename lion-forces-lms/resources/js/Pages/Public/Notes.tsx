@@ -13,7 +13,7 @@ export default function Notes({ notes }: { notes: NoteItem[] }) {
         <PublicLayout>
             <Head title="Notes" />
 
-            <section className="relative overflow-hidden bg-gradient-to-br from-secondary to-teal-950 py-20 text-center text-white">
+            <section className="relative overflow-hidden bg-secondary py-20 text-center text-white">
                 <div className="relative mx-auto max-w-container px-4 sm:px-6 lg:px-8">
                     <SectionKicker dark><span className="mx-auto">Study Material</span></SectionKicker>
                     <h1 className="font-display text-5xl uppercase tracking-wide sm:text-6xl">Notes</h1>

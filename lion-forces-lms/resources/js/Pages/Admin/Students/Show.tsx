@@ -104,7 +104,7 @@ function ProfileHeader({ student }: { student: Student }) {
     }
 
     return (
-        <div className="mb-6 overflow-hidden rounded-3xl border border-border bg-gradient-to-br from-secondary to-teal-950 p-6 text-white sm:p-8">
+        <div className="mb-6 overflow-hidden rounded-3xl border border-border bg-secondary p-6 text-white sm:p-8">
             <div className="flex flex-wrap items-center justify-between gap-4">
                 <div className="flex items-center gap-4">
                     <div className="flex h-16 w-16 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl bg-white/10 text-xl font-bold">

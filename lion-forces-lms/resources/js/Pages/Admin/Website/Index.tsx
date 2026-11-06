@@ -180,7 +180,7 @@ function HeroImagePanel({ heroImagePath }: { heroImagePath: string | null }) {
         <Panel className="lg:col-span-2">
             <h2 className="mb-1 font-bold text-text">Homepage Hero Photo</h2>
             <p className="mb-4 text-sm text-text-secondary">
-                The large photo on the homepage hero, next to the headline. A tall portrait-ish photo (roughly 4:5) works best — it's cropped to fit automatically.
+                The large photo on the homepage hero, next to the headline. A tall portrait-ish photo (roughly 4:5) works best. It's cropped to fit automatically.
             </p>
             <div className="mb-4 flex items-center gap-4">
                 <div className="flex h-28 w-24 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-dashed border-border bg-surface-sunken">

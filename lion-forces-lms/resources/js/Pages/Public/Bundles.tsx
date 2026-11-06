@@ -13,7 +13,7 @@ export default function Bundles({ bundles }: { bundles: BundleItem[] }) {
         <PublicLayout>
             <Head title="Bundles" />
 
-            <section className="relative overflow-hidden bg-gradient-to-br from-secondary to-teal-950 py-20 text-center text-white">
+            <section className="relative overflow-hidden bg-secondary py-20 text-center text-white">
                 <div className="relative mx-auto max-w-container px-4 sm:px-6 lg:px-8">
                     <SectionKicker dark><span className="mx-auto">Prep for More Than One</span></SectionKicker>
                     <h1 className="font-display text-5xl uppercase tracking-wide sm:text-6xl">Bundles</h1>

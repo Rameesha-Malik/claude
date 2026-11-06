@@ -2,6 +2,8 @@ import { Head, router, useForm } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
 import CloseButton from '@/Components/CloseButton';
 import AdminLayout from '@/Layouts/AdminLayout';
+import AdminPageHeader from '@/Components/AdminPageHeader';
+import EmptyState from '@/Components/EmptyState';
 
 interface CourseOpt { id: number; title: string }
 interface Manager {
@@ -126,24 +128,15 @@ export default function ContentManagersIndex({ managers, courses, filters }: Pro
         <AdminLayout header="Content Managers">
             <Head title="Content Managers" />
 
-            <div className="mb-6 flex flex-wrap items-start justify-between gap-4 rounded-3xl border border-border bg-surface p-6 sm:p-8">
-                <div className="flex gap-4">
-                    <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-2xl bg-primary-subtle text-primary">
-                        <svg className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M17 20h5v-2a4 4 0 00-3-3.87M9 20H4v-2a4 4 0 013-3.87m5-9.13a4 4 0 110 8 4 4 0 010-8zm6 4a4 4 0 11-8 0" />
-                        </svg>
-                    </span>
-                    <div>
-                        <h1 className="font-display text-3xl text-text">Content managers</h1>
-                        <p className="mt-2 max-w-xl text-sm text-text-secondary">
-                            Team members who can add or edit content in assigned courses. They cannot manage students, enrollments, or settings.
-                        </p>
-                    </div>
-                </div>
-                <button onClick={() => setAddOpen(true)} className="flex-shrink-0 rounded-xl bg-secondary px-5 py-3 text-sm font-bold uppercase text-on-secondary shadow-sm hover:bg-teal-800">
-                    + Add content manager
-                </button>
-            </div>
+            <AdminPageHeader
+                title="Content Managers"
+                description="Team members who can add or edit content in assigned courses. They cannot manage students, enrollments, or settings."
+                right={
+                    <button onClick={() => setAddOpen(true)} className="flex-shrink-0 rounded-xl bg-secondary px-5 py-3 text-sm font-bold uppercase text-on-secondary shadow-sm hover:bg-teal-800">
+                        + Add content manager
+                    </button>
+                }
+            />
 
             <form onSubmit={submitSearch} className="mb-6 flex gap-2 rounded-3xl border border-border bg-surface p-5">
                 <input
@@ -156,9 +149,7 @@ export default function ContentManagersIndex({ managers, courses, filters }: Pro
             </form>
 
             {managers.length === 0 ? (
-                <div className="rounded-3xl border border-dashed border-border bg-surface p-10 text-center text-text-secondary">
-                    No content managers yet.
-                </div>
+                <EmptyState>No content managers yet.</EmptyState>
             ) : (
                 <div className="space-y-3">
                     {managers.map((m) => (

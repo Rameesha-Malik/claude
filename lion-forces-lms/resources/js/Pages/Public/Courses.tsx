@@ -83,7 +83,7 @@ export default function Courses({ courses, categories, tags, filters }: Props) {
         <PublicLayout>
             <Head title="Courses" />
 
-            <section className="relative overflow-hidden bg-gradient-to-br from-secondary to-teal-950 py-20">
+            <section className="relative overflow-hidden bg-secondary py-20">
                 {/* dot-grid pattern + drifting gradient blobs -- breaks up the
                     flat dark fill instead of leaving it a solid gradient */}
                 <div
@@ -160,7 +160,7 @@ export default function Courses({ courses, categories, tags, filters }: Props) {
                 <RevealOnScroll className="grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
                     {courses.data.map((course) => (
                         <div key={course.id} className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-sm transition-all duration-normal hover:-translate-y-1.5 hover:border-primary hover:shadow-2xl">
-                            <div className="relative h-40 overflow-hidden bg-gradient-to-br from-teal-600 via-teal-800 to-teal-950">
+                            <div className="relative h-40 overflow-hidden bg-secondary">
                                 {course.thumbnail_path ? (
                                     <>
                                         <img

@@ -73,7 +73,7 @@ export default function TakeCustomQuiz({
                 headerExtra={
                     <>
                         1 mark each · no negative marking
-                        {mode === 'timed' && <span className="ml-2 font-bold uppercase text-primary">Timed mode -- no feedback until submit</span>}
+                        {mode === 'timed' && <span className="ml-2 font-bold uppercase text-primary">Timed mode: no feedback until submit</span>}
                     </>
                 }
                 timerNode={

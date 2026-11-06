@@ -169,7 +169,7 @@ function LessonPlayer({ lesson }: { lesson: Lesson }) {
                 // eslint-disable-next-line jsx-a11y/media-has-caption
                 <video controls src={fileUrl} className="w-full rounded-xl bg-black" />
             ) : (
-                <p className="rounded-xl bg-surface-sunken p-6 text-sm text-text-muted">This video is still being imported -- check back in a few minutes.</p>
+                <p className="rounded-xl bg-surface-sunken p-6 text-sm text-text-muted">This video is still being imported. Check back in a few minutes.</p>
             );
         case 'video_upload':
             return fileUrl ? (
@@ -652,11 +652,15 @@ function QuizListItem({ quiz }: { quiz: QuizSummary }) {
             href={`/portal/quizzes/${quiz.id}`}
             className="flex w-full items-center gap-3 rounded-2xl border border-dashed border-primary px-3 py-3 text-left text-sm transition-all duration-fast hover:bg-primary-subtle"
         >
-            <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-primary-subtle text-primary">
-                <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                </svg>
-            </span>
+            {quiz.latest_attempt_id ? (
+                <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-primary-subtle text-primary">
+                    <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                </span>
+            ) : (
+                <span className="h-7 w-7 flex-shrink-0 rounded-full border-2 border-dashed border-primary" />
+            )}
             <span className="min-w-0 flex-1 truncate font-medium text-text">{quiz.title}</span>
             <span className="flex-shrink-0 text-xs font-bold uppercase tracking-wide text-primary">
                 {quiz.latest_attempt_id ? 'Retake Quiz' : 'Start Quiz'}

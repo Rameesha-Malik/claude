@@ -4,6 +4,7 @@ import CloseButton from '@/Components/CloseButton';
 import RichTextArea from '@/Components/RichTextArea';
 import StatusDot from '@/Components/StatusDot';
 import AdminLayout from '@/Layouts/AdminLayout';
+import EmptyState from '@/Components/EmptyState';
 
 interface PageRow { id: number; title: string; slug: string; content: string | null; is_published: boolean; show_in_header: boolean; show_in_footer: boolean; public_url: string; updated_at: string }
 interface Props { pages: PageRow[] }
@@ -111,8 +112,8 @@ export default function PagesIndex({ pages }: Props) {
             </div>
 
             {pages.length === 0 && (
-                <div className="mt-4 rounded-3xl border border-dashed border-border bg-surface p-10 text-center text-text-secondary">
-                    No pages yet.
+                <div className="mt-4">
+                    <EmptyState>No pages yet.</EmptyState>
                 </div>
             )}
 

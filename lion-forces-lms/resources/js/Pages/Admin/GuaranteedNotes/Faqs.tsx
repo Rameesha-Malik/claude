@@ -5,6 +5,7 @@ import LiteMarkdown from '@/Components/LiteMarkdown';
 import RichTextArea from '@/Components/RichTextArea';
 import StatusDot from '@/Components/StatusDot';
 import AdminLayout from '@/Layouts/AdminLayout';
+import EmptyState from '@/Components/EmptyState';
 
 interface NoteOption { id: number; title: string }
 interface FaqRow { id: number; question: string; answer: string; is_active: boolean; note: NoteOption | null }
@@ -82,10 +83,7 @@ export default function NoteFaqsIndex({ faqs, notes }: Props) {
             </div>
 
             {faqs.length === 0 ? (
-                <div className="rounded-3xl border border-dashed border-border bg-surface p-10 text-center text-text-secondary">
-                    <p className="font-bold text-text">No FAQs yet</p>
-                    <p className="mt-1 text-sm">Add FAQs to answer common questions on a note's detail page.</p>
-                </div>
+                <EmptyState title="No FAQs yet" message="Add FAQs to answer common questions on a note's detail page." />
             ) : (
                 <div className="space-y-2">
                     {faqs.map((f) => (
