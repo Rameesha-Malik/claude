@@ -173,6 +173,8 @@ Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->nam
         Route::put('/settings', [AdminWebsiteController::class, 'updateSettings'])->name('settings.update');
         Route::post('/logo', [AdminWebsiteController::class, 'updateLogo'])->name('logo.update');
         Route::delete('/logo', [AdminWebsiteController::class, 'destroyLogo'])->name('logo.destroy');
+        Route::post('/hero-image', [AdminWebsiteController::class, 'updateHeroImage'])->name('hero-image.update');
+        Route::delete('/hero-image', [AdminWebsiteController::class, 'destroyHeroImage'])->name('hero-image.destroy');
         Route::put('/announcement', [AdminWebsiteController::class, 'updateAnnouncement'])->name('announcement.update');
         Route::put('/home-sections/{homeSection}', [AdminWebsiteController::class, 'updateHomeSection'])->name('home-sections.update');
 

@@ -33,6 +33,7 @@ class WebsiteController extends Controller
                 'social_youtube' => Setting::get('social_youtube'),
             ],
             'logoPath' => Setting::get('site_logo_path'),
+            'heroImagePath' => Setting::get('hero_image_path'),
             'announcement' => AnnouncementBar::first(),
             'heroSection' => HomeSection::where('section_key', 'hero')->first(),
             'ctaSection' => HomeSection::where('section_key', 'cta_footer')->first(),
@@ -101,6 +102,36 @@ class WebsiteController extends Controller
         Setting::set('site_logo_path', null);
 
         return back()->with('success', 'Logo removed.');
+    }
+
+    // Same pattern as updateLogo/destroyLogo above -- the homepage hero photo
+    // was a bundled file (resources/js/assets/hero/...), not editable without
+    // a code change. Falls back to that bundled photo when no setting value
+    // is stored, same as every other image here falls back to a placeholder.
+    public function updateHeroImage(Request $request)
+    {
+        $request->validate(['hero_image' => 'required|image|max:4096']);
+
+        $old = Setting::get('hero_image_path');
+        $path = $request->file('hero_image')->store('branding', 'public');
+        Setting::set('hero_image_path', $path);
+
+        if ($old) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($old);
+        }
+
+        return back()->with('success', 'Hero image updated.');
+    }
+
+    public function destroyHeroImage()
+    {
+        $old = Setting::get('hero_image_path');
+        if ($old) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($old);
+        }
+        Setting::set('hero_image_path', null);
+
+        return back()->with('success', 'Hero image reset to the default photo.');
     }
 
     public function updateAnnouncement(Request $request)

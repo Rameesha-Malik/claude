@@ -19,6 +19,7 @@ interface Testimonial { id: number; student_name: string; testimonial_text: stri
 interface Props {
     settings: Settings;
     logoPath: string | null;
+    heroImagePath: string | null;
     announcement: Announcement | null;
     heroSection: HomeSection;
     ctaSection: HomeSection;
@@ -60,7 +61,7 @@ export default function WebsiteIndex(props: Props) {
             </div>
 
             {tab === 'Settings' && <SettingsPanel settings={props.settings} logoPath={props.logoPath} announcement={props.announcement} />}
-            {tab === 'Home Page' && <HomePagePanel hero={props.heroSection} cta={props.ctaSection} />}
+            {tab === 'Home Page' && <HomePagePanel hero={props.heroSection} cta={props.ctaSection} heroImagePath={props.heroImagePath} />}
             {tab === 'How to Buy' && <HowToBuyPanel hero={props.howToBuyHeroSection} paymentMethods={props.paymentMethods} />}
             {tab === 'Stats' && <StatsPanel items={props.statsItems} />}
             {tab === 'Services' && <ServicesPanel items={props.serviceCards} />}
@@ -140,6 +141,68 @@ function LogoPanel({ logoPath }: { logoPath: string | null }) {
                             className={btnDangerClass}
                         >
                             Remove
+                        </button>
+                    )}
+                </form>
+            </div>
+            <FormErrors errors={form.errors as Record<string, string>} />
+        </Panel>
+    );
+}
+
+// Same upload/remove pattern as LogoPanel above. Was previously a file
+// bundled into the frontend build (resources/js/assets/hero/...) -- no way
+// to change it without a code deploy. "Remove" resets to that bundled photo
+// rather than leaving the hero with no image at all.
+function HeroImagePanel({ heroImagePath }: { heroImagePath: string | null }) {
+    const [preview, setPreview] = useState<string | null>(null);
+    const form = useForm<{ hero_image: File | null }>({ hero_image: null });
+
+    function submit(e: FormEvent) {
+        e.preventDefault();
+        if (!form.data.hero_image) return;
+        form.post('/admin/website/hero-image', {
+            forceFormData: true,
+            onSuccess: () => {
+                form.setData('hero_image', null);
+                setPreview(null);
+            },
+        });
+    }
+
+    function pickFile(e: ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0] ?? null;
+        form.setData('hero_image', file);
+        setPreview(file ? URL.createObjectURL(file) : null);
+    }
+
+    return (
+        <Panel className="lg:col-span-2">
+            <h2 className="mb-1 font-bold text-text">Homepage Hero Photo</h2>
+            <p className="mb-4 text-sm text-text-secondary">
+                The large photo on the homepage hero, next to the headline. A tall portrait-ish photo (roughly 4:5) works best — it's cropped to fit automatically.
+            </p>
+            <div className="mb-4 flex items-center gap-4">
+                <div className="flex h-28 w-24 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-dashed border-border bg-surface-sunken">
+                    {preview || heroImagePath ? (
+                        // eslint-disable-next-line jsx-a11y/alt-text
+                        <img src={preview ?? `/storage/${heroImagePath}`} className="h-full w-full object-cover" />
+                    ) : (
+                        <span className="px-2 text-center text-xs text-text-muted">Default photo</span>
+                    )}
+                </div>
+                <form onSubmit={submit} className="flex flex-wrap items-center gap-3">
+                    <input type="file" accept="image/*" onChange={pickFile} className="text-sm text-text-secondary" />
+                    <button type="submit" disabled={!form.data.hero_image || form.processing} className={btnClass}>
+                        {form.processing ? 'Uploading…' : 'Upload Photo'}
+                    </button>
+                    {heroImagePath && (
+                        <button
+                            type="button"
+                            onClick={() => confirm('Reset to the default hero photo?') && router.delete('/admin/website/hero-image')}
+                            className={btnDangerClass}
+                        >
+                            Reset to Default
                         </button>
                     )}
                 </form>
@@ -274,12 +337,14 @@ function SettingsPanel({ settings, logoPath, announcement }: { settings: Setting
     );
 }
 
-function HomePagePanel({ hero, cta }: { hero: HomeSection; cta: HomeSection }) {
+function HomePagePanel({ hero, cta, heroImagePath }: { hero: HomeSection; cta: HomeSection; heroImagePath: string | null }) {
     const heroForm = useForm({ ...hero.content });
     const ctaForm = useForm({ ...cta.content });
 
     return (
         <div className="grid gap-6 lg:grid-cols-2">
+            <HeroImagePanel heroImagePath={heroImagePath} />
+
             <Panel>
                 <h2 className="mb-4 font-bold text-text">Hero Section</h2>
                 <form

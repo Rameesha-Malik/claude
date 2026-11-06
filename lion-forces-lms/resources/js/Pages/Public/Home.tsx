@@ -162,6 +162,7 @@ interface Props {
     faqs: FaqItem[];
     testimonials: TestimonialItem[];
     latestNews: NewsItem[];
+    heroImagePath: string | null;
 }
 
 function money(v: string | null) {
@@ -185,7 +186,7 @@ const NEWS_BANNER_GRADIENTS = ['from-teal-600 via-teal-800 to-teal-950', 'from-s
 // surfaced here as a decorative "trust bar" tag ribbon, not invented copy.
 const TRUST_TAGS = ['Pak Army', 'Pak Navy', 'Pak Air Force', 'ISSB', 'PMA', 'Lady Cadet Course', 'AFNS', 'Rangers'];
 
-export default function Home({ sections, stats, services, featuredCourses, faqs, testimonials, latestNews }: Props) {
+export default function Home({ sections, stats, services, featuredCourses, faqs, testimonials, latestNews, heroImagePath }: Props) {
     const hero = sections.hero?.content ?? {};
     const why = sections.why_choose_us?.content ?? {};
     const whyTitle = sections.why_choose_us?.title ?? 'Why Choose Our Platform?';
@@ -198,8 +199,15 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
         <PublicLayout>
             <Head title="Home" />
 
-            {/* ---------------- Hero — light, split two-column ---------------- */}
-            <section className="relative overflow-hidden bg-surface pb-16 pt-28 sm:pb-20 sm:pt-32 lg:pb-28">
+            {/* ---------------- Hero — light, split two-column ----------------
+                lg:min-h + lg:flex centers this within one screen on desktop,
+                instead of running taller than the viewport and needing a
+                scroll to see the rest of it -- the image was uncapped
+                (lg:max-w-none) so it grew as tall as the grid column let it,
+                and the headline was larger again at lg than at sm. Both
+                trimmed back; mobile is untouched since stacking + scrolling
+                is the normal, expected pattern there. */}
+            <section className="relative overflow-hidden bg-surface pb-16 pt-28 sm:pb-20 sm:pt-32 lg:flex lg:min-h-[calc(100vh-5rem)] lg:items-center lg:py-16">
                 {/* soft brand-color glow, not a full dark wash -- keeps this section light */}
                 <div
                     aria-hidden
@@ -212,7 +220,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                     style={{ backgroundColor: 'var(--oxblood-300)' }}
                 />
 
-                <div className="relative mx-auto grid max-w-container gap-16 px-4 sm:px-6 lg:grid-cols-2 lg:items-center lg:gap-10 lg:px-8">
+                <div className="relative mx-auto grid max-w-container gap-16 px-4 sm:px-6 lg:w-full lg:grid-cols-2 lg:items-center lg:gap-10 lg:px-8">
                     {/* Left: copy */}
                     <RevealOnScroll staggerMs={110}>
                         <div className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-2 text-sm font-semibold text-text shadow-sm">
@@ -220,7 +228,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                             <span>4.8 Rated by 1,500+ Candidates</span>
                         </div>
 
-                        <h1 className="mt-6 font-display text-5xl uppercase leading-[1.05] text-secondary sm:text-6xl lg:text-[4.5rem]">
+                        <h1 className="mt-6 font-display text-5xl uppercase leading-[1.05] text-secondary sm:text-6xl">
                             Train Like You <span className="italic text-oxblood-600">Mean</span>
                             <br />
                             to Get{' '}
@@ -276,7 +284,10 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                     </RevealOnScroll>
 
                     {/* Right: visual panel + floating stat badges */}
-                    <RevealOnScroll staggerMs={110} className="relative mx-auto w-full max-w-md lg:max-w-none">
+                    {/* Was lg:max-w-none, letting the image grow as wide (and, at aspect-4/5,
+                        as tall) as the grid column allowed -- on a wide desktop viewport that
+                        made it taller than the screen. Capped at max-w-md everywhere now. */}
+                    <RevealOnScroll staggerMs={110} className="relative mx-auto w-full max-w-md">
                         <div className="relative aspect-[4/5] w-full">
                             {/* dotted texture card sitting behind the photo, offset like the reference */}
                             <div
@@ -291,7 +302,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
 
                             <div className="relative h-full w-full overflow-hidden rounded-[2rem] border border-border bg-gradient-to-br from-secondary via-teal-800 to-teal-950 shadow-2xl">
                                 <img
-                                    src={heroCadetsStudying}
+                                    src={heroImagePath ? `/storage/${heroImagePath}` : heroCadetsStudying}
                                     alt="Pakistan armed forces academy cadets preparing together"
                                     className="h-full w-full object-cover"
                                 />

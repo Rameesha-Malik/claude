@@ -8,6 +8,7 @@ use App\Models\HomeSection;
 use App\Models\Instructor;
 use App\Models\NewsAnnouncement;
 use App\Models\ServiceCard;
+use App\Models\Setting;
 use App\Models\StatsItem;
 use App\Models\Testimonial;
 use Illuminate\Http\Request;
@@ -24,6 +25,7 @@ class PublicSiteController extends Controller
 
         return Inertia::render('Public/Home', [
             'sections' => $sections,
+            'heroImagePath' => Setting::get('hero_image_path'),
             'stats' => StatsItem::orderBy('order')->get(['icon', 'number', 'label']),
             'services' => ServiceCard::orderBy('order')->get(['icon', 'title', 'description']),
             'featuredCourses' => Course::with(['category', 'sharedNotes:id,subject_id'])
