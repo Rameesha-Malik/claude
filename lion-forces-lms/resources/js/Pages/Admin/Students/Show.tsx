@@ -165,7 +165,11 @@ function ProfileHeader({ student }: { student: Student }) {
                             onChange={(e) => passwordForm.setData('password_confirmation', e.target.value)}
                         />
                     </div>
-                    <button type="submit" disabled={passwordForm.processing} className="rounded-lg bg-accent px-4 py-2 text-xs font-bold uppercase tracking-wide text-accent-fg hover:bg-accent-hover">
+                    {/* Explicit gold/dark-text pair, not bg-accent/text-accent-fg -- this
+                        panel is dark (bg-white/10 over the dark header), and accent now
+                        resolves to oxblood (meant for light surfaces) with light text to
+                        match, which would go nearly invisible here. */}
+                    <button type="submit" disabled={passwordForm.processing} className="rounded-lg bg-gold-400 px-4 py-2 text-xs font-bold uppercase tracking-wide text-secondary hover:bg-gold-300">
                         Save Password
                     </button>
                     {passwordForm.errors.password && <div className="w-full text-xs text-red-300">{passwordForm.errors.password}</div>}
@@ -503,7 +507,7 @@ function ReviewsPanel({ reviews }: { reviews: Review[] }) {
                         <div key={r.id} className="rounded-lg border border-border p-3 text-sm">
                             <div className="flex items-center justify-between">
                                 <span className="font-semibold text-text">{r.course?.title ?? 'N/A'}</span>
-                                {r.rating && <span className="text-gold-700">{'★'.repeat(r.rating)}</span>}
+                                {r.rating && <span className="text-star">{'★'.repeat(r.rating)}</span>}
                             </div>
                             <LiteMarkdown text={r.review_text} className="mt-1 text-text-secondary" />
                         </div>

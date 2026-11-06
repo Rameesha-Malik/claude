@@ -108,7 +108,7 @@ function UsersIcon() {
 
 function StarRow() {
     return (
-        <span className="flex items-center gap-0.5 text-gold-500">
+        <span className="flex items-center gap-0.5 text-star">
             {Array.from({ length: 5 }).map((_, i) => (
                 <svg key={i} viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
                     <path d="M10 1.5l2.6 5.6 6.1.6-4.6 4.1 1.3 6-5.4-3-5.4 3 1.3-6-4.6-4.1 6.1-.6L10 1.5Z" />
@@ -209,7 +209,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                 <div
                     aria-hidden
                     className="pointer-events-none absolute -left-32 bottom-0 h-96 w-96 rounded-full opacity-30 blur-3xl"
-                    style={{ backgroundColor: 'var(--gold-300)' }}
+                    style={{ backgroundColor: 'var(--oxblood-300)' }}
                 />
 
                 <div className="relative mx-auto grid max-w-container gap-16 px-4 sm:px-6 lg:grid-cols-2 lg:items-center lg:gap-10 lg:px-8">
@@ -221,7 +221,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                         </div>
 
                         <h1 className="mt-6 font-display text-5xl uppercase leading-[1.05] text-secondary sm:text-6xl lg:text-[4.5rem]">
-                            Train Like You <span className="italic text-gold-600">Mean</span>
+                            Train Like You <span className="italic text-oxblood-600">Mean</span>
                             <br />
                             to Get{' '}
                             <span className="relative inline-block">
@@ -325,10 +325,14 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                                 </div>
                             </FloatingBadge>
 
+                            {/* Was a standalone pale-gold fill chip -- made it match the
+                                "20+" badge's dark-teal-fill/gold-number treatment instead, so
+                                the two floating badges read as one consistent pair rather than
+                                one dark and one randomly pastel. */}
                             <FloatingBadge className="-bottom-2 right-4 translate-x-1/4 sm:right-8">
-                                <div className="rounded-2xl px-5 py-4 text-secondary shadow-xl" style={{ backgroundColor: 'var(--gold-400)' }}>
-                                    <div className="font-display text-2xl">5,000+</div>
-                                    <div className="text-xs">Assessments Taken</div>
+                                <div className="rounded-2xl bg-secondary px-5 py-4 text-white shadow-xl">
+                                    <div className="font-display text-2xl text-gold-400">5,000+</div>
+                                    <div className="text-xs text-teal-200">Assessments Taken</div>
                                 </div>
                             </FloatingBadge>
                         </div>
@@ -403,7 +407,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                         <div
                             aria-hidden
                             className="absolute left-1/2 top-1/2 h-[26rem] w-[26rem] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-60 blur-3xl"
-                            style={{ background: 'radial-gradient(circle, var(--color-primary-subtle), var(--gold-300) 70%, transparent 100%)' }}
+                            style={{ background: 'radial-gradient(circle, var(--color-primary-subtle), var(--oxblood-300) 70%, transparent 100%)' }}
                         />
 
                         <div className="relative flex h-full items-center justify-center">
@@ -446,7 +450,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                             ];
                             return (
                                 <div key={i} className={`absolute z-20 hidden max-w-[10rem] rounded-xl border border-border bg-surface px-3 py-2 shadow-lg sm:block ${positions[i]}`}>
-                                    <div className="flex items-center gap-1 text-gold-500">
+                                    <div className="flex items-center gap-1 text-star">
                                         {Array.from({ length: t.rating ?? 5 }).map((_, s) => (
                                             <svg key={s} viewBox="0 0 20 20" fill="currentColor" className="h-3 w-3">
                                                 <path d="M10 1.5l2.6 5.6 6.1.6-4.6 4.1 1.3 6-5.4-3-5.4 3 1.3-6-4.6-4.1 6.1-.6L10 1.5Z" />
@@ -696,9 +700,12 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                                 <span className="mx-auto">No Login Required</span>
                             </SectionKicker>
                             <h2 className="font-display text-3xl uppercase tracking-wide sm:text-4xl">{demoTeaser.banner_text}</h2>
+                            {/* Explicit gold/dark-text, not bg-accent/text-accent-fg -- this
+                                card is a dark teal gradient, and accent now means oxblood with
+                                light text, which would go nearly invisible here. */}
                             <Link
                                 href={demoTeaser.button_link ?? '/demo-quiz'}
-                                className="mt-8 inline-block rounded-xl bg-accent px-8 py-4 font-bold uppercase tracking-wide text-accent-fg shadow-lg transition-transform duration-normal ease-spring hover:-translate-y-0.5 hover:bg-accent-hover"
+                                className="mt-8 inline-block rounded-xl bg-gold-400 px-8 py-4 font-bold uppercase tracking-wide text-secondary shadow-lg transition-transform duration-normal ease-spring hover:-translate-y-0.5 hover:bg-gold-300"
                             >
                                 {demoTeaser.button_text ?? 'Start Demo Quiz'}
                             </Link>
@@ -782,7 +789,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                                                 {t.rating && (
                                                     <div className="inline-flex items-center gap-1.5 rounded-full bg-primary-subtle px-2.5 py-1 text-xs font-bold text-primary">
                                                         {t.rating.toFixed(1)}
-                                                        <span className="flex gap-0.5 text-gold-500">
+                                                        <span className="flex gap-0.5 text-star">
                                                             {Array.from({ length: 5 }).map((_, s) => (
                                                                 <svg key={s} className="h-3 w-3" fill={s < t.rating! ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 20 20">
                                                                     <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
@@ -808,7 +815,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                         <div
                             aria-hidden
                             className="absolute -right-10 -top-10 h-40 w-40 rotate-12 rounded-3xl"
-                            style={{ backgroundColor: 'rgba(212, 165, 55, 0.1)' }}
+                            style={{ backgroundColor: 'rgba(143, 53, 64, 0.1)' }}
                         />
 
                         <div className="relative grid gap-10 lg:grid-cols-2 lg:items-center">
@@ -865,7 +872,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                                             strokeLinecap="round"
                                             strokeLinejoin="round"
                                         />
-                                        <circle cx="150" cy="15" r="4" fill="var(--gold-500)" />
+                                        <circle cx="150" cy="15" r="4" fill="var(--oxblood-500)" />
                                         <circle cx="200" cy="5" r="4" fill="var(--color-primary)" />
                                     </svg>
                                 </div>

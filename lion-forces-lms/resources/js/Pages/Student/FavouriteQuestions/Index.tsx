@@ -37,7 +37,7 @@ function FavouriteCard({ item }: { item: Favourite }) {
                 <button
                     onClick={remove}
                     title="Remove from favourites"
-                    className="flex-shrink-0 text-xl text-gold-500 hover:opacity-70"
+                    className="flex-shrink-0 text-xl text-star hover:opacity-70"
                 >
                     ★
                 </button>

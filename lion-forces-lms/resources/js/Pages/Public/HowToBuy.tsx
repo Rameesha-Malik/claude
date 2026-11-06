@@ -74,9 +74,12 @@ export default function HowToBuy({ hero, packages, paymentMethods, faqs }: { her
                     <p className="mx-auto mt-4 max-w-xl text-teal-200">
                         {hero.subheading}
                     </p>
+                    {/* Explicit gold/dark-text, not bg-accent/text-accent-fg -- this hero is
+                        a dark teal gradient, and accent now means oxblood with light text,
+                        which would go nearly invisible here. */}
                     <Link
                         href="/register"
-                        className="mt-8 inline-block rounded-full bg-accent px-8 py-4 text-sm font-bold uppercase tracking-wide text-accent-fg shadow-lg transition-all duration-normal ease-spring hover:-translate-y-0.5 hover:bg-accent-hover"
+                        className="mt-8 inline-block rounded-full bg-gold-400 px-8 py-4 text-sm font-bold uppercase tracking-wide text-secondary shadow-lg transition-all duration-normal ease-spring hover:-translate-y-0.5 hover:bg-gold-300"
                     >
                         Register Now
                     </Link>
@@ -87,7 +90,7 @@ export default function HowToBuy({ hero, packages, paymentMethods, faqs }: { her
                 <RevealOnScroll className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                     {STEPS.map((step, i) => (
                         <div key={i} className="relative rounded-2xl border border-border bg-surface p-6">
-                            <div className="mb-3 font-display text-4xl text-gold-700">0{i + 1}</div>
+                            <div className="mb-3 font-display text-4xl text-oxblood-700">0{i + 1}</div>
                             <h3 className="font-bold text-text">{step.title}</h3>
                             <p className="mt-1 text-sm text-text-secondary">
                                 {step.title === 'Send Screenshot on WhatsApp' && site.whatsappNumber

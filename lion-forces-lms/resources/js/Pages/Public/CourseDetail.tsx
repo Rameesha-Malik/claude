@@ -31,7 +31,7 @@ interface Course {
 }
 
 function Stars({ rating }: { rating: number }) {
-    return <span className="text-gold-500">{'★'.repeat(rating)}{'☆'.repeat(5 - rating)}</span>;
+    return <span className="text-star">{'★'.repeat(rating)}{'☆'.repeat(5 - rating)}</span>;
 }
 
 function SectionHeading({ d, children }: { d: string; children: ReactNode }) {

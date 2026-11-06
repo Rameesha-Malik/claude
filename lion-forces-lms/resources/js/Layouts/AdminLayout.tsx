@@ -170,7 +170,10 @@ export default function AdminLayout({ children, header }: PropsWithChildren<{ he
                                                 : 'text-teal-200 hover:translate-x-0.5 hover:bg-white/10 hover:text-white'
                                         }`}
                                     >
-                                        {active && <span className="absolute -left-2.5 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-accent" />}
+                                        {/* Explicit gold, not bg-accent -- accent now resolves to oxblood (a
+                                            dark color meant for light surfaces) and this bar sits on the
+                                            dark teal sidebar, where gold/brass has always had the contrast. */}
+                                        {active && <span className="absolute -left-2.5 top-1/2 h-5 w-1 -translate-y-1/2 rounded-r-full bg-gold-400" />}
                                         <span className={`transition-transform duration-normal ${active ? '' : 'group-hover:scale-110'}`}>{item.icon}</span>
                                         {item.label}
                                     </Link>

@@ -6,7 +6,7 @@
  * Two variants:
  * - "dark" (default): bright, higher-opacity blobs for dark/teal sections
  *   (hero, CTA banners).
- * - "light": the same drifting motion but soft, low-opacity teal/gold
+ * - "light": the same drifting motion but soft, low-opacity teal/oxblood
  *   blobs tuned for white/light-gray sections — enough to break up flat
  *   solid backgrounds without ever competing with body text contrast.
  */
@@ -20,7 +20,7 @@ export default function GradientMesh({ className = '', variant = 'dark' }: { cla
                 />
                 <div
                     className="absolute -right-1/4 top-0 h-[60%] w-[60%] rounded-full opacity-[0.10] blur-3xl"
-                    style={{ background: 'radial-gradient(circle, var(--gold-400) 0%, transparent 70%)', animation: 'mesh-drift-2 24s ease-in-out infinite' }}
+                    style={{ background: 'radial-gradient(circle, var(--oxblood-400) 0%, transparent 70%)', animation: 'mesh-drift-2 24s ease-in-out infinite' }}
                 />
                 <div
                     className="absolute bottom-[-15%] left-1/3 h-[45%] w-[45%] rounded-full opacity-[0.08] blur-3xl"

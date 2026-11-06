@@ -78,6 +78,42 @@
   --gold-700: #8f6a08;
 
   /* ---------------------------------------------------------------------
+     1. PRIMITIVE — accent oxblood  (derived, decorative)
+     Replaces gold as the brand's second voice -- gold-500 text on white
+     was only ~2.3:1 contrast (fails WCAG AA); oxblood-500 is 7.6:1 at the
+     same role. Hue sits near-complementary to the primary teal (strong
+     contrast by design) but is deliberately darker/more muted than
+     --red-600 (the status/danger color) so the two don't read as the same
+     color used for two different meanings -- an accent and an error are
+     never the same hue *and* the same weight here.
+     Gold is NOT retired: it still does the job it was always good at
+     (brass/insignia text and fills on dark teal surfaces, where it had
+     great contrast the whole time -- the problem was only ever gold on
+     light backgrounds). Oxblood takes over every light-background and
+     default-CTA role gold used to have.
+     --------------------------------------------------------------------- */
+  --oxblood-300: #c98a90;
+  --oxblood-400: #a85861;
+  --oxblood-500: #8f3540;
+  --oxblood-600: #73272f;
+  --oxblood-700: #551e24;
+
+  /* ---------------------------------------------------------------------
+     1. PRIMITIVE — star rating yellow  (standalone, not part of either
+     brand ramp on purpose)
+     Star ratings are a near-universal convention (Amazon, Google, every
+     review widget) -- users read "bright yellow star" as a rating
+     regardless of a site's own brand colors, the same way they read red
+     as an error independent of brand. So this does NOT follow the accent
+     color when the accent changes; it's pinned to real yellow. Contrast
+     against white is deliberately not WCAG-AA-chased here, same as every
+     other star-rating UI on the web -- the rating is read by comparing
+     filled vs. empty star shapes, not by reading the color against the
+     page background.
+     --------------------------------------------------------------------- */
+  --star-yellow: #fbbf24;
+
+  /* ---------------------------------------------------------------------
      1. PRIMITIVE — typography, spacing, radius, elevation, motion
      --------------------------------------------------------------------- */
   --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system,
@@ -188,10 +224,16 @@
   /* focus — never remove, only restyle */
   --color-focus-ring: var(--teal-600);
 
-  /* accent — the gold voice described above */
-  --color-accent: var(--gold-500);
-  --color-accent-hover: var(--gold-600);
-  --color-on-accent: var(--teal-950);
+  /* accent — the oxblood voice described above. Oxblood is a dark fill
+     (unlike gold-500, which was light), so text on top of it needs to be
+     light now, not the dark teal-950 gold used to pair with. */
+  --color-accent: var(--oxblood-500);
+  --color-accent-hover: var(--oxblood-600);
+  --color-on-accent: var(--neutral-0);
+
+  /* star rating — intentionally not part of the accent system, see the
+     primitive's comment */
+  --color-star: var(--star-yellow);
 
   /* feedback */
   --color-success: var(--green-600); --color-success-bg: var(--green-100);
@@ -321,6 +363,16 @@
 
   --color-secondary:      var(--teal-800);
   --color-secondary-hover:var(--teal-700);
+
+  /* Was missing here entirely, so this manual dark-theme toggle fell back
+     to the light theme's accent -- harmless while that was gold (good
+     contrast on dark regardless), but would silently break once the
+     light-mode default became oxblood (a dark color, invisible on this
+     already-dark canvas). Dark surfaces always want the gold/brass
+     variant, same reasoning as the OS-level dark mode block above. */
+  --color-accent:       var(--gold-400);
+  --color-accent-hover: var(--gold-300);
+  --color-on-accent:    var(--teal-950);
 
   --color-success-bg: #0c2f1c; --color-warning-bg: #3a2708;
   --color-danger-bg:  #3a1414; --color-info-bg:    #10224a;

@@ -75,6 +75,11 @@ export default {
                     300: 'var(--gold-300)', 400: 'var(--gold-400)', 500: 'var(--gold-500)',
                     600: 'var(--gold-600)', 700: 'var(--gold-700)',
                 },
+                oxblood: {
+                    300: 'var(--oxblood-300)', 400: 'var(--oxblood-400)', 500: 'var(--oxblood-500)',
+                    600: 'var(--oxblood-600)', 700: 'var(--oxblood-700)',
+                },
+                star: 'var(--color-star)',
                 success: { DEFAULT: 'var(--color-success)', bg: 'var(--color-success-bg)' },
                 warning: { DEFAULT: 'var(--color-warning)', bg: 'var(--color-warning-bg)' },
                 danger: { DEFAULT: 'var(--color-danger)', bg: 'var(--color-danger-bg)' },

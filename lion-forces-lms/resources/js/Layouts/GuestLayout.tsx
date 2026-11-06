@@ -63,7 +63,7 @@ export default function Guest({ children, title, description }: PropsWithChildre
                     </div>
 
                     <div className="relative mt-auto rounded-xl border border-white/10 bg-black/25 px-4 py-3 backdrop-blur-sm">
-                        <div className="flex gap-0.5 text-gold-400">
+                        <div className="flex gap-0.5 text-star">
                             {Array.from({ length: 5 }).map((_, s) => (
                                 <svg key={s} viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5">
                                     <path d="M10 1.5l2.6 5.6 6.1.6-4.6 4.1 1.3 6-5.4-3-5.4 3 1.3-6-4.6-4.1 6.1-.6L10 1.5Z" />

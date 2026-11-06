@@ -75,7 +75,10 @@ export default function Contact({ faqs }: { faqs: FaqItem[] }) {
                             </div>
                         )}
                         <div className="flex items-center gap-2.5 rounded-full border border-white/15 bg-white/[0.06] px-4 py-2.5 text-left backdrop-blur-sm">
-                            <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-accent text-accent-fg">
+                            {/* Explicit gold, not bg-accent/text-accent-fg -- this icon sits in a
+                                glass-on-dark card, and accent now means oxblood (light-surface),
+                                which would barely show here. */}
+                            <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gold-400 text-secondary">
                                 <ClockIcon className="h-4 w-4" />
                             </span>
                             <div>

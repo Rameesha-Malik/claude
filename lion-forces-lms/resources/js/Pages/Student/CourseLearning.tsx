@@ -788,7 +788,7 @@ function CourseMetaBar({
             <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm">
                 {reviewCount > 0 && (
                     <div className="flex items-center gap-1.5">
-                        <span className="text-gold-500">{'★'.repeat(Math.round(avgRating))}{'☆'.repeat(5 - Math.round(avgRating))}</span>
+                        <span className="text-star">{'★'.repeat(Math.round(avgRating))}{'☆'.repeat(5 - Math.round(avgRating))}</span>
                         <span className="text-text-secondary">
                             {avgRating.toFixed(1)} ({reviewCount} review{reviewCount === 1 ? '' : 's'})
                         </span>
@@ -1225,7 +1225,7 @@ function ReviewWidget({ course, myReview }: { course: Course; myReview: Review |
             <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-3xl border border-border bg-surface p-4 transition-shadow duration-normal hover:shadow-md">
                 <div className="text-sm text-text-secondary">
                     {myReview ? (
-                        <>Your review: <span className="text-gold-500">{'★'.repeat(myReview.rating)}{'☆'.repeat(5 - myReview.rating)}</span> · {STATUS_LABEL[myReview.status]}</>
+                        <>Your review: <span className="text-star">{'★'.repeat(myReview.rating)}{'☆'.repeat(5 - myReview.rating)}</span> · {STATUS_LABEL[myReview.status]}</>
                     ) : (
                         'Enjoying this course? Leave a rating to help other students.'
                     )}
@@ -1245,7 +1245,7 @@ function ReviewWidget({ course, myReview }: { course: Course; myReview: Review |
                         key={n}
                         type="button"
                         onClick={() => setData('rating', n)}
-                        className="text-2xl text-gold-500 transition-transform duration-fast hover:scale-125"
+                        className="text-2xl text-star transition-transform duration-fast hover:scale-125"
                         aria-label={`${n} stars`}
                     >
                         {n <= data.rating ? '★' : '☆'}
