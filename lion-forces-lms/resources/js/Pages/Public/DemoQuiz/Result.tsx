@@ -66,8 +66,16 @@ export default function DemoQuizResult({ attempt, quizTitle }: Props) {
                 </div>
             </section>
 
+            {/* Client: every block here was forced into the hero's own
+                max-w-2xl column regardless of screen width, which left huge
+                dead margins on a real monitor. The score card and the
+                upsell/revision-list pitch are two logically separate things
+                (your result vs. why to enroll), so on a wide screen they now
+                sit side by side instead of stacked in one narrow strip --
+                the "Review Your Answers" list stays its own full-width
+                single column below, since that reads better long-form. */}
             <section className="relative -mt-14 px-4 pb-20 sm:px-6 lg:px-8">
-                <div className="mx-auto max-w-2xl">
+                <div className="mx-auto grid max-w-4xl gap-6 lg:grid-cols-2 lg:items-start">
                     <div className="rounded-2xl border border-border bg-surface p-8 text-center shadow-2xl">
                         <ScoreRing percentage={percentage} />
                         <p className="mt-3 text-text-secondary">You scored {score} out of {total}</p>
@@ -87,13 +95,19 @@ export default function DemoQuizResult({ attempt, quizTitle }: Props) {
                             </div>
                         </div>
 
-                        <div className="mt-8 rounded-xl bg-primary-subtle p-6">
+                        <Link href="/demo-quiz" className="mt-6 inline-block text-sm font-semibold text-text-secondary hover:text-primary">
+                            Try another demo quiz
+                        </Link>
+                    </div>
+
+                    <div className="flex flex-col gap-6">
+                        <div className="rounded-2xl bg-primary-subtle p-6 text-center lg:text-left">
                             <h2 className="font-display text-xl uppercase text-text">Like what you saw?</h2>
                             <p className="mt-2 text-sm text-text-secondary">
                                 This was just a taste. Enroll to unlock full practice tests, sectioned mock exams, staged tests,
                                 guaranteed notes, and personal progress tracking for your target exam.
                             </p>
-                            <div className="mt-4 flex flex-wrap justify-center gap-3">
+                            <div className="mt-4 flex flex-wrap justify-center gap-3 lg:justify-start">
                                 <Link href="/courses" className="rounded-lg bg-primary px-6 py-3 text-sm font-bold uppercase tracking-wide text-on-primary hover:bg-primary-hover">
                                     Browse Courses
                                 </Link>
@@ -103,34 +117,27 @@ export default function DemoQuizResult({ attempt, quizTitle }: Props) {
                             </div>
                         </div>
 
-                        <Link href="/demo-quiz" className="mt-6 inline-block text-sm font-semibold text-text-secondary hover:text-primary">
-                            Try another demo quiz
-                        </Link>
+                        {attempt.wrong_count > 0 && (
+                            <div className="flex items-start gap-3 rounded-2xl border border-warning bg-warning-bg p-5 text-left">
+                                <svg className="mt-0.5 h-5 w-5 flex-shrink-0 text-warning" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.75a.75.75 0 110 1.5.75.75 0 010-1.5zM11.25 12h.75v4.5h.75M12 21a9 9 0 100-18 9 9 0 000 18z" />
+                                </svg>
+                                <p className="font-bold text-text">
+                                    Enrolled students get every wrong answer saved to a personal{' '}
+                                    <span className="text-primary">Revision List</span> automatically, so it's easy to come back and
+                                    relearn exactly what tripped them up.{' '}
+                                    <Link href="/register" className="underline hover:text-primary">Create a free account</Link> to get that too.
+                                </p>
+                            </div>
+                        )}
                     </div>
-
-                    {attempt.wrong_count > 0 && (
-                        <div className="mt-8 flex items-start gap-3 rounded-2xl border border-warning bg-warning-bg p-5 text-left">
-                            <svg className="mt-0.5 h-5 w-5 flex-shrink-0 text-warning" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M12 6.75a.75.75 0 110 1.5.75.75 0 010-1.5zM11.25 12h.75v4.5h.75M12 21a9 9 0 100-18 9 9 0 000 18z" />
-                            </svg>
-                            <p className="font-bold text-text">
-                                Enrolled students get every wrong answer saved to a personal{' '}
-                                <span className="text-primary">Revision List</span> automatically, so it's easy to come back and
-                                relearn exactly what tripped them up.{' '}
-                                <Link href="/register" className="underline hover:text-primary">Create a free account</Link> to get that too.
-                            </p>
-                        </div>
-                    )}
-
                 </div>
 
                 {/* hideStats: the hero card above already shows Correct/
                     Wrong/Skipped prominently -- repeating those same three
-                    numbers again in a sidebar here was pure duplication,
-                    so this stays at the hero's own max-w-2xl rhythm
-                    instead of widening for a now-empty stat column. */}
+                    numbers again in a sidebar here was pure duplication. */}
                 {attempt.answers.length > 0 && (
-                    <div className="mx-auto mt-10 max-w-2xl">
+                    <div className="mx-auto mt-10 max-w-4xl">
                         <h2 className="mb-4 text-center font-display text-2xl uppercase tracking-wide text-text">Review Your Answers</h2>
                         <AnswerReviewRunner answers={attempt.answers} hideStats />
                     </div>
