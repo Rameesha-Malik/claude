@@ -197,34 +197,6 @@ export default function Contact({ faqs }: { faqs: FaqItem[] }) {
                     <p className="mx-auto mt-3 max-w-xl text-teal-200">
                         Have a question or feedback? Send us a message and we'll get back to you as soon as possible.
                     </p>
-
-                    <div className="relative mx-auto mt-6 flex max-w-md flex-wrap items-center justify-center gap-4">
-                        {site.supportEmail && (
-                            <div className="flex items-center gap-2.5 rounded-full border border-white/15 bg-white/10 px-4 py-2.5 text-left">
-                                <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-primary text-on-primary">
-                                    <MailIcon className="h-4 w-4" />
-                                </span>
-                                <div>
-                                    <p className="text-[0.65rem] uppercase tracking-wide text-teal-300">Email Us</p>
-                                    <p className="text-xs font-semibold text-white">{site.supportEmail}</p>
-                                </div>
-                            </div>
-                        )}
-                        {site.officeHours && (
-                            <div className="flex items-center gap-2.5 rounded-full border border-white/15 bg-white/10 px-4 py-2.5 text-left">
-                                {/* Explicit gold, not bg-accent/text-accent-fg -- this icon sits in a
-                                    card on the dark hero, and accent now means oxblood (light-surface),
-                                    which would barely show here. */}
-                                <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gold-400 text-secondary">
-                                    <ClockIcon className="h-4 w-4" />
-                                </span>
-                                <div>
-                                    <p className="text-[0.65rem] uppercase tracking-wide text-teal-300">Hours</p>
-                                    <p className="text-xs font-semibold text-white">{site.officeHours}</p>
-                                </div>
-                            </div>
-                        )}
-                    </div>
                 </div>
 
                 <div className="relative mx-auto mt-14 grid max-w-container items-start gap-6 px-4 text-left sm:px-6 lg:grid-cols-[0.85fr_1.15fr] lg:px-8">
