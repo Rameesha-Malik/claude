@@ -6,6 +6,7 @@ import FaqAccordionItem from '@/Components/FaqAccordionItem';
 import GradientMesh from '@/Components/GradientMesh';
 import RevealOnScroll from '@/Components/RevealOnScroll';
 import SectionKicker from '@/Components/SectionKicker';
+import WaveRibbon from '@/Components/WaveRibbon';
 import PublicLayout from '@/Layouts/PublicLayout';
 import { PageProps } from '@/types';
 
@@ -173,13 +174,20 @@ export default function Contact({ faqs }: { faqs: FaqItem[] }) {
                 separate plain-white content section. Both panels are glass
                 cards (white/5-10 + border-white/15, the same idiom this
                 page's hero pills already used) floating on that canvas. */}
-            <section className="relative overflow-hidden bg-secondary pb-20 pt-20 text-center sm:pb-28">
+            <section className="relative overflow-hidden bg-secondary pb-14 pt-20 text-center sm:pb-20">
                 <div
                     aria-hidden
                     className="absolute inset-0 opacity-[0.15]"
                     style={{ backgroundImage: 'radial-gradient(rgba(255,255,255,0.7) 1.5px, transparent 1.5px)', backgroundSize: '20px 20px' }}
                 />
                 <GradientMesh className="opacity-70" />
+                {/* Client: wide gutters either side of the centered headline read as
+                    dead space on large screens -- this flowing line (the same motif
+                    used on the Demo Quiz / Practice Tests heroes) fills that full-bleed
+                    width, not just the max-w-container column the text sits in. */}
+                <div aria-hidden className="absolute inset-x-0 top-0 h-[26rem] overflow-hidden sm:h-[30rem]">
+                    <WaveRibbon className="opacity-60" />
+                </div>
 
                 <div className="relative mx-auto max-w-container px-4 sm:px-6 lg:px-8">
                     <span className="inline-flex items-center gap-2 rounded-full bg-white/10 px-4 py-1.5 text-xs font-bold uppercase tracking-wide text-teal-200">
@@ -202,18 +210,20 @@ export default function Contact({ faqs }: { faqs: FaqItem[] }) {
                                 </div>
                             </div>
                         )}
-                        <div className="flex items-center gap-2.5 rounded-full border border-white/15 bg-white/10 px-4 py-2.5 text-left">
-                            {/* Explicit gold, not bg-accent/text-accent-fg -- this icon sits in a
-                                card on the dark hero, and accent now means oxblood (light-surface),
-                                which would barely show here. */}
-                            <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gold-400 text-secondary">
-                                <ClockIcon className="h-4 w-4" />
-                            </span>
-                            <div>
-                                <p className="text-[0.65rem] uppercase tracking-wide text-teal-300">Response Time</p>
-                                <p className="text-xs font-semibold text-white">Within a day</p>
+                        {site.officeHours && (
+                            <div className="flex items-center gap-2.5 rounded-full border border-white/15 bg-white/10 px-4 py-2.5 text-left">
+                                {/* Explicit gold, not bg-accent/text-accent-fg -- this icon sits in a
+                                    card on the dark hero, and accent now means oxblood (light-surface),
+                                    which would barely show here. */}
+                                <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full bg-gold-400 text-secondary">
+                                    <ClockIcon className="h-4 w-4" />
+                                </span>
+                                <div>
+                                    <p className="text-[0.65rem] uppercase tracking-wide text-teal-300">Hours</p>
+                                    <p className="text-xs font-semibold text-white">{site.officeHours}</p>
+                                </div>
                             </div>
-                        </div>
+                        )}
                     </div>
                 </div>
 
@@ -325,7 +335,7 @@ export default function Contact({ faqs }: { faqs: FaqItem[] }) {
             </section>
 
             {faqs.length > 0 && (
-                <section className="bg-surface-sunken py-20">
+                <section className="bg-surface-sunken pb-20 pt-14">
                     <div className="mx-auto max-w-container px-4 sm:px-6 lg:px-8">
                         <RevealOnScroll className="mx-auto mb-10 max-w-2xl text-center">
                             <SectionKicker>Common Questions</SectionKicker>
