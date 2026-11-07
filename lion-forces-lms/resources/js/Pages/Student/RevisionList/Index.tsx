@@ -5,7 +5,7 @@ import RevealOnScroll from '@/Components/RevealOnScroll';
 import StudentLayout from '@/Layouts/StudentLayout';
 
 interface Option { id: number; option_text: string; is_correct: boolean }
-interface Question { id: number; question_text: string; explanation: string | null; options: Option[] }
+interface Question { id: number; question_text: string; explanation: string | null; options: Option[]; subject: { name: string } | null }
 interface RevisionItem { id: number; times_wrong: number; last_wrong_at: string; question: Question }
 interface Props { items: RevisionItem[] }
 
@@ -18,12 +18,17 @@ function RevisionCard({ item }: { item: RevisionItem }) {
 
     return (
         <div className="rounded-3xl border border-border bg-surface p-5">
-            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                <p className="font-semibold text-text"><LiteMarkdownInline text={item.question.question_text} /></p>
+            <div className="mb-3 flex flex-wrap items-center gap-2">
+                {item.question.subject && (
+                    <span className="flex-shrink-0 rounded-full bg-primary-subtle px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide text-primary">
+                        {item.question.subject.name}
+                    </span>
+                )}
                 <span className="flex-shrink-0 rounded-full bg-warning-bg px-2.5 py-0.5 text-xs font-bold uppercase text-warning">
                     Missed {item.times_wrong}×
                 </span>
             </div>
+            <p className="mb-3 font-semibold text-text"><LiteMarkdownInline text={item.question.question_text} /></p>
 
             {revealed ? (
                 <>

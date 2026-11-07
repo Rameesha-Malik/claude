@@ -20,7 +20,7 @@ class RevisionListController extends Controller
     {
         $items = RevisionListItem::where('user_id', $request->user()->id)
             ->where('resolved', false)
-            ->with('question.options')
+            ->with('question.options', 'question.subject:id,name')
             ->orderByDesc('last_wrong_at')
             ->get();
 
