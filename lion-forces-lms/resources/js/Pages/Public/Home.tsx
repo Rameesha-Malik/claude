@@ -479,16 +479,16 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                 <section className="relative overflow-hidden bg-secondary pb-8 pt-8 text-text-inverse">
                     <GradientMesh className="opacity-60" />
                     <div className="relative mx-auto max-w-container px-4 sm:px-6 lg:px-8">
-                        <RevealOnScroll className="mx-auto mb-16 max-w-2xl text-center">
+                        <RevealOnScroll className="mx-auto mb-16 max-w-2xl text-center lg:max-w-6xl">
                             <span className="inline-flex items-center rounded-full bg-surface px-4 py-1.5 text-xs font-bold uppercase tracking-wide text-secondary shadow-sm">
                                 The Process
                             </span>
                             <h2 className="mt-5 font-display text-4xl uppercase tracking-wide sm:text-5xl">{howItWorksTitle}</h2>
-                            {howItWorks.paragraph && <p className="mx-auto mt-4 max-w-xl text-teal-200">{howItWorks.paragraph}</p>}
+                            {howItWorks.paragraph && <p className="mx-auto mt-4 max-w-xl text-teal-200 lg:max-w-none">{howItWorks.paragraph}</p>}
                         </RevealOnScroll>
                         <RevealOnScroll className="grid gap-8 md:grid-cols-3">
                             {howItWorks.steps.map((step: { title: string; description: string }, i: number) => (
-                                <div key={i} className="relative rounded-2xl border border-white/15 bg-white/10 p-6 transition-transform duration-normal hover:-translate-y-1">
+                                <div key={i} className="relative rounded-2xl border border-white/25 bg-white/10 p-6 transition-transform duration-normal hover:-translate-y-1">
                                     <div className="mb-4 flex items-start justify-between">
                                         <div>
                                             <h3 className="text-lg font-bold">{step.title}</h3>
