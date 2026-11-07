@@ -473,7 +473,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                                 </Link>
                             </div>
 
-                            <div className="divide-y divide-border rounded-2xl border border-border bg-surface">
+                            <div className="divide-y divide-border overflow-hidden rounded-[1.5rem] border border-border bg-surface">
                                 {faqs.map((faq, i) => (
                                     <FaqAccordionItem key={i} question={faq.question} answer={faq.answer} />
                                 ))}
