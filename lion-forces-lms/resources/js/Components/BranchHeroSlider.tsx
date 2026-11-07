@@ -3,6 +3,7 @@ import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import SectionKicker from '@/Components/SectionKicker';
+import ShieldMark from '@/Components/ShieldMark';
 import branchArmy from '@/assets/hero/branch-army.jpg';
 import branchNavy from '@/assets/hero/branch-navy.jpg';
 import branchAirforce from '@/assets/hero/branch-airforce.jpg';
@@ -190,7 +191,7 @@ export default function BranchHeroSlider({ heroImagePath }: { heroImagePath?: st
 function BranchSlideContent({ slide, reversed = false, active = true }: { slide: Slide; reversed?: boolean; active?: boolean }) {
     return (
         <div className="relative mx-auto flex h-full max-w-container flex-col items-center gap-10 px-4 py-16 sm:px-6 lg:h-full lg:flex-row lg:gap-14 lg:px-8 lg:py-0">
-            <div className={`w-full lg:w-1/2 ${reversed ? 'lg:order-2' : ''}`}>
+            <div className={`relative w-full lg:w-1/2 ${reversed ? 'lg:order-2' : ''}`}>
                 <div
                     className="relative aspect-[4/5] w-full max-w-md overflow-hidden rounded-[2rem] border border-white/10 shadow-2xl transition-transform duration-slower ease-out lg:mx-0"
                     style={{ marginInline: 'auto', transform: active ? 'scale(1)' : 'scale(1.04)' }}
@@ -206,6 +207,17 @@ function BranchSlideContent({ slide, reversed = false, active = true }: { slide:
                         {slide.branch}
                     </div>
                 </div>
+
+                {/* Seam badge: the academy's own mark, pinned on the photo card's
+                    inner edge (the edge facing the copy column) -- lg only, since
+                    there's no visual "seam" once the columns stack on mobile. */}
+                <div
+                    className={`absolute top-1/2 z-20 hidden h-16 w-16 -translate-y-1/2 items-center justify-center rounded-full border-4 border-secondary bg-primary shadow-xl lg:flex ${
+                        reversed ? 'left-0 -translate-x-1/2' : 'right-0 translate-x-1/2'
+                    }`}
+                >
+                    <ShieldMark className="h-8 w-8 text-on-primary" />
+                </div>
             </div>
 
             <div className={`w-full text-center lg:w-1/2 lg:text-left ${reversed ? 'lg:order-1' : ''}`}>
@@ -216,13 +228,25 @@ function BranchSlideContent({ slide, reversed = false, active = true }: { slide:
                     {slide.mottoTranslation && <span className="block text-xs font-medium normal-case tracking-normal text-teal-300">{slide.mottoTranslation}</span>}
                 </p>
                 <p className="mx-auto mt-5 max-w-lg text-lg leading-relaxed text-teal-200 lg:mx-0">{slide.description}</p>
-                <div className="mt-8 flex flex-wrap items-center justify-center gap-4 lg:justify-start">
+                <div className="mt-8 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
                     <Link
                         href={slide.ctaHref}
-                        className="inline-flex items-center gap-2 rounded-full bg-primary px-8 py-4 text-base font-bold uppercase tracking-wide text-on-primary shadow-lg transition-all duration-normal ease-spring hover:-translate-y-0.5 hover:shadow-xl"
+                        className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-sm font-bold uppercase tracking-wide text-on-primary shadow-lg transition-all duration-normal ease-spring hover:-translate-y-0.5 hover:shadow-xl"
                     >
                         Browse Courses
                         <ArrowIcon />
+                    </Link>
+                    <Link
+                        href="/demo-quiz"
+                        className="inline-flex items-center gap-2 rounded-full border-2 border-white/30 px-7 py-3.5 text-sm font-bold uppercase tracking-wide text-white transition-all duration-normal hover:-translate-y-0.5 hover:border-white/60"
+                    >
+                        Demo Quiz
+                    </Link>
+                    <Link
+                        href="/register"
+                        className="inline-flex items-center gap-2 rounded-full border-2 border-gold-400 px-7 py-3.5 text-sm font-bold uppercase tracking-wide text-gold-300 transition-all duration-normal hover:-translate-y-0.5 hover:bg-gold-400 hover:text-secondary"
+                    >
+                        Register Now
                     </Link>
                 </div>
             </div>
