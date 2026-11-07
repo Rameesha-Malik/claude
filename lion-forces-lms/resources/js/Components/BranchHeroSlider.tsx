@@ -66,6 +66,24 @@ export default function BranchHeroSlider({ slides }: { slides: HeroSlideData[] }
     const pinRef = useRef<HTMLDivElement>(null);
     const triggerRef = useRef<ScrollTrigger | null>(null);
     const [activeIndex, setActiveIndex] = useState(0);
+    const headerHeightRef = useRef(80);
+    const [panelHeight, setPanelHeight] = useState('calc(100vh - 80px)');
+
+    // Measured, not a fixed 80px/5rem guess -- the public header's real
+    // height varies (its nav row can grow/scroll with more nav items), so a
+    // hardcoded offset undershoots and lets this panel pin out from under
+    // the header, or leave a gap, instead of sitting flush below it.
+    useEffect(() => {
+        function measure() {
+            const h = document.querySelector('header')?.getBoundingClientRect().height;
+            if (!h) return;
+            headerHeightRef.current = h;
+            setPanelHeight(`calc(100vh - ${h}px)`);
+        }
+        measure();
+        window.addEventListener('resize', measure);
+        return () => window.removeEventListener('resize', measure);
+    }, []);
 
     useEffect(() => {
         if (total < 2) return;
@@ -76,10 +94,9 @@ export default function BranchHeroSlider({ slides }: { slides: HeroSlideData[] }
         mm.add('(min-width: 1024px) and (prefers-reduced-motion: no-preference)', () => {
             const st = ScrollTrigger.create({
                 trigger: sectionRef.current,
-                // '80px' (not 'top top') -- the public header is sticky and
-                // 5rem/80px tall; pinning at the viewport's true top would
-                // slide this panel under it instead of sitting below it.
-                start: 'top 80px',
+                // A function (not a plain string) so ScrollTrigger re-reads
+                // the live measured height on every refresh/resize.
+                start: () => `top ${headerHeightRef.current}px`,
                 end: () => `+=${(total - 1) * window.innerHeight * 0.9}`,
                 pin: pinRef.current,
                 scrub: 0.6,
@@ -120,7 +137,7 @@ export default function BranchHeroSlider({ slides }: { slides: HeroSlideData[] }
 
             {/* Desktop: scroll-pinned slider */}
             <div ref={sectionRef} className="relative hidden lg:block">
-                <div ref={pinRef} className="relative h-[calc(100vh-5rem)] overflow-hidden">
+                <div ref={pinRef} className="relative overflow-hidden" style={{ height: panelHeight }}>
                     {slides.map((slide, i) => (
                         <div
                             key={slide.branch_key}
