@@ -184,9 +184,15 @@ export default function Contact({ faqs }: { faqs: FaqItem[] }) {
                 {/* Client: wide gutters either side of the centered headline read as
                     dead space on large screens -- this flowing line (the same motif
                     used on the Demo Quiz / Practice Tests heroes) fills that full-bleed
-                    width, not just the max-w-container column the text sits in. */}
+                    width, not just the max-w-container column the text sits in. Two
+                    bands (not one stretched across the whole section) so the panel
+                    grid's own gutters further down stay covered too, without
+                    over-stretching a single ribbon's aspect ratio. */}
                 <div aria-hidden className="absolute inset-x-0 top-0 h-[26rem] overflow-hidden sm:h-[30rem]">
                     <WaveRibbon className="opacity-60" />
+                </div>
+                <div aria-hidden className="absolute inset-x-0 bottom-0 h-[22rem] overflow-hidden sm:h-[26rem]">
+                    <WaveRibbon className="opacity-40" />
                 </div>
 
                 <div className="relative mx-auto max-w-container px-4 sm:px-6 lg:px-8">
@@ -302,25 +308,24 @@ export default function Contact({ faqs }: { faqs: FaqItem[] }) {
                                 )}
                             </button>
                         </form>
+
+                        {/* Client: the plain FAQ section below here left dark, empty
+                            background under the form card -- folded the FAQ list into
+                            this panel instead of giving it its own separate section. */}
+                        {faqs.length > 0 && (
+                            <div className="relative mt-10 border-t border-white/15 pt-8">
+                                <SectionKicker dark>Common Questions</SectionKicker>
+                                <h3 className="font-display text-xl uppercase tracking-wide text-white">FAQs</h3>
+                                <div className="mt-4 divide-y divide-white/10 overflow-hidden rounded-[1rem] border border-white/15 bg-white/5">
+                                    {faqs.map((faq, i) => (
+                                        <FaqAccordionItem key={i} question={faq.question} answer={faq.answer} dark />
+                                    ))}
+                                </div>
+                            </div>
+                        )}
                     </RevealOnScroll>
                 </div>
             </section>
-
-            {faqs.length > 0 && (
-                <section className="bg-surface-sunken pb-20 pt-14">
-                    <div className="mx-auto max-w-container px-4 sm:px-6 lg:px-8">
-                        <RevealOnScroll className="mx-auto mb-10 max-w-2xl text-center">
-                            <SectionKicker>Common Questions</SectionKicker>
-                            <h2 className="font-display text-4xl uppercase tracking-wide text-text sm:text-5xl">FAQs</h2>
-                        </RevealOnScroll>
-                        <RevealOnScroll className="mx-auto max-w-3xl divide-y divide-border overflow-hidden rounded-[1.5rem] border border-border bg-surface">
-                            {faqs.map((faq, i) => (
-                                <FaqAccordionItem key={i} question={faq.question} answer={faq.answer} />
-                            ))}
-                        </RevealOnScroll>
-                    </div>
-                </section>
-            )}
         </PublicLayout>
     );
 }
