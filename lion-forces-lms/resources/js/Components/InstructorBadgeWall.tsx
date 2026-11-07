@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import Barcode from '@/Components/Barcode';
 
 interface Instructor {
     name: string;
@@ -9,21 +10,6 @@ interface Instructor {
 }
 
 const STRAP_COLORS = ['var(--teal-600)', 'var(--gold-500)', 'var(--teal-800)', 'var(--gold-400)', 'var(--teal-400)'];
-
-/** Deterministic pseudo-random bar widths so each badge's barcode looks distinct but never changes between renders. */
-function Barcode({ seed }: { seed: number }) {
-    const bars = Array.from({ length: 20 }, (_, i) => {
-        const v = Math.sin(seed * 12.9898 + i * 78.233) * 43758.5453;
-        return v - Math.floor(v) > 0.55 ? 2 : 1;
-    });
-    return (
-        <div className="flex h-4 items-end justify-center gap-[1.5px]" aria-hidden>
-            {bars.map((w, i) => (
-                <span key={i} className="bg-text-muted" style={{ width: w, height: i % 4 === 0 ? '100%' : '65%', opacity: 0.45 }} />
-            ))}
-        </div>
-    );
-}
 
 /**
  * ID badges hanging on lanyards from a rod, swaying gently, each flippable
