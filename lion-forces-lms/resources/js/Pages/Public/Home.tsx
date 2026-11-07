@@ -227,7 +227,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
 
             {/* ---------------- What We Offer — fanned card stack + scattered praise ---------------- */}
             {services.length > 0 && (
-                <section className="relative overflow-hidden bg-surface pb-24 pt-14">
+                <section className="relative overflow-hidden bg-surface pb-16 pt-14">
                     <GradientMesh variant="light" />
 
                     {/* Real branch crests (not the generic academy ShieldMark) in the wide
@@ -326,7 +326,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
 
             {/* ---------------- Featured Courses ---------------- */}
             {featuredCourses.length > 0 && (
-                <section className="relative overflow-hidden bg-surface-sunken py-20">
+                <section className="relative overflow-hidden bg-surface-sunken pb-20 pt-14">
                     <GradientMesh variant="light" />
                     <div className="relative mx-auto max-w-container px-4 sm:px-6 lg:px-8">
                         <RevealOnScroll className="mb-14 flex flex-wrap items-end justify-between gap-4">
