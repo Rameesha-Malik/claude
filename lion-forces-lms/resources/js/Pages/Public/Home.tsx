@@ -501,7 +501,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
             )}
 
             {/* ---------------- CTA Footer Banner — text + illustrative "your progress" dashboard preview ---------------- */}
-            <section className="mx-auto max-w-container px-4 pb-24 sm:px-6 lg:px-8">
+            <section className="mx-auto max-w-container px-4 pb-8 sm:px-6 lg:px-8">
                 <RevealOnScroll>
                     <div className="relative overflow-hidden rounded-3xl border-2 border-accent bg-surface-brand p-10 sm:p-16">
                         <div
