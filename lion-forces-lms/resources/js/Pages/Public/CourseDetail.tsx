@@ -1,5 +1,5 @@
 import { Head, Link, usePage } from '@inertiajs/react';
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 import LiteMarkdown from '@/Components/LiteMarkdown';
 import PublicLayout from '@/Layouts/PublicLayout';
 import { PageProps } from '@/types';
@@ -70,6 +70,27 @@ const INCLUDED_ICONS = {
 
 export default function CourseDetail({ course }: { course: Course }) {
     const { auth } = usePage<PageProps>().props;
+
+    // Client: "why radio not fill when I select a package" -- the package
+    // rows used to be plain links that navigated away immediately, so there
+    // was never a moment where a selection could visibly register. Now a
+    // package click just selects it (radio fills, card highlights); the one
+    // CTA button at the top carries the actual chosen package through to
+    // checkout. Defaults to the first package so the page always has a
+    // valid selection and a working CTA, matching the reference's
+    // pre-selected plan.
+    const [selectedPackageId, setSelectedPackageId] = useState<number | null>(
+        course.packages.length > 0 ? course.packages[0].id : null,
+    );
+    const selectedPackage = course.packages.find((p) => p.id === selectedPackageId) ?? null;
+    const displayPrice = selectedPackage ? selectedPackage.price : course.base_price;
+    const buyHref = auth.user
+        ? selectedPackage
+            ? `/portal/courses/${course.slug}/checkout?package=${selectedPackage.id}`
+            : `/portal/my-courses/${course.slug}`
+        : selectedPackage
+            ? '/register'
+            : '/how-to-buy';
 
     const included = [
         { key: 'lectures', label: 'Video Lectures & Notes', icon: INCLUDED_ICONS.lectures, on: true },
@@ -224,32 +245,38 @@ export default function CourseDetail({ course }: { course: Course }) {
                     <div className="sticky top-24 space-y-4">
                         <div className="rounded-[1.5rem] border border-border bg-surface p-6 shadow-md">
                             <div className="text-3xl font-bold text-primary">
-                                {course.base_price ? `Rs. ${Number(course.base_price).toLocaleString()}` : 'Contact us'}
+                                {displayPrice ? `Rs. ${Number(displayPrice).toLocaleString()}` : 'Contact us'}
                             </div>
-                            {/* Logged-in candidates go straight to the course (its own
-                                enrollment check handles "not purchased yet"); visitors get
-                                routed to How to Buy rather than straight into checkout. */}
+                            {/* Logged-in candidates with a package picked go straight to
+                                checkout for it; with nothing to pick (no packages at all)
+                                they go to the course itself, whose own enrollment check
+                                handles "not purchased yet". Visitors get routed to register
+                                (package picked) or How to Buy (nothing to pick). */}
                             <Link
-                                href={auth.user ? `/portal/my-courses/${course.slug}` : '/how-to-buy'}
+                                href={buyHref}
                                 className="mt-4 block rounded-[1rem] bg-primary py-3 text-center font-semibold text-on-primary hover:bg-primary-hover"
                             >
                                 {auth.user ? 'Start Learning' : 'Buy Now'}
                             </Link>
 
-                            {/* Client: wanted this to read like a plan-picker (21st.dev
-                                "Pricing" reference) -- rounded rectangle options with a
-                                radio-style indicator, not a plain bordered link list.
-                                These still just navigate straight to checkout/register
-                                (no actual selection state to carry), the circle is purely
-                                visual so each option reads as "a plan to pick". */}
+                            {/* Client: "why radio not fill when I select a package" -- these
+                                are now real radio-style selections (button, not Link): a
+                                click highlights the chosen package here, and the single CTA
+                                above carries that selection to checkout/register. */}
                             {course.packages.length > 0 && (
                                 <div className="mt-6 space-y-3">
                                     <div className="text-sm font-semibold text-text">Packages</div>
-                                    {course.packages.map((pkg) => (
-                                        <Link
+                                    {course.packages.map((pkg) => {
+                                        const isSelected = pkg.id === selectedPackageId;
+                                        return (
+                                        <button
                                             key={pkg.id}
-                                            href={auth.user ? `/portal/courses/${course.slug}/checkout?package=${pkg.id}` : '/register'}
-                                            className="group flex items-start justify-between gap-3 rounded-[1rem] border border-border p-4 transition-colors hover:border-primary hover:bg-primary-subtle"
+                                            type="button"
+                                            onClick={() => setSelectedPackageId(pkg.id)}
+                                            aria-pressed={isSelected}
+                                            className={`group flex w-full items-start justify-between gap-3 rounded-[1rem] border p-4 text-left transition-colors ${
+                                                isSelected ? 'border-primary bg-primary-subtle' : 'border-border hover:border-primary hover:bg-primary-subtle'
+                                            }`}
                                         >
                                             <div className="min-w-0 flex-1">
                                                 <div className="flex flex-wrap items-center gap-2">
@@ -263,9 +290,16 @@ export default function CourseDetail({ course }: { course: Course }) {
                                                 <div className="mt-0.5 text-sm text-text">Rs. {Number(pkg.price).toLocaleString()}</div>
                                                 {pkg.description && <p className="mt-1 text-xs text-text-secondary">{pkg.description}</p>}
                                             </div>
-                                            <span className="mt-1 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border-2 border-border transition-colors group-hover:border-primary" />
-                                        </Link>
-                                    ))}
+                                            <span
+                                                className={`mt-1 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border-2 transition-colors ${
+                                                    isSelected ? 'border-primary bg-primary' : 'border-border group-hover:border-primary'
+                                                }`}
+                                            >
+                                                {isSelected && <span className="h-2 w-2 rounded-full bg-on-primary" />}
+                                            </span>
+                                        </button>
+                                        );
+                                    })}
                                 </div>
                             )}
                         </div>
