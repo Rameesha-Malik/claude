@@ -103,7 +103,7 @@ export default function Login({
                 <button
                     type="submit"
                     disabled={processing}
-                    className="w-full rounded-lg bg-gradient-to-r from-secondary to-primary py-3.5 text-sm font-bold uppercase tracking-wide text-on-primary shadow-lg transition-all duration-normal hover:shadow-xl focus:outline-none focus:shadow-glow disabled:opacity-50"
+                    className="w-full rounded-[0.75rem] bg-gradient-to-r from-secondary to-primary py-3.5 text-sm font-bold uppercase tracking-wide text-on-primary shadow-lg transition-all duration-normal hover:shadow-xl focus:outline-none focus:shadow-glow disabled:opacity-50"
                 >
                     Login
                 </button>

@@ -23,7 +23,7 @@ export default function Guest({ children, title, description }: PropsWithChildre
                 backgroundSize: '18px 18px',
             }}
         >
-            <div className="relative flex w-full max-w-5xl overflow-hidden rounded-3xl bg-surface shadow-2xl">
+            <div className="relative flex w-full max-w-5xl overflow-hidden rounded-[2rem] bg-surface shadow-2xl">
                 <div className="relative hidden w-full max-w-md flex-col justify-between overflow-hidden bg-gradient-to-br from-secondary via-teal-800 to-teal-950 p-8 lg:flex">
                     <img
                         src={authParade}
@@ -62,7 +62,7 @@ export default function Guest({ children, title, description }: PropsWithChildre
                         </Link>
                     </div>
 
-                    <div className="relative mt-auto rounded-xl border border-white/10 bg-black/25 px-4 py-3 backdrop-blur-sm">
+                    <div className="relative mt-auto rounded-[1rem] border border-white/10 bg-black/25 px-4 py-3 backdrop-blur-sm">
                         <div className="flex gap-0.5 text-star">
                             {Array.from({ length: 5 }).map((_, s) => (
                                 <svg key={s} viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5">
