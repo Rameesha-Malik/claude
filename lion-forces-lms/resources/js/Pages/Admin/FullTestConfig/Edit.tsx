@@ -236,7 +236,7 @@ function StageForm({
                 </div>
             )}
 
-            <div className="mb-2 flex items-center justify-between">
+            <div className="mb-2 flex flex-wrap items-center justify-between gap-2">
                 <h4 className="text-sm font-bold text-text">Questions ({form.data.question_ids.length} selected)</h4>
                 <select className={inputClass} style={{ width: 200 }} value={subjectFilter} onChange={(e) => setSubjectFilter(e.target.value)}>
                     <option value="">All subjects</option>

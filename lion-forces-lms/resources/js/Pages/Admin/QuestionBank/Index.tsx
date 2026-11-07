@@ -71,7 +71,7 @@ function QuestionsPanel({ questions, subjects, topics, courses, filters, bulkUpl
 
     return (
         <div>
-            <div className="mb-4 flex items-center justify-between">
+            <div className="mb-4 flex flex-wrap items-center justify-between gap-2">
                 <select
                     className={inputClass}
                     style={{ width: 220 }}
@@ -81,7 +81,7 @@ function QuestionsPanel({ questions, subjects, topics, courses, filters, bulkUpl
                     <option value="">All subjects</option>
                     {subjects.map((s) => <option key={s.id} value={s.id}>{s.name}</option>)}
                 </select>
-                <div className="flex gap-2">
+                <div className="flex flex-wrap gap-2">
                     <button onClick={() => setShowBulk((v) => !v)} className={`${btnClass} bg-surface-sunken text-text hover:bg-surface-sunken/80`}>
                         {showBulk ? 'Cancel' : 'Bulk Upload (CSV)'}
                     </button>

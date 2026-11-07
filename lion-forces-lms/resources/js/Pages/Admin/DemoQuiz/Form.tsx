@@ -97,7 +97,7 @@ export default function DemoQuizForm({ demoQuiz, subjects, categories, questionB
                 </div>
 
                 <div className="rounded-2xl border border-border bg-surface p-6 lg:col-span-2">
-                    <div className="mb-3 flex items-center justify-between">
+                    <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                         <h3 className="font-bold text-text">Select Questions ({form.data.question_ids.length} selected)</h3>
                         <select className={inputClass} style={{ width: 200 }} value={subjectFilter} onChange={(e) => setSubjectFilter(e.target.value)}>
                             <option value="">All subjects</option>
