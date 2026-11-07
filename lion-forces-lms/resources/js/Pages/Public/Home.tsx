@@ -255,7 +255,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                         <div
                             aria-hidden
                             className="absolute left-1/2 top-1/2 h-[26rem] w-[26rem] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-60 blur-3xl"
-                            style={{ background: 'radial-gradient(circle, var(--color-primary-subtle), var(--oxblood-300) 70%, transparent 100%)' }}
+                            style={{ background: 'radial-gradient(circle, var(--color-primary-subtle), var(--teal-300) 70%, transparent 100%)' }}
                         />
 
                         <div className="relative flex h-full items-center justify-center">
