@@ -2,11 +2,12 @@ import { Head, Link } from '@inertiajs/react';
 import AnimatedCounter from '@/Components/AnimatedCounter';
 import BranchHeroSlider from '@/Components/BranchHeroSlider';
 import FaqAccordionItem from '@/Components/FaqAccordionItem';
+import FeaturedCoursesCarousel from '@/Components/FeaturedCoursesCarousel';
 import GradientMesh from '@/Components/GradientMesh';
-import LiteMarkdown from '@/Components/LiteMarkdown';
 import NewsCoverflowCarousel from '@/Components/NewsCoverflowCarousel';
 import RevealOnScroll from '@/Components/RevealOnScroll';
 import SectionKicker from '@/Components/SectionKicker';
+import TestimonialsMarquee from '@/Components/TestimonialsMarquee';
 import TiltCard from '@/Components/TiltCard';
 import WaveRibbon from '@/Components/WaveRibbon';
 import WhyChooseIcon from '@/Components/WhyChooseIcon';
@@ -81,34 +82,6 @@ function StepMockup({ index }: { index: number }) {
     );
 }
 
-function ClockIcon() {
-    return (
-        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.6} className="h-3.5 w-3.5">
-            <circle cx="10" cy="10" r="7.5" />
-            <path strokeLinecap="round" d="M10 5.5V10l3 2" />
-        </svg>
-    );
-}
-
-function TopicIcon() {
-    return (
-        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.6} className="h-3.5 w-3.5">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M3.5 4.5h5l8 8-5 5-8-8v-5z" />
-            <circle cx="7" cy="8" r="1" fill="currentColor" stroke="none" />
-        </svg>
-    );
-}
-
-function UsersIcon() {
-    return (
-        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.6} className="h-3.5 w-3.5">
-            <circle cx="7" cy="6.5" r="2.5" />
-            <path strokeLinecap="round" d="M2.5 16c0-2.5 2-4.5 4.5-4.5s4.5 2 4.5 4.5" />
-            <path strokeLinecap="round" d="M12.5 4.6a2.5 2.5 0 010 4.8M15 16c0-2-1.3-3.7-3-4.3" />
-        </svg>
-    );
-}
-
 interface StatItem { icon: string; number: string; label: string }
 interface ServiceItem { icon: string; title: string; description: string }
 interface CourseItem {
@@ -145,11 +118,6 @@ interface Props {
     testimonials: TestimonialItem[];
     latestNews: NewsItem[];
     heroSlides: HeroSlideItem[];
-}
-
-function money(v: string | null) {
-    if (!v) return null;
-    return `Rs. ${Number(v).toLocaleString()}`;
 }
 
 // Real exam/service names the platform prepares candidates for (same set
@@ -320,7 +288,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                 </section>
             )}
 
-            {/* ---------------- Featured Courses ---------------- */}
+            {/* ---------------- Featured Courses — horizontal scroll-snap deck ---------------- */}
             {featuredCourses.length > 0 && (
                 <section className="relative overflow-hidden bg-surface-sunken pb-8 pt-8">
                     <GradientMesh variant="light" />
@@ -334,84 +302,8 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                                 View all &rarr;
                             </Link>
                         </RevealOnScroll>
-                        <RevealOnScroll className="grid gap-7 sm:grid-cols-2 lg:grid-cols-4">
-                            {featuredCourses.map((course) => (
-                                <div key={course.id} className="relative h-full">
-                                    {/* Glow -- same "colored blur sitting behind the card" signature as the
-                                        21st.dev glassmorphism card this was adapted from, just in our teal
-                                        instead of its lime, and subtle enough not to fight the card above it. */}
-                                    <div
-                                        aria-hidden
-                                        className="pointer-events-none absolute inset-x-4 -bottom-3 top-1/2 rounded-[2rem] opacity-0 blur-2xl transition-opacity duration-normal group-hover:opacity-100"
-                                        style={{ background: 'var(--color-primary)' }}
-                                    />
-                                    <TiltCard max={5} className="group relative h-full rounded-[1.5rem]">
-                                        <div
-                                            className="flex h-full flex-col overflow-hidden rounded-[1.5rem] border shadow-lg backdrop-blur-glass transition-all duration-normal group-hover:-translate-y-1.5 group-hover:shadow-2xl"
-                                            style={{ background: 'var(--glass-bg)', borderColor: 'var(--glass-border)' }}
-                                        >
-                                        <div className="relative h-40 overflow-hidden bg-secondary">
-                                            {course.thumbnail_path ? (
-                                                <img
-                                                    src={`/storage/${course.thumbnail_path}`}
-                                                    alt=""
-                                                    className="h-full w-full object-cover transition-transform duration-slow group-hover:scale-110"
-                                                />
-                                            ) : (
-                                                <>
-                                                    <span
-                                                        aria-hidden
-                                                        className="absolute -right-4 -top-4 h-16 w-16 rotate-12 rounded-[1rem] bg-white/10 transition-transform duration-slow group-hover:rotate-45"
-                                                    />
-                                                    <div className="flex h-full items-center justify-center">
-                                                        <span className="relative font-display text-2xl uppercase tracking-widest text-white">
-                                                            {course.category?.name ?? 'Course'}
-                                                        </span>
-                                                    </div>
-                                                </>
-                                            )}
-                                            <div className="absolute inset-0 bg-gradient-to-t from-black/40 via-transparent to-transparent opacity-0 transition-opacity duration-normal group-hover:opacity-100" />
-                                        </div>
-
-                                        <div className="flex flex-1 flex-col p-5">
-                                            <h3 className="font-bold text-text group-hover:text-primary">{course.title}</h3>
-                                            <p className="mt-1 line-clamp-2 flex-1 text-sm text-text-secondary">{course.short_description}</p>
-
-                                            <div className="mt-4 flex items-center gap-3 text-xs text-text-muted">
-                                                {course.hours && (
-                                                    <span className="inline-flex items-center gap-1">
-                                                        <ClockIcon /> {course.hours}h
-                                                    </span>
-                                                )}
-                                                {course.topics_count > 0 && (
-                                                    <span className="inline-flex items-center gap-1">
-                                                        <TopicIcon /> {course.topics_count} topic{course.topics_count === 1 ? '' : 's'}
-                                                    </span>
-                                                )}
-                                                {course.enrollments_count > 0 && (
-                                                    <span className="inline-flex items-center gap-1">
-                                                        <UsersIcon /> {course.enrollments_count}+ enrolled
-                                                    </span>
-                                                )}
-                                            </div>
-
-                                            <div className="mt-4 flex items-center justify-between border-t border-border pt-4">
-                                                <span className="font-display text-lg text-primary">{money(course.base_price) ?? 'Free'}</span>
-                                                <Link
-                                                    href={`/courses/${course.slug}`}
-                                                    className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4 py-2 text-xs font-bold uppercase tracking-wide text-on-primary shadow-sm transition-all duration-fast hover:bg-primary-hover hover:shadow-md"
-                                                >
-                                                    View Course
-                                                    <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5 transition-transform duration-fast group-hover:translate-x-0.5">
-                                                        <path d="M11.3 3.3a1 1 0 011.4 0l5 5a1 1 0 010 1.4l-5 5a1 1 0 11-1.4-1.4L14.6 10H4a1 1 0 010-2h10.6l-3.3-3.3a1 1 0 010-1.4z" />
-                                                    </svg>
-                                                </Link>
-                                            </div>
-                                        </div>
-                                        </div>
-                                    </TiltCard>
-                                </div>
-                            ))}
+                        <RevealOnScroll>
+                            <FeaturedCoursesCarousel courses={featuredCourses} />
                         </RevealOnScroll>
                     </div>
                 </section>
@@ -594,56 +486,20 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                 </section>
             )}
 
-            {/* ---------------- Testimonials — mixed photo/quote cards ("What Our Customers Say" reference) ---------------- */}
+            {/* ---------------- Testimonials — two-row infinite marquee ---------------- */}
             {testimonials.length > 0 && (
                 <section className="relative overflow-hidden bg-surface-sunken pb-8 pt-8">
                     <GradientMesh variant="light" />
-                    <div className="relative mx-auto max-w-container px-4 sm:px-6 lg:px-8">
-                        <RevealOnScroll className="mx-auto mb-14 max-w-2xl text-center">
+                    <div className="relative mx-auto mb-10 max-w-2xl px-4 text-center sm:px-6">
+                        <RevealOnScroll>
                             <SectionKicker>Real Results</SectionKicker>
                             <h2 className="font-display text-4xl uppercase tracking-wide text-text sm:text-5xl">Success Stories</h2>
                         </RevealOnScroll>
-                        <RevealOnScroll className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                            {testimonials.map((t, i) => {
-                                // A real student photo earns the wider two-column "feature" card
-                                // treatment; text-only testimonials stay compact -- the mixed
-                                // layout follows what data actually exists, nothing is staged.
-                                const hasPhoto = !!t.photo_path;
-                                return (
-                                    <div
-                                        key={i}
-                                        className={`rounded-2xl border border-border bg-surface p-6 shadow-sm transition-shadow duration-normal hover:shadow-md ${hasPhoto ? 'flex items-center gap-5 sm:col-span-2' : ''}`}
-                                    >
-                                        {hasPhoto && (
-                                            <img
-                                                src={`/storage/${t.photo_path}`}
-                                                alt=""
-                                                className="hidden h-24 w-24 flex-shrink-0 rounded-2xl object-cover sm:block"
-                                            />
-                                        )}
-                                        <div className="flex-1">
-                                            <LiteMarkdown text={t.testimonial_text} className="text-sm italic leading-relaxed text-text-secondary" />
-                                            <div className="mt-4 flex flex-wrap items-center justify-between gap-2">
-                                                <div className="font-semibold text-text">{t.student_name}</div>
-                                                {t.rating && (
-                                                    <div className="inline-flex items-center gap-1.5 rounded-full bg-primary-subtle px-2.5 py-1 text-xs font-bold text-primary">
-                                                        {t.rating.toFixed(1)}
-                                                        <span className="flex gap-0.5 text-star">
-                                                            {Array.from({ length: 5 }).map((_, s) => (
-                                                                <svg key={s} className="h-3 w-3" fill={s < t.rating! ? 'currentColor' : 'none'} stroke="currentColor" viewBox="0 0 20 20">
-                                                                    <path d="M10 15l-5.878 3.09 1.123-6.545L.489 6.91l6.572-.955L10 0l2.939 5.955 6.572.955-4.756 4.635 1.123 6.545z" />
-                                                                </svg>
-                                                            ))}
-                                                        </span>
-                                                    </div>
-                                                )}
-                                            </div>
-                                        </div>
-                                    </div>
-                                );
-                            })}
-                        </RevealOnScroll>
                     </div>
+
+                    <RevealOnScroll>
+                        <TestimonialsMarquee items={testimonials} />
+                    </RevealOnScroll>
                 </section>
             )}
 
