@@ -4,6 +4,7 @@ import BranchHeroSlider from '@/Components/BranchHeroSlider';
 import FaqAccordionItem from '@/Components/FaqAccordionItem';
 import GradientMesh from '@/Components/GradientMesh';
 import LiteMarkdown from '@/Components/LiteMarkdown';
+import NewsCoverflowCarousel from '@/Components/NewsCoverflowCarousel';
 import RevealOnScroll from '@/Components/RevealOnScroll';
 import SectionKicker from '@/Components/SectionKicker';
 import TiltCard from '@/Components/TiltCard';
@@ -150,17 +151,6 @@ function money(v: string | null) {
     if (!v) return null;
     return `Rs. ${Number(v).toLocaleString()}`;
 }
-
-function formatDate(v: string) {
-    return new Date(v).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
-}
-
-// Fallback for a post with no uploaded photo -- cycles through the brand's
-// two "poster" gradients so it still reads as intentional per-card
-// variation rather than 3 identical blocks in a row. A post WITH a photo
-// (Admin > News > Image) shows that instead, same as the dedicated /news
-// page already does.
-const NEWS_BANNER_GRADIENTS = ['from-teal-600 via-teal-800 to-teal-950', 'from-secondary via-teal-900 to-teal-950'];
 
 // Real exam/service names the platform prepares candidates for (same set
 // named in the hero subheading and used as course category badges) --
@@ -506,61 +496,34 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                 </section>
             )}
 
-            {/* ---------------- Latest News — article-style cards ---------------- */}
+            {/* ---------------- Latest News — 3D coverflow poster carousel ---------------- */}
             {latestNews.length > 0 && (
-                <section className="relative overflow-hidden pb-8 pt-8">
-                    <GradientMesh variant="light" />
+                <section className="relative overflow-hidden bg-secondary pb-8 pt-8 text-text-inverse">
+                    <GradientMesh className="opacity-60" />
                     <div className="relative mx-auto max-w-container px-4 sm:px-6 lg:px-8">
-                    <RevealOnScroll className="mx-auto mb-14 max-w-2xl text-center">
-                        <SectionKicker>Stay Updated</SectionKicker>
-                        <h2 className="font-display text-4xl uppercase tracking-wide text-text sm:text-5xl">Discover Our Latest News</h2>
-                        <p className="mt-3 text-text-secondary">
-                            Application windows, batch announcements, and exam updates across every service you're preparing for.
-                        </p>
+                        <RevealOnScroll className="mx-auto mb-10 max-w-2xl text-center">
+                            <SectionKicker dark>Stay Updated</SectionKicker>
+                            <h2 className="font-display text-4xl uppercase tracking-wide sm:text-5xl">Discover Our Latest News</h2>
+                            <p className="mt-3 text-teal-200">
+                                Application windows, batch announcements, and exam updates across every service you're preparing for.
+                            </p>
+                        </RevealOnScroll>
+                    </div>
+
+                    {/* Full-bleed, outside the max-w-container padding -- the coverflow
+                        needs real room either side of the centered card for the dimmed
+                        neighbors and nav arrows, same as the reference design (edge to
+                        edge, not boxed in). */}
+                    <RevealOnScroll>
+                        <NewsCoverflowCarousel items={latestNews} viewAllHref="/news" />
                     </RevealOnScroll>
 
-                    <RevealOnScroll className="grid gap-6 sm:grid-cols-3">
-                        {latestNews.map((item, i) => (
-                            <div key={item.id} className="group flex flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-sm transition-all duration-normal hover:-translate-y-1.5 hover:border-primary hover:shadow-2xl">
-                                {item.image_path ? (
-                                    <img src={`/storage/${item.image_path}`} alt={item.title} className="h-36 w-full object-cover" />
-                                ) : (
-                                    <div className={`relative flex h-36 items-center justify-center bg-gradient-to-br px-4 text-center ${NEWS_BANNER_GRADIENTS[i % NEWS_BANNER_GRADIENTS.length]}`}>
-                                        <span
-                                            aria-hidden
-                                            className="absolute -right-4 -top-4 h-16 w-16 rotate-12 rounded-[1rem] bg-white/10 transition-transform duration-slow group-hover:rotate-45"
-                                        />
-                                        <span className="relative font-display text-xl uppercase leading-tight tracking-wide text-white">
-                                            {item.organization ?? 'Announcement'}
-                                        </span>
-                                    </div>
-                                )}
-
-                                <div className="flex flex-1 flex-col p-5">
-                                    {item.organization && (
-                                        <span className="mb-2 inline-block w-fit rounded-full bg-primary-subtle px-2.5 py-1 text-[0.65rem] font-bold uppercase tracking-wide text-primary">
-                                            {item.organization}
-                                        </span>
-                                    )}
-                                    <h3 className="font-bold text-text group-hover:text-primary">{item.title}</h3>
-                                    <p className="mt-1.5 line-clamp-2 flex-1 text-sm text-text-secondary">{item.description}</p>
-
-                                    <div className="mt-4 flex items-center justify-between border-t border-border pt-4 text-xs text-text-muted">
-                                        <span>Posted {formatDate(item.created_at)}</span>
-                                        {item.deadline_date && (
-                                            <span className="font-bold text-danger">Apply by {formatDate(item.deadline_date)}</span>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                    </RevealOnScroll>
-
-                    <RevealOnScroll className="mt-10 text-center">
-                        <Link href="/news" className="font-bold uppercase tracking-wide text-primary hover:text-primary-hover">
-                            View all news &rarr;
-                        </Link>
-                    </RevealOnScroll>
+                    <div className="relative mx-auto max-w-container px-4 sm:px-6 lg:px-8">
+                        <RevealOnScroll className="mt-6 text-center">
+                            <Link href="/news" className="font-bold uppercase tracking-wide text-white hover:text-teal-200">
+                                View all news &rarr;
+                            </Link>
+                        </RevealOnScroll>
                     </div>
                 </section>
             )}
