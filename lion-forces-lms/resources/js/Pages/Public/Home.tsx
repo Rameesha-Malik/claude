@@ -396,7 +396,12 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                 // already bg-secondary, and two identical dark-teal sections back to
                 // back with no divider read as one merged block.
                 <section className="relative overflow-hidden bg-teal-950 pb-8 pt-8 text-text-inverse">
-                    <GradientMesh className="opacity-60" />
+                    {/* opacity-20, not the usual opacity-60 -- How It Works right
+                        above uses that same bright GradientMesh treatment, and at
+                        matching brightness the two sections' blobs washed out the
+                        darker teal-950 base, undoing the contrast that color change
+                        was for. Dialed down so the darker base actually reads. */}
+                    <GradientMesh className="opacity-20" />
                     <div className="relative mx-auto max-w-container px-4 sm:px-6 lg:px-8">
                         <RevealOnScroll className="mx-auto mb-10 max-w-2xl text-center">
                             <SectionKicker dark>Stay Updated</SectionKicker>
