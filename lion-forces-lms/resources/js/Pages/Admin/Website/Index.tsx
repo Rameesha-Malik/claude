@@ -21,6 +21,7 @@ interface HeroSlide {
     description: string;
     cta_href: string;
     image_path: string | null;
+    crest_path: string | null;
 }
 interface StatsItem { id: number; icon: string | null; number: string; label: string }
 interface ServiceCard { id: number; icon: string | null; title: string; description: string | null }
@@ -340,8 +341,9 @@ function HeroSlidesPanel({ items }: { items: HeroSlide[] }) {
 
 function HeroSlideCard({ slide }: { slide: HeroSlide }) {
     const [preview, setPreview] = useState<string | null>(null);
+    const [crestPreview, setCrestPreview] = useState<string | null>(null);
     const form = useForm<{
-        title: string; motto: string; motto_translation: string; description: string; cta_href: string; image: File | null;
+        title: string; motto: string; motto_translation: string; description: string; cta_href: string; image: File | null; crest: File | null;
     }>({
         title: slide.title,
         motto: slide.motto ?? '',
@@ -349,6 +351,7 @@ function HeroSlideCard({ slide }: { slide: HeroSlide }) {
         description: slide.description,
         cta_href: slide.cta_href,
         image: null,
+        crest: null,
     });
 
     function submit(e: FormEvent) {
@@ -356,7 +359,9 @@ function HeroSlideCard({ slide }: { slide: HeroSlide }) {
         form.put(`/admin/website/hero-slides/${slide.id}`, {
             onSuccess: () => {
                 form.setData('image', null);
+                form.setData('crest', null);
                 setPreview(null);
+                setCrestPreview(null);
             },
         });
     }
@@ -367,29 +372,60 @@ function HeroSlideCard({ slide }: { slide: HeroSlide }) {
         setPreview(file ? URL.createObjectURL(file) : null);
     }
 
+    function pickCrest(e: ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0] ?? null;
+        form.setData('crest', file);
+        setCrestPreview(file ? URL.createObjectURL(file) : null);
+    }
+
     return (
         <Panel>
             <h2 className="mb-4 font-bold text-text">{slide.branch}</h2>
             <form onSubmit={submit} className="grid gap-4 lg:grid-cols-[160px_1fr]">
-                <div>
-                    <div className="mb-2 flex h-40 w-32 items-center justify-center overflow-hidden rounded-2xl border border-dashed border-border bg-surface-sunken">
-                        {preview || slide.image_path ? (
-                            // eslint-disable-next-line jsx-a11y/alt-text
-                            <img src={preview ?? `/storage/${slide.image_path}`} className="h-full w-full object-cover" />
-                        ) : (
-                            <span className="px-2 text-center text-xs text-text-muted">Default photo</span>
+                <div className="space-y-4">
+                    <div>
+                        <div className="mb-2 flex h-40 w-32 items-center justify-center overflow-hidden rounded-2xl border border-dashed border-border bg-surface-sunken">
+                            {preview || slide.image_path ? (
+                                // eslint-disable-next-line jsx-a11y/alt-text
+                                <img src={preview ?? `/storage/${slide.image_path}`} className="h-full w-full object-cover" />
+                            ) : (
+                                <span className="px-2 text-center text-xs text-text-muted">Default photo</span>
+                            )}
+                        </div>
+                        <label className="mb-1 block text-xs font-medium text-text-secondary">Photo</label>
+                        <input type="file" accept="image/*" onChange={pickFile} className="w-32 text-xs text-text-secondary" />
+                        {slide.image_path && !preview && (
+                            <button
+                                type="button"
+                                onClick={() => confirm('Reset to the default photo?') && router.delete(`/admin/website/hero-slides/${slide.id}/image`)}
+                                className={`${btnDangerClass} mt-2`}
+                            >
+                                Reset Photo
+                            </button>
                         )}
                     </div>
-                    <input type="file" accept="image/*" onChange={pickFile} className="w-32 text-xs text-text-secondary" />
-                    {slide.image_path && !preview && (
-                        <button
-                            type="button"
-                            onClick={() => confirm('Reset to the default photo?') && router.delete(`/admin/website/hero-slides/${slide.id}/image`)}
-                            className={`${btnDangerClass} mt-2`}
-                        >
-                            Reset Photo
-                        </button>
-                    )}
+
+                    <div>
+                        <div className="mb-2 flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border border-dashed border-border bg-surface-sunken p-2">
+                            {crestPreview || slide.crest_path ? (
+                                // eslint-disable-next-line jsx-a11y/alt-text
+                                <img src={crestPreview ?? `/storage/${slide.crest_path}`} className="h-full w-full object-contain" />
+                            ) : (
+                                <span className="text-center text-[0.6rem] text-text-muted">Default crest</span>
+                            )}
+                        </div>
+                        <label className="mb-1 block text-xs font-medium text-text-secondary">Crest / Logo</label>
+                        <input type="file" accept="image/*" onChange={pickCrest} className="w-32 text-xs text-text-secondary" />
+                        {slide.crest_path && !crestPreview && (
+                            <button
+                                type="button"
+                                onClick={() => confirm('Reset to the default crest?') && router.delete(`/admin/website/hero-slides/${slide.id}/crest`)}
+                                className={`${btnDangerClass} mt-2`}
+                            >
+                                Reset Crest
+                            </button>
+                        )}
+                    </div>
                 </div>
 
                 <div className="space-y-4">

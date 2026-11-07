@@ -175,6 +175,7 @@ Route::middleware(['auth', 'verified', 'user_type:admin'])->prefix('admin')->nam
         Route::delete('/logo', [AdminWebsiteController::class, 'destroyLogo'])->name('logo.destroy');
         Route::put('/hero-slides/{heroSlide}', [AdminWebsiteController::class, 'updateHeroSlide'])->name('hero-slides.update');
         Route::delete('/hero-slides/{heroSlide}/image', [AdminWebsiteController::class, 'destroyHeroSlideImage'])->name('hero-slides.image.destroy');
+        Route::delete('/hero-slides/{heroSlide}/crest', [AdminWebsiteController::class, 'destroyHeroSlideCrest'])->name('hero-slides.crest.destroy');
         Route::put('/announcement', [AdminWebsiteController::class, 'updateAnnouncement'])->name('announcement.update');
         Route::put('/home-sections/{homeSection}', [AdminWebsiteController::class, 'updateHomeSection'])->name('home-sections.update');
 

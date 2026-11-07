@@ -25,7 +25,7 @@ class PublicSiteController extends Controller
 
         return Inertia::render('Public/Home', [
             'sections' => $sections,
-            'heroSlides' => HeroSlide::orderBy('order')->get(['branch_key', 'branch', 'title', 'motto', 'motto_translation', 'description', 'cta_href', 'image_path']),
+            'heroSlides' => HeroSlide::orderBy('order')->get(['branch_key', 'branch', 'title', 'motto', 'motto_translation', 'description', 'cta_href', 'image_path', 'crest_path']),
             'stats' => StatsItem::orderBy('order')->get(['icon', 'number', 'label']),
             'services' => ServiceCard::orderBy('order')->get(['icon', 'title', 'description']),
             'featuredCourses' => Course::with(['category', 'sharedNotes:id,subject_id'])

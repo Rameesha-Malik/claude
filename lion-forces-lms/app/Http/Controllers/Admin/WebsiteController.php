@@ -118,14 +118,22 @@ class WebsiteController extends Controller
             'description' => 'required|string|max:1000',
             'cta_href' => 'required|string|max:255',
             'image' => 'nullable|image|max:4096',
+            'crest' => 'nullable|image|max:2048',
         ]);
-        unset($data['image']);
+        unset($data['image'], $data['crest']);
 
         if ($request->hasFile('image')) {
             if ($heroSlide->image_path) {
                 \Illuminate\Support\Facades\Storage::disk('public')->delete($heroSlide->image_path);
             }
             $data['image_path'] = $request->file('image')->store('branding', 'public');
+        }
+
+        if ($request->hasFile('crest')) {
+            if ($heroSlide->crest_path) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($heroSlide->crest_path);
+            }
+            $data['crest_path'] = $request->file('crest')->store('branding', 'public');
         }
 
         $heroSlide->update($data);
@@ -141,6 +149,16 @@ class WebsiteController extends Controller
         }
 
         return back()->with('success', "{$heroSlide->branch} slide photo reset to the default.");
+    }
+
+    public function destroyHeroSlideCrest(HeroSlide $heroSlide)
+    {
+        if ($heroSlide->crest_path) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($heroSlide->crest_path);
+            $heroSlide->update(['crest_path' => null]);
+        }
+
+        return back()->with('success', "{$heroSlide->branch} crest reset to the default.");
     }
 
     public function updateAnnouncement(Request $request)

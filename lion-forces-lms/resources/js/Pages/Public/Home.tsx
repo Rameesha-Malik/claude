@@ -130,6 +130,7 @@ interface HeroSlideItem {
     description: string;
     cta_href: string;
     image_path: string | null;
+    crest_path: string | null;
 }
 
 interface Props {
@@ -184,17 +185,24 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                     <GradientMesh className="opacity-50" />
 
                     {/* decorative -- real exam/service names already named in the hero copy above,
-                        just surfaced as a wavy tag ribbon instead of plain prose */}
-                    <div aria-hidden className="relative mx-auto flex max-w-4xl flex-wrap justify-center gap-x-3 gap-y-6 px-6">
+                        just surfaced as a tag ribbon instead of plain prose. Was a per-tag
+                        sine-wave translateY/rotate, which (combined with centering inside a
+                        narrow max-w-4xl) left large uneven gaps on both sides and between
+                        rows at wide viewports -- flat/even wrap fills the section width more
+                        evenly instead. Colors now reference --color-primary directly (not the
+                        raw teal-700/teal-500 stops) so this tracks the live theme instead of a
+                        hardcoded primitive pair; gold stays as the primitive pair since that's
+                        the deliberate "second brand voice" choice for dark surfaces (see
+                        SectionKicker's own comment on gold-vs-oxblood-by-surface). */}
+                    <div aria-hidden className="relative mx-auto flex max-w-3xl flex-wrap justify-center gap-3 px-6">
                         {TRUST_TAGS.map((tag, i) => (
                             <span
                                 key={tag}
                                 className={`rounded-full px-4 py-2 text-xs font-bold uppercase tracking-wide shadow-lg sm:text-sm ${i % 2 === 0 ? 'text-white' : 'text-on-accent'}`}
                                 style={{
                                     background: i % 2 === 0
-                                        ? 'linear-gradient(135deg, var(--teal-700), var(--teal-500))'
-                                        : 'linear-gradient(135deg, var(--gold-500), var(--gold-300))',
-                                    transform: `translateY(${Math.sin(i * 1.1) * 10}px) rotate(${Math.sin(i * 0.7) * 5}deg)`,
+                                        ? 'linear-gradient(135deg, var(--color-primary), var(--color-primary-hover))'
+                                        : 'linear-gradient(135deg, var(--gold-400), var(--gold-300))',
                                 }}
                             >
                                 {tag}

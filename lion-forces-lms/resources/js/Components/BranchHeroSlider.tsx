@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import SectionKicker from '@/Components/SectionKicker';
-import ShieldMark from '@/Components/ShieldMark';
 import branchArmy from '@/assets/hero/branch-army.jpg';
 import branchNavy from '@/assets/hero/branch-navy.jpg';
 import branchAirforce from '@/assets/hero/branch-airforce.jpg';
@@ -20,6 +19,7 @@ export interface HeroSlideData {
     description: string;
     cta_href: string;
     image_path: string | null;
+    crest_path: string | null;
 }
 
 // Per-branch bits that aren't admin content: the official crest (a fixed
@@ -180,6 +180,7 @@ export default function BranchHeroSlider({ slides }: { slides: HeroSlideData[] }
 function BranchSlideContent({ slide, reversed = false, active = true }: { slide: HeroSlideData; reversed?: boolean; active?: boolean }) {
     const assets = BRANCH_ASSETS[slide.branch_key] ?? BRANCH_ASSETS.army;
     const image = slide.image_path ? `/storage/${slide.image_path}` : assets.fallbackImage;
+    const crest = slide.crest_path ? `/storage/${slide.crest_path}` : assets.crest;
 
     return (
         <div className="relative mx-auto flex h-full max-w-container flex-col items-center gap-10 px-4 py-16 sm:px-6 lg:h-full lg:flex-row lg:gap-14 lg:px-8 lg:py-0">
@@ -195,20 +196,21 @@ function BranchSlideContent({ slide, reversed = false, active = true }: { slide:
                         style={{ background: 'linear-gradient(to top, rgba(4, 39, 38, 0.75), rgba(4, 39, 38, 0.1) 55%, transparent 80%)' }}
                     />
                     <div className="absolute left-5 top-5 inline-flex items-center gap-2 rounded-full bg-black/30 px-3 py-2 text-xs font-bold uppercase tracking-wide text-white backdrop-blur-sm">
-                        <img src={assets.crest} alt={assets.crestAlt} className="h-6 w-6 object-contain" />
+                        <img src={crest} alt={assets.crestAlt} className="h-6 w-6 object-contain" />
                         {slide.branch}
                     </div>
                 </div>
 
-                {/* Seam badge: the academy's own mark, pinned on the photo card's
-                    inner edge (the edge facing the copy column) -- lg only, since
+                {/* Seam badge: this slide's own branch crest (admin-uploaded,
+                    or the bundled default), pinned on the photo card's inner
+                    edge (the edge facing the copy column) -- lg only, since
                     there's no visual "seam" once the columns stack on mobile. */}
                 <div
-                    className={`absolute top-1/2 z-20 hidden h-16 w-16 -translate-y-1/2 items-center justify-center rounded-full border-4 border-secondary bg-primary shadow-xl lg:flex ${
+                    className={`absolute top-1/2 z-20 hidden h-16 w-16 -translate-y-1/2 items-center justify-center rounded-full border-4 border-secondary bg-primary p-2.5 shadow-xl lg:flex ${
                         reversed ? 'left-0 -translate-x-1/2' : 'right-0 translate-x-1/2'
                     }`}
                 >
-                    <ShieldMark className="h-8 w-8 text-on-primary" />
+                    <img src={crest} alt={assets.crestAlt} className="h-full w-full object-contain" />
                 </div>
             </div>
 
