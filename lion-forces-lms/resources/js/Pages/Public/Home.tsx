@@ -183,7 +183,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
 
             {/* ---------------- Trust Bar — wavy ribbon of the exams we prepare for, arched over the real stats ---------------- */}
             {stats.length > 0 && (
-                <section className="relative overflow-hidden bg-secondary pb-14 pt-16 sm:pt-20">
+                <section className="relative overflow-hidden bg-secondary pb-8 pt-10">
                     <GradientMesh className="opacity-50" />
 
                     {/* decorative -- real exam/service names already named in the hero copy above,
@@ -227,7 +227,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
 
             {/* ---------------- What We Offer — fanned card stack + scattered praise ---------------- */}
             {services.length > 0 && (
-                <section className="relative overflow-hidden bg-surface pb-16 pt-14">
+                <section className="relative overflow-hidden bg-surface pb-8 pt-8">
                     <GradientMesh variant="light" />
 
                     {/* Real branch crests (not the generic academy ShieldMark) in the wide
@@ -252,10 +252,16 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                     {/* Fan stack -- own overflow-hidden box so rotated/offset cards never
                         widen the page, regardless of viewport size. */}
                     <div className="relative mx-auto mt-10 h-[22rem] max-w-3xl overflow-hidden px-4 sm:h-[26rem] sm:px-6">
+                        {/* Was a fixed h-[26rem] inside a parent that's only h-[22rem] below sm --
+                            bigger than its own clipping box, so overflow-hidden cut it off at a
+                            hard straight edge instead of letting it fade out. Now smaller than the
+                            parent at every breakpoint, with the gradient's own transparent stop
+                            pulled earlier (85%, not 100%) so it visually reaches zero well before
+                            any edge, backed by a heavier blur for a soft rather than sharp fade. */}
                         <div
                             aria-hidden
-                            className="absolute left-1/2 top-1/2 h-[26rem] w-[26rem] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-60 blur-3xl"
-                            style={{ background: 'radial-gradient(circle, var(--color-primary-subtle), var(--teal-300) 70%, transparent 100%)' }}
+                            className="absolute left-1/2 top-1/2 h-64 w-64 -translate-x-1/2 -translate-y-1/2 rounded-full opacity-50 blur-[60px] sm:h-80 sm:w-80"
+                            style={{ background: 'radial-gradient(circle, var(--color-primary-subtle), var(--teal-300) 60%, transparent 85%)' }}
                         />
 
                         <div className="relative flex h-full items-center justify-center">
@@ -326,7 +332,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
 
             {/* ---------------- Featured Courses ---------------- */}
             {featuredCourses.length > 0 && (
-                <section className="relative overflow-hidden bg-surface-sunken pb-16 pt-14">
+                <section className="relative overflow-hidden bg-surface-sunken pb-8 pt-8">
                     <GradientMesh variant="light" />
                     <div className="relative mx-auto max-w-container px-4 sm:px-6 lg:px-8">
                         <RevealOnScroll className="mb-14 flex flex-wrap items-end justify-between gap-4">
@@ -365,7 +371,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                                                 <>
                                                     <span
                                                         aria-hidden
-                                                        className="absolute -right-4 -top-4 h-16 w-16 rotate-12 rounded-lg bg-white/10 transition-transform duration-slow group-hover:rotate-45"
+                                                        className="absolute -right-4 -top-4 h-16 w-16 rotate-12 rounded-[1rem] bg-white/10 transition-transform duration-slow group-hover:rotate-45"
                                                     />
                                                     <div className="flex h-full items-center justify-center">
                                                         <span className="relative font-display text-2xl uppercase tracking-widest text-white">
@@ -423,7 +429,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
 
             {/* ---------------- Why Choose Us — bento grid: one bold featured tile + a plain CSS grid for the rest (no absolute positioning, so nothing can misalign) ---------------- */}
             {why.items && (
-                <section className="relative overflow-hidden bg-surface-sunken pb-16 pt-14">
+                <section className="relative overflow-hidden bg-surface-sunken pb-8 pt-8">
                     <GradientMesh variant="light" />
                     <div className="relative mx-auto max-w-container px-4 sm:px-6 lg:px-8">
                         <RevealOnScroll className="mx-auto mb-14 max-w-2xl text-center">
@@ -470,7 +476,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
 
             {/* ---------------- How It Works ---------------- */}
             {howItWorks.steps && (
-                <section className="relative overflow-hidden bg-secondary pb-16 pt-14 text-text-inverse">
+                <section className="relative overflow-hidden bg-secondary pb-8 pt-8 text-text-inverse">
                     <GradientMesh className="opacity-60" />
                     <div className="relative mx-auto max-w-container px-4 sm:px-6 lg:px-8">
                         <RevealOnScroll className="mx-auto mb-16 max-w-2xl text-center">
@@ -502,7 +508,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
 
             {/* ---------------- Latest News — article-style cards ---------------- */}
             {latestNews.length > 0 && (
-                <section className="relative overflow-hidden pb-16 pt-14">
+                <section className="relative overflow-hidden pb-8 pt-8">
                     <GradientMesh variant="light" />
                     <div className="relative mx-auto max-w-container px-4 sm:px-6 lg:px-8">
                     <RevealOnScroll className="mx-auto mb-14 max-w-2xl text-center">
@@ -522,7 +528,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                                     <div className={`relative flex h-36 items-center justify-center bg-gradient-to-br px-4 text-center ${NEWS_BANNER_GRADIENTS[i % NEWS_BANNER_GRADIENTS.length]}`}>
                                         <span
                                             aria-hidden
-                                            className="absolute -right-4 -top-4 h-16 w-16 rotate-12 rounded-lg bg-white/10 transition-transform duration-slow group-hover:rotate-45"
+                                            className="absolute -right-4 -top-4 h-16 w-16 rotate-12 rounded-[1rem] bg-white/10 transition-transform duration-slow group-hover:rotate-45"
                                         />
                                         <span className="relative font-display text-xl uppercase leading-tight tracking-wide text-white">
                                             {item.organization ?? 'Announcement'}
@@ -586,7 +592,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
 
             {/* ---------------- FAQs — gradient "ask us" panel + accordion ---------------- */}
             {faqs.length > 0 && (
-                <section className="relative overflow-hidden pb-16 pt-14">
+                <section className="relative overflow-hidden pb-8 pt-8">
                     <GradientMesh variant="light" />
                     <div className="relative mx-auto max-w-container px-4 sm:px-6 lg:px-8">
                         <RevealOnScroll className="mx-auto mb-14 max-w-2xl text-center">
@@ -627,7 +633,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
 
             {/* ---------------- Testimonials — mixed photo/quote cards ("What Our Customers Say" reference) ---------------- */}
             {testimonials.length > 0 && (
-                <section className="relative overflow-hidden bg-surface-sunken pb-16 pt-14">
+                <section className="relative overflow-hidden bg-surface-sunken pb-8 pt-8">
                     <GradientMesh variant="light" />
                     <div className="relative mx-auto max-w-container px-4 sm:px-6 lg:px-8">
                         <RevealOnScroll className="mx-auto mb-14 max-w-2xl text-center">
