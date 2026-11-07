@@ -91,6 +91,46 @@ function CheckIcon() {
     );
 }
 
+function ChipIcon({ className = 'h-6 w-8' }: { className?: string }) {
+    return (
+        <svg viewBox="0 0 32 24" fill="none" stroke="currentColor" strokeWidth={1.3} className={className}>
+            <rect x="0.5" y="0.5" width="31" height="23" rx="4" />
+            <path d="M11 0.5v23M21 0.5v23M0.5 8h10M21.5 8H31M0.5 16h10M21.5 16H31" />
+        </svg>
+    );
+}
+
+const PAYMENT_CARD_COLORS = ['var(--teal-700)', 'var(--teal-900)', 'var(--teal-600)'];
+
+// Real client-provided account details (name/account number on separate
+// lines of the admin-entered description -- see PaymentMethod seed data),
+// styled like a bank card. No expiry/CVV/masking like the design reference
+// used -- those fields don't exist here and this number isn't a secret to
+// hide from the person trying to pay it.
+function PaymentCard({ name, description, color }: { name: string; description: string | null; color: string }) {
+    const lines = (description ?? '').split('\n').map((l) => l.trim()).filter(Boolean);
+    const number = lines[0] ?? '';
+    const holder = (lines[1] ?? '').replace(/^Account Name:\s*/i, '');
+    const formattedNumber = /[\s-]/.test(number) ? number : number.replace(/(.{4})/g, '$1 ').trim();
+
+    return (
+        <div
+            className="relative overflow-hidden rounded-[1.25rem] p-6 text-white shadow-lg transition-all duration-normal hover:-translate-y-1 hover:shadow-xl"
+            style={{ background: `linear-gradient(135deg, ${color}, var(--teal-950))` }}
+        >
+            <span aria-hidden className="pointer-events-none absolute -right-8 -top-8 h-32 w-32 rounded-full bg-white/10 blur-2xl" />
+            <div className="relative flex items-start justify-between">
+                <p className="text-xs font-bold uppercase tracking-[0.15em] text-white/70">{name}</p>
+                <ChipIcon className="h-6 w-8 text-white/60" />
+            </div>
+            {formattedNumber && (
+                <p className="relative mt-8 break-all font-mono text-base tracking-wide text-white">{formattedNumber}</p>
+            )}
+            {holder && <p className="relative mt-4 text-sm font-medium text-white/90">{holder}</p>}
+        </div>
+    );
+}
+
 export default function HowToBuy({ hero, packages, paymentMethods, faqs }: { hero: HeroContent; packages: PackageItem[]; paymentMethods: PaymentMethodItem[]; faqs: FaqItem[] }) {
     const { site } = usePage<PageProps>().props;
 
@@ -232,15 +272,12 @@ export default function HowToBuy({ hero, packages, paymentMethods, faqs }: { her
                 </RevealOnScroll>
                 <RevealOnScroll className="grid gap-6 sm:grid-cols-3">
                     {paymentMethods.map((method, i) => (
-                        <div key={i} className="rounded-2xl border border-border bg-surface p-6 text-center">
-                            <div className="mx-auto mb-3 flex h-12 w-12 items-center justify-center rounded-xl bg-primary-subtle text-primary">
-                                <svg className="h-6 w-6" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M3 6h18v12H3V6zm4 8h4" />
-                                </svg>
-                            </div>
-                            <h3 className="font-bold text-text">{method.name}</h3>
-                            <p className="mt-1 text-sm text-text-secondary">{method.description}</p>
-                        </div>
+                        <PaymentCard
+                            key={i}
+                            name={method.name}
+                            description={method.description}
+                            color={PAYMENT_CARD_COLORS[i % PAYMENT_CARD_COLORS.length]}
+                        />
                     ))}
                 </RevealOnScroll>
             </section>
