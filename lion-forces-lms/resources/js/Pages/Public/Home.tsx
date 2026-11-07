@@ -392,21 +392,19 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
 
             {/* ---------------- Latest News — 3D coverflow poster carousel ---------------- */}
             {latestNews.length > 0 && (
-                // bg-teal-950, not bg-secondary -- How It Works right above this is
-                // already bg-secondary, and two identical dark-teal sections back to
-                // back with no divider read as one merged block.
-                <section className="relative overflow-hidden bg-teal-950 pb-8 pt-8 text-text-inverse">
-                    {/* opacity-20, not the usual opacity-60 -- How It Works right
-                        above uses that same bright GradientMesh treatment, and at
-                        matching brightness the two sections' blobs washed out the
-                        darker teal-950 base, undoing the contrast that color change
-                        was for. Dialed down so the darker base actually reads. */}
-                    <GradientMesh className="opacity-20" />
+                // bg-teal-50, not a dark section -- How It Works right above this
+                // is already bg-secondary, and this used to be another dark-teal
+                // section stacked right on top of it. A light section here also
+                // means the carousel's own dark "stage" backdrop (built for
+                // legibility of its white card text) now gives real contrast
+                // against the page instead of blending into a dark section.
+                <section className="relative overflow-hidden bg-teal-50 pb-8 pt-8">
+                    <GradientMesh variant="light" />
                     <div className="relative mx-auto max-w-container px-4 sm:px-6 lg:px-8">
                         <RevealOnScroll className="mx-auto mb-10 max-w-2xl text-center">
-                            <SectionKicker dark>Stay Updated</SectionKicker>
-                            <h2 className="font-display text-4xl uppercase tracking-wide sm:text-5xl">Discover Our Latest News</h2>
-                            <p className="mt-3 text-teal-200">
+                            <SectionKicker>Stay Updated</SectionKicker>
+                            <h2 className="font-display text-4xl uppercase tracking-wide text-secondary sm:text-5xl">Discover Our Latest News</h2>
+                            <p className="mt-3 text-text-secondary">
                                 Application windows, batch announcements, and exam updates across every service you're preparing for.
                             </p>
                         </RevealOnScroll>
@@ -423,9 +421,9 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
             )}
 
             {/* ---------------- Demo Quiz Teaser ---------------- */}
-            {/* bg-white, not the page's minty --color-canvas -- right after
-                the very dark News section, a clean white band reads much
-                better than canvas's slight mint tint. */}
+            {/* bg-white, not the page's minty --color-canvas -- a clean white
+                band reads better than canvas's slight mint tint right before
+                the dark CTA card reappears. */}
             <section className="bg-white px-4 pb-8 pt-8 sm:px-6 lg:px-8">
                 <div className="mx-auto max-w-container">
                 <RevealOnScroll>
