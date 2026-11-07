@@ -1,5 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
 import AnimatedCounter from '@/Components/AnimatedCounter';
+import BranchHeroSlider from '@/Components/BranchHeroSlider';
 import FaqAccordionItem from '@/Components/FaqAccordionItem';
 import GradientMesh from '@/Components/GradientMesh';
 import LiteMarkdown from '@/Components/LiteMarkdown';
@@ -10,7 +11,6 @@ import TiltCard from '@/Components/TiltCard';
 import WaveRibbon from '@/Components/WaveRibbon';
 import WhyChooseIcon from '@/Components/WhyChooseIcon';
 import PublicLayout from '@/Layouts/PublicLayout';
-import heroCadetsStudying from '@/assets/hero/cadets-studying.jpg';
 
 // Small illustrative mockup per "How It Works" step -- built from plain
 // divs/SVG rather than screenshots, so it never depends on external image
@@ -106,39 +106,6 @@ function UsersIcon() {
     );
 }
 
-function StarRow() {
-    return (
-        <span className="flex items-center gap-0.5 text-star">
-            {Array.from({ length: 5 }).map((_, i) => (
-                <svg key={i} viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
-                    <path d="M10 1.5l2.6 5.6 6.1.6-4.6 4.1 1.3 6-5.4-3-5.4 3 1.3-6-4.6-4.1 6.1-.6L10 1.5Z" />
-                </svg>
-            ))}
-        </span>
-    );
-}
-
-function CheckBadge() {
-    return (
-        <span className="flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full bg-success-bg text-success">
-            <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5">
-                <path d="M16.7 5.3a1 1 0 0 1 0 1.4l-7.5 7.5a1 1 0 0 1-1.4 0L3.3 9.7a1 1 0 1 1 1.4-1.4L8 11.6l6.8-6.8a1 1 0 0 1 1.4 0Z" />
-            </svg>
-        </span>
-    );
-}
-
-// Positions a floating badge relative to the visual panel; kept as its
-// own component so every badge shares the same z-index/animation timing
-// rather than repeating both across five call sites.
-function FloatingBadge({ children, className = '' }: { children: React.ReactNode; className?: string }) {
-    return (
-        <div className={`absolute z-10 animate-float motion-reduce:animate-none ${className}`}>
-            {children}
-        </div>
-    );
-}
-
 interface StatItem { icon: string; number: string; label: string }
 interface ServiceItem { icon: string; title: string; description: string }
 interface CourseItem {
@@ -187,7 +154,6 @@ const NEWS_BANNER_GRADIENTS = ['from-teal-600 via-teal-800 to-teal-950', 'from-s
 const TRUST_TAGS = ['Pak Army', 'Pak Navy', 'Pak Air Force', 'ISSB', 'PMA', 'Lady Cadet Course', 'AFNS', 'Rangers'];
 
 export default function Home({ sections, stats, services, featuredCourses, faqs, testimonials, latestNews, heroImagePath }: Props) {
-    const hero = sections.hero?.content ?? {};
     const why = sections.why_choose_us?.content ?? {};
     const whyTitle = sections.why_choose_us?.title ?? 'Why Choose Our Platform?';
     const howItWorks = sections.how_it_works?.content ?? {};
@@ -199,158 +165,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
         <PublicLayout>
             <Head title="Home" />
 
-            {/* ---------------- Hero — light, split two-column ----------------
-                lg:min-h + lg:flex centers this within one screen on desktop,
-                instead of running taller than the viewport and needing a
-                scroll to see the rest of it -- the image was uncapped
-                (lg:max-w-none) so it grew as tall as the grid column let it,
-                and the headline was larger again at lg than at sm. Both
-                trimmed back; mobile is untouched since stacking + scrolling
-                is the normal, expected pattern there. */}
-            <section className="relative overflow-hidden bg-surface pb-16 pt-28 sm:pb-20 sm:pt-32 lg:flex lg:min-h-[calc(100vh-5rem)] lg:items-center lg:py-16">
-                {/* soft brand-color glow, not a full dark wash -- keeps this section light */}
-                <div
-                    aria-hidden
-                    className="pointer-events-none absolute -right-40 -top-40 h-[32rem] w-[32rem] rounded-full opacity-40 blur-3xl"
-                    style={{ backgroundColor: 'var(--color-primary-subtle)' }}
-                />
-                <div
-                    aria-hidden
-                    className="pointer-events-none absolute -left-32 bottom-0 h-96 w-96 rounded-full opacity-30 blur-3xl"
-                    style={{ backgroundColor: 'var(--oxblood-300)' }}
-                />
-
-                <div className="relative mx-auto grid max-w-container gap-16 px-4 sm:px-6 lg:w-full lg:grid-cols-2 lg:items-center lg:gap-10 lg:px-8">
-                    {/* Left: copy */}
-                    <RevealOnScroll staggerMs={110}>
-                        <div className="inline-flex items-center gap-2 rounded-full border border-border bg-surface px-4 py-2 text-sm font-semibold text-text shadow-sm">
-                            <StarRow />
-                            <span>4.8 Rated by 1,500+ Candidates</span>
-                        </div>
-
-                        <h1 className="mt-6 font-display text-5xl uppercase leading-[1.05] text-secondary sm:text-6xl">
-                            Train Like You <span className="italic text-oxblood-600">Mean</span>
-                            <br />
-                            to Get{' '}
-                            <span className="relative inline-block">
-                                Selected
-                                <svg
-                                    aria-hidden
-                                    className="absolute -bottom-2 left-0 w-full text-accent"
-                                    viewBox="0 0 200 12"
-                                    preserveAspectRatio="none"
-                                >
-                                    <path d="M2 9.5C40 3 140 1 198 7" fill="none" stroke="currentColor" strokeWidth="5" strokeLinecap="round" />
-                                </svg>
-                            </span>
-                        </h1>
-
-                        <p className="mt-6 max-w-xl text-lg leading-relaxed text-text-secondary">
-                            {hero.subheading ?? "Pakistan's largest online forces preparation platform: structured courses, mock exams, and expert mentorship for ISSB, PMA, Navy and Air Force candidates."}
-                        </p>
-
-                        {/* selected-candidate avatar cluster -- initials standing in until real student photos are supplied */}
-                        <div className="mt-6 flex items-center gap-3">
-                            <div className="flex -space-x-3">
-                                {['AH', 'MR', 'SK', 'ZB'].map((initials, i) => (
-                                    <span
-                                        key={initials}
-                                        className="flex h-10 w-10 items-center justify-center rounded-full border-2 border-surface text-xs font-bold text-on-primary shadow-sm"
-                                        style={{ backgroundColor: i % 2 === 0 ? 'var(--color-primary)' : 'var(--color-secondary)', zIndex: 4 - i }}
-                                    >
-                                        {initials}
-                                    </span>
-                                ))}
-                            </div>
-                            <p className="text-sm text-text-secondary">
-                                <span className="font-bold text-text">300+</span> candidates selected this year
-                            </p>
-                        </div>
-
-                        <div className="mt-8 flex flex-wrap items-center gap-4">
-                            <Link
-                                href={hero.cta_primary_link ?? '/courses'}
-                                className="rounded-full bg-secondary px-8 py-4 text-base font-bold uppercase tracking-wide text-on-secondary shadow-lg transition-all duration-normal ease-spring hover:-translate-y-0.5 hover:bg-teal-800 hover:shadow-xl"
-                            >
-                                {hero.cta_primary_text ?? 'Explore Courses'}
-                            </Link>
-                            <Link
-                                href={hero.cta_secondary_link ?? '/demo-quiz'}
-                                className="rounded-full border-2 border-border bg-surface px-8 py-4 text-base font-bold uppercase tracking-wide text-text transition-all duration-normal hover:-translate-y-0.5 hover:border-primary hover:text-primary"
-                            >
-                                {hero.cta_secondary_text ?? 'Try Free Demo Quiz'}
-                            </Link>
-                        </div>
-                    </RevealOnScroll>
-
-                    {/* Right: visual panel + floating stat badges */}
-                    {/* Was lg:max-w-none, letting the image grow as wide (and, at aspect-4/5,
-                        as tall) as the grid column allowed -- on a wide desktop viewport that
-                        made it taller than the screen. Capped at max-w-md everywhere now. */}
-                    <RevealOnScroll staggerMs={110} className="relative mx-auto w-full max-w-md">
-                        <div className="relative aspect-[4/5] w-full">
-                            {/* dotted texture card sitting behind the photo, offset like the reference */}
-                            <div
-                                aria-hidden
-                                className="absolute -right-4 -top-4 h-full w-full rounded-[2rem] sm:-right-6 sm:-top-6"
-                                style={{
-                                    backgroundColor: 'var(--color-surface-sunken)',
-                                    backgroundImage: 'radial-gradient(var(--color-border-strong) 1.5px, transparent 1.5px)',
-                                    backgroundSize: '14px 14px',
-                                }}
-                            />
-
-                            <div className="relative h-full w-full overflow-hidden rounded-[2rem] border border-border bg-gradient-to-br from-secondary via-teal-800 to-teal-950 shadow-2xl">
-                                <img
-                                    src={heroImagePath ? `/storage/${heroImagePath}` : heroCadetsStudying}
-                                    alt="Pakistan armed forces academy cadets preparing together"
-                                    className="h-full w-full object-cover"
-                                />
-                                {/* subtle brand-color wash at the base so the photo reads as part of
-                                    this palette rather than a stock insert -- an inline rgba (not a
-                                    Tailwind opacity-modified `secondary` utility) because the token
-                                    is a plain CSS color value, not an alpha-ready channel triplet */}
-                                <div
-                                    aria-hidden
-                                    className="absolute inset-0"
-                                    style={{ background: 'linear-gradient(to top, rgba(4, 39, 38, 0.65), rgba(4, 39, 38, 0.08) 55%, transparent 80%)' }}
-                                />
-                            </div>
-
-                            <FloatingBadge className="left-0 top-8 -translate-x-1/3 sm:-translate-x-1/2">
-                                <div className="flex items-center gap-2 rounded-full bg-surface px-4 py-2.5 text-sm font-bold text-text shadow-lg">
-                                    <CheckBadge /> Practice Tests
-                                </div>
-                            </FloatingBadge>
-
-                            <FloatingBadge className="right-0 top-1/3 translate-x-1/4 sm:translate-x-1/3">
-                                <div className="flex items-center gap-2 rounded-full bg-surface px-4 py-2.5 text-sm font-bold text-text shadow-lg">
-                                    <CheckBadge /> Mock Exams
-                                </div>
-                            </FloatingBadge>
-
-                            <FloatingBadge className="bottom-16 left-0 -translate-x-1/4 sm:-translate-x-1/3">
-                                <div className="rounded-2xl bg-secondary px-5 py-4 text-white shadow-xl">
-                                    <div className="font-display text-2xl text-gold-400">20+</div>
-                                    <div className="text-xs text-teal-200">Structured Courses</div>
-                                </div>
-                            </FloatingBadge>
-
-                            {/* Was a standalone pale-gold fill chip -- made it match the
-                                "20+" badge's dark-teal-fill/gold-number treatment instead, so
-                                the two floating badges read as one consistent pair rather than
-                                one dark and one randomly pastel. */}
-                            <FloatingBadge className="-bottom-2 right-4 translate-x-1/4 sm:right-8">
-                                <div className="rounded-2xl bg-secondary px-5 py-4 text-white shadow-xl">
-                                    <div className="font-display text-2xl text-gold-400">5,000+</div>
-                                    <div className="text-xs text-teal-200">Assessments Taken</div>
-                                </div>
-                            </FloatingBadge>
-                        </div>
-                    </RevealOnScroll>
-                </div>
-
-            </section>
+            <BranchHeroSlider heroImagePath={heroImagePath} />
 
             {/* ---------------- Trust Bar — wavy ribbon of the exams we prepare for, arched over the real stats ---------------- */}
             {stats.length > 0 && (
