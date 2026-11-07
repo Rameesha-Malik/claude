@@ -13,34 +13,41 @@ interface Props { quiz: Quiz | null; quizzes: Quiz[]; pageContent: { title: stri
 
 function QuizCard({ q }: { q: Quiz }) {
     return (
-        <div className="flex flex-col rounded-2xl border border-border bg-surface p-6 text-center shadow-2xl">
-            {q.subject && (
-                <span className="mx-auto mb-3 w-fit rounded-full bg-primary-subtle px-3 py-1 text-xs font-bold uppercase tracking-wide text-primary">
-                    {q.subject.name}
-                </span>
-            )}
-            <h3 className="font-display text-lg uppercase text-text">{q.title}</h3>
-            <div className="mx-auto mt-4 flex w-full items-start justify-center gap-6">
-                <div className="flex flex-col items-center gap-1.5">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary-subtle">
-                        <p className="font-display text-xl text-primary">{q.questions_count}</p>
-                    </div>
-                    <p className="text-[0.65rem] uppercase tracking-wide text-text-muted">Questions</p>
-                </div>
-                <div className="flex flex-col items-center gap-1.5">
-                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary-subtle">
-                        <p className="font-display text-xl text-primary">{q.duration_minutes}</p>
-                    </div>
-                    <p className="text-[0.65rem] uppercase tracking-wide text-text-muted">Minutes</p>
-                </div>
+        <div className="relative pt-5">
+            {/* Client: wanted the quiz's title in its own rectangle sitting
+                above the card (overlapping the dark hero it floats up from),
+                not inline as a heading inside the white box. */}
+            <div className="absolute inset-x-4 top-0 z-10 rounded-[0.75rem] bg-gold-400 px-4 py-2.5 text-center shadow-lg">
+                <h3 className="font-display text-sm uppercase tracking-wide text-secondary">{q.title}</h3>
             </div>
-            <button
-                onClick={() => router.post('/demo-quiz/start', { quiz_id: q.id })}
-                className="mt-5 inline-flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 text-xs font-bold uppercase tracking-wide text-on-primary shadow-lg transition-all duration-normal ease-spring hover:-translate-y-0.5 hover:bg-primary-hover"
-            >
-                <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
-                Start
-            </button>
+            <div className="flex flex-col rounded-[1.5rem] border border-border bg-surface p-6 pt-8 text-center shadow-2xl">
+                {q.subject && (
+                    <span className="mx-auto mb-3 w-fit rounded-full bg-primary-subtle px-3 py-1 text-xs font-bold uppercase tracking-wide text-primary">
+                        {q.subject.name}
+                    </span>
+                )}
+                <div className="mx-auto mt-1 flex w-full items-start justify-center gap-6">
+                    <div className="flex flex-col items-center gap-1.5">
+                        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary-subtle">
+                            <p className="font-display text-xl text-primary">{q.questions_count}</p>
+                        </div>
+                        <p className="text-[0.65rem] uppercase tracking-wide text-text-muted">Questions</p>
+                    </div>
+                    <div className="flex flex-col items-center gap-1.5">
+                        <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary-subtle">
+                            <p className="font-display text-xl text-primary">{q.duration_minutes}</p>
+                        </div>
+                        <p className="text-[0.65rem] uppercase tracking-wide text-text-muted">Minutes</p>
+                    </div>
+                </div>
+                <button
+                    onClick={() => router.post('/demo-quiz/start', { quiz_id: q.id })}
+                    className="mt-5 inline-flex items-center justify-center gap-2 rounded-full bg-primary px-6 py-3 text-xs font-bold uppercase tracking-wide text-on-primary shadow-lg transition-all duration-normal ease-spring hover:-translate-y-0.5 hover:bg-primary-hover"
+                >
+                    <svg className="h-3.5 w-3.5" fill="currentColor" viewBox="0 0 24 24"><path d="M8 5v14l11-7z" /></svg>
+                    Start
+                </button>
+            </div>
         </div>
     );
 }
@@ -100,7 +107,7 @@ export default function DemoQuizIntro({ quiz, quizzes, pageContent }: Props) {
                             {quizzes.map((q) => <QuizCard key={q.id} q={q} />)}
                         </div>
                     ) : quiz ? (
-                        <div className="rounded-2xl border border-border bg-surface p-8 text-center shadow-2xl">
+                        <div className="rounded-[1.5rem] border border-border bg-surface p-8 text-center shadow-2xl">
                             <div className="mx-auto flex max-w-sm items-start justify-center gap-10">
                                 <div className="flex flex-col items-center gap-2">
                                     <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary-subtle">
@@ -126,7 +133,7 @@ export default function DemoQuizIntro({ quiz, quizzes, pageContent }: Props) {
                             </button>
                         </div>
                     ) : (
-                        <div className="rounded-2xl border border-dashed border-border bg-surface p-10 text-center text-text-secondary shadow-2xl">
+                        <div className="rounded-[1.5rem] border border-dashed border-border bg-surface p-10 text-center text-text-secondary shadow-2xl">
                             The demo quiz isn't available right now. Check back soon, or explore our full course catalog.
                         </div>
                     )}
