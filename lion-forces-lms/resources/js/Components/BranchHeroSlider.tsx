@@ -3,19 +3,25 @@ import { useEffect, useRef, useState } from 'react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import SectionKicker from '@/Components/SectionKicker';
-import ShieldMark from '@/Components/ShieldMark';
 import branchArmy from '@/assets/hero/branch-army.jpg';
 import branchNavy from '@/assets/hero/branch-navy.jpg';
 import branchAirforce from '@/assets/hero/branch-airforce.jpg';
+import armyCrest from '@/assets/crests/army-crest.png';
+import navyCrest from '@/assets/crests/navy-crest.png';
+import airforceCrest from '@/assets/crests/airforce-crest.png';
 
 interface Slide {
     key: string;
     branch: string;
     title: string;
+    motto: string;
+    mottoTranslation?: string;
     description: string;
     ctaHref: string;
     image: string;
     imageAlt: string;
+    crest: string;
+    crestAlt: string;
 }
 
 function ArrowIcon({ className = 'h-4 w-4' }: { className?: string }) {
@@ -51,31 +57,42 @@ export default function BranchHeroSlider({ heroImagePath }: { heroImagePath?: st
             key: 'army',
             branch: 'Pakistan Army',
             title: 'Lead From the Front',
+            motto: 'Iman, Taqwa, Jihad fi Sabilillah',
+            mottoTranslation: 'Faith, Piety, Struggle in the Path of Allah',
             description:
                 'Complete preparation for PMA Long Course and Army entry tests — tactical reasoning, physical standards, and interview readiness built into one structured track.',
             ctaHref: '/courses?category=pma',
             image: heroImagePath ? `/storage/${heroImagePath}` : branchArmy,
             imageAlt: 'Pakistan Army officers on parade',
+            crest: armyCrest,
+            crestAlt: 'Pakistan Army crest',
         },
         {
             key: 'navy',
             branch: 'Pakistan Navy',
             title: 'Command the Seas',
+            motto: "Hasbunallahu wa Ni'mal Wakeel",
+            mottoTranslation: 'Allah is sufficient for us, and He is the best disposer of affairs',
             description:
                 'Structured preparation for Pakistan Navy commission entry — written tests, interviews, and ISSB-pattern assessment, covered end to end.',
             ctaHref: '/courses?category=navy',
             image: branchNavy,
             imageAlt: 'Pakistan Navy officer on parade',
+            crest: navyCrest,
+            crestAlt: 'Pakistan Navy crest',
         },
         {
             key: 'airforce',
             branch: 'Pakistan Air Force',
             title: 'Rise Above the Rest',
+            motto: 'Second to None',
             description:
                 'Purpose-built prep for PAF recruitment exams — aptitude, academic, and selection-board readiness in one guided course.',
             ctaHref: '/courses?category=air-force',
             image: branchAirforce,
             imageAlt: 'Pakistan Air Force officers on parade',
+            crest: airforceCrest,
+            crestAlt: 'Pakistan Air Force crest',
         },
     ];
     const total = slides.length;
@@ -184,9 +201,9 @@ function BranchSlideContent({ slide, reversed = false, active = true }: { slide:
                         className="absolute inset-0"
                         style={{ background: 'linear-gradient(to top, rgba(4, 39, 38, 0.75), rgba(4, 39, 38, 0.1) 55%, transparent 80%)' }}
                     />
-                    <div className="absolute left-5 top-5 inline-flex items-center gap-2 rounded-full bg-black/30 px-3.5 py-2 text-xs font-bold uppercase tracking-wide text-white backdrop-blur-sm">
-                        <ShieldMark className="h-4 w-4 text-gold-400" />
-                        Lion Forces Academy
+                    <div className="absolute left-5 top-5 inline-flex items-center gap-2 rounded-full bg-black/30 px-3 py-2 text-xs font-bold uppercase tracking-wide text-white backdrop-blur-sm">
+                        <img src={slide.crest} alt={slide.crestAlt} className="h-6 w-6 object-contain" />
+                        {slide.branch}
                     </div>
                 </div>
             </div>
@@ -194,7 +211,11 @@ function BranchSlideContent({ slide, reversed = false, active = true }: { slide:
             <div className={`w-full text-center lg:w-1/2 lg:text-left ${reversed ? 'lg:order-1' : ''}`}>
                 <SectionKicker dark>{slide.branch}</SectionKicker>
                 <h1 className="font-display text-5xl uppercase leading-[1.05] text-white sm:text-6xl">{slide.title}</h1>
-                <p className="mx-auto mt-6 max-w-lg text-lg leading-relaxed text-teal-200 lg:mx-0">{slide.description}</p>
+                <p className="mt-3 text-sm font-semibold uppercase tracking-wide text-gold-300">
+                    {slide.motto}
+                    {slide.mottoTranslation && <span className="block text-xs font-medium normal-case tracking-normal text-teal-300">{slide.mottoTranslation}</span>}
+                </p>
+                <p className="mx-auto mt-5 max-w-lg text-lg leading-relaxed text-teal-200 lg:mx-0">{slide.description}</p>
                 <div className="mt-8 flex flex-wrap items-center justify-center gap-4 lg:justify-start">
                     <Link
                         href={slide.ctaHref}
