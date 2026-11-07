@@ -33,24 +33,39 @@ export default function PracticeTests({ tests, totalQuestions }: { tests: TestIt
                         {tests.map((t) => (
                             <div
                                 key={t.id}
-                                className="group rounded-3xl border border-border bg-surface p-6 transition-all duration-normal hover:-translate-y-1 hover:border-primary hover:shadow-lg"
+                                className="group flex h-full flex-col rounded-[1.5rem] border border-border bg-surface p-6 transition-all duration-normal hover:-translate-y-1 hover:border-primary hover:shadow-xl"
                             >
-                                {t.course?.category && (
-                                    <span className="rounded-full bg-primary-subtle px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide text-primary">
-                                        {t.course.category.name}
+                                <div className="flex items-start justify-between gap-3">
+                                    <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-primary-subtle text-primary transition-transform duration-normal group-hover:scale-110">
+                                        <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                                        </svg>
                                     </span>
-                                )}
-                                <h3 className="mt-3 font-bold text-text group-hover:text-primary">{t.title}</h3>
+                                    {t.course?.category && (
+                                        <span className="mt-1 flex-shrink-0 rounded-full bg-primary-subtle px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide text-primary">
+                                            {t.course.category.name}
+                                        </span>
+                                    )}
+                                </div>
+                                <h3 className="mt-4 font-bold text-text group-hover:text-primary">{t.title}</h3>
                                 <p className="mt-1 text-sm text-text-secondary">{t.course?.title}</p>
-                                <p className="mt-3 text-sm font-semibold text-text-secondary">
+
+                                <span className="mt-4 inline-flex w-fit items-center gap-1.5 rounded-full bg-surface-sunken px-3 py-1.5 text-xs font-semibold text-text-secondary">
+                                    <svg className="h-3.5 w-3.5 text-primary" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 7h6m-6 4h4" />
+                                    </svg>
                                     {t.question_selection_mode === 'manual' ? `${t.questions_count} questions` : `${t.auto_question_count ?? 10} questions (random)`}
-                                </p>
+                                </span>
+
                                 {t.course && (
                                     <Link
                                         href={`/courses/${t.course.slug}`}
-                                        className="mt-4 inline-flex items-center gap-1.5 text-sm font-bold text-primary hover:underline"
+                                        className="mt-auto inline-flex items-center gap-1.5 pt-5 text-sm font-bold text-primary hover:underline"
                                     >
-                                        View Course &rarr;
+                                        View Course
+                                        <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5 transition-transform duration-fast group-hover:translate-x-0.5">
+                                            <path d="M11.3 3.3a1 1 0 011.4 0l5 5a1 1 0 010 1.4l-5 5a1 1 0 11-1.4-1.4L14.6 10H4a1 1 0 010-2h10.6l-3.3-3.3a1 1 0 010-1.4z" />
+                                        </svg>
                                     </Link>
                                 )}
                             </div>
