@@ -157,7 +157,7 @@ export default function HowToBuy({ hero, packages, paymentMethods, faqs }: { her
                 </div>
             </section>
 
-            <section className="mx-auto max-w-container px-4 py-20 sm:px-6 lg:px-8">
+            <section className="mx-auto max-w-container px-4 py-14 sm:px-6 lg:px-8">
                 <RevealOnScroll className="mx-auto mb-12 max-w-2xl text-center">
                     <SectionKicker>How It Works</SectionKicker>
                     <h2 className="font-display text-4xl uppercase tracking-wide text-text sm:text-5xl">Get Started in 6 Steps</h2>
@@ -202,7 +202,7 @@ export default function HowToBuy({ hero, packages, paymentMethods, faqs }: { her
             </section>
 
             {packages.length > 0 && (
-                <section className="bg-surface-sunken py-20">
+                <section className="bg-surface-sunken py-14">
                     <div className="mx-auto max-w-container px-4 sm:px-6 lg:px-8">
                         <RevealOnScroll className="mx-auto mb-12 max-w-2xl text-center">
                             <SectionKicker>Pricing</SectionKicker>
@@ -265,7 +265,7 @@ export default function HowToBuy({ hero, packages, paymentMethods, faqs }: { her
                 </section>
             )}
 
-            <section className="mx-auto max-w-container px-4 py-20 sm:px-6 lg:px-8">
+            <section className="mx-auto max-w-container px-4 py-14 sm:px-6 lg:px-8">
                 <RevealOnScroll className="mx-auto mb-12 max-w-2xl text-center">
                     <SectionKicker>Payment</SectionKicker>
                     <h2 className="font-display text-4xl uppercase tracking-wide text-text sm:text-5xl">Payment Methods</h2>
@@ -283,7 +283,7 @@ export default function HowToBuy({ hero, packages, paymentMethods, faqs }: { her
             </section>
 
             {faqs.length > 0 && (
-                <section className="bg-surface-sunken py-20">
+                <section className="bg-surface-sunken py-14">
                     <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
                         <RevealOnScroll className="mb-10 text-center">
                             <h2 className="font-display text-3xl uppercase tracking-wide text-text">Refunds & Access</h2>
@@ -300,7 +300,7 @@ export default function HowToBuy({ hero, packages, paymentMethods, faqs }: { her
                 </section>
             )}
 
-            <section className="mx-auto max-w-container px-4 pb-24 pt-20 sm:px-6 lg:px-8">
+            <section className="mx-auto max-w-container px-4 pb-20 pt-14 sm:px-6 lg:px-8">
                 <RevealOnScroll className="rounded-3xl bg-surface-brand p-10 text-center sm:p-16">
                     <h2 className="font-display text-4xl uppercase tracking-wide text-secondary sm:text-5xl">
                         Ready to Get Started?
