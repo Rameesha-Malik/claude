@@ -116,45 +116,36 @@ export default function HowToBuy({ hero, packages, paymentMethods, faqs }: { her
                     <SectionKicker>How It Works</SectionKicker>
                     <h2 className="font-display text-4xl uppercase tracking-wide text-text sm:text-5xl">Get Started in 6 Steps</h2>
                 </RevealOnScroll>
-                <RevealOnScroll staggerMs={60} className="grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+                <RevealOnScroll staggerMs={60} className="grid gap-x-6 gap-y-10 sm:grid-cols-2 lg:grid-cols-3">
                     {STEPS.map((step, i) => {
                         const Icon = STEP_ICONS[i];
                         return (
-                            <div key={i} className="group">
-                                {/* This inner wrapper (not the outer card div) is the positioning
-                                    context for the floating badge below, so the badge anchors to the
-                                    image's own bottom edge -- not the bottom of the whole card, which
-                                    would shift whenever the Urdu line wraps to two lines. */}
-                                <div className="relative">
-                                    <div
-                                        className="relative h-36 overflow-hidden rounded-[1.5rem] transition-transform duration-normal group-hover:-translate-y-1"
-                                        style={{ background: 'linear-gradient(135deg, var(--teal-800), var(--teal-500))' }}
-                                    >
-                                        <div className="flex h-full items-center justify-center">
-                                            <Icon className="h-12 w-12 text-white/80" />
-                                        </div>
-                                        <div aria-hidden className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/35 to-transparent" />
-                                        <span className="absolute bottom-3 left-4 right-16 truncate text-left text-sm font-bold uppercase tracking-wide text-white">
-                                            {step.title}
-                                        </span>
-                                    </div>
-                                    {/* Floating step-number badge straddling the image's bottom edge --
-                                        a sibling of the (overflow-hidden) image, not a child of it, so it
-                                        isn't clipped by the image's own rounded-corner mask. */}
-                                    <span className="absolute -bottom-4 right-4 flex h-11 w-11 items-center justify-center rounded-full border border-border bg-surface font-display text-sm text-primary shadow-lg">
-                                        0{i + 1}
-                                    </span>
-                                </div>
-                                <div className="px-1 pb-1 pt-8">
-                                    <p className="text-sm text-text-secondary">
+                            <div key={i} className="group relative">
+                                {/* Client: the content itself belongs on the card (where the
+                                    reference's photo was), not as plain text below a decorative
+                                    tile -- one rounded panel holding the icon, title and both
+                                    descriptions, same idea as the reference's image card. */}
+                                <div
+                                    className="relative overflow-hidden rounded-[1.5rem] px-5 pb-12 pt-5 text-left shadow-sm transition-all duration-normal group-hover:-translate-y-1 group-hover:shadow-lg"
+                                    style={{ background: 'linear-gradient(135deg, var(--teal-800), var(--teal-500))' }}
+                                >
+                                    <Icon className="h-8 w-8 text-white/70" />
+                                    <h3 className="mt-4 text-sm font-bold uppercase tracking-wide text-white">{step.title}</h3>
+                                    <p className="mt-2 text-sm text-teal-100">
                                         {step.title === 'Send Screenshot on WhatsApp' && site.whatsappNumber
                                             ? `Send us a screenshot of your payment receipt on WhatsApp (${site.whatsappNumber}).`
                                             : step.en}
                                     </p>
-                                    <p dir="rtl" className="mt-2 font-urdu text-sm leading-relaxed text-text-secondary">
+                                    <p dir="rtl" className="mt-2 font-urdu text-sm leading-relaxed text-teal-100">
                                         {step.ur}
                                     </p>
                                 </div>
+                                {/* Step number where the reference's arrow button sat, straddling
+                                    the card's bottom-right corner -- a sibling of the (overflow-hidden)
+                                    card, not a child of it, so it isn't clipped by the rounded mask. */}
+                                <span className="absolute -bottom-4 right-4 flex h-11 w-11 items-center justify-center rounded-full border border-border bg-surface font-display text-sm text-primary shadow-lg">
+                                    0{i + 1}
+                                </span>
                             </div>
                         );
                     })}
