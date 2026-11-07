@@ -1,4 +1,6 @@
 import { Head, Link, usePage } from '@inertiajs/react';
+import { CheckCircleIcon, PersonIcon } from '@/Components/AuthIcons';
+import { PhoneIcon, TagIcon } from '@/Components/ContactFieldIcons';
 import LiteMarkdown from '@/Components/LiteMarkdown';
 import RevealOnScroll from '@/Components/RevealOnScroll';
 import SectionKicker from '@/Components/SectionKicker';
@@ -49,6 +51,29 @@ const STEPS = [
     },
 ];
 
+function CardIcon({ className = 'h-5 w-5' }: { className?: string }) {
+    return (
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.6} className={className}>
+            <rect x="2.5" y="5" width="15" height="10" rx="1.75" />
+            <path strokeLinecap="round" d="M2.5 8.5h15" />
+            <path strokeLinecap="round" d="M5 12h3" />
+        </svg>
+    );
+}
+
+function BookIcon({ className = 'h-5 w-5' }: { className?: string }) {
+    return (
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.6} className={className}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M3.5 4.5c1.8-.9 3.9-.9 5.5 0v11c-1.6-.9-3.7-.9-5.5 0v-11z" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 4.5c-1.8-.9-3.9-.9-5.5 0v11c1.6-.9 3.7-.9 5.5 0v-11z" />
+        </svg>
+    );
+}
+
+// One icon per STEPS entry, same order -- paired here rather than inline in
+// the STEPS array so that array can stay plain data.
+const STEP_ICONS = [PersonIcon, TagIcon, CardIcon, PhoneIcon, CheckCircleIcon, BookIcon];
+
 interface PaymentMethodItem { name: string; description: string | null }
 interface HeroContent { headline: string; subheading: string }
 
@@ -87,21 +112,52 @@ export default function HowToBuy({ hero, packages, paymentMethods, faqs }: { her
             </section>
 
             <section className="mx-auto max-w-container px-4 py-20 sm:px-6 lg:px-8">
-                <RevealOnScroll className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                    {STEPS.map((step, i) => (
-                        <div key={i} className="relative rounded-2xl border border-border bg-surface p-6">
-                            <div className="mb-3 font-display text-4xl text-oxblood-700">0{i + 1}</div>
-                            <h3 className="font-bold text-text">{step.title}</h3>
-                            <p className="mt-1 text-sm text-text-secondary">
-                                {step.title === 'Send Screenshot on WhatsApp' && site.whatsappNumber
-                                    ? `Send us a screenshot of your payment receipt on WhatsApp (${site.whatsappNumber}).`
-                                    : step.en}
-                            </p>
-                            <p dir="rtl" className="mt-2 font-urdu text-sm leading-relaxed text-text-secondary">
-                                {step.ur}
-                            </p>
-                        </div>
-                    ))}
+                <RevealOnScroll className="mx-auto mb-12 max-w-2xl text-center">
+                    <SectionKicker>How It Works</SectionKicker>
+                    <h2 className="font-display text-4xl uppercase tracking-wide text-text sm:text-5xl">Get Started in 6 Steps</h2>
+                </RevealOnScroll>
+                <RevealOnScroll staggerMs={60} className="grid gap-x-6 gap-y-12 sm:grid-cols-2 lg:grid-cols-3">
+                    {STEPS.map((step, i) => {
+                        const Icon = STEP_ICONS[i];
+                        return (
+                            <div key={i} className="group">
+                                {/* This inner wrapper (not the outer card div) is the positioning
+                                    context for the floating badge below, so the badge anchors to the
+                                    image's own bottom edge -- not the bottom of the whole card, which
+                                    would shift whenever the Urdu line wraps to two lines. */}
+                                <div className="relative">
+                                    <div
+                                        className="relative h-36 overflow-hidden rounded-[1.5rem] transition-transform duration-normal group-hover:-translate-y-1"
+                                        style={{ background: 'linear-gradient(135deg, var(--teal-800), var(--teal-500))' }}
+                                    >
+                                        <div className="flex h-full items-center justify-center">
+                                            <Icon className="h-12 w-12 text-white/80" />
+                                        </div>
+                                        <div aria-hidden className="absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-black/35 to-transparent" />
+                                        <span className="absolute bottom-3 left-4 right-16 truncate text-left text-sm font-bold uppercase tracking-wide text-white">
+                                            {step.title}
+                                        </span>
+                                    </div>
+                                    {/* Floating step-number badge straddling the image's bottom edge --
+                                        a sibling of the (overflow-hidden) image, not a child of it, so it
+                                        isn't clipped by the image's own rounded-corner mask. */}
+                                    <span className="absolute -bottom-4 right-4 flex h-11 w-11 items-center justify-center rounded-full border border-border bg-surface font-display text-sm text-primary shadow-lg">
+                                        0{i + 1}
+                                    </span>
+                                </div>
+                                <div className="px-1 pb-1 pt-8">
+                                    <p className="text-sm text-text-secondary">
+                                        {step.title === 'Send Screenshot on WhatsApp' && site.whatsappNumber
+                                            ? `Send us a screenshot of your payment receipt on WhatsApp (${site.whatsappNumber}).`
+                                            : step.en}
+                                    </p>
+                                    <p dir="rtl" className="mt-2 font-urdu text-sm leading-relaxed text-text-secondary">
+                                        {step.ur}
+                                    </p>
+                                </div>
+                            </div>
+                        );
+                    })}
                 </RevealOnScroll>
             </section>
 
