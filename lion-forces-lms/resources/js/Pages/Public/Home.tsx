@@ -392,7 +392,10 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
 
             {/* ---------------- Latest News — 3D coverflow poster carousel ---------------- */}
             {latestNews.length > 0 && (
-                <section className="relative overflow-hidden bg-secondary pb-8 pt-8 text-text-inverse">
+                // bg-teal-950, not bg-secondary -- How It Works right above this is
+                // already bg-secondary, and two identical dark-teal sections back to
+                // back with no divider read as one merged block.
+                <section className="relative overflow-hidden bg-teal-950 pb-8 pt-8 text-text-inverse">
                     <GradientMesh className="opacity-60" />
                     <div className="relative mx-auto max-w-container px-4 sm:px-6 lg:px-8">
                         <RevealOnScroll className="mx-auto mb-10 max-w-2xl text-center">
