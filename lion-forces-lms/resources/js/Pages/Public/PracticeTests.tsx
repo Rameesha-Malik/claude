@@ -1,7 +1,9 @@
 import { Head, Link } from '@inertiajs/react';
 import AnimatedCounter from '@/Components/AnimatedCounter';
+import GradientMesh from '@/Components/GradientMesh';
 import RevealOnScroll from '@/Components/RevealOnScroll';
 import SectionKicker from '@/Components/SectionKicker';
+import WaveRibbon from '@/Components/WaveRibbon';
 import PublicLayout from '@/Layouts/PublicLayout';
 
 interface TestItem {
@@ -15,6 +17,8 @@ export default function PracticeTests({ tests, totalQuestions }: { tests: TestIt
             <Head title="Practice Tests" />
 
             <section className="relative overflow-hidden bg-secondary py-20 text-center text-white">
+                <GradientMesh className="opacity-40" />
+                <WaveRibbon />
                 <div className="relative mx-auto max-w-container px-4 sm:px-6 lg:px-8">
                     <SectionKicker dark><span className="mx-auto">Sharpen Your Skills</span></SectionKicker>
                     <h1 className="font-display text-5xl uppercase tracking-wide sm:text-6xl">Practice Tests</h1>
