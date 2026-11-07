@@ -329,13 +329,13 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                             {/* Featured tile: first item, bold solid fill, spans 2 columns on larger screens */}
                             {why.items[0] && (
                                 <div className="flex flex-col rounded-2xl bg-primary p-7 text-on-primary shadow-lg sm:col-span-2">
-                                    <span className="flex h-12 w-12 items-center justify-center rounded-full bg-white/15">
-                                        <WhyChooseIcon name={why.items[0].icon ?? 'shield-check'} />
-                                    </span>
-                                    <div className="mt-6">
+                                    <div className="flex items-center gap-4">
+                                        <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-white/15">
+                                            <WhyChooseIcon name={why.items[0].icon ?? 'shield-check'} />
+                                        </span>
                                         <h3 className="font-display text-2xl uppercase tracking-wide">{why.items[0].title}</h3>
-                                        <p className="mt-1.5 max-w-md text-sm leading-relaxed text-white/85">{why.items[0].description}</p>
                                     </div>
+                                    <p className="mt-3 max-w-md text-sm leading-relaxed text-white/85">{why.items[0].description}</p>
                                 </div>
                             )}
 
@@ -344,11 +344,13 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                                     key={i}
                                     className="group rounded-2xl border border-border bg-surface p-6 transition-all duration-normal hover:-translate-y-1 hover:border-primary hover:shadow-lg"
                                 >
-                                    <span className="flex h-11 w-11 items-center justify-center rounded-full bg-primary-subtle text-primary transition-transform duration-normal group-hover:scale-110">
-                                        <WhyChooseIcon name={item.icon ?? 'shield-check'} />
-                                    </span>
-                                    <h3 className="mt-4 font-bold text-text">{item.title}</h3>
-                                    <p className="mt-1 text-sm leading-relaxed text-text-secondary">{item.description}</p>
+                                    <div className="flex items-center gap-3">
+                                        <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-primary-subtle text-primary transition-transform duration-normal group-hover:scale-110">
+                                            <WhyChooseIcon name={item.icon ?? 'shield-check'} />
+                                        </span>
+                                        <h3 className="font-bold text-text">{item.title}</h3>
+                                    </div>
+                                    <p className="mt-2 text-sm leading-relaxed text-text-secondary">{item.description}</p>
                                 </div>
                             ))}
                         </RevealOnScroll>
