@@ -1,0 +1,172 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\Course;
+use App\Models\MockExam;
+use App\Models\MockExamSection;
+use App\Models\QuestionBank;
+use App\Models\Subject;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Inertia\Response;
+
+class MockExamController extends Controller
+{
+    public function index(Request $request, Course $course): Response
+    {
+        abort_unless($request->user()->canManageCourse($course), 403);
+
+        return Inertia::render('Admin/MockExams/Index', [
+            'course' => $course->only('id', 'title'),
+            'exams' => $course->mockExams()->withCount('sections')->get(),
+        ]);
+    }
+
+    public function adminIndex(Request $request): Response
+    {
+        $isContentManager = $request->user()->hasRole('content_manager');
+        $managedCourseIds = $isContentManager ? $request->user()->managedCourses()->pluck('courses.id') : null;
+
+        return Inertia::render('Admin/MockExams/AllIndex', [
+            'exams' => MockExam::with('course:id,title')->withCount('sections')
+                ->when($isContentManager, fn ($q) => $q->whereIn('course_id', $managedCourseIds))
+                ->orderByDesc('id')->get(),
+            'courses' => Course::orderBy('title')->when($isContentManager, fn ($q) => $q->whereIn('id', $managedCourseIds))->get(['id', 'title']),
+        ]);
+    }
+
+    public function create(Request $request, Course $course): Response
+    {
+        abort_unless($request->user()->canManageCourse($course), 403);
+
+        return $this->form($course);
+    }
+
+    public function edit(Request $request, Course $course, MockExam $mockExam): Response
+    {
+        abort_unless($request->user()->canManageCourse($course), 403);
+
+        $mockExam->load('sections.questions');
+
+        return $this->form($course, $mockExam);
+    }
+
+    private function form(Course $course, ?MockExam $mockExam = null): Response
+    {
+        return Inertia::render('Admin/MockExams/Form', [
+            'course' => $course->only('id', 'title'),
+            'mockExam' => $mockExam,
+            'subjects' => Subject::orderBy('name')->get(['id', 'name']),
+            'questionBank' => QuestionBank::select('id', 'subject_id', 'question_text', 'difficulty')
+                ->orderByDesc('id')
+                ->limit(300)
+                ->get(),
+        ]);
+    }
+
+    public function store(Request $request, Course $course)
+    {
+        abort_unless($request->user()->canManageCourse($course), 403);
+
+        $data = $this->validated($request);
+        $exam = $course->mockExams()->create($data);
+
+        return redirect()->route('admin.courses.mock-exams.edit', [$course, $exam])->with('success', 'Mock exam created. Now add sections.');
+    }
+
+    public function update(Request $request, Course $course, MockExam $mockExam)
+    {
+        abort_unless($request->user()->canManageCourse($course), 403);
+
+        $mockExam->update($this->validated($request));
+
+        return back()->with('success', 'Mock exam updated.');
+    }
+
+    public function destroy(Request $request, Course $course, MockExam $mockExam)
+    {
+        abort_unless($request->user()->canManageCourse($course), 403);
+
+        $mockExam->delete();
+
+        return redirect()->route('admin.courses.mock-exams.index', $course)->with('success', 'Mock exam removed.');
+    }
+
+    private function validated(Request $request): array
+    {
+        return $request->validate([
+            'title' => 'required|string|max:255',
+            'target_exam_name' => 'nullable|string|max:255',
+            'total_duration_minutes' => 'nullable|integer|min:1',
+            'attempt_limit' => 'nullable|integer|min:1',
+            'fullscreen_required' => 'boolean',
+            'disallow_back_navigation' => 'boolean',
+            'available_from' => 'nullable|date',
+            'available_until' => 'nullable|date',
+            'is_active' => 'boolean',
+        ]);
+    }
+
+    // --- Sections ---
+
+    public function storeSection(Request $request, Course $course, MockExam $mockExam)
+    {
+        abort_unless($request->user()->canManageCourse($course), 403);
+
+        $data = $this->sectionValidated($request);
+        $questionIds = $data['question_ids'] ?? [];
+        unset($data['question_ids']);
+        $data['order'] = $mockExam->sections()->count() + 1;
+
+        $section = $mockExam->sections()->create($data);
+        $this->syncSectionQuestions($section, $questionIds);
+
+        return back()->with('success', 'Section added.');
+    }
+
+    public function updateSection(Request $request, Course $course, MockExam $mockExam, MockExamSection $section)
+    {
+        abort_unless($request->user()->canManageCourse($course), 403);
+
+        $data = $this->sectionValidated($request);
+        $questionIds = $data['question_ids'] ?? [];
+        unset($data['question_ids']);
+
+        $section->update($data);
+        $this->syncSectionQuestions($section, $questionIds);
+
+        return back()->with('success', 'Section updated.');
+    }
+
+    public function destroySection(Request $request, Course $course, MockExam $mockExam, MockExamSection $section)
+    {
+        abort_unless($request->user()->canManageCourse($course), 403);
+
+        $section->delete();
+
+        return back()->with('success', 'Section removed.');
+    }
+
+    private function sectionValidated(Request $request): array
+    {
+        return $request->validate([
+            'name' => 'required|string|max:255',
+            'duration_minutes' => 'nullable|integer|min:1',
+            'marks_per_question' => 'required|numeric|min:0',
+            'negative_marking' => 'required|numeric|min:0',
+            'question_ids' => 'nullable|array',
+            'question_ids.*' => 'exists:question_bank,id',
+        ]);
+    }
+
+    private function syncSectionQuestions(MockExamSection $section, array $questionIds): void
+    {
+        $sync = [];
+        foreach (array_values($questionIds) as $i => $id) {
+            $sync[$id] = ['order' => $i + 1];
+        }
+        $section->questions()->sync($sync);
+    }
+}
