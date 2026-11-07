@@ -119,7 +119,10 @@ export default function NewsCoverflowCarousel({ items, viewAllHref = '/news' }: 
                 )}
                 <div
                     className="absolute inset-0"
-                    style={{ background: 'radial-gradient(circle at center, rgba(5,79,76,0.35) 0%, rgba(3,41,39,0.93) 100%)' }}
+                    style={{
+                        background:
+                            'radial-gradient(ellipse at center, rgba(4,167,157,0.3) 0%, rgba(5,79,76,0.55) 45%, var(--color-secondary) 85%)',
+                    }}
                 />
             </div>
 

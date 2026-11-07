@@ -411,14 +411,6 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                     <RevealOnScroll>
                         <NewsCoverflowCarousel items={latestNews} viewAllHref="/news" />
                     </RevealOnScroll>
-
-                    <div className="relative mx-auto max-w-container px-4 sm:px-6 lg:px-8">
-                        <RevealOnScroll className="mt-6 text-center">
-                            <Link href="/news" className="font-bold uppercase tracking-wide text-white hover:text-teal-200">
-                                View all news &rarr;
-                            </Link>
-                        </RevealOnScroll>
-                    </div>
                 </section>
             )}
 
