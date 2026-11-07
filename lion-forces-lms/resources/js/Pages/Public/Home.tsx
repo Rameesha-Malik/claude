@@ -6,10 +6,12 @@ import GradientMesh from '@/Components/GradientMesh';
 import LiteMarkdown from '@/Components/LiteMarkdown';
 import RevealOnScroll from '@/Components/RevealOnScroll';
 import SectionKicker from '@/Components/SectionKicker';
-import ShieldMark from '@/Components/ShieldMark';
 import TiltCard from '@/Components/TiltCard';
 import WaveRibbon from '@/Components/WaveRibbon';
 import WhyChooseIcon from '@/Components/WhyChooseIcon';
+import armyCrest from '@/assets/crests/army-crest.png';
+import navyCrest from '@/assets/crests/navy-crest.png';
+import airforceCrest from '@/assets/crests/airforce-crest.png';
 import PublicLayout from '@/Layouts/PublicLayout';
 
 // Small illustrative mockup per "How It Works" step -- built from plain
@@ -225,18 +227,19 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
 
             {/* ---------------- What We Offer — fanned card stack + scattered praise ---------------- */}
             {services.length > 0 && (
-                <section className="relative overflow-hidden bg-surface py-24">
+                <section className="relative overflow-hidden bg-surface pb-24 pt-14">
                     <GradientMesh variant="light" />
 
-                    {/* Large faint shield watermarks in the wide side margins either side of
-                        the fan stack -- those margins sit outside the max-w-3xl content
-                        column below and were empty on anything wider than ~1024px. */}
+                    {/* Real branch crests (not the generic academy ShieldMark) in the wide
+                        side margins either side of the fan stack -- those margins sit
+                        outside the max-w-3xl content column below and were empty on
+                        anything wider than ~1024px. Navy on the left, Army on the right. */}
                     {/* opacity-* (not a `text-primary/[0.05]` slash modifier) -- `primary`
                         is a plain CSS color value, not an alpha-ready channel triplet, so
                         that modifier silently resolves to fully opaque (see the Home hero
                         and About panel gradient fixes for the same underlying issue). */}
-                    <ShieldMark aria-hidden className="pointer-events-none absolute -left-16 top-1/2 hidden h-72 w-72 -translate-y-1/2 text-primary opacity-[0.06] xl:block" />
-                    <ShieldMark aria-hidden className="pointer-events-none absolute -right-16 top-1/2 hidden h-72 w-72 -translate-y-1/2 rotate-12 text-primary opacity-[0.06] xl:block" />
+                    <img src={navyCrest} aria-hidden alt="" className="pointer-events-none absolute -left-16 top-1/2 hidden h-72 w-72 -translate-y-1/2 opacity-[0.1] xl:block" />
+                    <img src={armyCrest} aria-hidden alt="" className="pointer-events-none absolute -right-16 top-1/2 hidden h-72 w-72 -translate-y-1/2 rotate-12 opacity-[0.1] xl:block" />
 
                     <RevealOnScroll className="relative mx-auto mb-4 max-w-2xl px-4 text-center sm:px-6">
                         <SectionKicker>What We Cover</SectionKicker>
@@ -248,7 +251,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
 
                     {/* Fan stack -- own overflow-hidden box so rotated/offset cards never
                         widen the page, regardless of viewport size. */}
-                    <div className="relative mx-auto mt-16 h-[22rem] max-w-3xl overflow-hidden px-4 sm:h-[26rem] sm:px-6">
+                    <div className="relative mx-auto mt-10 h-[22rem] max-w-3xl overflow-hidden px-4 sm:h-[26rem] sm:px-6">
                         <div
                             aria-hidden
                             className="absolute left-1/2 top-1/2 h-[26rem] w-[26rem] -translate-x-1/2 -translate-y-1/2 rounded-full opacity-60 blur-3xl"
@@ -274,7 +277,16 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                                         <TiltCard max={6} className="rounded-2xl">
                                             <div className="flex h-48 flex-col rounded-2xl border border-border bg-surface p-5 text-left shadow-xl sm:h-56">
                                                 <div className="mb-3 flex h-10 w-10 items-center justify-center rounded-xl bg-primary text-on-primary shadow-md">
-                                                    <ServiceIcon name={service.icon} />
+                                                    {service.icon === 'shield' ? (
+                                                        <img src={armyCrest} alt="" className="h-7 w-7 object-contain" />
+                                                    ) : service.icon === 'anchor' ? (
+                                                        <div className="flex items-center -space-x-1.5">
+                                                            <img src={navyCrest} alt="" className="h-5 w-5 object-contain" />
+                                                            <img src={airforceCrest} alt="" className="h-5 w-5 object-contain" />
+                                                        </div>
+                                                    ) : (
+                                                        <ServiceIcon name={service.icon} />
+                                                    )}
                                                 </div>
                                                 <h3 className="text-sm font-bold text-text">{service.title}</h3>
                                                 <p className="mt-1.5 line-clamp-3 text-xs leading-relaxed text-text-secondary">{service.description}</p>
@@ -294,7 +306,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                                 'bottom-2 right-2 sm:right-14 sm:bottom-10',
                             ];
                             return (
-                                <div key={i} className={`absolute z-20 hidden max-w-[10rem] rounded-xl border border-border bg-surface px-3 py-2 shadow-lg sm:block ${positions[i]}`}>
+                                <div key={i} className={`absolute z-20 hidden max-w-[10rem] rounded-[1.25rem] border border-border bg-surface px-3 py-2 shadow-lg sm:block ${positions[i]}`}>
                                     <div className="flex items-center gap-1 text-star">
                                         {Array.from({ length: t.rating ?? 5 }).map((_, s) => (
                                             <svg key={s} viewBox="0 0 20 20" fill="currentColor" className="h-3 w-3">
