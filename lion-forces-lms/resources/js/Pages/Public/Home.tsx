@@ -328,7 +328,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                         <RevealOnScroll className="grid gap-5 sm:grid-cols-2 lg:grid-cols-3">
                             {/* Featured tile: first item, bold solid fill, spans 2 columns on larger screens */}
                             {why.items[0] && (
-                                <div className="flex flex-col rounded-2xl bg-primary p-7 text-on-primary shadow-lg sm:col-span-2">
+                                <div className="flex flex-col rounded-[1.5rem] bg-primary p-7 text-on-primary shadow-lg sm:col-span-2">
                                     <div className="flex items-center gap-4">
                                         <span className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-white/15">
                                             <WhyChooseIcon name={why.items[0].icon ?? 'shield-check'} />
@@ -342,7 +342,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                             {why.items.slice(1).map((item: { icon?: string; title: string; description: string }, i: number) => (
                                 <div
                                     key={i}
-                                    className="group rounded-2xl border border-border bg-surface p-6 transition-all duration-normal hover:-translate-y-1 hover:border-primary hover:shadow-lg"
+                                    className="group rounded-[1.5rem] border border-border bg-surface p-6 transition-all duration-normal hover:-translate-y-1 hover:border-primary hover:shadow-lg"
                                 >
                                     <div className="flex items-center gap-3">
                                         <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-primary-subtle text-primary transition-transform duration-normal group-hover:scale-110">
@@ -418,7 +418,11 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
             )}
 
             {/* ---------------- Demo Quiz Teaser ---------------- */}
-            <section className="mx-auto max-w-container px-4 pb-8 sm:px-6 lg:px-8">
+            {/* bg-white, not the page's minty --color-canvas -- right after
+                the very dark News section, a clean white band reads much
+                better than canvas's slight mint tint. */}
+            <section className="bg-white px-4 pb-8 pt-8 sm:px-6 lg:px-8">
+                <div className="mx-auto max-w-container">
                 <RevealOnScroll>
                     <div className="relative overflow-hidden rounded-3xl bg-secondary p-10 text-center text-white shadow-2xl sm:p-16">
                         <GradientMesh />
@@ -440,6 +444,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                         </div>
                     </div>
                 </RevealOnScroll>
+                </div>
             </section>
 
             {/* ---------------- FAQs — gradient "ask us" panel + accordion ---------------- */}
@@ -453,8 +458,8 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                         </RevealOnScroll>
 
                         <RevealOnScroll className="mx-auto grid max-w-4xl gap-6 lg:grid-cols-[minmax(0,1fr)_minmax(0,1.6fr)]">
-                            <div className="relative overflow-hidden rounded-2xl bg-secondary p-8 text-white shadow-lg">
-                                <span className="flex h-14 w-14 items-center justify-center rounded-2xl bg-white/15">
+                            <div className="relative overflow-hidden rounded-[1.5rem] bg-secondary p-8 text-white shadow-lg">
+                                <span className="flex h-14 w-14 items-center justify-center rounded-full bg-white/15">
                                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.6} className="h-7 w-7">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M4 5h13a2 2 0 012 2v7a2 2 0 01-2 2H10l-4 3v-3H5a2 2 0 01-2-2V7a2 2 0 012-2z" />
                                         <path strokeLinecap="round" d="M8.5 10h7M8.5 13h4.5" />

@@ -446,6 +446,40 @@ export default function QuestionRunner({
                     </div>
                 </div>
             </div>
+
+            {/* The same question-jump grid the full layout has above the
+                question -- cut here originally only to save vertical height,
+                not because it's not useful. With the sidebar now wide enough
+                to host it, there's no reason a multi-question demo/custom
+                quiz shouldn't get the same quick navigation. */}
+            {total > 1 && (
+                <div className="rounded-2xl border border-border bg-surface p-3 shadow-sm">
+                    <p className="mb-2 text-xs font-bold uppercase tracking-wide text-text-muted">Question Navigator</p>
+                    <div className="grid grid-cols-6 gap-1.5 lg:grid-cols-5">
+                        {questions.map((q, i) => {
+                            const isCurrent = i === currentIndex;
+                            const isAnswered = answers[q.id] !== null && answers[q.id] !== undefined;
+                            const isSkipped = !isAnswered && visited.has(i) && !isCurrent;
+                            let classes = 'border-border bg-surface text-text-muted hover:border-primary';
+                            if (isCurrent) classes = 'border-primary bg-primary text-on-primary shadow-sm';
+                            else if (isAnswered) classes = 'border-success bg-success-bg text-success';
+                            else if (isSkipped) classes = 'border-warning bg-warning-bg text-warning';
+                            return (
+                                <button
+                                    key={q.id}
+                                    type="button"
+                                    onClick={() => goTo(i)}
+                                    aria-current={isCurrent}
+                                    aria-label={`Go to question ${i + 1}`}
+                                    className={`flex h-8 items-center justify-center rounded-lg border text-xs font-bold transition-colors ${classes}`}
+                                >
+                                    {i + 1}
+                                </button>
+                            );
+                        })}
+                    </div>
+                </div>
+            )}
         </div>
     );
 

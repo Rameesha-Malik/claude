@@ -20,13 +20,17 @@ function QuizCard({ q }: { q: Quiz }) {
                 </span>
             )}
             <h3 className="font-display text-lg uppercase text-text">{q.title}</h3>
-            <div className="mx-auto mt-4 grid w-full grid-cols-2 gap-2">
-                <div className="rounded-xl bg-primary-subtle p-3">
-                    <p className="font-display text-xl text-primary">{q.questions_count}</p>
+            <div className="mx-auto mt-4 flex w-full items-start justify-center gap-6">
+                <div className="flex flex-col items-center gap-1.5">
+                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary-subtle">
+                        <p className="font-display text-xl text-primary">{q.questions_count}</p>
+                    </div>
                     <p className="text-[0.65rem] uppercase tracking-wide text-text-muted">Questions</p>
                 </div>
-                <div className="rounded-xl bg-primary-subtle p-3">
-                    <p className="font-display text-xl text-primary">{q.duration_minutes}</p>
+                <div className="flex flex-col items-center gap-1.5">
+                    <div className="flex h-16 w-16 items-center justify-center rounded-full bg-primary-subtle">
+                        <p className="font-display text-xl text-primary">{q.duration_minutes}</p>
+                    </div>
                     <p className="text-[0.65rem] uppercase tracking-wide text-text-muted">Minutes</p>
                 </div>
             </div>
@@ -78,7 +82,7 @@ export default function DemoQuizIntro({ quiz, quizzes, pageContent }: Props) {
             </section>
 
             {/* Card floats up over the hero's bottom edge */}
-            <section className="relative -mt-14 px-4 pb-20 sm:px-6 lg:px-8">
+            <section className="relative -mt-24 px-4 pb-20 sm:px-6 lg:px-8">
                 <div className={hasMultiple ? 'mx-auto max-w-4xl' : 'mx-auto max-w-2xl'}>
                     {hasMultiple && grouped ? (
                         <div className="space-y-10">
@@ -97,13 +101,17 @@ export default function DemoQuizIntro({ quiz, quizzes, pageContent }: Props) {
                         </div>
                     ) : quiz ? (
                         <div className="rounded-2xl border border-border bg-surface p-8 text-center shadow-2xl">
-                            <div className="mx-auto grid max-w-sm grid-cols-2 gap-3">
-                                <div className="rounded-xl bg-primary-subtle p-4">
-                                    <p className="font-display text-3xl text-primary">{quiz.questions_count}</p>
+                            <div className="mx-auto flex max-w-sm items-start justify-center gap-10">
+                                <div className="flex flex-col items-center gap-2">
+                                    <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary-subtle">
+                                        <p className="font-display text-3xl text-primary">{quiz.questions_count}</p>
+                                    </div>
                                     <p className="text-xs uppercase tracking-wide text-text-muted">Questions</p>
                                 </div>
-                                <div className="rounded-xl bg-primary-subtle p-4">
-                                    <p className="font-display text-3xl text-primary">{quiz.duration_minutes}</p>
+                                <div className="flex flex-col items-center gap-2">
+                                    <div className="flex h-20 w-20 items-center justify-center rounded-full bg-primary-subtle">
+                                        <p className="font-display text-3xl text-primary">{quiz.duration_minutes}</p>
+                                    </div>
                                     <p className="text-xs uppercase tracking-wide text-text-muted">Minutes</p>
                                 </div>
                             </div>

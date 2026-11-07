@@ -49,11 +49,13 @@ export default function DemoQuizTake({ quiz, attemptId, questions }: Props) {
                 marketing page) was itself eating into the "all in one
                 screen, no scroll" budget for a timed demo quiz -- cut down
                 to just enough to not look cramped against the navbar.
-                Width was max-w-3xl (768px), which on anything wider than a
-                laptop left huge dead gutters either side of the quiz card --
-                widened to max-w-5xl so the card actually uses the screen
-                instead of sitting in a narrow column in the middle of it. */}
-            <div className="mx-auto max-w-5xl px-4 py-4 sm:px-6 lg:px-8">
+                Width was max-w-3xl, then max-w-5xl, both still leaving a
+                visibly empty gutter on either side on a desktop monitor --
+                widened again to max-w-6xl, and the sidebar's compact
+                question navigator (QuestionRunner) now gives that side
+                column enough real content to fill it instead of sitting
+                mostly empty under the two small stat boxes. */}
+            <div className="mx-auto max-w-6xl px-4 py-4 sm:px-6 lg:px-8">
                 <QuestionRunner
                     questions={questions}
                     answers={answers}
