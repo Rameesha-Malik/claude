@@ -159,7 +159,7 @@ export default function Courses({ courses, categories, tags, filters }: Props) {
             <section className="mx-auto max-w-container px-4 py-16 sm:px-6 lg:px-8">
                 <RevealOnScroll className="grid gap-7 sm:grid-cols-2 lg:grid-cols-3">
                     {courses.data.map((course) => (
-                        <div key={course.id} className="group flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-sm transition-all duration-normal hover:-translate-y-1.5 hover:border-primary hover:shadow-2xl">
+                        <div key={course.id} className="group flex h-full flex-col overflow-hidden rounded-[1.5rem] border border-border bg-surface shadow-sm transition-all duration-normal hover:-translate-y-1.5 hover:border-primary hover:shadow-2xl">
                             <div className="relative h-40 overflow-hidden bg-secondary">
                                 {course.thumbnail_path ? (
                                     <>
@@ -186,7 +186,7 @@ export default function Courses({ courses, categories, tags, filters }: Props) {
                                         />
                                         <span
                                             aria-hidden
-                                            className="absolute -right-4 -top-4 h-16 w-16 rotate-12 rounded-lg bg-white/10 transition-transform duration-slow group-hover:rotate-45"
+                                            className="absolute -right-4 -top-4 h-16 w-16 rotate-12 rounded-[1rem] bg-white/10 transition-transform duration-slow group-hover:rotate-45"
                                         />
                                         <div className="flex h-full items-center justify-center">
                                             <span className="relative font-display text-2xl uppercase tracking-widest text-white">
