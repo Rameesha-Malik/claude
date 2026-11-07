@@ -76,7 +76,10 @@ export default function BranchHeroSlider({ slides }: { slides: HeroSlideData[] }
         mm.add('(min-width: 1024px) and (prefers-reduced-motion: no-preference)', () => {
             const st = ScrollTrigger.create({
                 trigger: sectionRef.current,
-                start: 'top top',
+                // '80px' (not 'top top') -- the public header is sticky and
+                // 5rem/80px tall; pinning at the viewport's true top would
+                // slide this panel under it instead of sitting below it.
+                start: 'top 80px',
                 end: () => `+=${(total - 1) * window.innerHeight * 0.9}`,
                 pin: pinRef.current,
                 scrub: 0.6,
@@ -202,23 +205,23 @@ function BranchSlideContent({ slide, reversed = false, active = true }: { slide:
                     </p>
                 )}
                 <p className="mx-auto mt-5 max-w-lg text-lg leading-relaxed text-teal-200 lg:mx-0">{slide.description}</p>
-                <div className="mt-8 flex flex-wrap items-center justify-center gap-3 lg:justify-start">
+                <div className="mt-8 flex flex-wrap items-center justify-center gap-2 lg:justify-start">
                     <Link
                         href={slide.cta_href}
-                        className="inline-flex items-center gap-2 rounded-full bg-primary px-7 py-3.5 text-sm font-bold uppercase tracking-wide text-on-primary shadow-lg transition-all duration-normal ease-spring hover:-translate-y-0.5 hover:shadow-xl"
+                        className="inline-flex flex-shrink-0 items-center gap-1.5 whitespace-nowrap rounded-full bg-primary px-5 py-3 text-xs font-bold uppercase tracking-wide text-on-primary shadow-lg transition-all duration-normal ease-spring hover:-translate-y-0.5 hover:shadow-xl sm:px-6 sm:text-sm"
                     >
                         Browse Courses
-                        <ArrowIcon />
+                        <ArrowIcon className="h-3.5 w-3.5" />
                     </Link>
                     <Link
                         href="/demo-quiz"
-                        className="inline-flex items-center gap-2 rounded-full border-2 border-white/30 px-7 py-3.5 text-sm font-bold uppercase tracking-wide text-white transition-all duration-normal hover:-translate-y-0.5 hover:border-white/60"
+                        className="inline-flex flex-shrink-0 items-center whitespace-nowrap rounded-full border-2 border-white/30 px-5 py-3 text-xs font-bold uppercase tracking-wide text-white transition-all duration-normal hover:-translate-y-0.5 hover:border-white/60 sm:px-6 sm:text-sm"
                     >
                         Demo Quiz
                     </Link>
                     <Link
                         href="/register"
-                        className="inline-flex items-center gap-2 rounded-full border-2 border-gold-400 px-7 py-3.5 text-sm font-bold uppercase tracking-wide text-gold-300 transition-all duration-normal hover:-translate-y-0.5 hover:bg-gold-400 hover:text-secondary"
+                        className="inline-flex flex-shrink-0 items-center whitespace-nowrap rounded-full border-2 border-gold-400 px-5 py-3 text-xs font-bold uppercase tracking-wide text-gold-300 transition-all duration-normal hover:-translate-y-0.5 hover:bg-gold-400 hover:text-secondary sm:px-6 sm:text-sm"
                     >
                         Register Now
                     </Link>
