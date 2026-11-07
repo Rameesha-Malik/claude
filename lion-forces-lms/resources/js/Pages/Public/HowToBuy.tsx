@@ -284,11 +284,11 @@ export default function HowToBuy({ hero, packages, paymentMethods, faqs }: { her
 
             {faqs.length > 0 && (
                 <section className="bg-surface-sunken py-14">
-                    <div className="mx-auto max-w-3xl px-4 sm:px-6 lg:px-8">
-                        <RevealOnScroll className="mb-10 text-center">
+                    <div className="mx-auto max-w-container px-4 sm:px-6 lg:px-8">
+                        <RevealOnScroll className="mx-auto mb-10 max-w-2xl text-center">
                             <h2 className="font-display text-3xl uppercase tracking-wide text-text">Refunds & Access</h2>
                         </RevealOnScroll>
-                        <div className="divide-y divide-border overflow-hidden rounded-[1.5rem] border border-border bg-surface">
+                        <div className="mx-auto max-w-3xl divide-y divide-border overflow-hidden rounded-[1.5rem] border border-border bg-surface">
                             {faqs.map((faq, i) => (
                                 <div key={i} className="px-6 py-5">
                                     <div className="font-semibold text-text">{faq.question}</div>
