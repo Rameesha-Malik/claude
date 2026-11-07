@@ -1,9 +1,9 @@
 import { Head, Link } from '@inertiajs/react';
 import AnimatedCounter from '@/Components/AnimatedCounter';
+import InstructorBadgeWall from '@/Components/InstructorBadgeWall';
 import RevealOnScroll from '@/Components/RevealOnScroll';
 import SectionKicker from '@/Components/SectionKicker';
 import ShieldMark from '@/Components/ShieldMark';
-import TiltCard from '@/Components/TiltCard';
 import WhyChooseIcon from '@/Components/WhyChooseIcon';
 import PublicLayout from '@/Layouts/PublicLayout';
 import heroAboutMentorship from '@/assets/hero/about-mentorship.jpg';
@@ -207,32 +207,8 @@ export default function About({ instructors, section, stats }: Props) {
                             <h2 className="font-display text-4xl uppercase tracking-wide text-text sm:text-5xl">Our Instructors</h2>
                         </RevealOnScroll>
 
-                        <RevealOnScroll className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                            {instructors.map((instructor, i) => (
-                                <TiltCard key={i} max={5} className="rounded-2xl">
-                                    <div className="flex h-full flex-col rounded-2xl border border-border bg-surface p-6 text-center shadow-sm transition-shadow duration-normal hover:shadow-lg">
-                                        {instructor.photo_path ? (
-                                            <img
-                                                src={`/storage/${instructor.photo_path}`}
-                                                alt=""
-                                                className="mx-auto h-20 w-20 rounded-full object-cover shadow-sm"
-                                            />
-                                        ) : (
-                                            <span className="mx-auto flex h-20 w-20 items-center justify-center rounded-full bg-primary-subtle font-display text-2xl text-primary">
-                                                {instructor.name.charAt(0).toUpperCase()}
-                                            </span>
-                                        )}
-                                        <h3 className="mt-4 font-bold text-text">{instructor.name}</h3>
-                                        {instructor.qualification && (
-                                            <p className="mt-0.5 text-sm font-semibold text-primary">{instructor.qualification}</p>
-                                        )}
-                                        {instructor.experience && (
-                                            <p className="mt-1 text-xs uppercase tracking-wide text-text-muted">{instructor.experience}</p>
-                                        )}
-                                        {instructor.bio && <p className="mt-3 flex-1 text-sm leading-relaxed text-text-secondary">{instructor.bio}</p>}
-                                    </div>
-                                </TiltCard>
-                            ))}
+                        <RevealOnScroll>
+                            <InstructorBadgeWall instructors={instructors} />
                         </RevealOnScroll>
                     </div>
                 </section>
