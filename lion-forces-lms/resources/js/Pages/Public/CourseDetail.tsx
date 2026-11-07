@@ -124,7 +124,7 @@ export default function CourseDetail({ course }: { course: Course }) {
                     <img
                         src={`/storage/${course.thumbnail_path}`}
                         alt=""
-                        className="aspect-[7/2] max-h-56 w-full rounded-2xl border border-border object-cover shadow-md"
+                        className="aspect-[7/2] max-h-56 w-full rounded-[1.5rem] border border-border object-cover shadow-md"
                     />
                 </div>
             )}
@@ -141,7 +141,7 @@ export default function CourseDetail({ course }: { course: Course }) {
                     )}
 
                     {included.length > 0 && (
-                        <div className="rounded-2xl border border-border bg-surface p-6">
+                        <div className="rounded-[1.5rem] border border-border bg-surface p-6">
                             <h3 className="font-semibold text-text">This Course Includes</h3>
                             <div className="mt-3 grid grid-cols-2 gap-3 sm:grid-cols-4">
                                 {included.map((i) => (
@@ -170,7 +170,7 @@ export default function CourseDetail({ course }: { course: Course }) {
                             <SectionHeading d="M15.75 10.5l4.72-2.72a.75.75 0 011.13.65v7.14a.75.75 0 01-1.13.65l-4.72-2.72M4.5 6.75h9a1.5 1.5 0 011.5 1.5v7.5a1.5 1.5 0 01-1.5 1.5h-9a1.5 1.5 0 01-1.5-1.5v-7.5a1.5 1.5 0 011.5-1.5z">
                                 Free Preview
                             </SectionHeading>
-                            <ul className="mt-3 divide-y divide-border rounded-xl border border-border">
+                            <ul className="mt-3 divide-y divide-border overflow-hidden rounded-[1rem] border border-border">
                                 {course.lessons.map((lesson) => (
                                     <li key={lesson.id} className="flex items-center gap-3 px-4 py-3 text-sm">
                                         <LessonTypeIcon type={lesson.type} />
@@ -183,7 +183,7 @@ export default function CourseDetail({ course }: { course: Course }) {
                     )}
 
                     {course.instructor && (
-                        <div className="rounded-2xl border border-border bg-surface p-6">
+                        <div className="rounded-[1.5rem] border border-border bg-surface p-6">
                             <h3 className="font-semibold text-text">Instructor</h3>
                             <div className="mt-2 text-lg font-semibold text-primary">{course.instructor.name}</div>
                             <div className="text-sm text-text-secondary">{course.instructor.qualification}</div>
@@ -201,13 +201,13 @@ export default function CourseDetail({ course }: { course: Course }) {
                             )}
                         </SectionHeading>
                         {course.approved_reviews.length === 0 ? (
-                            <p className="mt-3 rounded-xl border border-dashed border-border bg-surface p-6 text-center text-sm text-text-secondary">
+                            <p className="mt-3 rounded-[1rem] border border-dashed border-border bg-surface p-6 text-center text-sm text-text-secondary">
                                 No reviews yet.
                             </p>
                         ) : (
                             <div className="mt-3 space-y-3">
                                 {course.approved_reviews.map((r) => (
-                                    <div key={r.id} className="rounded-xl border border-border bg-surface p-4">
+                                    <div key={r.id} className="rounded-[1rem] border border-border bg-surface p-4">
                                         <div className="flex items-center justify-between">
                                             <Stars rating={r.rating} />
                                             <span className="text-sm font-semibold text-text">{r.user?.name ?? 'Student'}</span>
@@ -222,7 +222,7 @@ export default function CourseDetail({ course }: { course: Course }) {
 
                 <aside>
                     <div className="sticky top-24 space-y-4">
-                        <div className="rounded-2xl border border-border bg-surface p-6 shadow-md">
+                        <div className="rounded-[1.5rem] border border-border bg-surface p-6 shadow-md">
                             <div className="text-3xl font-bold text-primary">
                                 {course.base_price ? `Rs. ${Number(course.base_price).toLocaleString()}` : 'Contact us'}
                             </div>
@@ -231,11 +231,17 @@ export default function CourseDetail({ course }: { course: Course }) {
                                 routed to How to Buy rather than straight into checkout. */}
                             <Link
                                 href={auth.user ? `/portal/my-courses/${course.slug}` : '/how-to-buy'}
-                                className="mt-4 block rounded-xl bg-primary py-3 text-center font-semibold text-on-primary hover:bg-primary-hover"
+                                className="mt-4 block rounded-[1rem] bg-primary py-3 text-center font-semibold text-on-primary hover:bg-primary-hover"
                             >
                                 {auth.user ? 'Start Learning' : 'Buy Now'}
                             </Link>
 
+                            {/* Client: wanted this to read like a plan-picker (21st.dev
+                                "Pricing" reference) -- rounded rectangle options with a
+                                radio-style indicator, not a plain bordered link list.
+                                These still just navigate straight to checkout/register
+                                (no actual selection state to carry), the circle is purely
+                                visual so each option reads as "a plan to pick". */}
                             {course.packages.length > 0 && (
                                 <div className="mt-6 space-y-3">
                                     <div className="text-sm font-semibold text-text">Packages</div>
@@ -243,25 +249,28 @@ export default function CourseDetail({ course }: { course: Course }) {
                                         <Link
                                             key={pkg.id}
                                             href={auth.user ? `/portal/courses/${course.slug}/checkout?package=${pkg.id}` : '/register'}
-                                            className="block rounded-lg border border-border p-3 transition-colors hover:border-primary hover:bg-primary-subtle"
+                                            className="group flex items-start justify-between gap-3 rounded-[1rem] border border-border p-4 transition-colors hover:border-primary hover:bg-primary-subtle"
                                         >
-                                            <div className="flex justify-between text-sm font-medium text-text">
-                                                <span>{pkg.name}</span>
-                                                <span>Rs. {Number(pkg.price).toLocaleString()}</span>
+                                            <div className="min-w-0 flex-1">
+                                                <div className="flex flex-wrap items-center gap-2">
+                                                    <span className="font-bold text-text">{pkg.name}</span>
+                                                    {summarizeModules(pkg.modules) !== 'Full Course' && (
+                                                        <span className="inline-block rounded-full bg-primary-subtle px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-primary">
+                                                            {summarizeModules(pkg.modules)}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                                <div className="mt-0.5 text-sm text-text">Rs. {Number(pkg.price).toLocaleString()}</div>
+                                                {pkg.description && <p className="mt-1 text-xs text-text-secondary">{pkg.description}</p>}
                                             </div>
-                                            {summarizeModules(pkg.modules) !== 'Full Course' && (
-                                                <span className="mt-1 inline-block rounded-full bg-primary-subtle px-2 py-0.5 text-xs font-bold uppercase tracking-wide text-primary">
-                                                    {summarizeModules(pkg.modules)}
-                                                </span>
-                                            )}
-                                            {pkg.description && <p className="mt-1 text-xs text-text-secondary">{pkg.description}</p>}
+                                            <span className="mt-1 flex h-5 w-5 flex-shrink-0 items-center justify-center rounded-full border-2 border-border transition-colors group-hover:border-primary" />
                                         </Link>
                                     ))}
                                 </div>
                             )}
                         </div>
 
-                        <div className="rounded-2xl border border-border bg-surface p-5 text-sm">
+                        <div className="rounded-[1.5rem] border border-border bg-surface p-5 text-sm">
                             <div className="font-semibold text-text">Course Details</div>
                             <dl className="mt-3 space-y-2 text-text-secondary">
                                 <div className="flex items-center justify-between"><dt>Enrolled</dt><dd className="font-semibold text-text">{course.enrollments_count}</dd></div>
