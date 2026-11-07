@@ -185,16 +185,15 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                     <GradientMesh className="opacity-50" />
 
                     {/* decorative -- real exam/service names already named in the hero copy above,
-                        just surfaced as a tag ribbon instead of plain prose. Was a per-tag
-                        sine-wave translateY/rotate, which (combined with centering inside a
-                        narrow max-w-4xl) left large uneven gaps on both sides and between
-                        rows at wide viewports -- flat/even wrap fills the section width more
-                        evenly instead. Colors now reference --color-primary directly (not the
-                        raw teal-700/teal-500 stops) so this tracks the live theme instead of a
-                        hardcoded primitive pair; gold stays as the primitive pair since that's
-                        the deliberate "second brand voice" choice for dark surfaces (see
-                        SectionKicker's own comment on gold-vs-oxblood-by-surface). */}
-                    <div aria-hidden className="relative mx-auto flex max-w-3xl flex-wrap justify-center gap-3 px-6">
+                        just surfaced as a tag ribbon instead of plain prose. Tilt is back (just
+                        rotate, no translateY) -- the vertical offset was what created the uneven
+                        row gaps, rotation alone doesn't. Wider cap (5xl, not 3xl) so the row
+                        doesn't leave such large flat margins at wide viewports. Colors reference
+                        --color-primary directly (not raw teal-700/teal-500 stops) so this tracks
+                        the live theme; gold stays a primitive pair since that's the deliberate
+                        "second brand voice" choice for dark surfaces (see SectionKicker's own
+                        comment on gold-vs-oxblood-by-surface). */}
+                    <div aria-hidden className="relative mx-auto flex max-w-5xl flex-wrap justify-center gap-3 px-6">
                         {TRUST_TAGS.map((tag, i) => (
                             <span
                                 key={tag}
@@ -203,6 +202,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                                     background: i % 2 === 0
                                         ? 'linear-gradient(135deg, var(--color-primary), var(--color-primary-hover))'
                                         : 'linear-gradient(135deg, var(--gold-400), var(--gold-300))',
+                                    transform: `rotate(${Math.sin(i * 0.7) * 5}deg)`,
                                 }}
                             >
                                 {tag}

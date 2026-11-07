@@ -148,20 +148,34 @@ export default function BranchHeroSlider({ slides }: { slides: HeroSlideData[] }
                         </div>
                     ))}
 
+                    {/* Branch crest nav: all three crests always visible, stacked in the
+                        gutter between the two columns -- replaces both the old single
+                        per-slide "seam badge" (which only ever showed the active branch)
+                        and the plain dot row, since this does the same job (jump to a
+                        slide) while actually showing what each slide is. */}
                     {total > 1 && (
-                        <div className="absolute bottom-8 left-1/2 z-10 flex -translate-x-1/2 items-center gap-3">
-                            {slides.map((slide, i) => (
-                                <button
-                                    key={slide.branch_key}
-                                    type="button"
-                                    onClick={() => goTo(i)}
-                                    aria-label={`Show ${slide.branch} slide`}
-                                    aria-current={i === activeIndex}
-                                    className={`h-2.5 rounded-full transition-all duration-normal ${
-                                        i === activeIndex ? 'w-8 bg-gold-400' : 'w-2.5 bg-white/40 hover:bg-white/60'
-                                    }`}
-                                />
-                            ))}
+                        <div className="absolute left-1/2 top-1/2 z-20 hidden -translate-x-1/2 -translate-y-1/2 flex-col items-center gap-4 lg:flex">
+                            {slides.map((slide, i) => {
+                                const assets = BRANCH_ASSETS[slide.branch_key] ?? BRANCH_ASSETS.army;
+                                const crest = slide.crest_path ? `/storage/${slide.crest_path}` : assets.crest;
+                                const isActive = i === activeIndex;
+                                return (
+                                    <button
+                                        key={slide.branch_key}
+                                        type="button"
+                                        onClick={() => goTo(i)}
+                                        aria-label={`Show ${slide.branch} slide`}
+                                        aria-current={isActive}
+                                        className={`flex flex-shrink-0 items-center justify-center rounded-full border-4 shadow-xl transition-all duration-normal ${
+                                            isActive
+                                                ? 'h-16 w-16 border-secondary bg-primary p-2.5'
+                                                : 'h-11 w-11 border-secondary/70 bg-black/30 p-2 opacity-70 hover:opacity-100'
+                                        }`}
+                                    >
+                                        <img src={crest} alt={assets.crestAlt} className="h-full w-full object-contain" />
+                                    </button>
+                                );
+                            })}
                         </div>
                     )}
 
@@ -183,11 +197,20 @@ function BranchSlideContent({ slide, reversed = false, active = true }: { slide:
     const crest = slide.crest_path ? `/storage/${slide.crest_path}` : assets.crest;
 
     return (
-        <div className="relative mx-auto flex h-full max-w-container flex-col items-center gap-10 px-4 py-16 sm:px-6 lg:h-full lg:flex-row lg:gap-14 lg:px-8 lg:py-0">
-            <div className={`relative w-full lg:w-1/2 ${reversed ? 'lg:order-2' : ''}`}>
+        <div className="relative mx-auto flex h-full max-w-container flex-col items-center gap-10 px-4 py-16 sm:px-6 lg:h-full lg:flex-row lg:gap-28 lg:px-8 lg:py-0">
+            <div className={`relative w-full lg:w-1/2 lg:min-w-0 ${reversed ? 'lg:order-2' : ''}`}>
                 <div
-                    className="relative aspect-[4/5] w-full max-w-md overflow-hidden rounded-[2rem] border border-white/10 shadow-2xl transition-transform duration-slower ease-out lg:mx-0"
-                    style={{ marginInline: 'auto', transform: active ? 'scale(1)' : 'scale(1.04)' }}
+                    className="relative aspect-[4/5] w-full max-w-lg overflow-hidden rounded-[2rem] border border-white/10 shadow-2xl transition-transform duration-slower ease-out"
+                    style={{
+                        // Hugs the OUTER edge of its column (away from the gutter)
+                        // instead of centering -- centering left equal dead space on
+                        // both sides, including outside the photo where nothing
+                        // else fills it. The inner (gutter-facing) side keeps
+                        // whatever space is left over for the crest nav below.
+                        marginLeft: reversed ? 'auto' : 0,
+                        marginRight: reversed ? 0 : 'auto',
+                        transform: active ? 'scale(1)' : 'scale(1.04)',
+                    }}
                 >
                     <img src={image} alt={assets.imageAlt} className="h-full w-full object-cover" />
                     <div
@@ -200,21 +223,9 @@ function BranchSlideContent({ slide, reversed = false, active = true }: { slide:
                         {slide.branch}
                     </div>
                 </div>
-
-                {/* Seam badge: this slide's own branch crest (admin-uploaded,
-                    or the bundled default), pinned on the photo card's inner
-                    edge (the edge facing the copy column) -- lg only, since
-                    there's no visual "seam" once the columns stack on mobile. */}
-                <div
-                    className={`absolute top-1/2 z-20 hidden h-16 w-16 -translate-y-1/2 items-center justify-center rounded-full border-4 border-secondary bg-primary p-2.5 shadow-xl lg:flex ${
-                        reversed ? 'left-0 -translate-x-1/2' : 'right-0 translate-x-1/2'
-                    }`}
-                >
-                    <img src={crest} alt={assets.crestAlt} className="h-full w-full object-contain" />
-                </div>
             </div>
 
-            <div className={`w-full text-center lg:w-1/2 lg:text-left ${reversed ? 'lg:order-1' : ''}`}>
+            <div className={`w-full text-center lg:w-1/2 lg:min-w-0 lg:text-left ${reversed ? 'lg:order-1' : ''}`}>
                 <SectionKicker dark>{slide.branch}</SectionKicker>
                 <h1 className="font-display text-5xl uppercase leading-[1.05] text-white sm:text-6xl">{slide.title}</h1>
                 {slide.motto && (
@@ -237,12 +248,6 @@ function BranchSlideContent({ slide, reversed = false, active = true }: { slide:
                         className="inline-flex flex-shrink-0 items-center whitespace-nowrap rounded-full border-2 border-white/30 px-5 py-3 text-xs font-bold uppercase tracking-wide text-white transition-all duration-normal hover:-translate-y-0.5 hover:border-white/60 sm:px-6 sm:text-sm"
                     >
                         Demo Quiz
-                    </Link>
-                    <Link
-                        href="/register"
-                        className="inline-flex flex-shrink-0 items-center whitespace-nowrap rounded-full border-2 border-gold-400 px-5 py-3 text-xs font-bold uppercase tracking-wide text-gold-300 transition-all duration-normal hover:-translate-y-0.5 hover:bg-gold-400 hover:text-secondary sm:px-6 sm:text-sm"
-                    >
-                        Register Now
                     </Link>
                 </div>
             </div>
