@@ -121,6 +121,17 @@ interface NewsItem {
 }
 interface SectionContent { title: string; content: Record<string, any> }
 
+interface HeroSlideItem {
+    branch_key: string;
+    branch: string;
+    title: string;
+    motto: string | null;
+    motto_translation: string | null;
+    description: string;
+    cta_href: string;
+    image_path: string | null;
+}
+
 interface Props {
     sections: Record<string, SectionContent>;
     stats: StatItem[];
@@ -129,7 +140,7 @@ interface Props {
     faqs: FaqItem[];
     testimonials: TestimonialItem[];
     latestNews: NewsItem[];
-    heroImagePath: string | null;
+    heroSlides: HeroSlideItem[];
 }
 
 function money(v: string | null) {
@@ -153,7 +164,7 @@ const NEWS_BANNER_GRADIENTS = ['from-teal-600 via-teal-800 to-teal-950', 'from-s
 // surfaced here as a decorative "trust bar" tag ribbon, not invented copy.
 const TRUST_TAGS = ['Pak Army', 'Pak Navy', 'Pak Air Force', 'ISSB', 'PMA', 'Lady Cadet Course', 'AFNS', 'Rangers'];
 
-export default function Home({ sections, stats, services, featuredCourses, faqs, testimonials, latestNews, heroImagePath }: Props) {
+export default function Home({ sections, stats, services, featuredCourses, faqs, testimonials, latestNews, heroSlides }: Props) {
     const why = sections.why_choose_us?.content ?? {};
     const whyTitle = sections.why_choose_us?.title ?? 'Why Choose Our Platform?';
     const howItWorks = sections.how_it_works?.content ?? {};
@@ -165,7 +176,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
         <PublicLayout>
             <Head title="Home" />
 
-            <BranchHeroSlider heroImagePath={heroImagePath} />
+            <BranchHeroSlider slides={heroSlides} />
 
             {/* ---------------- Trust Bar — wavy ribbon of the exams we prepare for, arched over the real stats ---------------- */}
             {stats.length > 0 && (

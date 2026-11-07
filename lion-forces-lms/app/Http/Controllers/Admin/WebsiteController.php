@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\AnnouncementBar;
 use App\Models\Faq;
+use App\Models\HeroSlide;
 use App\Models\HomeSection;
 use App\Models\PaymentMethod;
 use App\Models\ServiceCard;
@@ -33,9 +34,8 @@ class WebsiteController extends Controller
                 'social_youtube' => Setting::get('social_youtube'),
             ],
             'logoPath' => Setting::get('site_logo_path'),
-            'heroImagePath' => Setting::get('hero_image_path'),
+            'heroSlides' => HeroSlide::orderBy('order')->get(),
             'announcement' => AnnouncementBar::first(),
-            'heroSection' => HomeSection::where('section_key', 'hero')->first(),
             'ctaSection' => HomeSection::where('section_key', 'cta_footer')->first(),
             'howToBuyHeroSection' => HomeSection::firstOrCreate(
                 ['section_key' => 'how_to_buy_hero'],
@@ -104,34 +104,43 @@ class WebsiteController extends Controller
         return back()->with('success', 'Logo removed.');
     }
 
-    // Same pattern as updateLogo/destroyLogo above -- the homepage hero photo
-    // was a bundled file (resources/js/assets/hero/...), not editable without
-    // a code change. Falls back to that bundled photo when no setting value
-    // is stored, same as every other image here falls back to a placeholder.
-    public function updateHeroImage(Request $request)
+    // Each hero slide carries its own photo -- same upload/replace pattern
+    // as updateLogo above, scoped to one HeroSlide row instead of a
+    // singleton Setting. Falls back to the frontend's bundled crop of the
+    // parade photo when image_path is null, same as every other image here
+    // falls back to a placeholder.
+    public function updateHeroSlide(Request $request, HeroSlide $heroSlide)
     {
-        $request->validate(['hero_image' => 'required|image|max:4096']);
+        $data = $request->validate([
+            'title' => 'required|string|max:255',
+            'motto' => 'nullable|string|max:255',
+            'motto_translation' => 'nullable|string|max:255',
+            'description' => 'required|string|max:1000',
+            'cta_href' => 'required|string|max:255',
+            'image' => 'nullable|image|max:4096',
+        ]);
+        unset($data['image']);
 
-        $old = Setting::get('hero_image_path');
-        $path = $request->file('hero_image')->store('branding', 'public');
-        Setting::set('hero_image_path', $path);
-
-        if ($old) {
-            \Illuminate\Support\Facades\Storage::disk('public')->delete($old);
+        if ($request->hasFile('image')) {
+            if ($heroSlide->image_path) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($heroSlide->image_path);
+            }
+            $data['image_path'] = $request->file('image')->store('branding', 'public');
         }
 
-        return back()->with('success', 'Hero image updated.');
+        $heroSlide->update($data);
+
+        return back()->with('success', "{$heroSlide->branch} slide updated.");
     }
 
-    public function destroyHeroImage()
+    public function destroyHeroSlideImage(HeroSlide $heroSlide)
     {
-        $old = Setting::get('hero_image_path');
-        if ($old) {
-            \Illuminate\Support\Facades\Storage::disk('public')->delete($old);
+        if ($heroSlide->image_path) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($heroSlide->image_path);
+            $heroSlide->update(['image_path' => null]);
         }
-        Setting::set('hero_image_path', null);
 
-        return back()->with('success', 'Hero image reset to the default photo.');
+        return back()->with('success', "{$heroSlide->branch} slide photo reset to the default.");
     }
 
     public function updateAnnouncement(Request $request)

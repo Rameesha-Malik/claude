@@ -4,6 +4,7 @@ namespace Database\Seeders;
 
 use App\Models\AnnouncementBar;
 use App\Models\Faq;
+use App\Models\HeroSlide;
 use App\Models\HomeSection;
 use App\Models\NavItem;
 use App\Models\PaymentMethod;
@@ -176,6 +177,40 @@ class SiteContentSeeder extends Seeder
         ServiceCard::updateOrCreate(['title' => 'Navy & Air Force'], ['icon' => 'anchor', 'description' => 'Structured courses for Navy and PAF recruitment exams.', 'order' => 2]);
         ServiceCard::updateOrCreate(['title' => 'ISSB & Intelligence'], ['icon' => 'brain', 'description' => 'ISSB-pattern practice and IQ test preparation.', 'order' => 3]);
         ServiceCard::updateOrCreate(['title' => 'Lady Cadet Course'], ['icon' => 'star', 'description' => 'Dedicated LCC preparation track for female candidates.', 'order' => 4]);
+
+        // --- Homepage hero slider (Army/Navy/Air Force) ---
+        // Mottos are REAL: Army's and PAF's are long-documented; Navy's is
+        // the one given on Pakistan Navy's own official channel, since
+        // other secondary sources disagreed. image_path stays null until
+        // an admin uploads a real photo -- the frontend falls back to its
+        // own bundled crop of the parade photo until then.
+        HeroSlide::updateOrCreate(['branch_key' => 'army'], [
+            'branch' => 'Pakistan Army',
+            'title' => 'Lead From the Front',
+            'motto' => 'Iman, Taqwa, Jihad fi Sabilillah',
+            'motto_translation' => 'Faith, Piety, Struggle in the Path of Allah',
+            'description' => 'Complete preparation for PMA Long Course and Army entry tests — tactical reasoning, physical standards, and interview readiness built into one structured track.',
+            'cta_href' => '/courses?category=pma',
+            'order' => 1,
+        ]);
+        HeroSlide::updateOrCreate(['branch_key' => 'navy'], [
+            'branch' => 'Pakistan Navy',
+            'title' => 'Command the Seas',
+            'motto' => "Hasbunallahu wa Ni'mal Wakeel",
+            'motto_translation' => 'Allah is sufficient for us, and He is the best disposer of affairs',
+            'description' => 'Structured preparation for Pakistan Navy commission entry — written tests, interviews, and ISSB-pattern assessment, covered end to end.',
+            'cta_href' => '/courses?category=navy',
+            'order' => 2,
+        ]);
+        HeroSlide::updateOrCreate(['branch_key' => 'airforce'], [
+            'branch' => 'Pakistan Air Force',
+            'title' => 'Rise Above the Rest',
+            'motto' => 'Second to None',
+            'motto_translation' => null,
+            'description' => 'Purpose-built prep for PAF recruitment exams — aptitude, academic, and selection-board readiness in one guided course.',
+            'cta_href' => '/courses?category=air-force',
+            'order' => 3,
+        ]);
 
         // --- How to Buy page (hero + payment method cards) ---
         HomeSection::updateOrCreate(['section_key' => 'how_to_buy_hero'], [

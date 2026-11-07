@@ -11,6 +11,17 @@ interface Settings {
 }
 interface Announcement { id?: number; message: string; link_url: string | null; is_active: boolean; expires_at: string | null }
 interface HomeSection { id: number; title: string; content: Record<string, any> }
+interface HeroSlide {
+    id: number;
+    branch_key: string;
+    branch: string;
+    title: string;
+    motto: string | null;
+    motto_translation: string | null;
+    description: string;
+    cta_href: string;
+    image_path: string | null;
+}
 interface StatsItem { id: number; icon: string | null; number: string; label: string }
 interface ServiceCard { id: number; icon: string | null; title: string; description: string | null }
 interface PaymentMethod { id: number; icon: string | null; name: string; description: string | null }
@@ -19,11 +30,10 @@ interface Testimonial { id: number; student_name: string; testimonial_text: stri
 interface Props {
     settings: Settings;
     logoPath: string | null;
-    heroImagePath: string | null;
     announcement: Announcement | null;
-    heroSection: HomeSection;
     ctaSection: HomeSection;
     howToBuyHeroSection: HomeSection;
+    heroSlides: HeroSlide[];
     statsItems: StatsItem[];
     serviceCards: ServiceCard[];
     paymentMethods: PaymentMethod[];
@@ -31,7 +41,7 @@ interface Props {
     testimonials: Testimonial[];
 }
 
-const TABS = ['Settings', 'Home Page', 'How to Buy', 'Stats', 'Services', 'FAQs', 'Testimonials'] as const;
+const TABS = ['Settings', 'Home Page', 'Hero Slides', 'How to Buy', 'Stats', 'Services', 'FAQs', 'Testimonials'] as const;
 type Tab = (typeof TABS)[number];
 
 const inputClass = 'w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:shadow-glow focus:outline-none';
@@ -61,7 +71,8 @@ export default function WebsiteIndex(props: Props) {
             </div>
 
             {tab === 'Settings' && <SettingsPanel settings={props.settings} logoPath={props.logoPath} announcement={props.announcement} />}
-            {tab === 'Home Page' && <HomePagePanel hero={props.heroSection} cta={props.ctaSection} heroImagePath={props.heroImagePath} />}
+            {tab === 'Home Page' && <HomePagePanel cta={props.ctaSection} />}
+            {tab === 'Hero Slides' && <HeroSlidesPanel items={props.heroSlides} />}
             {tab === 'How to Buy' && <HowToBuyPanel hero={props.howToBuyHeroSection} paymentMethods={props.paymentMethods} />}
             {tab === 'Stats' && <StatsPanel items={props.statsItems} />}
             {tab === 'Services' && <ServicesPanel items={props.serviceCards} />}
@@ -141,68 +152,6 @@ function LogoPanel({ logoPath }: { logoPath: string | null }) {
                             className={btnDangerClass}
                         >
                             Remove
-                        </button>
-                    )}
-                </form>
-            </div>
-            <FormErrors errors={form.errors as Record<string, string>} />
-        </Panel>
-    );
-}
-
-// Same upload/remove pattern as LogoPanel above. Was previously a file
-// bundled into the frontend build (resources/js/assets/hero/...) -- no way
-// to change it without a code deploy. "Remove" resets to that bundled photo
-// rather than leaving the hero with no image at all.
-function HeroImagePanel({ heroImagePath }: { heroImagePath: string | null }) {
-    const [preview, setPreview] = useState<string | null>(null);
-    const form = useForm<{ hero_image: File | null }>({ hero_image: null });
-
-    function submit(e: FormEvent) {
-        e.preventDefault();
-        if (!form.data.hero_image) return;
-        form.post('/admin/website/hero-image', {
-            forceFormData: true,
-            onSuccess: () => {
-                form.setData('hero_image', null);
-                setPreview(null);
-            },
-        });
-    }
-
-    function pickFile(e: ChangeEvent<HTMLInputElement>) {
-        const file = e.target.files?.[0] ?? null;
-        form.setData('hero_image', file);
-        setPreview(file ? URL.createObjectURL(file) : null);
-    }
-
-    return (
-        <Panel className="lg:col-span-2">
-            <h2 className="mb-1 font-bold text-text">Homepage Hero Photo</h2>
-            <p className="mb-4 text-sm text-text-secondary">
-                The large photo on the homepage hero, next to the headline. A tall portrait-ish photo (roughly 4:5) works best. It's cropped to fit automatically.
-            </p>
-            <div className="mb-4 flex items-center gap-4">
-                <div className="flex h-28 w-24 flex-shrink-0 items-center justify-center overflow-hidden rounded-2xl border border-dashed border-border bg-surface-sunken">
-                    {preview || heroImagePath ? (
-                        // eslint-disable-next-line jsx-a11y/alt-text
-                        <img src={preview ?? `/storage/${heroImagePath}`} className="h-full w-full object-cover" />
-                    ) : (
-                        <span className="px-2 text-center text-xs text-text-muted">Default photo</span>
-                    )}
-                </div>
-                <form onSubmit={submit} className="flex flex-wrap items-center gap-3">
-                    <input type="file" accept="image/*" onChange={pickFile} className="text-sm text-text-secondary" />
-                    <button type="submit" disabled={!form.data.hero_image || form.processing} className={btnClass}>
-                        {form.processing ? 'Uploading…' : 'Upload Photo'}
-                    </button>
-                    {heroImagePath && (
-                        <button
-                            type="button"
-                            onClick={() => confirm('Reset to the default hero photo?') && router.delete('/admin/website/hero-image')}
-                            className={btnDangerClass}
-                        >
-                            Reset to Default
                         </button>
                     )}
                 </form>
@@ -337,50 +286,11 @@ function SettingsPanel({ settings, logoPath, announcement }: { settings: Setting
     );
 }
 
-function HomePagePanel({ hero, cta, heroImagePath }: { hero: HomeSection; cta: HomeSection; heroImagePath: string | null }) {
-    const heroForm = useForm({ ...hero.content });
+function HomePagePanel({ cta }: { cta: HomeSection }) {
     const ctaForm = useForm({ ...cta.content });
 
     return (
         <div className="grid gap-6 lg:grid-cols-2">
-            <HeroImagePanel heroImagePath={heroImagePath} />
-
-            <Panel>
-                <h2 className="mb-4 font-bold text-text">Hero Section</h2>
-                <form
-                    onSubmit={(e) => { e.preventDefault(); router.put(`/admin/website/home-sections/${hero.id}`, { content: heroForm.data }); }}
-                    className="space-y-4"
-                >
-                    <div>
-                        <label className={labelClass}>Headline</label>
-                        <input className={inputClass} value={heroForm.data.headline ?? ''} onChange={(e) => heroForm.setData('headline', e.target.value)} />
-                    </div>
-                    <div>
-                        <label className={labelClass}>Subheading</label>
-                        <RichTextArea rows={2} className={inputClass} value={heroForm.data.subheading ?? ''} onChange={(v) => heroForm.setData('subheading', v)} />
-                    </div>
-                    <div className="grid grid-cols-2 gap-4">
-                        <div>
-                            <label className={labelClass}>Primary CTA Text</label>
-                            <input className={inputClass} value={heroForm.data.cta_primary_text ?? ''} onChange={(e) => heroForm.setData('cta_primary_text', e.target.value)} />
-                        </div>
-                        <div>
-                            <label className={labelClass}>Primary CTA Link</label>
-                            <input className={inputClass} value={heroForm.data.cta_primary_link ?? ''} onChange={(e) => heroForm.setData('cta_primary_link', e.target.value)} />
-                        </div>
-                        <div>
-                            <label className={labelClass}>Secondary CTA Text</label>
-                            <input className={inputClass} value={heroForm.data.cta_secondary_text ?? ''} onChange={(e) => heroForm.setData('cta_secondary_text', e.target.value)} />
-                        </div>
-                        <div>
-                            <label className={labelClass}>Secondary CTA Link</label>
-                            <input className={inputClass} value={heroForm.data.cta_secondary_link ?? ''} onChange={(e) => heroForm.setData('cta_secondary_link', e.target.value)} />
-                        </div>
-                    </div>
-                    <button type="submit" disabled={heroForm.processing} className={btnClass}>Save Hero</button>
-                </form>
-            </Panel>
-
             <Panel>
                 <h2 className="mb-4 font-bold text-text">CTA Footer Banner</h2>
                 <form
@@ -409,6 +319,109 @@ function HomePagePanel({ hero, cta, heroImagePath }: { hero: HomeSection; cta: H
                 </form>
             </Panel>
         </div>
+    );
+}
+
+// One card per branch slide (Army/Navy/Air Force) on the homepage hero
+// slider. There's no add/delete here -- the three branches are fixed in
+// the frontend component, this only edits each one's content and photo.
+function HeroSlidesPanel({ items }: { items: HeroSlide[] }) {
+    return (
+        <div className="space-y-6">
+            <p className="text-sm text-text-secondary">
+                Content for the homepage hero slider. Each slide keeps its photo until you upload a new one or reset it back to the default.
+            </p>
+            {items.map((slide) => (
+                <HeroSlideCard key={slide.id} slide={slide} />
+            ))}
+        </div>
+    );
+}
+
+function HeroSlideCard({ slide }: { slide: HeroSlide }) {
+    const [preview, setPreview] = useState<string | null>(null);
+    const form = useForm<{
+        title: string; motto: string; motto_translation: string; description: string; cta_href: string; image: File | null;
+    }>({
+        title: slide.title,
+        motto: slide.motto ?? '',
+        motto_translation: slide.motto_translation ?? '',
+        description: slide.description,
+        cta_href: slide.cta_href,
+        image: null,
+    });
+
+    function submit(e: FormEvent) {
+        e.preventDefault();
+        form.put(`/admin/website/hero-slides/${slide.id}`, {
+            onSuccess: () => {
+                form.setData('image', null);
+                setPreview(null);
+            },
+        });
+    }
+
+    function pickFile(e: ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0] ?? null;
+        form.setData('image', file);
+        setPreview(file ? URL.createObjectURL(file) : null);
+    }
+
+    return (
+        <Panel>
+            <h2 className="mb-4 font-bold text-text">{slide.branch}</h2>
+            <form onSubmit={submit} className="grid gap-4 lg:grid-cols-[160px_1fr]">
+                <div>
+                    <div className="mb-2 flex h-40 w-32 items-center justify-center overflow-hidden rounded-2xl border border-dashed border-border bg-surface-sunken">
+                        {preview || slide.image_path ? (
+                            // eslint-disable-next-line jsx-a11y/alt-text
+                            <img src={preview ?? `/storage/${slide.image_path}`} className="h-full w-full object-cover" />
+                        ) : (
+                            <span className="px-2 text-center text-xs text-text-muted">Default photo</span>
+                        )}
+                    </div>
+                    <input type="file" accept="image/*" onChange={pickFile} className="w-32 text-xs text-text-secondary" />
+                    {slide.image_path && !preview && (
+                        <button
+                            type="button"
+                            onClick={() => confirm('Reset to the default photo?') && router.delete(`/admin/website/hero-slides/${slide.id}/image`)}
+                            className={`${btnDangerClass} mt-2`}
+                        >
+                            Reset Photo
+                        </button>
+                    )}
+                </div>
+
+                <div className="space-y-4">
+                    <div>
+                        <label className={labelClass}>Title</label>
+                        <input className={inputClass} value={form.data.title} onChange={(e) => form.setData('title', e.target.value)} />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className={labelClass}>Motto (optional)</label>
+                            <input className={inputClass} value={form.data.motto} onChange={(e) => form.setData('motto', e.target.value)} />
+                        </div>
+                        <div>
+                            <label className={labelClass}>Motto Translation (optional)</label>
+                            <input className={inputClass} value={form.data.motto_translation} onChange={(e) => form.setData('motto_translation', e.target.value)} />
+                        </div>
+                    </div>
+                    <div>
+                        <label className={labelClass}>Description</label>
+                        <RichTextArea rows={2} className={inputClass} value={form.data.description} onChange={(v) => form.setData('description', v)} />
+                    </div>
+                    <div>
+                        <label className={labelClass}>Browse Courses Link</label>
+                        <input className={inputClass} value={form.data.cta_href} onChange={(e) => form.setData('cta_href', e.target.value)} />
+                    </div>
+                    <FormErrors errors={form.errors as Record<string, string>} />
+                    <button type="submit" disabled={form.processing} className={btnClass}>
+                        {form.processing ? 'Saving…' : 'Save Slide'}
+                    </button>
+                </div>
+            </form>
+        </Panel>
     );
 }
 
