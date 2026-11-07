@@ -149,16 +149,26 @@ export default function About({ instructors, section, stats }: Props) {
                         {section?.content.paragraph && <p className="mt-3 text-text-secondary">{section.content.paragraph}</p>}
                     </RevealOnScroll>
 
-                    <RevealOnScroll className="mx-auto grid max-w-4xl gap-px overflow-hidden rounded-2xl border border-border bg-border sm:grid-cols-2">
+                    {/* Client: wanted this styled like the 21st.dev "Testimonials"
+                        masonry wall (staggered columns of white cards) rather than a
+                        flat 2-col icon-row grid -- same real Why Choose Us content
+                        (every item, not a subset), just a different layout. True CSS
+                        multi-column masonry (not a synthetic scroll animation, there's
+                        no repeating content here to loop), each card break-inside-avoid
+                        so columns stagger naturally by content height. */}
+                    <RevealOnScroll className="mx-auto columns-1 gap-5 sm:columns-2 lg:max-w-5xl lg:columns-3">
                         {items.map((item, i) => (
-                            <div key={i} className="flex items-start gap-4 bg-surface p-6 transition-colors duration-normal hover:bg-primary-subtle">
-                                <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-xl bg-primary-subtle text-primary">
-                                    <WhyChooseIcon name={item.icon ?? 'shield-check'} className="h-5 w-5" />
-                                </span>
-                                <div>
+                            <div
+                                key={i}
+                                className="mb-5 break-inside-avoid rounded-[1.5rem] border border-border bg-surface p-6 shadow-sm transition-colors duration-normal hover:border-primary hover:bg-primary-subtle"
+                            >
+                                <div className="flex items-center gap-3">
+                                    <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-primary-subtle text-primary">
+                                        <WhyChooseIcon name={item.icon ?? 'shield-check'} className="h-5 w-5" />
+                                    </span>
                                     <h3 className="font-bold text-text">{item.title}</h3>
-                                    <p className="mt-1 text-sm leading-relaxed text-text-secondary">{item.description}</p>
                                 </div>
+                                <p className="mt-3 text-sm leading-relaxed text-text-secondary">{item.description}</p>
                             </div>
                         ))}
                     </RevealOnScroll>
