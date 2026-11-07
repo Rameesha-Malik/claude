@@ -205,8 +205,8 @@ export default function Contact({ faqs }: { faqs: FaqItem[] }) {
                     </p>
                 </div>
 
-                <div className="relative mx-auto mt-14 grid max-w-container items-start gap-6 px-4 text-left sm:px-6 lg:grid-cols-[0.85fr_1.15fr] lg:px-8">
-                    <RevealOnScroll className="min-w-0 rounded-[1.5rem] border border-white/15 bg-white/5 p-6 shadow-2xl backdrop-blur-sm sm:p-8">
+                <div className="relative mx-auto mt-14 grid max-w-container items-stretch gap-6 px-4 text-left sm:px-6 lg:grid-cols-[0.85fr_1.15fr] lg:px-8">
+                    <RevealOnScroll className="flex min-w-0 flex-col rounded-[1.5rem] border border-white/15 bg-white/5 p-6 shadow-2xl backdrop-blur-sm sm:p-8">
                         <SectionKicker dark>Reach Us Directly</SectionKicker>
                         <h2 className="font-display text-2xl uppercase tracking-wide text-white">Contact Details</h2>
 
@@ -265,7 +265,12 @@ export default function Contact({ faqs }: { faqs: FaqItem[] }) {
                             )}
                         </RevealOnScroll>
 
-                        <OrbitDecoration />
+                        {/* Pushed to the bottom of the (now equal-height) panel rather than
+                            sitting right under the contact rows, so the shorter left column
+                            doesn't just end in blank space while the form column runs on. */}
+                        <div className="mt-auto">
+                            <OrbitDecoration />
+                        </div>
                     </RevealOnScroll>
 
                     <RevealOnScroll className="relative min-w-0 overflow-hidden rounded-[1.5rem] border border-white/15 bg-white/5 p-6 shadow-2xl backdrop-blur-sm sm:p-8">
