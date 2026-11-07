@@ -198,9 +198,16 @@ function BranchSlideContent({ slide, reversed = false, active = true }: { slide:
 
     return (
         <div className="relative mx-auto flex h-full max-w-container flex-col items-center gap-10 px-4 py-16 sm:px-6 lg:h-full lg:flex-row lg:gap-28 lg:px-8 lg:py-0">
-            <div className={`relative w-full lg:w-1/2 lg:min-w-0 ${reversed ? 'lg:order-2' : ''}`}>
+            <div className={`relative w-full lg:h-full lg:w-1/2 lg:min-w-0 ${reversed ? 'lg:order-2' : ''}`}>
                 <div
-                    className="relative aspect-[4/5] w-full max-w-lg overflow-hidden rounded-[2rem] border border-white/10 shadow-2xl transition-transform duration-slower ease-out"
+                    // Width-driven (aspect-[4/5] computes height from width) on mobile,
+                    // where there's no fixed-height panel and normal page scroll handles
+                    // any overflow. At lg, height-driven instead (h-full, w-auto) -- on a
+                    // short laptop screen, deriving height FROM a width up to max-w-lg
+                    // could make the photo taller than the pinned panel actually is,
+                    // clipping its bottom edge (and bottom rounded corner) against the
+                    // panel's overflow-hidden. max-w-lg still caps width on tall screens.
+                    className="relative aspect-[4/5] w-full max-w-lg overflow-hidden rounded-[2rem] border border-white/10 shadow-2xl transition-transform duration-slower ease-out lg:h-full lg:w-auto"
                     style={{
                         // Hugs the OUTER edge of its column (away from the gutter)
                         // instead of centering -- centering left equal dead space on
