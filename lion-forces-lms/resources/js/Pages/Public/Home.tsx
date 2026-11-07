@@ -326,7 +326,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
 
             {/* ---------------- Featured Courses ---------------- */}
             {featuredCourses.length > 0 && (
-                <section className="relative overflow-hidden bg-surface-sunken pb-20 pt-14">
+                <section className="relative overflow-hidden bg-surface-sunken pb-16 pt-14">
                     <GradientMesh variant="light" />
                     <div className="relative mx-auto max-w-container px-4 sm:px-6 lg:px-8">
                         <RevealOnScroll className="mb-14 flex flex-wrap items-end justify-between gap-4">
@@ -340,8 +340,20 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                         </RevealOnScroll>
                         <RevealOnScroll className="grid gap-7 sm:grid-cols-2 lg:grid-cols-4">
                             {featuredCourses.map((course) => (
-                                <TiltCard key={course.id} max={5} className="group h-full rounded-2xl">
-                                    <div className="flex h-full flex-col overflow-hidden rounded-2xl border border-border bg-surface shadow-sm transition-all duration-normal group-hover:-translate-y-1.5 group-hover:border-primary group-hover:shadow-2xl">
+                                <div key={course.id} className="relative h-full">
+                                    {/* Glow -- same "colored blur sitting behind the card" signature as the
+                                        21st.dev glassmorphism card this was adapted from, just in our teal
+                                        instead of its lime, and subtle enough not to fight the card above it. */}
+                                    <div
+                                        aria-hidden
+                                        className="pointer-events-none absolute inset-x-4 -bottom-3 top-1/2 rounded-[2rem] opacity-0 blur-2xl transition-opacity duration-normal group-hover:opacity-100"
+                                        style={{ background: 'var(--color-primary)' }}
+                                    />
+                                    <TiltCard max={5} className="group relative h-full rounded-[1.5rem]">
+                                        <div
+                                            className="flex h-full flex-col overflow-hidden rounded-[1.5rem] border shadow-lg backdrop-blur-glass transition-all duration-normal group-hover:-translate-y-1.5 group-hover:shadow-2xl"
+                                            style={{ background: 'var(--glass-bg)', borderColor: 'var(--glass-border)' }}
+                                        >
                                         <div className="relative h-40 overflow-hidden bg-secondary">
                                             {course.thumbnail_path ? (
                                                 <img
@@ -400,8 +412,9 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
                                                 </Link>
                                             </div>
                                         </div>
-                                    </div>
-                                </TiltCard>
+                                        </div>
+                                    </TiltCard>
+                                </div>
                             ))}
                         </RevealOnScroll>
                     </div>
@@ -410,7 +423,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
 
             {/* ---------------- Why Choose Us — bento grid: one bold featured tile + a plain CSS grid for the rest (no absolute positioning, so nothing can misalign) ---------------- */}
             {why.items && (
-                <section className="relative overflow-hidden bg-surface-sunken py-24">
+                <section className="relative overflow-hidden bg-surface-sunken pb-16 pt-14">
                     <GradientMesh variant="light" />
                     <div className="relative mx-auto max-w-container px-4 sm:px-6 lg:px-8">
                         <RevealOnScroll className="mx-auto mb-14 max-w-2xl text-center">
@@ -457,7 +470,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
 
             {/* ---------------- How It Works ---------------- */}
             {howItWorks.steps && (
-                <section className="relative overflow-hidden bg-secondary py-24 text-text-inverse">
+                <section className="relative overflow-hidden bg-secondary pb-16 pt-14 text-text-inverse">
                     <GradientMesh className="opacity-60" />
                     <div className="relative mx-auto max-w-container px-4 sm:px-6 lg:px-8">
                         <RevealOnScroll className="mx-auto mb-16 max-w-2xl text-center">
@@ -489,7 +502,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
 
             {/* ---------------- Latest News — article-style cards ---------------- */}
             {latestNews.length > 0 && (
-                <section className="relative overflow-hidden py-24">
+                <section className="relative overflow-hidden pb-16 pt-14">
                     <GradientMesh variant="light" />
                     <div className="relative mx-auto max-w-container px-4 sm:px-6 lg:px-8">
                     <RevealOnScroll className="mx-auto mb-14 max-w-2xl text-center">
@@ -573,7 +586,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
 
             {/* ---------------- FAQs — gradient "ask us" panel + accordion ---------------- */}
             {faqs.length > 0 && (
-                <section className="relative overflow-hidden py-24">
+                <section className="relative overflow-hidden pb-16 pt-14">
                     <GradientMesh variant="light" />
                     <div className="relative mx-auto max-w-container px-4 sm:px-6 lg:px-8">
                         <RevealOnScroll className="mx-auto mb-14 max-w-2xl text-center">
@@ -614,7 +627,7 @@ export default function Home({ sections, stats, services, featuredCourses, faqs,
 
             {/* ---------------- Testimonials — mixed photo/quote cards ("What Our Customers Say" reference) ---------------- */}
             {testimonials.length > 0 && (
-                <section className="relative overflow-hidden bg-surface-sunken py-24">
+                <section className="relative overflow-hidden bg-surface-sunken pb-16 pt-14">
                     <GradientMesh variant="light" />
                     <div className="relative mx-auto max-w-container px-4 sm:px-6 lg:px-8">
                         <RevealOnScroll className="mx-auto mb-14 max-w-2xl text-center">
