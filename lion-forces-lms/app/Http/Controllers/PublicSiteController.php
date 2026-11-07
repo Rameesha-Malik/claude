@@ -292,7 +292,9 @@ class PublicSiteController extends Controller
     {
         $page = \App\Models\Page::where('slug', $slug)->where('is_published', true)->firstOrFail();
 
-        return Inertia::render('Public/Page', ['page' => $page->only('title', 'content')]);
+        return Inertia::render('Public/Page', [
+            'page' => [...$page->only('title', 'content'), 'updated_at' => $page->updated_at],
+        ]);
     }
 
     // Footer "Privacy Policy" / "Terms & Conditions" links point at these
