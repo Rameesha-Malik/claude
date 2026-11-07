@@ -59,7 +59,7 @@
      --------------------------------------------------------------------- */
   --green-600: #15a34a;  --green-100: #dcfce7;  --green-700: #128040;
   --amber-600: #d97706;  --amber-100: #fef3c7;  --amber-700: #b45309;
-  --red-600:   #dc2626;  --red-100:   #fee2e2;  --red-700:   #b91c1c;
+  --red-600:   #d13838;  --red-100:   #fee2e2;  --red-700:   #b91c1c;   /* 600 = Perpetuity's destructive */
   --blue-600:  #2563eb;  --blue-100:  #dbeafe;  /* info, distinct from teal */
 
   /* ---------------------------------------------------------------------
@@ -116,10 +116,13 @@
   /* ---------------------------------------------------------------------
      1. PRIMITIVE — typography, spacing, radius, elevation, motion
      --------------------------------------------------------------------- */
-  --font-sans: "Plus Jakarta Sans", ui-sans-serif, system-ui, -apple-system,
+  /* Body font swapped to Montserrat to match the "Perpetuity" theme;
+     --font-display (headline face) is untouched -- the theme has no
+     opinion on display type, and it's the brand's one distinct silhouette. */
+  --font-sans: "Montserrat", ui-sans-serif, system-ui, -apple-system,
                "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
   --font-urdu: "Noto Nastaliq Urdu", var(--font-sans);
-  --font-mono: ui-monospace, "JetBrains Mono", "SF Mono", Menlo, monospace;
+  --font-mono: "Courier New", ui-monospace, "JetBrains Mono", "SF Mono", Menlo, monospace;
   /* Display face for hero/section headlines only — condensed, all-caps,
      poster-weight. This is what gives the brand a distinct silhouette
      instead of reading as another generic SaaS-sans layout. Never use it
@@ -143,8 +146,11 @@
   --space-8: 2rem;     --space-10: 2.5rem;  --space-12: 3rem;
   --space-16: 4rem;    --space-20: 5rem;    --space-24: 6rem;
 
-  --radius-sm: 0.375rem; --radius-md: 0.625rem; --radius-lg: 0.875rem;
-  --radius-xl: 1.25rem;  --radius-2xl: 1.75rem; --radius-full: 9999px;
+  /* Flattened to match the "Perpetuity" theme (21st.dev) the client chose --
+     every corner except true circles/pills (--radius-full, untouched) now
+     shares one near-square radius instead of the old sm->2xl size ramp. */
+  --radius-sm: 0.125rem; --radius-md: 0.125rem; --radius-lg: 0.125rem;
+  --radius-xl: 0.125rem; --radius-2xl: 0.125rem; --radius-full: 9999px;
 
   /* Elevation is tinted with the brand teal, not neutral black — this is
      what stops a teal UI from looking like a grey UI with teal buttons. */
@@ -173,50 +179,49 @@
      editing the primitive above, never hunting through components.
      --------------------------------------------------------------------- */
 
-  /* surfaces */
-  /* Was plain neutral-50 (flat gray) -- every page read as colorless except
-     for buttons. A faint teal tint instead means the brand color is present
-     everywhere, not just in a few accents, without introducing a new hue or
-     touching any component. */
-  --color-canvas:          var(--teal-25);
-  --color-surface:         var(--neutral-0);
-  --color-surface-raised:  var(--neutral-0);
-  --color-surface-sunken:  var(--neutral-100);
-  --color-surface-brand:   var(--teal-50);
+  /* surfaces — "Perpetuity" theme (21st.dev), light mode. The client picked
+     this theme but asked to keep our own brand teal for --color-primary
+     rather than the theme's own teal swatch -- every other light-mode
+     value below (backgrounds, text ink, borders) is the theme's, applied
+     straight from its published CSS. */
+  --color-canvas:          #e8f0f0;
+  --color-surface:         #f2f7f7;
+  --color-surface-raised:  #f2f7f7;
+  --color-surface-sunken:  #e0eaea;
+  --color-surface-brand:   #d9eaea;
   --color-surface-inverse: var(--teal-900);
   /* Translucent variant for the sticky header — a literal rgba, not an
      opacity modifier on --color-surface: Tailwind's /NN opacity syntax
      cannot resolve a color that is itself a CSS custom property, and
      silently emits no rule at all rather than an error. Keep this in sync
      with --color-surface by hand in each theme block below. */
-  --color-surface-translucent: rgba(255, 255, 255, 0.85);
+  --color-surface-translucent: rgba(242, 247, 247, 0.85);
 
   /* text */
-  --color-text:           var(--neutral-900);
-  --color-text-secondary: var(--neutral-600);
-  /* Not --neutral-400 (#a5a5a5) directly -- that's the client's brand
-     swatch and stays untouched for non-text uses, but at 2.46:1 on white
-     it fails WCAG AA for text (needs 4.5:1) and was genuinely hard to
-     read as the labels/hints/timestamps this is used for everywhere.
-     #757575 keeps the same "muted grey" role at 4.61:1. */
-  --color-text-muted:     #757575;
+  --color-text:           #0a4a55;
+  --color-text-secondary: #2f6166;
+  --color-text-muted:     #427a7e;
   --color-text-brand:     var(--teal-700);
   --color-text-inverse:   var(--neutral-0);
   --color-text-on-brand:  var(--neutral-0);
 
   /* borders */
-  --color-border:        var(--neutral-200);
-  --color-border-strong: var(--neutral-300);
+  --color-border:        #cde0e2;
+  --color-border-strong: #9dbcc0;
   --color-border-brand:  var(--teal-200);
 
-  /* interactive — primary */
+  /* interactive — primary. Kept as our own brand teal per the client's
+     explicit call -- NOT the theme's own primary swatch (#06858e). */
   --color-primary:         var(--teal-600);
   --color-primary-hover:   var(--teal-700);
   --color-primary-active:  var(--teal-800);
-  --color-primary-subtle:  var(--teal-50);
+  --color-primary-subtle:  #c9e5e7;
   --color-on-primary:      var(--neutral-0);
 
-  /* interactive — secondary (deep teal, for nav/headers) */
+  /* interactive — secondary (deep teal, for nav/headers). Kept dark on
+     purpose during the Perpetuity retheme -- the theme's own "sidebar"
+     role is a pale tint, but the client chose to keep this one dark
+     brand element rather than go fully pale everywhere. */
   --color-secondary:        var(--teal-900);
   --color-secondary-hover:  var(--teal-800);
   --color-on-secondary:     var(--neutral-0);
@@ -224,9 +229,10 @@
   /* focus — never remove, only restyle */
   --color-focus-ring: var(--teal-600);
 
-  /* accent — the oxblood voice described above. Oxblood is a dark fill
-     (unlike gold-500, which was light), so text on top of it needs to be
-     light now, not the dark teal-950 gold used to pair with. */
+  /* accent — the oxblood voice described above. Not part of the Perpetuity
+     retheme: the theme's own "accent" is a pale hover tint (now reused
+     above as --color-primary-subtle), not a decorative brand voice, so
+     there's nothing in the theme that actually competes with this role. */
   --color-accent: var(--oxblood-500);
   --color-accent-hover: var(--oxblood-600);
   --color-on-accent: var(--neutral-0);

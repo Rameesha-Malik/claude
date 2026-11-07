@@ -15,7 +15,7 @@ export default {
     theme: {
         extend: {
             fontFamily: {
-                sans: ['Plus Jakarta Sans', ...defaultTheme.fontFamily.sans],
+                sans: ['Montserrat', ...defaultTheme.fontFamily.sans],
                 urdu: ['Noto Nastaliq Urdu', ...defaultTheme.fontFamily.sans],
                 display: ['Bebas Neue', 'Anton', ...defaultTheme.fontFamily.sans],
             },
@@ -114,7 +114,13 @@ export default {
             },
             borderRadius: {
                 sm: 'var(--radius-sm)', md: 'var(--radius-md)', lg: 'var(--radius-lg)',
-                xl: 'var(--radius-xl)', '2xl': 'var(--radius-2xl)', full: 'var(--radius-full)',
+                xl: 'var(--radius-xl)', '2xl': 'var(--radius-2xl)',
+                // 3xl isn't in Tailwind's default scale remap above it, but
+                // rounded-3xl is used throughout the app -- without this it
+                // would keep Tailwind's stock 1.5rem while every other size
+                // flattens to the Perpetuity theme's near-square radius.
+                '3xl': 'var(--radius-2xl)',
+                full: 'var(--radius-full)',
             },
             boxShadow: {
                 xs: 'var(--shadow-xs)', sm: 'var(--shadow-sm)', md: 'var(--shadow-md)',
