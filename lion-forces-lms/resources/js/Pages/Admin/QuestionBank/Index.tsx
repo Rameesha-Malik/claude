@@ -1,5 +1,6 @@
 import { Head, router, useForm } from '@inertiajs/react';
 import { useState } from 'react';
+import Pagination from '@/Components/Pagination';
 import QuestionBankForm from '@/Components/QuestionBankForm';
 import { BulkUploadResult, QuestionBankBulkUploadForm, QuestionBankBulkUploadResult } from '@/Components/QuestionBankBulkUpload';
 import AdminLayout from '@/Layouts/AdminLayout';
@@ -210,19 +211,3 @@ function TopicsPanel({ subjects, topics }: { subjects: Subject[]; topics: Topic[
     );
 }
 
-function Pagination({ links }: { links: { url: string | null; label: string; active: boolean }[] }) {
-    if (links.length <= 3) return null;
-    return (
-        <div className="mt-6 flex flex-wrap justify-center gap-2">
-            {links.map((link, i) => (
-                <button
-                    key={i}
-                    disabled={!link.url}
-                    onClick={() => link.url && router.get(link.url, {}, { preserveState: true })}
-                    className={`rounded-lg px-4 py-2 text-sm ${link.active ? 'bg-primary text-on-primary' : 'bg-surface text-text-secondary hover:bg-primary-subtle'} disabled:opacity-40`}
-                    dangerouslySetInnerHTML={{ __html: link.label }}
-                />
-            ))}
-        </div>
-    );
-}

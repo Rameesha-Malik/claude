@@ -1,5 +1,6 @@
 import { Head, Link, useForm } from '@inertiajs/react';
 import { FormEventHandler, useState } from 'react';
+import Pagination from '@/Components/Pagination';
 import RichTextArea from '@/Components/RichTextArea';
 import StatusDot from '@/Components/StatusDot';
 import AdminLayout from '@/Layouts/AdminLayout';
@@ -55,18 +56,7 @@ export default function QAIndex({ questions, status, type, unansweredCount }: Pr
                 )}
             </div>
 
-            {questions.links.length > 3 && (
-                <div className="mt-6 flex flex-wrap gap-2">
-                    {questions.links.map((link, i) => (
-                        <Link
-                            key={i}
-                            href={link.url ?? '#'}
-                            className={`rounded-lg px-3 py-1.5 text-sm ${link.active ? 'bg-primary text-on-primary' : 'border border-border text-text hover:border-primary'} ${!link.url ? 'pointer-events-none opacity-40' : ''}`}
-                            dangerouslySetInnerHTML={{ __html: link.label }}
-                        />
-                    ))}
-                </div>
-            )}
+            <Pagination links={questions.links} className="mt-6 flex flex-wrap gap-2" />
         </AdminLayout>
     );
 }

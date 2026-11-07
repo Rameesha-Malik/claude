@@ -1,5 +1,6 @@
 import { Head, router } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
+import Pagination from '@/Components/Pagination';
 import StatusDot from '@/Components/StatusDot';
 import AdminLayout from '@/Layouts/AdminLayout';
 import AdminPageHeader from '@/Components/AdminPageHeader';
@@ -179,17 +180,7 @@ export default function PaymentsIndex({ payments, filters }: Props) {
 
             {payments.data.length === 0 && <p className="py-10 text-center text-text-secondary">No transactions found.</p>}
 
-            <div className="mt-6 flex flex-wrap justify-center gap-2">
-                {payments.links.map((link, i) => (
-                    <button
-                        key={i}
-                        disabled={!link.url}
-                        onClick={() => link.url && router.get(link.url, {}, { preserveState: true })}
-                        className={`rounded-lg px-4 py-2 text-sm ${link.active ? 'bg-primary text-on-primary' : 'bg-surface text-text-secondary hover:bg-primary-subtle'} disabled:opacity-40`}
-                        dangerouslySetInnerHTML={{ __html: link.label }}
-                    />
-                ))}
-            </div>
+            <Pagination links={payments.links} className="mt-6 flex flex-wrap justify-center gap-2" />
         </AdminLayout>
     );
 }

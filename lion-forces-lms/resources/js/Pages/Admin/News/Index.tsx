@@ -1,5 +1,6 @@
 import { Head, router, useForm } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
+import Pagination from '@/Components/Pagination';
 import RichTextArea from '@/Components/RichTextArea';
 import StatusDot from '@/Components/StatusDot';
 import AdminLayout from '@/Layouts/AdminLayout';
@@ -184,19 +185,7 @@ export default function NewsIndex({ announcements, categories, filters }: Props)
                 {announcements.data.length === 0 && <p className="text-sm text-text-secondary">{filters.search ? 'No announcements match that search.' : 'No announcements yet.'}</p>}
             </div>
 
-            {announcements.links.length > 3 && (
-                <div className="mb-6 flex flex-wrap justify-center gap-2">
-                    {announcements.links.map((link, i) => (
-                        <button
-                            key={i}
-                            disabled={!link.url}
-                            onClick={() => link.url && router.get(link.url, {}, { preserveState: true })}
-                            className={`rounded-lg px-4 py-2 text-sm ${link.active ? 'bg-primary text-on-primary' : 'bg-surface text-text-secondary hover:bg-primary-subtle'} disabled:opacity-40`}
-                            dangerouslySetInnerHTML={{ __html: link.label }}
-                        />
-                    ))}
-                </div>
-            )}
+            <Pagination links={announcements.links} className="mb-6 flex flex-wrap justify-center gap-2" />
 
             <h3 className="mb-2 text-xs font-bold uppercase tracking-wide text-text-muted">Add New</h3>
             <form

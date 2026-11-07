@@ -1,4 +1,5 @@
-import { Head, router } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
+import Pagination from '@/Components/Pagination';
 import PublicLayout from '@/Layouts/PublicLayout';
 
 interface NewsItem {
@@ -70,17 +71,7 @@ export default function News({ announcements }: Props) {
                     <p className="py-16 text-center text-text-secondary">No active announcements right now.</p>
                 )}
 
-                <div className="mt-10 flex flex-wrap justify-center gap-2">
-                    {announcements.links.map((link, i) => (
-                        <button
-                            key={i}
-                            disabled={!link.url}
-                            onClick={() => link.url && router.get(link.url, {}, { preserveState: true })}
-                            className={`rounded-lg px-4 py-2 text-sm ${link.active ? 'bg-primary text-on-primary' : 'bg-surface text-text-secondary hover:bg-primary-subtle'} disabled:opacity-40`}
-                            dangerouslySetInnerHTML={{ __html: link.label }}
-                        />
-                    ))}
-                </div>
+                <Pagination links={announcements.links} className="mt-10 flex flex-wrap justify-center gap-2" />
             </section>
         </PublicLayout>
     );

@@ -1,5 +1,6 @@
 import { Head, router } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
+import Pagination from '@/Components/Pagination';
 import AdminLayout from '@/Layouts/AdminLayout';
 
 interface FavRow {
@@ -83,17 +84,7 @@ export default function FavouriteQuestionsIndex({ favourites, subjects, filters 
 
             {favourites.data.length === 0 && <p className="py-10 text-center text-text-secondary">No favourites yet.</p>}
 
-            <div className="mt-6 flex flex-wrap justify-center gap-2">
-                {favourites.links.map((link, i) => (
-                    <button
-                        key={i}
-                        disabled={!link.url}
-                        onClick={() => link.url && router.get(link.url, {}, { preserveState: true })}
-                        className={`rounded-lg px-4 py-2 text-sm ${link.active ? 'bg-primary text-on-primary' : 'bg-surface text-text-secondary hover:bg-primary-subtle'} disabled:opacity-40`}
-                        dangerouslySetInnerHTML={{ __html: link.label }}
-                    />
-                ))}
-            </div>
+            <Pagination links={favourites.links} className="mt-6 flex flex-wrap justify-center gap-2" />
         </AdminLayout>
     );
 }

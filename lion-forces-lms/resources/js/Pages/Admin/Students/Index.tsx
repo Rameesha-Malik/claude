@@ -3,6 +3,7 @@ import { FormEvent, useState } from 'react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import AdminPageHeader from '@/Components/AdminPageHeader';
 import EmptyState from '@/Components/EmptyState';
+import Pagination from '@/Components/Pagination';
 
 const inputClass = 'rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:shadow-glow focus:outline-none';
 
@@ -209,17 +210,7 @@ export default function StudentsIndex({ students, filters }: Props) {
                 </div>
             )}
 
-            <div className="mt-6 flex flex-wrap justify-center gap-2">
-                {students.links.map((link, i) => (
-                    <button
-                        key={i}
-                        disabled={!link.url}
-                        onClick={() => link.url && router.get(link.url, {}, { preserveState: true })}
-                        className={`rounded-lg px-4 py-2 text-sm ${link.active ? 'bg-primary text-on-primary' : 'bg-surface text-text-secondary hover:bg-primary-subtle'} disabled:opacity-40`}
-                        dangerouslySetInnerHTML={{ __html: link.label }}
-                    />
-                ))}
-            </div>
+            <Pagination links={students.links} className="mt-6 flex flex-wrap justify-center gap-2" />
         </AdminLayout>
     );
 }

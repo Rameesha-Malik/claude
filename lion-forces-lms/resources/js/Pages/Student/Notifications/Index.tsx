@@ -1,4 +1,5 @@
-import { Head, Link, router } from '@inertiajs/react';
+import { Head, router } from '@inertiajs/react';
+import Pagination from '@/Components/Pagination';
 import RevealOnScroll from '@/Components/RevealOnScroll';
 import StudentLayout from '@/Layouts/StudentLayout';
 
@@ -67,18 +68,7 @@ export default function NotificationsIndex({ notifications }: Props) {
                 )}
             </RevealOnScroll>
 
-            {notifications.links.length > 3 && (
-                <div className="mt-6 flex flex-wrap gap-2">
-                    {notifications.links.map((link, i) => (
-                        <Link
-                            key={i}
-                            href={link.url ?? '#'}
-                            className={`rounded-lg px-3 py-1.5 text-sm ${link.active ? 'bg-primary text-on-primary' : 'border border-border text-text hover:border-primary'} ${!link.url ? 'pointer-events-none opacity-40' : ''}`}
-                            dangerouslySetInnerHTML={{ __html: link.label }}
-                        />
-                    ))}
-                </div>
-            )}
+            <Pagination links={notifications.links} className="mt-6 flex flex-wrap gap-2" />
         </StudentLayout>
     );
 }

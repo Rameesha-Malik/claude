@@ -1,6 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
 import GradientMesh from '@/Components/GradientMesh';
+import Pagination from '@/Components/Pagination';
 import RevealOnScroll from '@/Components/RevealOnScroll';
 import PublicLayout from '@/Layouts/PublicLayout';
 
@@ -268,17 +269,7 @@ export default function Courses({ courses, categories, tags, filters }: Props) {
                     <p className="py-16 text-center text-text-secondary">No courses match your filters yet.</p>
                 )}
 
-                <div className="mt-10 flex flex-wrap justify-center gap-2">
-                    {courses.links.map((link, i) => (
-                        <button
-                            key={i}
-                            disabled={!link.url}
-                            onClick={() => link.url && router.get(link.url, {}, { preserveState: true })}
-                            className={`rounded-lg px-4 py-2 text-sm ${link.active ? 'bg-primary text-on-primary' : 'bg-surface text-text-secondary hover:bg-primary-subtle'} disabled:opacity-40`}
-                            dangerouslySetInnerHTML={{ __html: link.label }}
-                        />
-                    ))}
-                </div>
+                <Pagination links={courses.links} className="mt-10 flex flex-wrap justify-center gap-2" />
             </section>
         </PublicLayout>
     );

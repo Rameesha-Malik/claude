@@ -1,6 +1,7 @@
 import { Head, router } from '@inertiajs/react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import EmptyState from '@/Components/EmptyState';
+import Pagination from '@/Components/Pagination';
 
 interface Submission { id: number; name: string; email: string; phone: string | null; subject: string | null; message: string; is_handled: boolean; created_at: string }
 interface Props {
@@ -83,17 +84,7 @@ export default function ContactInboxIndex({ submissions, counts, filters }: Prop
                 )}
             </div>
 
-            <div className="mt-6 flex flex-wrap justify-center gap-2">
-                {submissions.links.map((link, i) => (
-                    <button
-                        key={i}
-                        disabled={!link.url}
-                        onClick={() => link.url && router.get(link.url, {}, { preserveState: true })}
-                        className={`rounded-lg px-4 py-2 text-sm ${link.active ? 'bg-primary text-on-primary' : 'bg-surface text-text-secondary hover:bg-primary-subtle'} disabled:opacity-40`}
-                        dangerouslySetInnerHTML={{ __html: link.label }}
-                    />
-                ))}
-            </div>
+            <Pagination links={submissions.links} className="mt-6 flex flex-wrap justify-center gap-2" />
         </AdminLayout>
     );
 }
