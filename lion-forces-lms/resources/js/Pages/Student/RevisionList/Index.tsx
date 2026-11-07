@@ -18,17 +18,12 @@ function RevisionCard({ item }: { item: RevisionItem }) {
 
     return (
         <div className="rounded-3xl border border-border bg-surface p-5">
-            <div className="mb-3 flex flex-wrap items-center gap-2">
-                {item.question.subject && (
-                    <span className="flex-shrink-0 rounded-full bg-primary-subtle px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide text-primary">
-                        {item.question.subject.name}
-                    </span>
-                )}
+            <div className="mb-3 flex items-center justify-between gap-2">
+                <p className="font-semibold text-text"><LiteMarkdownInline text={item.question.question_text} /></p>
                 <span className="flex-shrink-0 rounded-full bg-warning-bg px-2.5 py-0.5 text-xs font-bold uppercase text-warning">
                     Missed {item.times_wrong}×
                 </span>
             </div>
-            <p className="mb-3 font-semibold text-text"><LiteMarkdownInline text={item.question.question_text} /></p>
 
             {revealed ? (
                 <>
@@ -67,14 +62,31 @@ function RevisionCard({ item }: { item: RevisionItem }) {
     );
 }
 
+// Grouped by the question's real subject (client: questions "need to belong
+// to their actual category so it is easy to" revise one subject at a time),
+// instead of one flat list -- preserves the order subjects first show up in
+// (already most-recently-missed-first from the backend), "General" catching
+// any question with no subject assigned.
+function groupBySubject(items: RevisionItem[]): [string, RevisionItem[]][] {
+    const groups = new Map<string, RevisionItem[]>();
+    for (const item of items) {
+        const subject = item.question.subject?.name ?? 'General';
+        if (!groups.has(subject)) groups.set(subject, []);
+        groups.get(subject)!.push(item);
+    }
+    return Array.from(groups.entries());
+}
+
 export default function RevisionListIndex({ items }: Props) {
+    const groups = groupBySubject(items);
+
     return (
         <StudentLayout header="Revision List">
             <Head title="Revision List" />
 
             <p className="mb-6 max-w-2xl text-sm text-text-secondary">
-                Every question you've gotten wrong on a practice test, quiz, staged test, or mock exam lands here automatically.
-                Getting it right on a later attempt clears it from this list.
+                Every question you've gotten wrong on a practice test, quiz, staged test, or mock exam lands here automatically,
+                grouped by subject. Getting it right on a later attempt clears it from this list.
             </p>
 
             {items.length === 0 ? (
@@ -82,9 +94,19 @@ export default function RevisionListIndex({ items }: Props) {
                     Nothing to revise right now. Either you haven't taken a test yet, or you're getting everything right. Keep it up!
                 </div>
             ) : (
-                <RevealOnScroll staggerMs={40} className="space-y-5">
-                    {items.map((item) => (
-                        <RevisionCard key={item.id} item={item} />
+                <RevealOnScroll staggerMs={60} className="space-y-10">
+                    {groups.map(([subject, groupItems]) => (
+                        <div key={subject}>
+                            <h2 className="mb-4 flex items-center gap-2 font-display text-xl uppercase tracking-wide text-text">
+                                {subject}
+                                <span className="rounded-full bg-surface-sunken px-2.5 py-0.5 text-xs font-bold text-text-muted">{groupItems.length}</span>
+                            </h2>
+                            <div className="space-y-5">
+                                {groupItems.map((item) => (
+                                    <RevisionCard key={item.id} item={item} />
+                                ))}
+                            </div>
+                        </div>
                     ))}
                 </RevealOnScroll>
             )}
