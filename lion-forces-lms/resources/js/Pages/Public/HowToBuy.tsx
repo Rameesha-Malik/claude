@@ -4,6 +4,7 @@ import { PhoneIcon, TagIcon } from '@/Components/ContactFieldIcons';
 import LiteMarkdown from '@/Components/LiteMarkdown';
 import RevealOnScroll from '@/Components/RevealOnScroll';
 import SectionKicker from '@/Components/SectionKicker';
+import WhyChooseIcon from '@/Components/WhyChooseIcon';
 import PublicLayout from '@/Layouts/PublicLayout';
 import { PageProps } from '@/types';
 
@@ -74,6 +75,11 @@ function BookIcon({ className = 'h-5 w-5' }: { className?: string }) {
 // the STEPS array so that array can stay plain data.
 const STEP_ICONS = [PersonIcon, TagIcon, CardIcon, PhoneIcon, CheckCircleIcon, BookIcon];
 
+// Cycled by index across whatever packages admin has configured -- purely
+// decorative variety (WhyChooseIcon's existing set, reused rather than
+// drawing new ones), not a claim about what tier each package is.
+const PACKAGE_ICONS = ['medal', 'tag', 'gift', 'shield-check'];
+
 interface PaymentMethodItem { name: string; description: string | null }
 interface HeroContent { headline: string; subheading: string }
 
@@ -124,9 +130,12 @@ export default function HowToBuy({ hero, packages, paymentMethods, faqs }: { her
                                 {/* Client: the content itself belongs on the card (where the
                                     reference's photo was), not as plain text below a decorative
                                     tile -- one rounded panel holding the icon, title and both
-                                    descriptions, same idea as the reference's image card. */}
+                                    descriptions, same idea as the reference's image card. A fixed
+                                    min-height (not just padding) keeps every card the same size
+                                    regardless of how long a given step's EN/UR text runs, and a
+                                    single consistent corner radius everywhere -- no mixed shapes. */}
                                 <div
-                                    className="relative overflow-hidden rounded-[1.5rem] px-5 pb-12 pt-5 text-left shadow-sm transition-all duration-normal group-hover:-translate-y-1 group-hover:shadow-lg"
+                                    className="relative flex min-h-[17rem] flex-col overflow-hidden rounded-[1.5rem] px-5 pb-12 pt-5 text-left shadow-sm transition-all duration-normal group-hover:-translate-y-1 group-hover:shadow-lg"
                                     style={{ background: 'linear-gradient(135deg, var(--teal-800), var(--teal-500))' }}
                                 >
                                     <Icon className="h-8 w-8 text-white/70" />
@@ -159,8 +168,8 @@ export default function HowToBuy({ hero, packages, paymentMethods, faqs }: { her
                             <SectionKicker>Pricing</SectionKicker>
                             <h2 className="font-display text-4xl uppercase tracking-wide text-text sm:text-5xl">Packages</h2>
                         </RevealOnScroll>
-                        <RevealOnScroll staggerMs={60} className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                            {packages.map((pkg) => {
+                        <RevealOnScroll staggerMs={60} className="grid items-stretch gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                            {packages.map((pkg, i) => {
                                 // Each line of the admin-entered description becomes one
                                 // checkmarked feature -- a plan-comparison-card look (à la
                                 // Hostinger's pricing tiers) instead of a plain table row.
@@ -168,38 +177,45 @@ export default function HowToBuy({ hero, packages, paymentMethods, faqs }: { her
                                     .split('\n')
                                     .map((line) => line.replace(/^[-•*]\s*/, '').trim())
                                     .filter(Boolean);
+                                const icon = PACKAGE_ICONS[i % PACKAGE_ICONS.length];
                                 return (
                                     <div
                                         key={pkg.id}
-                                        className="flex flex-col rounded-2xl border border-border bg-surface p-6 shadow-sm transition-all duration-normal hover:-translate-y-1 hover:border-primary hover:shadow-lg"
+                                        className="flex min-h-[26rem] flex-col items-center rounded-[1.5rem] border border-border bg-surface p-8 text-center shadow-sm transition-all duration-normal hover:-translate-y-1 hover:border-primary hover:shadow-lg"
                                     >
-                                        <p className="text-xs font-bold uppercase tracking-wide text-primary">{pkg.course?.title}</p>
-                                        <h3 className="mt-1 font-display text-xl uppercase tracking-wide text-text">{pkg.name}</h3>
-                                        <p className="mt-3 font-display text-3xl text-text">
+                                        <span className="flex h-14 w-14 flex-shrink-0 items-center justify-center rounded-full bg-primary-subtle text-primary">
+                                            <WhyChooseIcon name={icon} className="h-7 w-7" />
+                                        </span>
+                                        {pkg.course && <p className="mt-4 text-xs font-bold uppercase tracking-wide text-primary">{pkg.course.title}</p>}
+                                        <h3 className="mt-1 font-display text-2xl uppercase tracking-wide text-text">{pkg.name}</h3>
+                                        <p className="mt-4 font-display text-4xl text-text">
                                             Rs. {Number(pkg.price).toLocaleString()}
                                         </p>
-                                        <p className="text-xs text-text-muted">
+                                        <p className="mt-1 text-xs text-text-muted">
                                             {pkg.validity_days ? `${pkg.validity_days} days access` : 'Lifetime access'}
                                         </p>
-
-                                        {features.length > 0 && (
-                                            <ul className="mt-5 flex-1 space-y-2.5 border-t border-border pt-5">
-                                                {features.map((f, i) => (
-                                                    <li key={i} className="flex items-start gap-2 text-sm text-text-secondary">
-                                                        <CheckIcon />
-                                                        {f}
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        )}
 
                                         {pkg.course && (
                                             <Link
                                                 href={`/courses/${pkg.course.slug}`}
-                                                className="mt-6 block rounded-full bg-primary py-2.5 text-center text-sm font-bold uppercase tracking-wide text-on-primary shadow-sm transition-all duration-fast hover:-translate-y-0.5 hover:bg-primary-hover hover:shadow-md"
+                                                className="mt-6 block w-full rounded-full border-2 border-border py-2.5 text-center text-sm font-bold uppercase tracking-wide text-text transition-all duration-fast hover:border-primary hover:text-primary"
                                             >
                                                 View Package
                                             </Link>
+                                        )}
+
+                                        {features.length > 0 && (
+                                            <div className="mt-8 w-full flex-1 border-t border-border pt-6 text-left">
+                                                <p className="text-sm font-bold uppercase tracking-wide text-text">Highlights</p>
+                                                <ul className="mt-3 space-y-2.5">
+                                                    {features.map((f, fi) => (
+                                                        <li key={fi} className="flex items-start gap-2 text-sm text-text-secondary">
+                                                            <CheckIcon />
+                                                            {f}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
                                         )}
                                     </div>
                                 );
