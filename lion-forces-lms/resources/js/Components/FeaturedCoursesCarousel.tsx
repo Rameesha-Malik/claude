@@ -95,13 +95,13 @@ export default function FeaturedCoursesCarousel({ courses }: { courses: CourseCa
 
             <div
                 ref={scrollerRef}
-                className="flex snap-x snap-mandatory gap-6 overflow-x-auto scroll-pl-4 pb-4 [-ms-overflow-style:none] [scrollbar-width:thin] sm:scroll-pl-0 [&::-webkit-scrollbar]:h-1.5 [&::-webkit-scrollbar-thumb]:rounded-full [&::-webkit-scrollbar-thumb]:bg-border [&::-webkit-scrollbar-track]:bg-transparent"
+                className="flex snap-x snap-mandatory gap-6 overflow-x-auto scroll-pl-4 pb-1 [-ms-overflow-style:none] [scrollbar-width:none] sm:scroll-pl-0 [&::-webkit-scrollbar]:hidden"
             >
                 {courses.map((course) => (
                     <div
                         key={course.id}
                         data-card
-                        className="group w-[17rem] flex-shrink-0 snap-start overflow-hidden rounded-2xl border border-border bg-surface shadow-sm transition-all duration-normal hover:-translate-y-1 hover:border-primary hover:shadow-xl sm:w-80"
+                        className="group w-[17rem] flex-shrink-0 snap-start overflow-hidden rounded-[1.5rem] border border-border bg-surface shadow-sm transition-all duration-normal hover:-translate-y-1 hover:border-primary hover:shadow-xl sm:w-80"
                     >
                         <div className="relative h-44 overflow-hidden bg-secondary">
                             {course.thumbnail_path ? (
