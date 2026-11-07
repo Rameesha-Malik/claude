@@ -1,6 +1,7 @@
 import { Head, Link, usePage } from '@inertiajs/react';
 import { CheckCircleIcon, PersonIcon } from '@/Components/AuthIcons';
 import { PhoneIcon, TagIcon } from '@/Components/ContactFieldIcons';
+import GradientMesh from '@/Components/GradientMesh';
 import LiteMarkdown from '@/Components/LiteMarkdown';
 import RevealOnScroll from '@/Components/RevealOnScroll';
 import SectionKicker from '@/Components/SectionKicker';
@@ -139,6 +140,13 @@ export default function HowToBuy({ hero, packages, paymentMethods, faqs }: { her
             <Head title="How to Buy" />
 
             <section className="relative overflow-hidden bg-secondary py-20 text-center text-white">
+                <div
+                    aria-hidden
+                    className="absolute inset-0 opacity-[0.15]"
+                    style={{ backgroundImage: 'radial-gradient(rgba(255,255,255,0.7) 1.5px, transparent 1.5px)', backgroundSize: '20px 20px' }}
+                />
+                <GradientMesh className="opacity-70" />
+
                 <div className="relative mx-auto max-w-container px-4 sm:px-6 lg:px-8">
                     <SectionKicker dark><span className="mx-auto">Get Started</span></SectionKicker>
                     <h1 className="font-display text-5xl uppercase tracking-wide sm:text-6xl">{hero.headline}</h1>
