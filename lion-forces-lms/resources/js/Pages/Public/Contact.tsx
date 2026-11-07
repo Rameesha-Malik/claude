@@ -30,6 +30,38 @@ function PinIcon({ className = 'h-5 w-5' }: { className?: string }) {
     );
 }
 
+// Client: "many things are animated here" (21st.dev Contact reference) --
+// that reference's hand-drawn globe graphic would need a new illustration
+// asset; this gives the same "quiet ambient motion anchoring the contact
+// info column" effect with two counter-rotating dashed rings around the
+// mail icon instead, built from the same sonar/orbit motif already used
+// elsewhere this session (GradientMesh's ping rings) rather than a one-off.
+function OrbitDecoration() {
+    return (
+        <div aria-hidden className="relative mx-auto mt-10 hidden h-48 w-48 items-center justify-center lg:flex">
+            <style>{`
+                @keyframes orbit-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
+                @keyframes orbit-spin-reverse { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
+                .orbit-ring-outer { animation: orbit-spin 50s linear infinite; }
+                .orbit-ring-inner { animation: orbit-spin-reverse 36s linear infinite; }
+                @media (prefers-reduced-motion: reduce) {
+                    .orbit-ring-outer, .orbit-ring-inner { animation: none; }
+                }
+            `}</style>
+            <span className="orbit-ring-outer absolute inset-0 rounded-full border border-dashed border-border">
+                <span className="absolute -top-1.5 left-1/2 h-3 w-3 -translate-x-1/2 rounded-full bg-gold-400 shadow-md" />
+            </span>
+            <span className="orbit-ring-inner absolute inset-8 rounded-full border border-dashed border-primary/40">
+                <span className="absolute -left-1.5 top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full bg-primary shadow-md" />
+            </span>
+            <span className="absolute inset-16 rounded-full bg-primary-subtle" />
+            <span className="relative flex h-14 w-14 items-center justify-center rounded-full bg-primary text-on-primary shadow-lg">
+                <MailIcon className="h-6 w-6" />
+            </span>
+        </div>
+    );
+}
+
 export default function Contact({ faqs }: { faqs: FaqItem[] }) {
     const { site } = usePage<PageProps>().props;
     const { data, setData, post, processing, errors, wasSuccessful, reset } = useForm({
@@ -105,11 +137,11 @@ export default function Contact({ faqs }: { faqs: FaqItem[] }) {
                         <SectionKicker>Reach Us Directly</SectionKicker>
                         <h2 className="font-display text-3xl uppercase tracking-wide text-text">Contact Details</h2>
 
-                        <div className="mt-6 space-y-3">
+                        <RevealOnScroll staggerMs={60} className="mt-6 space-y-3">
                             {site.supportEmail && (
                                 <a
                                     href={`mailto:${site.supportEmail}`}
-                                    className="flex items-center gap-3 rounded-xl border border-border bg-surface p-4 transition-colors duration-fast hover:border-primary hover:bg-primary-subtle"
+                                    className="flex items-center gap-3 rounded-[1rem] border border-border bg-surface p-4 transition-all duration-fast hover:-translate-y-0.5 hover:border-primary hover:bg-primary-subtle hover:shadow-md"
                                 >
                                     <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-primary-subtle text-primary">
                                         <MailIcon />
@@ -121,7 +153,7 @@ export default function Contact({ faqs }: { faqs: FaqItem[] }) {
                                 </a>
                             )}
                             {site.officeLocation && (
-                                <div className="flex items-center gap-3 rounded-xl border border-border bg-surface p-4">
+                                <div className="flex items-center gap-3 rounded-[1rem] border border-border bg-surface p-4 transition-all duration-fast hover:-translate-y-0.5 hover:shadow-md">
                                     <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-secondary/10 text-secondary">
                                         <PinIcon />
                                     </span>
@@ -132,7 +164,7 @@ export default function Contact({ faqs }: { faqs: FaqItem[] }) {
                                 </div>
                             )}
                             {site.officeHours && (
-                                <div className="flex items-center gap-3 rounded-xl border border-border bg-surface p-4">
+                                <div className="flex items-center gap-3 rounded-[1rem] border border-border bg-surface p-4 transition-all duration-fast hover:-translate-y-0.5 hover:shadow-md">
                                     <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-surface-sunken text-text-secondary">
                                         <ClockIcon />
                                     </span>
@@ -147,7 +179,7 @@ export default function Contact({ faqs }: { faqs: FaqItem[] }) {
                                     href={`https://wa.me/${site.whatsappNumber.replace(/[^0-9]/g, '')}`}
                                     target="_blank"
                                     rel="noopener noreferrer"
-                                    className="flex items-center gap-3 rounded-xl border border-border bg-surface p-4 transition-colors duration-fast hover:border-primary hover:bg-primary-subtle"
+                                    className="flex items-center gap-3 rounded-[1rem] border border-border bg-surface p-4 transition-all duration-fast hover:-translate-y-0.5 hover:border-primary hover:bg-primary-subtle hover:shadow-md"
                                 >
                                     <span className="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-full bg-[#25D366]/10 text-[#25D366]">
                                         <PhoneIcon />
@@ -158,20 +190,31 @@ export default function Contact({ faqs }: { faqs: FaqItem[] }) {
                                     </div>
                                 </a>
                             )}
-                        </div>
+                        </RevealOnScroll>
+
+                        <OrbitDecoration />
                     </RevealOnScroll>
 
-                    <RevealOnScroll className="min-w-0 rounded-3xl border border-border bg-surface p-6 shadow-xl sm:p-8">
-                        <h2 className="font-display text-2xl uppercase tracking-wide text-text">Send a Message</h2>
-                        <p className="text-sm text-text-secondary">We typically reply within a day.</p>
+                    <RevealOnScroll className="relative min-w-0 overflow-hidden rounded-[1.5rem] border border-border bg-surface p-6 shadow-xl sm:p-8">
+                        {/* Same decorative corner blob already used on other feature
+                            cards sitewide (CTA footer banner, etc), just in primary
+                            teal instead of oxblood since this card sits on a plain
+                            light section, not a branded-accent one. */}
+                        <div
+                            aria-hidden
+                            className="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rotate-12 rounded-[2rem] opacity-[0.06]"
+                            style={{ backgroundColor: 'var(--color-primary)' }}
+                        />
+                        <h2 className="relative font-display text-2xl uppercase tracking-wide text-text">Send a Message</h2>
+                        <p className="relative text-sm text-text-secondary">We typically reply within a day.</p>
 
                         {wasSuccessful && (
-                            <div className="mt-4 rounded-lg bg-success-bg px-4 py-3 text-sm text-success">
+                            <div className="relative mt-4 rounded-[0.75rem] bg-success-bg px-4 py-3 text-sm text-success">
                                 Your message has been sent. We'll be in touch soon.
                             </div>
                         )}
 
-                        <form onSubmit={submit} className="mt-6 space-y-4">
+                        <form onSubmit={submit} className="relative mt-6 space-y-4">
                             <div className="grid gap-4 sm:grid-cols-2">
                                 <Field label="Name" error={errors.name}>
                                     <IconTextInput icon={<PersonIcon />} value={data.name} onChange={(e) => setData('name', e.target.value)} />
@@ -196,15 +239,20 @@ export default function Contact({ faqs }: { faqs: FaqItem[] }) {
                                     rows={4}
                                     value={data.message}
                                     onChange={(e) => setData('message', e.target.value)}
-                                    className="w-full rounded-lg border-border bg-surface py-3 px-4 text-sm text-text shadow-xs transition-shadow duration-fast focus:border-primary focus:shadow-glow focus:outline-none"
+                                    className="w-full rounded-[0.75rem] border-border bg-surface py-3 px-4 text-sm text-text shadow-xs transition-shadow duration-fast focus:border-primary focus:shadow-glow focus:outline-none"
                                 />
                             </Field>
                             <button
                                 type="submit"
                                 disabled={processing}
-                                className="w-full rounded-lg bg-gradient-to-r from-secondary to-primary py-3.5 text-sm font-bold uppercase tracking-wide text-on-primary shadow-lg transition-all duration-normal hover:shadow-xl focus:outline-none focus:shadow-glow disabled:opacity-50"
+                                className="group flex w-full items-center justify-center gap-2 rounded-[1rem] bg-gradient-to-r from-secondary to-primary py-3.5 text-sm font-bold uppercase tracking-wide text-on-primary shadow-lg transition-all duration-normal ease-spring hover:-translate-y-0.5 hover:shadow-xl focus:outline-none focus:shadow-glow disabled:opacity-50 disabled:hover:translate-y-0"
                             >
                                 {processing ? 'Sending…' : 'Send Message'}
+                                {!processing && (
+                                    <svg viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4 transition-transform duration-fast group-hover:translate-x-0.5">
+                                        <path d="M11.3 3.3a1 1 0 011.4 0l5 5a1 1 0 010 1.4l-5 5a1 1 0 11-1.4-1.4L14.6 10H4a1 1 0 010-2h10.6l-3.3-3.3a1 1 0 010-1.4z" />
+                                    </svg>
+                                )}
                             </button>
                         </form>
                     </RevealOnScroll>
@@ -218,7 +266,7 @@ export default function Contact({ faqs }: { faqs: FaqItem[] }) {
                             <SectionKicker>Common Questions</SectionKicker>
                             <h2 className="font-display text-4xl uppercase tracking-wide text-text sm:text-5xl">FAQs</h2>
                         </RevealOnScroll>
-                        <RevealOnScroll className="mx-auto max-w-3xl divide-y divide-border rounded-2xl border border-border bg-surface">
+                        <RevealOnScroll className="mx-auto max-w-3xl divide-y divide-border overflow-hidden rounded-[1.5rem] border border-border bg-surface">
                             {faqs.map((faq, i) => (
                                 <FaqAccordionItem key={i} question={faq.question} answer={faq.answer} />
                             ))}
