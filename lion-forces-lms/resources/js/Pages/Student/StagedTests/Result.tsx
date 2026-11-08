@@ -1,6 +1,7 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import { useState } from 'react';
 import AnswerReviewRunner from '@/Components/AnswerReviewRunner';
+import LiquidButton from '@/Components/LiquidButton';
 import StatusDot from '@/Components/StatusDot';
 import StudentLayout from '@/Layouts/StudentLayout';
 import { trimDecimal } from '@/lib/format';
@@ -24,7 +25,7 @@ export default function StagedTestResult({ attempt, testTitle, stages }: Props) 
         <StudentLayout header={`Result: ${testTitle}`}>
             <Head title={`Result: ${testTitle}`} />
 
-            <div className={`mb-6 rounded-2xl border p-6 ${attempt.passed ? 'border-success bg-success-bg' : 'border-danger bg-danger-bg'}`}>
+            <div className={`mb-6 rounded-[1.5rem] border p-6 ${attempt.passed ? 'border-success bg-success-bg' : 'border-danger bg-danger-bg'}`}>
                 <p className={`text-sm font-bold uppercase tracking-wide ${attempt.passed ? 'text-success' : 'text-danger'}`}>
                     {attempt.passed ? 'All Stages Passed' : 'Did Not Clear All Stages'}
                 </p>
@@ -33,31 +34,32 @@ export default function StagedTestResult({ attempt, testTitle, stages }: Props) 
                 {stoppedAt && (
                     <p className="mt-2 text-sm font-semibold text-danger">Stopped at "{stoppedAt.name}": its pass threshold wasn't met.</p>
                 )}
-                <Link href="/portal/my-courses" className="mt-4 inline-block rounded-lg border border-border px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-text hover:border-primary">
+                <LiquidButton href="/portal/my-courses" tone="light" className="mt-4 px-5 py-2.5 text-sm uppercase tracking-wide">
                     Back to My Courses
-                </Link>
+                </LiquidButton>
             </div>
 
             <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {stages.map((s) => {
                     const pct = Number(s.total_marks) > 0 ? Math.round((Math.max(Number(s.score), 0) / Number(s.total_marks)) * 100) : 0;
                     return (
-                        <button
+                        <LiquidButton
                             key={s.id}
+                            type="button"
+                            tone="light"
+                            shape="tile"
                             onClick={() => s.completed && setOpenStage(openStage === s.id ? null : s.id)}
                             disabled={!s.completed}
-                            className={`rounded-xl border p-4 text-left transition-colors disabled:opacity-40 ${
-                                openStage === s.id ? 'border-primary bg-primary-subtle' : 'border-border bg-surface hover:border-primary'
-                            }`}
+                            className={`p-4 ${openStage === s.id ? 'ring-2 ring-primary' : ''}`}
                         >
                             <div className="flex items-center justify-between">
-                                <p className="font-semibold text-text">{s.name}</p>
+                                <p className="font-semibold">{s.name}</p>
                                 {s.completed && (
                                     <StatusDot label={s.passed ? 'Passed' : 'Failed'} tone={s.passed ? 'positive' : 'negative'} />
                                 )}
                             </div>
-                            <p className="text-sm text-text-secondary">{s.completed ? `${s.score} / ${s.total_marks} · ${pct}%` : 'Not reached'}</p>
-                        </button>
+                            <p className="text-sm opacity-80">{s.completed ? `${s.score} / ${s.total_marks} · ${pct}%` : 'Not reached'}</p>
+                        </LiquidButton>
                     );
                 })}
             </div>

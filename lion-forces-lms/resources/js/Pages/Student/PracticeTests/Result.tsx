@@ -1,6 +1,7 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import AnimatedCounter from '@/Components/AnimatedCounter';
 import AnswerReviewRunner from '@/Components/AnswerReviewRunner';
+import LiquidButton from '@/Components/LiquidButton';
 import StudentLayout from '@/Layouts/StudentLayout';
 import { trimDecimal } from '@/lib/format';
 
@@ -25,7 +26,7 @@ export default function PracticeTestResult({ attempt, testTitle, isRepeatable, p
         <StudentLayout header={`Result: ${testTitle}`}>
             <Head title={`Result: ${testTitle}`} />
 
-            <div className={`mb-6 rounded-3xl border p-6 shadow-sm ${attempt.passed ? 'border-success bg-success-bg' : 'border-danger bg-danger-bg'}`}>
+            <div className={`mb-6 rounded-[2rem] border p-6 shadow-sm ${attempt.passed ? 'border-success bg-success-bg' : 'border-danger bg-danger-bg'}`}>
                 <div className="flex flex-wrap items-center justify-between gap-4">
                     <div>
                         <p className={`text-sm font-bold uppercase tracking-wide ${attempt.passed ? 'text-success' : 'text-danger'}`}>
@@ -38,36 +39,30 @@ export default function PracticeTestResult({ attempt, testTitle, isRepeatable, p
                             Score: {trimDecimal(attempt.score)} / {trimDecimal(attempt.total_marks)}
                         </p>
                     </div>
-                    <div className="flex gap-4 text-center text-sm">
-                        <div className="rounded-2xl bg-surface px-4 py-2.5 shadow-xs">
-                            <p className="text-xl font-bold text-success">{correctCount}</p>
-                            <p className="text-text-muted">Correct</p>
-                        </div>
-                        <div className="rounded-2xl bg-surface px-4 py-2.5 shadow-xs">
-                            <p className="text-xl font-bold text-danger">{wrongCount}</p>
-                            <p className="text-text-muted">Wrong</p>
-                        </div>
-                        <div className="rounded-2xl bg-surface px-4 py-2.5 shadow-xs">
-                            <p className="text-xl font-bold text-text-muted">{skippedCount}</p>
-                            <p className="text-text-muted">Skipped</p>
-                        </div>
+                    <div className="flex gap-3 text-center text-sm">
+                        <LiquidButton tone="success" shape="tile" className="px-4 py-2.5 text-center">
+                            <p className="text-xl font-bold">{correctCount}</p>
+                            <p className="opacity-80">Correct</p>
+                        </LiquidButton>
+                        <LiquidButton tone="danger" shape="tile" className="px-4 py-2.5 text-center">
+                            <p className="text-xl font-bold">{wrongCount}</p>
+                            <p className="opacity-80">Wrong</p>
+                        </LiquidButton>
+                        <LiquidButton tone="light" shape="tile" className="px-4 py-2.5 text-center">
+                            <p className="text-xl font-bold">{skippedCount}</p>
+                            <p className="opacity-80">Skipped</p>
+                        </LiquidButton>
                     </div>
                 </div>
                 <div className="mt-5 flex flex-wrap gap-3">
                     {isRepeatable && practiceTestId && (
-                        <Link
-                            href={`/portal/practice-tests/${practiceTestId}`}
-                            className="rounded-full bg-primary px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-on-primary shadow-sm transition-all duration-fast hover:-translate-y-0.5 hover:bg-primary-hover hover:shadow-md"
-                        >
+                        <LiquidButton href={`/portal/practice-tests/${practiceTestId}`} className="px-5 py-2.5 text-sm uppercase tracking-wide">
                             Retake Test
-                        </Link>
+                        </LiquidButton>
                     )}
-                    <Link
-                        href="/portal/my-courses"
-                        className="rounded-full border border-border bg-surface px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-text transition-all duration-fast hover:-translate-y-0.5 hover:border-primary hover:text-primary"
-                    >
+                    <LiquidButton href="/portal/my-courses" tone="light" className="px-5 py-2.5 text-sm uppercase tracking-wide">
                         Back to My Courses
-                    </Link>
+                    </LiquidButton>
                 </div>
             </div>
 

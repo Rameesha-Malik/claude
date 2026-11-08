@@ -1,6 +1,7 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import { useState } from 'react';
 import AnswerReviewRunner from '@/Components/AnswerReviewRunner';
+import LiquidButton from '@/Components/LiquidButton';
 import StudentLayout from '@/Layouts/StudentLayout';
 import { trimDecimal } from '@/lib/format';
 
@@ -21,29 +22,32 @@ export default function MockExamResult({ attempt, examTitle, sections }: Props) 
         <StudentLayout header={`Result: ${examTitle}`}>
             <Head title={`Result: ${examTitle}`} />
 
-            <div className={`mb-6 rounded-2xl border p-6 ${attempt.passed ? 'border-success bg-success-bg' : 'border-danger bg-danger-bg'}`}>
+            <div className={`mb-6 rounded-[1.5rem] border p-6 ${attempt.passed ? 'border-success bg-success-bg' : 'border-danger bg-danger-bg'}`}>
                 <p className={`text-sm font-bold uppercase tracking-wide ${attempt.passed ? 'text-success' : 'text-danger'}`}>
                     {attempt.passed ? 'Passed' : 'Needs Improvement'}
                 </p>
                 <p className="mt-1 font-display text-4xl text-text">{trimDecimal(attempt.percentage)}%</p>
                 <p className="mt-1 text-sm text-text-secondary">Overall Score: {trimDecimal(attempt.score)} / {trimDecimal(attempt.total_marks)}</p>
-                <Link href="/portal/my-courses" className="mt-4 inline-block rounded-lg border border-border px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-text hover:border-primary">
+                <LiquidButton href="/portal/my-courses" tone="light" className="mt-4 px-5 py-2.5 text-sm uppercase tracking-wide">
                     Back to My Courses
-                </Link>
+                </LiquidButton>
             </div>
 
             <div className="mb-6 grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                 {sections.map((s) => {
                     const pct = Number(s.total_marks) > 0 ? Math.round((Math.max(Number(s.score), 0) / Number(s.total_marks)) * 100) : 0;
                     return (
-                        <button
+                        <LiquidButton
                             key={s.id}
+                            type="button"
+                            tone={openSection === s.id ? 'dark' : 'light'}
+                            shape="tile"
                             onClick={() => setOpenSection(openSection === s.id ? null : s.id)}
-                            className={`rounded-xl border p-4 text-left transition-colors ${openSection === s.id ? 'border-primary bg-primary-subtle' : 'border-border bg-surface hover:border-primary'}`}
+                            className="p-4"
                         >
-                            <p className="font-semibold text-text">{s.name}</p>
-                            <p className="text-sm text-text-secondary">{s.score} / {s.total_marks} · {pct}%</p>
-                        </button>
+                            <p className="font-semibold">{s.name}</p>
+                            <p className="text-sm opacity-80">{s.score} / {s.total_marks} · {pct}%</p>
+                        </LiquidButton>
                     );
                 })}
             </div>
