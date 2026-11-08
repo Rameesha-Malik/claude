@@ -449,7 +449,7 @@ class DemoContentSeeder extends Seeder
         if ($lcc) {
             $enrollment = Enrollment::updateOrCreate(
                 ['user_id' => $student->id, 'course_id' => $lcc->id],
-                ['status' => 'active', 'activated_at' => now()->subDays(10), 'package_id' => $lcc->packages()->first()?->id],
+                ['status' => 'active', 'activated_at' => now()->subDays(10), 'package_id' => $lcc->packages()->first()?->id, 'modules' => Enrollment::ALL_MODULES],
             );
             $student->update(['target_exam_name' => $lcc->target_exam_name, 'target_exam_date' => now()->addDays(30)]);
 
@@ -468,7 +468,7 @@ class DemoContentSeeder extends Seeder
             // flow's "Awaiting activation" state without an admin action.
             Enrollment::updateOrCreate(
                 ['user_id' => $student->id, 'course_id' => $pma->id],
-                ['status' => 'pending', 'package_id' => $pma->packages()->first()?->id],
+                ['status' => 'pending', 'package_id' => $pma->packages()->first()?->id, 'modules' => Enrollment::ALL_MODULES],
             );
         }
 
