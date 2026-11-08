@@ -1,10 +1,18 @@
 import { Head, router } from '@inertiajs/react';
 import { FormEvent, useEffect, useState } from 'react';
+import AvatarInitial from '@/Components/AvatarInitial';
 import CloseButton from '@/Components/CloseButton';
+import ColumnsToggle from '@/Components/ColumnsToggle';
 import Pagination from '@/Components/Pagination';
 import StatusDot from '@/Components/StatusDot';
 import AdminLayout from '@/Layouts/AdminLayout';
 import AdminPageHeader from '@/Components/AdminPageHeader';
+
+const COLUMNS = [
+    { key: 'payment', label: 'Amount / Proof' },
+    { key: 'assigned', label: 'Assigned' },
+    { key: 'progress', label: 'Progress' },
+];
 
 type Module = 'lectures' | 'quiz' | 'tests' | 'assignments';
 const ALL_MODULES: Module[] = ['lectures', 'quiz', 'tests', 'assignments'];
@@ -147,6 +155,9 @@ export default function EnrollmentsIndex({ enrollments, courses, filters }: Prop
     const [status, setStatus] = useState(filters.status ?? '');
     const [selected, setSelected] = useState<number[]>([]);
     const [modalOpen, setModalOpen] = useState(false);
+    const [visible, setVisible] = useState<Record<string, boolean>>({});
+    const isVisible = (key: string) => visible[key] ?? true;
+    const toggleColumn = (key: string) => setVisible((v) => ({ ...v, [key]: !isVisible(key) }));
 
     function applyFilters(e?: FormEvent) {
         e?.preventDefault();
@@ -239,15 +250,18 @@ export default function EnrollmentsIndex({ enrollments, courses, filters }: Prop
                 </div>
             </form>
 
-            {selected.length > 0 && (
-                <div className="mb-4 flex items-center justify-between rounded-2xl border border-primary bg-primary-subtle px-5 py-3">
-                    <span className="text-sm font-semibold text-primary">{selected.length} selected</span>
-                    <div className="flex gap-2">
-                        <button onClick={() => bulkAction('cancel')} className="rounded-full bg-warning-bg px-3 py-1.5 text-xs font-bold uppercase text-warning hover:opacity-80">Suspend selected</button>
-                        <button onClick={() => bulkAction('delete')} className="rounded-full bg-danger-bg px-3 py-1.5 text-xs font-bold uppercase text-danger hover:opacity-80">Delete selected</button>
+            <div className="mb-4 flex items-center justify-between gap-3">
+                {selected.length > 0 ? (
+                    <div className="flex flex-1 items-center justify-between rounded-2xl border border-primary bg-primary-subtle px-5 py-3">
+                        <span className="text-sm font-semibold text-primary">{selected.length} selected</span>
+                        <div className="flex gap-2">
+                            <button onClick={() => bulkAction('cancel')} className="rounded-full bg-warning-bg px-3 py-1.5 text-xs font-bold uppercase text-warning hover:opacity-80">Suspend selected</button>
+                            <button onClick={() => bulkAction('delete')} className="rounded-full bg-danger-bg px-3 py-1.5 text-xs font-bold uppercase text-danger hover:opacity-80">Delete selected</button>
+                        </div>
                     </div>
-                </div>
-            )}
+                ) : <span />}
+                <ColumnsToggle columns={COLUMNS} visible={visible} onToggle={toggleColumn} />
+            </div>
 
             <div className="overflow-x-auto rounded-2xl border border-border bg-surface">
                 <table className="w-full min-w-[880px] text-left text-sm">
@@ -259,9 +273,9 @@ export default function EnrollmentsIndex({ enrollments, courses, filters }: Prop
                             <th className="px-5 py-3">Student</th>
                             <th className="px-5 py-3">Course</th>
                             <th className="px-5 py-3">Status</th>
-                            <th className="px-5 py-3">Amount / Proof</th>
-                            <th className="px-5 py-3">Assigned</th>
-                            <th className="px-5 py-3">Progress</th>
+                            {isVisible('payment') && <th className="px-5 py-3">Amount / Proof</th>}
+                            {isVisible('assigned') && <th className="px-5 py-3">Assigned</th>}
+                            {isVisible('progress') && <th className="px-5 py-3">Progress</th>}
                             <th className="px-5 py-3">Actions</th>
                         </tr>
                     </thead>
@@ -270,8 +284,13 @@ export default function EnrollmentsIndex({ enrollments, courses, filters }: Prop
                             <tr key={e.id}>
                                 <td className="px-5 py-3"><input type="checkbox" checked={selected.includes(e.id)} onChange={() => toggleSelect(e.id)} /></td>
                                 <td className="px-5 py-3">
-                                    <div className="font-medium text-text">{e.user?.name}</div>
-                                    <div className="text-xs text-text-muted">{e.user?.email}</div>
+                                    <div className="flex items-center gap-2.5">
+                                        {e.user && <AvatarInitial name={e.user.name} />}
+                                        <div className="min-w-0">
+                                            <div className="truncate font-medium text-text">{e.user?.name}</div>
+                                            <div className="truncate text-xs text-text-muted">{e.user?.email}</div>
+                                        </div>
+                                    </div>
                                 </td>
                                 <td className="px-5 py-3 text-text-secondary">
                                     {e.course?.title ?? 'N/A'}
@@ -284,20 +303,22 @@ export default function EnrollmentsIndex({ enrollments, courses, filters }: Prop
                                 <td className="px-5 py-3">
                                     <StatusDot label={e.status} tone={e.status === 'active' ? 'positive' : e.status === 'pending' ? 'warning' : 'negative'} />
                                 </td>
-                                <td className="px-5 py-3 text-text-secondary">
-                                    {e.payment ? (
-                                        <>
-                                            Rs. {Number(e.payment.amount).toLocaleString()}
-                                            {e.payment.proof_file_path && (
-                                                <a href={`/storage/${e.payment.proof_file_path}`} target="_blank" rel="noopener noreferrer" className="ml-2 text-xs font-bold text-primary hover:underline">
-                                                    View
-                                                </a>
-                                            )}
-                                        </>
-                                    ) : 'N/A'}
-                                </td>
-                                <td className="px-5 py-3 text-text-secondary">{e.assigned ? 'Yes' : 'No'}</td>
-                                <td className="px-5 py-3 text-text-secondary">{e.progress}%</td>
+                                {isVisible('payment') && (
+                                    <td className="px-5 py-3 text-text-secondary">
+                                        {e.payment ? (
+                                            <>
+                                                Rs. {Number(e.payment.amount).toLocaleString()}
+                                                {e.payment.proof_file_path && (
+                                                    <a href={`/storage/${e.payment.proof_file_path}`} target="_blank" rel="noopener noreferrer" className="ml-2 text-xs font-bold text-primary hover:underline">
+                                                        View
+                                                    </a>
+                                                )}
+                                            </>
+                                        ) : 'N/A'}
+                                    </td>
+                                )}
+                                {isVisible('assigned') && <td className="px-5 py-3 text-text-secondary">{e.assigned ? 'Yes' : 'No'}</td>}
+                                {isVisible('progress') && <td className="px-5 py-3 text-text-secondary">{e.progress}%</td>}
                                 <td className="px-5 py-3">
                                     <div className="flex gap-3">
                                         <button onClick={() => cancelOne(e)} title="Suspend" className="text-warning hover:opacity-70">

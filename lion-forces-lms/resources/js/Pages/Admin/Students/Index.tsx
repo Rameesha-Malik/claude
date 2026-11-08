@@ -2,8 +2,17 @@ import { Head, Link, router, useForm } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import AdminPageHeader from '@/Components/AdminPageHeader';
+import AvatarInitial from '@/Components/AvatarInitial';
+import ColumnsToggle from '@/Components/ColumnsToggle';
 import EmptyState from '@/Components/EmptyState';
 import Pagination from '@/Components/Pagination';
+
+const COLUMNS = [
+    { key: 'email', label: 'Email' },
+    { key: 'enrollments', label: 'Enrollments' },
+    { key: 'status', label: 'Status' },
+    { key: 'joined', label: 'Joined' },
+];
 
 const inputClass = 'rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:shadow-glow focus:outline-none';
 
@@ -68,6 +77,9 @@ interface Props {
 export default function StudentsIndex({ students, filters }: Props) {
     const [search, setSearch] = useState(filters.search ?? '');
     const [addOpen, setAddOpen] = useState(false);
+    const [visible, setVisible] = useState<Record<string, boolean>>({});
+    const isVisible = (key: string) => visible[key] ?? true;
+    const toggleColumn = (key: string) => setVisible((v) => ({ ...v, [key]: !isVisible(key) }));
 
     function submitSearch(e: FormEvent) {
         e.preventDefault();
@@ -120,7 +132,7 @@ export default function StudentsIndex({ students, filters }: Props) {
                     />
                     <button type="submit" className="rounded-lg bg-primary px-4 py-2 text-sm font-bold uppercase text-on-primary hover:bg-primary-hover">Search</button>
                 </form>
-                <div className="flex gap-2">
+                <div className="flex items-center gap-2">
                     {[
                         { key: null, label: 'All' },
                         { key: 'active', label: 'Active' },
@@ -136,77 +148,94 @@ export default function StudentsIndex({ students, filters }: Props) {
                             {opt.label}
                         </button>
                     ))}
+                    <ColumnsToggle columns={COLUMNS} visible={visible} onToggle={toggleColumn} />
                 </div>
             </div>
 
             {students.data.length === 0 ? (
                 <EmptyState>No students found.</EmptyState>
             ) : (
-                <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {students.data.map((s) => (
-                        <div key={s.id} className="rounded-3xl border border-border bg-surface p-5">
-                            <div className="flex items-start justify-between gap-3">
-                                <div className="flex min-w-0 items-center gap-3">
-                                    <span className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full bg-primary-subtle text-sm font-bold text-primary">
-                                        {s.name.charAt(0).toUpperCase()}
-                                    </span>
-                                    <div className="min-w-0">
-                                        <p className="truncate font-bold text-text">{s.name}</p>
-                                        <p className="truncate text-xs text-text-muted">{s.email}</p>
-                                    </div>
-                                </div>
-                                {/* Active is the default, expected state for almost every
-                                    student here -- a loud green pill on every single card
-                                    competed with the name for attention and added nothing
-                                    (of course they're active). A plain dot says the same
-                                    thing quietly; Suspended is the actual exception worth
-                                    a reader's eye, so it keeps the bold pill. */}
-                                {s.is_active ? (
-                                    <span className="flex flex-shrink-0 items-center gap-1.5 text-xs font-medium text-text-muted">
-                                        <span className="h-1.5 w-1.5 rounded-full bg-success" />
-                                        Active
-                                    </span>
-                                ) : (
-                                    <span className="flex-shrink-0 rounded-full bg-danger-bg px-2.5 py-0.5 text-xs font-bold uppercase text-danger">
-                                        Suspended
-                                    </span>
-                                )}
-                            </div>
-
-                            <div className="mt-4 flex items-center justify-between border-t border-border pt-3 text-sm">
-                                <span className="text-text-muted">Enrollments</span>
-                                <span className="font-bold text-text">{s.enrollments_count}</span>
-                            </div>
-
-                            {/* Delete is destructive and permanent (cascades enrollments +
-                                test history) -- kept visually apart from the two routine
-                                actions, icon-only and unobtrusive until hovered, rather than
-                                sitting flush against "Deactivate" as equally-weighted text
-                                where a misclick is one slip away. */}
-                            <div className="mt-3 flex items-center justify-between gap-2 border-t border-border pt-3 text-sm">
-                                <div className="flex items-center gap-4">
-                                    <Link href={`/admin/students/${s.id}`} className="font-semibold text-primary hover:underline">
-                                        Profile
-                                    </Link>
-                                    <button
-                                        onClick={() => router.post(`/admin/students/${s.id}/toggle-suspend`, {}, { preserveScroll: true })}
-                                        className="font-semibold text-warning hover:underline"
-                                    >
-                                        {s.is_active ? 'Deactivate' : 'Reactivate'}
-                                    </button>
-                                </div>
-                                <button
-                                    onClick={() => destroyStudent(s)}
-                                    title={`Delete ${s.name}`}
-                                    className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg text-text-muted hover:bg-danger-bg hover:text-danger"
-                                >
-                                    <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 7h12M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2m2 0v13a1 1 0 01-1 1H8a1 1 0 01-1-1V7h10z" />
-                                    </svg>
-                                </button>
-                            </div>
-                        </div>
-                    ))}
+                <div className="overflow-x-auto rounded-2xl border border-border bg-surface">
+                    <table className="w-full min-w-[640px] text-left text-sm">
+                        <thead className="border-b border-border bg-surface-sunken text-xs uppercase tracking-wide text-text-muted">
+                            <tr>
+                                <th className="px-5 py-3">Student</th>
+                                {isVisible('email') && <th className="px-5 py-3">Email</th>}
+                                {isVisible('enrollments') && <th className="px-5 py-3">Enrollments</th>}
+                                {isVisible('status') && <th className="px-5 py-3">Status</th>}
+                                {isVisible('joined') && <th className="px-5 py-3">Joined</th>}
+                                <th className="px-5 py-3 text-right">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody className="divide-y divide-border">
+                            {students.data.map((s) => (
+                                <tr key={s.id}>
+                                    <td className="px-5 py-3">
+                                        <div className="flex items-center gap-3">
+                                            <AvatarInitial name={s.name} />
+                                            <span className="min-w-0 truncate font-medium text-text">{s.name}</span>
+                                        </div>
+                                    </td>
+                                    {isVisible('email') && <td className="px-5 py-3 text-text-secondary">{s.email}</td>}
+                                    {isVisible('enrollments') && <td className="px-5 py-3 font-bold text-text">{s.enrollments_count}</td>}
+                                    {isVisible('status') && (
+                                        <td className="px-5 py-3">
+                                            {/* Active is the default, expected state for almost
+                                                every student here -- a loud green pill on every
+                                                single row competed with the name for attention and
+                                                added nothing (of course they're active). A plain
+                                                dot says the same thing quietly; Suspended is the
+                                                actual exception worth a reader's eye, so it keeps
+                                                the bold pill. */}
+                                            {s.is_active ? (
+                                                <span className="flex items-center gap-1.5 text-xs font-medium text-text-muted">
+                                                    <span className="h-1.5 w-1.5 rounded-full bg-success" />
+                                                    Active
+                                                </span>
+                                            ) : (
+                                                <span className="inline-block rounded-full bg-danger-bg px-2.5 py-0.5 text-xs font-bold uppercase text-danger">
+                                                    Suspended
+                                                </span>
+                                            )}
+                                        </td>
+                                    )}
+                                    {isVisible('joined') && (
+                                        <td className="whitespace-nowrap px-5 py-3 text-text-secondary">
+                                            {new Date(s.created_at).toLocaleDateString('en-US', { day: '2-digit', month: 'short', year: 'numeric' })}
+                                        </td>
+                                    )}
+                                    <td className="px-5 py-3">
+                                        <div className="flex items-center justify-end gap-4">
+                                            <Link href={`/admin/students/${s.id}`} className="text-sm font-semibold text-primary hover:underline">
+                                                Profile
+                                            </Link>
+                                            <button
+                                                onClick={() => router.post(`/admin/students/${s.id}/toggle-suspend`, {}, { preserveScroll: true })}
+                                                className="text-sm font-semibold text-warning hover:underline"
+                                            >
+                                                {s.is_active ? 'Deactivate' : 'Reactivate'}
+                                            </button>
+                                            {/* Delete is destructive and permanent (cascades
+                                                enrollments + test history) -- kept visually apart
+                                                from the two routine actions, icon-only and
+                                                unobtrusive until hovered, rather than sitting flush
+                                                against "Deactivate" as equally-weighted text where a
+                                                misclick is one slip away. */}
+                                            <button
+                                                onClick={() => destroyStudent(s)}
+                                                title={`Delete ${s.name}`}
+                                                className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-lg text-text-muted hover:bg-danger-bg hover:text-danger"
+                                            >
+                                                <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" d="M6 7h12M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2m2 0v13a1 1 0 01-1 1H8a1 1 0 01-1-1V7h10z" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
                 </div>
             )}
 

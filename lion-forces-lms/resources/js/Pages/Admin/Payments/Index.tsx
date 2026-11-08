@@ -1,9 +1,17 @@
 import { Head, router } from '@inertiajs/react';
 import { FormEvent, useState } from 'react';
+import AvatarInitial from '@/Components/AvatarInitial';
+import ColumnsToggle from '@/Components/ColumnsToggle';
 import Pagination from '@/Components/Pagination';
 import StatusDot from '@/Components/StatusDot';
 import AdminLayout from '@/Layouts/AdminLayout';
 import AdminPageHeader from '@/Components/AdminPageHeader';
+
+const COLUMNS = [
+    { key: 'course', label: 'Course' },
+    { key: 'method', label: 'Method' },
+    { key: 'proof', label: 'Proof' },
+];
 
 interface Payment {
     id: number; amount: string; method: string; status: string; reference_number: string | null; proof_file_path: string | null; created_at: string;
@@ -20,6 +28,9 @@ export default function PaymentsIndex({ payments, filters }: Props) {
     const [search, setSearch] = useState(filters.search ?? '');
     const [dateFrom, setDateFrom] = useState(filters.date_from ?? '');
     const [dateTo, setDateTo] = useState(filters.date_to ?? '');
+    const [visible, setVisible] = useState<Record<string, boolean>>({});
+    const isVisible = (key: string) => visible[key] ?? true;
+    const toggleColumn = (key: string) => setVisible((v) => ({ ...v, [key]: !isVisible(key) }));
 
     function applyFilters(e?: FormEvent) {
         e?.preventDefault();
@@ -89,7 +100,7 @@ export default function PaymentsIndex({ payments, filters }: Props) {
                         <button type="button" onClick={clearFilters} className="flex-1 rounded-lg border border-border px-4 py-2 text-sm font-bold text-text-secondary hover:bg-surface-sunken">Clear</button>
                     </div>
                 </div>
-                <div className="mt-4 flex flex-wrap gap-2 border-t border-border pt-4">
+                <div className="mt-4 flex flex-wrap items-center gap-2 border-t border-border pt-4">
                     {[null, 'pending', 'verified', 'rejected'].map((s) => (
                         <button
                             key={s ?? 'all'}
@@ -100,6 +111,7 @@ export default function PaymentsIndex({ payments, filters }: Props) {
                             {s ?? 'All'}
                         </button>
                     ))}
+                    <ColumnsToggle columns={COLUMNS} visible={visible} onToggle={toggleColumn} />
                 </div>
             </form>
 
@@ -109,10 +121,10 @@ export default function PaymentsIndex({ payments, filters }: Props) {
                         <tr>
                             <th className="px-5 py-3">Date &amp; Time</th>
                             <th className="px-5 py-3">Student</th>
-                            <th className="px-5 py-3">Course</th>
-                            <th className="px-5 py-3">Method</th>
+                            {isVisible('course') && <th className="px-5 py-3">Course</th>}
+                            {isVisible('method') && <th className="px-5 py-3">Method</th>}
                             <th className="px-5 py-3">Amount</th>
-                            <th className="px-5 py-3">Proof</th>
+                            {isVisible('proof') && <th className="px-5 py-3">Proof</th>}
                             <th className="px-5 py-3">Status</th>
                             {/* Client: Verify/Reject -- the one action this whole
                                 page exists for -- sat in the last column of an
@@ -133,20 +145,27 @@ export default function PaymentsIndex({ payments, filters }: Props) {
                                     {new Date(p.created_at).toLocaleString('en-US', { day: '2-digit', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' })}
                                 </td>
                                 <td className="px-5 py-3">
-                                    <div className="font-medium text-text">{p.enrollment?.user?.name}</div>
-                                    <div className="text-xs text-text-muted">{p.enrollment?.user?.email}</div>
+                                    <div className="flex items-center gap-2.5">
+                                        {p.enrollment?.user && <AvatarInitial name={p.enrollment.user.name} />}
+                                        <div className="min-w-0">
+                                            <div className="truncate font-medium text-text">{p.enrollment?.user?.name}</div>
+                                            <div className="truncate text-xs text-text-muted">{p.enrollment?.user?.email}</div>
+                                        </div>
+                                    </div>
                                 </td>
-                                <td className="px-5 py-3 text-text-secondary">{p.enrollment?.course?.title ?? 'N/A'}</td>
-                                <td className="px-5 py-3 capitalize text-text-secondary">{p.method.replace('_', ' ')}</td>
+                                {isVisible('course') && <td className="px-5 py-3 text-text-secondary">{p.enrollment?.course?.title ?? 'N/A'}</td>}
+                                {isVisible('method') && <td className="px-5 py-3 capitalize text-text-secondary">{p.method.replace('_', ' ')}</td>}
                                 <td className="px-5 py-3 font-semibold text-text">PKR {Number(p.amount).toLocaleString()}</td>
-                                <td className="px-5 py-3">
-                                    {p.proof_file_path ? (
-                                        <a href={`/storage/${p.proof_file_path}`} target="_blank" rel="noopener noreferrer" className="font-semibold text-primary hover:underline">View</a>
-                                    ) : (
-                                        <span className="text-text-muted">N/A</span>
-                                    )}
-                                    {p.reference_number && <div className="text-xs text-text-muted">Ref: {p.reference_number}</div>}
-                                </td>
+                                {isVisible('proof') && (
+                                    <td className="px-5 py-3">
+                                        {p.proof_file_path ? (
+                                            <a href={`/storage/${p.proof_file_path}`} target="_blank" rel="noopener noreferrer" className="font-semibold text-primary hover:underline">View</a>
+                                        ) : (
+                                            <span className="text-text-muted">N/A</span>
+                                        )}
+                                        {p.reference_number && <div className="text-xs text-text-muted">Ref: {p.reference_number}</div>}
+                                    </td>
+                                )}
                                 <td className="px-5 py-3">
                                     <StatusDot label={p.status} tone={p.status === 'verified' ? 'positive' : p.status === 'pending' ? 'warning' : 'negative'} />
                                     {/* Who decided this and when -- was recorded on
