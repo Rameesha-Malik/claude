@@ -202,22 +202,16 @@ function BranchSlideContent({ slide, reversed = false, active = true }: { slide:
                 <div
                     // Width-driven (aspect-[4/5] computes height from width) on mobile,
                     // where there's no fixed-height panel and normal page scroll handles
-                    // any overflow. At lg, height-driven instead (h-full, w-auto) -- on a
-                    // short laptop screen, deriving height FROM a width up to max-w-lg
-                    // could make the photo taller than the pinned panel actually is,
-                    // clipping its bottom edge (and bottom rounded corner) against the
-                    // panel's overflow-hidden. max-w-lg still caps width on tall screens.
-                    className="relative aspect-[4/5] w-full max-w-lg overflow-hidden rounded-[2rem] border border-white/10 shadow-2xl transition-transform duration-slower ease-out lg:h-full lg:w-auto"
-                    style={{
-                        // Hugs the OUTER edge of its column (away from the gutter)
-                        // instead of centering -- centering left equal dead space on
-                        // both sides, including outside the photo where nothing
-                        // else fills it. The inner (gutter-facing) side keeps
-                        // whatever space is left over for the crest nav below.
-                        marginLeft: reversed ? 'auto' : 0,
-                        marginRight: reversed ? 0 : 'auto',
-                        transform: active ? 'scale(1)' : 'scale(1.04)',
-                    }}
+                    // any overflow, capped at max-w-lg so it's not oversized on a wide
+                    // tablet. At lg, height-driven instead: lg:aspect-auto and
+                    // lg:max-w-none cancel both of those. lg:w-full (not w-auto) is
+                    // required here -- a block box with overflow-hidden (its own BFC),
+                    // a definite height, and width:auto shrinks-to-fit instead of
+                    // filling its containing block, so w-auto left this box narrow
+                    // with dead space beside it; only an explicit 100% width actually
+                    // fills the column. object-cover on the <img> still crops cleanly.
+                    className="relative aspect-[4/5] w-full max-w-lg overflow-hidden rounded-[2rem] border border-white/10 shadow-2xl transition-transform duration-slower ease-out lg:aspect-auto lg:h-full lg:w-full lg:max-w-none"
+                    style={{ transform: active ? 'scale(1)' : 'scale(1.04)' }}
                 >
                     <img src={image} alt={assets.imageAlt} className="h-full w-full object-cover" />
                     <div

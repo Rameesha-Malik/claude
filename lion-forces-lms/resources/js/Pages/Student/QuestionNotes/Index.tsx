@@ -32,21 +32,37 @@ function NoteCard({ item }: { item: NoteItem }) {
     if (deleted) return null;
 
     return (
-        <div className="rounded-3xl border border-border bg-surface p-5">
+        <div className="rounded-[2rem] border border-border bg-surface p-5">
             <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
                 <div>
                     {item.question.subject && (
-                        <span className="mb-1 inline-block rounded-full bg-primary-subtle px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide text-primary">
+                        <span className="mb-1 inline-block rounded-full bg-primary px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide text-on-primary">
                             {item.question.subject.name}
                         </span>
                     )}
                     <p className="font-semibold text-text"><LiteMarkdownInline text={item.question.question_text} /></p>
                 </div>
-                <div className="flex flex-shrink-0 gap-3">
-                    <button onClick={() => setEditing((v) => !v)} className="text-xs font-bold uppercase text-primary hover:underline">
-                        {editing ? 'Cancel' : 'Edit'}
+                <div className="flex flex-shrink-0 gap-1.5">
+                    {!editing && (
+                        <button
+                            onClick={() => setEditing(true)}
+                            title="Edit note"
+                            className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-[0.5rem] text-text-muted hover:bg-primary-subtle hover:text-primary"
+                        >
+                            <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.5-9.5a2.121 2.121 0 013 3L12 16l-4 1 1-4 9.5-9.5z" />
+                            </svg>
+                        </button>
+                    )}
+                    <button
+                        onClick={remove}
+                        title="Delete note"
+                        className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-[0.5rem] text-text-muted hover:bg-danger-bg hover:text-danger"
+                    >
+                        <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 7h12M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2m2 0v13a1 1 0 01-1 1H8a1 1 0 01-1-1V7h10z" />
+                        </svg>
                     </button>
-                    <button onClick={remove} className="text-xs font-bold uppercase text-danger hover:underline">Delete</button>
                 </div>
             </div>
 
@@ -54,16 +70,21 @@ function NoteCard({ item }: { item: NoteItem }) {
                 <div className="space-y-2">
                     <textarea
                         rows={3}
-                        className="w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:shadow-glow focus:outline-none"
+                        className="w-full rounded-[0.75rem] border border-border px-3 py-2 text-sm focus:border-primary focus:shadow-glow focus:outline-none"
                         value={text}
                         onChange={(e) => setText(e.target.value)}
                     />
-                    <button onClick={save} className="rounded-lg bg-primary px-4 py-2 text-xs font-bold uppercase tracking-wide text-on-primary hover:bg-primary-hover">
-                        Save Note
-                    </button>
+                    <div className="flex gap-2">
+                        <button onClick={save} className="rounded-[0.75rem] bg-primary px-4 py-2 text-xs font-bold uppercase tracking-wide text-on-primary hover:bg-primary-hover">
+                            Save Note
+                        </button>
+                        <button onClick={() => { setText(saved); setEditing(false); }} className="rounded-[0.75rem] border border-border px-4 py-2 text-xs font-bold uppercase tracking-wide text-text-secondary hover:bg-surface-sunken">
+                            Cancel
+                        </button>
+                    </div>
                 </div>
             ) : (
-                <p className="whitespace-pre-line rounded-2xl bg-primary-subtle p-3 text-sm text-text">{saved}</p>
+                <p className="whitespace-pre-line rounded-[1.5rem] bg-primary-subtle p-3 text-sm text-text">{saved}</p>
             )}
         </div>
     );
@@ -80,7 +101,7 @@ export default function QuestionNotesIndex({ notes }: Props) {
             </p>
 
             {notes.length === 0 ? (
-                <div className="rounded-3xl border border-dashed border-border bg-surface p-10 text-center text-text-secondary">
+                <div className="rounded-[2rem] border border-dashed border-border bg-surface p-10 text-center text-text-secondary">
                     No notes yet. While taking a quiz or test, tap the pencil icon on any question to jot one down.
                 </div>
             ) : (
