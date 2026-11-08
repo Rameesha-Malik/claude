@@ -1,6 +1,7 @@
 import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
 import AccordionRow from '@/Components/AccordionRow';
+import LiquidButton from '@/Components/LiquidButton';
 import { LiteMarkdownInline } from '@/Components/LiteMarkdown';
 import RevealOnScroll from '@/Components/RevealOnScroll';
 import StudentLayout from '@/Layouts/StudentLayout';
@@ -44,9 +45,9 @@ function NoteCard({ item }: { item: NoteItem }) {
             title={<LiteMarkdownInline text={item.question.question_text} />}
             pill={
                 item.question.subject && (
-                    <span className="flex-shrink-0 rounded-full bg-primary px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide text-on-primary">
+                    <LiquidButton className="px-2.5 py-0.5 text-xs uppercase tracking-wide">
                         {item.question.subject.name}
-                    </span>
+                    </LiquidButton>
                 )
             }
             subtitle={`Noted on ${new Date(item.created_at).toLocaleDateString()}`}

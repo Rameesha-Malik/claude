@@ -1,6 +1,7 @@
 import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
 import CustomQuizTabs from '@/Components/CustomQuizTabs';
+import LiquidButton from '@/Components/LiquidButton';
 import { LiteMarkdownInline } from '@/Components/LiteMarkdown';
 import RevealOnScroll from '@/Components/RevealOnScroll';
 import StudentLayout from '@/Layouts/StudentLayout';
@@ -26,7 +27,10 @@ function FavouriteCard({ item }: { item: Favourite }) {
     return (
         <div
             className="group relative overflow-hidden rounded-[2rem] p-6 text-white"
-            style={{ background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))' }}
+            style={{
+                background: 'linear-gradient(160deg, var(--teal-700) 0%, var(--teal-950) 55%, var(--teal-900) 100%)',
+                boxShadow: 'inset 0 1px 0 rgba(255,255,255,.2), inset 0 -1px 4px rgba(0,0,0,.4), 0 10px 24px rgba(3,41,39,.35)',
+            }}
         >
             {/* Shine sweep on hover -- a skewed light band that travels across
                 the card once, clipped by the card's own overflow-hidden/rounded
@@ -82,20 +86,14 @@ function FavouriteCard({ item }: { item: Favourite }) {
                             <LiteMarkdownInline text={item.question.explanation} />
                         </div>
                     )}
-                    <button
-                        onClick={() => setRevealed(false)}
-                        className="rounded-full bg-white/15 px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-white transition-colors hover:bg-white/25"
-                    >
+                    <LiquidButton tone="light" onClick={() => setRevealed(false)} className="px-5 py-2.5 text-sm uppercase tracking-wide">
                         Hide Answer
-                    </button>
+                    </LiquidButton>
                 </div>
             ) : (
-                <button
-                    onClick={() => setRevealed(true)}
-                    className="rounded-full bg-white/15 px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-white transition-colors hover:bg-white/25"
-                >
+                <LiquidButton tone="light" onClick={() => setRevealed(true)} className="px-5 py-2.5 text-sm uppercase tracking-wide">
                     Reveal Answer
-                </button>
+                </LiquidButton>
             )}
             </div>
         </div>
