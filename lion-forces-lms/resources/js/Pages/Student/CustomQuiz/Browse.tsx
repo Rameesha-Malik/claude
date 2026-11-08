@@ -32,9 +32,9 @@ function QuestionCard({ q }: { q: Question }) {
             title={<LiteMarkdownInline text={q.question_text} />}
             pill={
                 q.subject && (
-                    <span className="flex-shrink-0 rounded-full bg-primary px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide text-on-primary">
+                    <LiquidButton className="px-2.5 py-0.5 text-xs uppercase tracking-wide">
                         {q.subject.name}
-                    </span>
+                    </LiquidButton>
                 )
             }
             subtitle={`${q.difficulty.charAt(0).toUpperCase()}${q.difficulty.slice(1)} difficulty`}
@@ -61,20 +61,14 @@ function QuestionCard({ q }: { q: Question }) {
                             <LiteMarkdownInline text={q.explanation} />
                         </div>
                     )}
-                    <button
-                        onClick={() => setRevealed(false)}
-                        className="mt-3 rounded-full border border-border px-4 py-2 text-sm font-bold uppercase tracking-wide text-text transition-colors hover:border-primary hover:text-primary"
-                    >
+                    <LiquidButton onClick={() => setRevealed(false)} className="mt-3 px-4 py-2 text-sm uppercase tracking-wide">
                         Hide Answer
-                    </button>
+                    </LiquidButton>
                 </>
             ) : (
-                <button
-                    onClick={() => setRevealed(true)}
-                    className="rounded-full border border-border px-4 py-2 text-sm font-bold uppercase tracking-wide text-text transition-colors hover:border-primary hover:text-primary"
-                >
+                <LiquidButton onClick={() => setRevealed(true)} className="px-4 py-2 text-sm uppercase tracking-wide">
                     Reveal Answer
-                </button>
+                </LiquidButton>
             )}
         </AccordionRow>
     );
@@ -122,24 +116,22 @@ export default function CustomQuizBrowse({ questions, hasAccess }: Props) {
                 <div>
                     {subjects.length > 1 && (
                         <div className="mb-6 flex flex-wrap gap-2">
-                            <button
+                            <LiquidButton
                                 onClick={() => setSubjectId(null)}
-                                className={`rounded-full px-4 py-2 text-sm font-bold uppercase tracking-wide transition-colors ${
-                                    subjectId === null ? 'bg-primary text-on-primary' : 'bg-surface-sunken text-text-secondary hover:bg-primary-subtle'
-                                }`}
+                                tone={subjectId === null ? 'dark' : 'light'}
+                                className="px-4 py-2 text-sm uppercase tracking-wide"
                             >
                                 All <span className="opacity-70">({questions.length})</span>
-                            </button>
+                            </LiquidButton>
                             {subjects.map((s) => (
-                                <button
+                                <LiquidButton
                                     key={s.id}
                                     onClick={() => setSubjectId(s.id)}
-                                    className={`rounded-full px-4 py-2 text-sm font-bold uppercase tracking-wide transition-colors ${
-                                        subjectId === s.id ? 'bg-primary text-on-primary' : 'bg-surface-sunken text-text-secondary hover:bg-primary-subtle'
-                                    }`}
+                                    tone={subjectId === s.id ? 'dark' : 'light'}
+                                    className="px-4 py-2 text-sm uppercase tracking-wide"
                                 >
                                     {s.name} <span className="opacity-70">({questions.filter((q) => q.subject?.id === s.id).length})</span>
-                                </button>
+                                </LiquidButton>
                             ))}
                         </div>
                     )}
