@@ -1,5 +1,6 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import CustomQuizTabs from '@/Components/CustomQuizTabs';
+import LiquidButton from '@/Components/LiquidButton';
 import StudentLayout from '@/Layouts/StudentLayout';
 
 interface Stats {
@@ -71,9 +72,9 @@ export default function CustomQuizProgress({ hasAccess, stats }: Props) {
                 <div className="rounded-3xl border border-dashed border-border bg-surface p-10 text-center text-text-secondary">
                     <p className="font-bold text-text">Progress is part of Quiz access</p>
                     <p className="mt-1 text-sm">Buy a course with Quiz access to track your accuracy and coverage across its question bank.</p>
-                    <Link href="/courses" className="mt-4 inline-block rounded-full bg-primary px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-on-primary hover:bg-primary-hover">
+                    <LiquidButton href="/courses" className="mt-4 px-5 py-2.5 text-sm uppercase tracking-wide">
                         Browse Courses
-                    </Link>
+                    </LiquidButton>
                 </div>
             ) : !stats || stats.usedCount === 0 ? (
                 <div className="rounded-3xl border border-dashed border-border bg-surface p-10 text-center text-text-secondary">

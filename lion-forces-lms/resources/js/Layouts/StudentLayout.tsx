@@ -1,6 +1,7 @@
 import { Link, usePage, router } from '@inertiajs/react';
 import { PropsWithChildren, ReactNode, useState } from 'react';
 import Icon from '@/Components/Icon';
+import LiquidButton from '@/Components/LiquidButton';
 import SiteLogo from '@/Components/SiteLogo';
 import { PageProps } from '@/types';
 
@@ -78,19 +79,12 @@ export default function StudentLayout({ children, header }: PropsWithChildren<{ 
                 "Upgrade to Pro" pitch -- this app has no such tier, so the real
                 equivalent is pointing at the actual thing a student can do
                 next: browse and enroll in more courses. */}
-            <div className="mx-3 mb-3 rounded-2xl bg-white/10 p-4">
+            <div className="mx-3 mb-3 rounded-[1.5rem] bg-white/10 p-4">
                 <p className="text-sm font-bold text-white">Explore More Courses</p>
                 <p className="mt-1 text-xs text-teal-200">New courses are added regularly. See what's available.</p>
-                {/* Explicit gold/dark-text, not bg-accent -- this card is on the
-                    dark sidebar, and accent now means oxblood with light text,
-                    which would go nearly invisible here (same fix applied to
-                    every other dark-surface accent button this session). */}
-                <Link
-                    href="/courses"
-                    className="mt-3 inline-flex items-center justify-center rounded-full bg-gold-400 px-4 py-2 text-xs font-bold uppercase tracking-wide text-secondary transition-colors hover:bg-gold-300"
-                >
+                <LiquidButton href="/courses" className="mt-3 w-full px-4 py-2 text-xs uppercase tracking-wide">
                     Browse Courses
-                </Link>
+                </LiquidButton>
             </div>
 
             <div className="border-t border-white/10 p-4">

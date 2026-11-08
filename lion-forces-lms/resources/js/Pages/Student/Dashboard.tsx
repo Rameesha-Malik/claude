@@ -3,6 +3,7 @@ import { ReactNode, useEffect, useState } from 'react';
 import AnimatedCounter from '@/Components/AnimatedCounter';
 import BarChart from '@/Components/BarChart';
 import Icon from '@/Components/Icon';
+import LiquidButton from '@/Components/LiquidButton';
 import RevealOnScroll from '@/Components/RevealOnScroll';
 import RingStat from '@/Components/RingStat';
 import StudentLayout from '@/Layouts/StudentLayout';
@@ -201,13 +202,10 @@ export default function Dashboard({ enrollments, performance, activityTrend, rev
                         <span className="text-text-muted">&middot;</span>
                         {now.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
                     </div>
-                    <Link
-                        href="/courses"
-                        className="inline-flex items-center gap-1.5 rounded-full bg-primary px-4.5 py-2.5 text-sm font-bold text-on-primary transition-colors duration-fast hover:bg-primary-hover"
-                    >
+                    <LiquidButton href="/courses" className="px-4.5 py-2.5 text-sm">
                         Browse Courses
                         <Icon d={ICONS.arrow} className="h-3.5 w-3.5" />
-                    </Link>
+                    </LiquidButton>
                 </div>
             </div>
 

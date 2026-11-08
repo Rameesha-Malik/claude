@@ -1,7 +1,8 @@
-import { Head, Link } from '@inertiajs/react';
+import { Head } from '@inertiajs/react';
 import { useState } from 'react';
 import AccordionRow from '@/Components/AccordionRow';
 import CustomQuizTabs from '@/Components/CustomQuizTabs';
+import LiquidButton from '@/Components/LiquidButton';
 import { LiteMarkdownInline } from '@/Components/LiteMarkdown';
 import RevealOnScroll from '@/Components/RevealOnScroll';
 import StudentLayout from '@/Layouts/StudentLayout';
@@ -107,9 +108,9 @@ export default function CustomQuizBrowse({ questions, hasAccess }: Props) {
                         Buy a course with Quiz access to browse its full question bank with answers. These {questions.length} questions are a
                         free taste of how Browse works.
                     </p>
-                    <Link href="/courses" className="mt-4 inline-block rounded-full bg-primary px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-on-primary hover:bg-primary-hover">
+                    <LiquidButton href="/courses" className="mt-4 px-5 py-2.5 text-sm uppercase tracking-wide">
                         Browse Courses
-                    </Link>
+                    </LiquidButton>
                 </div>
             )}
 
