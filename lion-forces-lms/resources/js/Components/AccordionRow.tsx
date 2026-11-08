@@ -21,7 +21,7 @@ export default function AccordionRow({ icon, iconBg = 'var(--color-primary)', ti
         <div className="rounded-[2rem] border border-border bg-surface p-5">
             <button type="button" onClick={() => setOpen((v) => !v)} className="flex w-full items-center gap-4 text-left">
                 <span
-                    className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-[1rem] text-white"
+                    className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full text-white"
                     style={{ backgroundColor: iconBg }}
                 >
                     {icon}
