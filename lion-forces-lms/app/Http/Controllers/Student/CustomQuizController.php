@@ -46,7 +46,7 @@ use Inertia\Response;
  */
 class CustomQuizController extends Controller
 {
-    private const FREE_TRIAL_MAX_QUESTIONS = 5;
+    private const FREE_TRIAL_MAX_QUESTIONS = 10;
 
     public function create(Request $request): Response
     {
@@ -130,9 +130,15 @@ class CustomQuizController extends Controller
     // (only questions the student starred). This is read-only exploration
     // of the real question bank: pick a subject, see every question in
     // it with its answer. Gated the same way the per-course Question Bank
-    // tab already is -- a real purchased quiz module, no free-trial
-    // carve-out here, since unlimited answer browsing would undercut the
-    // paywall far more than a 5-question quiz cap does.
+    // tab already is -- a real purchased quiz module.
+    //
+    // Client: a student with no access used to hit a bare wall here, with
+    // no sense of what Browse even does. Same free-trial spirit as
+    // create()'s capped quiz -- a FREE_TRIAL_MAX_QUESTIONS sample, pulled
+    // from the whole platform bank (not scoped to any course, since
+    // there's no purchased course to scope to), still real questions with
+    // real answers so they can see exactly how the feature works, just
+    // capped instead of unlimited.
     public function browse(Request $request): Response
     {
         abort_unless(FeatureFlags::enabled('custom_quiz'), 404);
@@ -141,10 +147,16 @@ class CustomQuizController extends Controller
             ->where('quizzes_enabled', true)
             ->pluck('id');
 
-        $questions = QuestionBank::with(['subject:id,name', 'options'])
-            ->whereIn('course_id', $courseIds)
-            ->orderBy('subject_id')
-            ->get()
+        $hasAccess = $courseIds->isNotEmpty();
+
+        $query = QuestionBank::with(['subject:id,name', 'options']);
+        if ($hasAccess) {
+            $query->whereIn('course_id', $courseIds)->orderBy('subject_id');
+        } else {
+            $query->inRandomOrder()->limit(self::FREE_TRIAL_MAX_QUESTIONS);
+        }
+
+        $questions = $query->get()
             ->map(fn ($q) => [
                 'id' => $q->id,
                 'question_text' => $q->question_text,
@@ -160,7 +172,7 @@ class CustomQuizController extends Controller
 
         return Inertia::render('Student/CustomQuiz/Browse', [
             'questions' => $questions,
-            'hasAccess' => $courseIds->isNotEmpty(),
+            'hasAccess' => $hasAccess,
         ]);
     }
 
@@ -170,9 +182,9 @@ class CustomQuizController extends Controller
     // Mock Exam, Staged Test, Custom Quiz -- see matchingQuestionsQuery()
     // above), so a question answered via a regular Quiz still counts
     // here, not just ones answered inside a Custom Quiz. Gated the same
-    // way browse() is (a real purchased quiz module, no free-trial
-    // carve-out), since detailed analytics over the full bank would
-    // undercut the paywall far more than a 5-question quiz cap does.
+    // way create()'s quiz cap is (a real purchased quiz module), with no
+    // sample carve-out of its own -- detailed analytics over the full
+    // bank is a bigger giveaway than a capped question sample.
     //
     // Computed entirely in PHP Collection logic rather than SQL window
     // functions -- SQLite has none of the ones MySQL offers, and this

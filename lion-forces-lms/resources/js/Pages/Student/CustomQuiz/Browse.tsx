@@ -16,19 +16,19 @@ function QuestionCard({ q }: { q: Question }) {
     const [revealed, setRevealed] = useState(false);
 
     return (
-        <div className="rounded-3xl border border-border bg-surface p-5">
+        <div className="rounded-[2rem] border border-border bg-surface p-5">
             <div className="mb-3 flex flex-wrap gap-2">
                 {q.subject && <span className="rounded-full bg-primary-subtle px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide text-primary">{q.subject.name}</span>}
                 <span className="rounded-full bg-surface-sunken px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide text-text-muted">{q.difficulty}</span>
             </div>
-            {q.image_path && <img src={`/storage/${q.image_path}`} alt="" className="mb-3 max-h-48 rounded-lg border border-border" />}
+            {q.image_path && <img src={`/storage/${q.image_path}`} alt="" className="mb-3 max-h-48 rounded-[0.75rem] border border-border" />}
             <p className="font-semibold text-text"><LiteMarkdownInline text={q.question_text} /></p>
 
             {revealed ? (
                 <>
                     <div className="mt-3 space-y-2">
                         {q.options.map((opt) => (
-                            <div key={opt.id} className={`rounded-2xl border p-3 text-sm ${opt.is_correct ? 'border-success bg-success-bg text-text' : 'border-border text-text-secondary'}`}>
+                            <div key={opt.id} className={`rounded-[1.5rem] border p-3 text-sm ${opt.is_correct ? 'border-success bg-success-bg text-text' : 'border-border text-text-secondary'}`}>
                                 {opt.image_path ? (
                                     <img src={`/storage/${opt.image_path}`} alt="" className="max-h-32 rounded" />
                                 ) : (
@@ -39,7 +39,7 @@ function QuestionCard({ q }: { q: Question }) {
                         ))}
                     </div>
                     {q.explanation && (
-                        <div className="mt-3 rounded-2xl bg-primary-subtle p-3 text-sm text-text">
+                        <div className="mt-3 rounded-[1.5rem] bg-primary-subtle p-3 text-sm text-text">
                             <span className="font-bold text-primary">Explanation: </span>
                             <LiteMarkdownInline text={q.explanation} />
                         </div>
@@ -78,16 +78,21 @@ export default function CustomQuizBrowse({ questions, hasAccess }: Props) {
 
             <CustomQuizTabs active="browse" />
 
-            {!hasAccess ? (
-                <div className="rounded-3xl border border-dashed border-border bg-surface p-10 text-center text-text-secondary">
-                    <p className="font-bold text-text">Browse is part of Quiz access</p>
-                    <p className="mt-1 text-sm">Buy a course with Quiz access to browse its full question bank with answers.</p>
+            {!hasAccess && (
+                <div className="mb-6 rounded-[2rem] border border-dashed border-border bg-surface p-6 text-center text-text-secondary">
+                    <p className="font-bold text-text">You're viewing a free sample</p>
+                    <p className="mt-1 text-sm">
+                        Buy a course with Quiz access to browse its full question bank with answers. These {questions.length} questions are a
+                        free taste of how Browse works.
+                    </p>
                     <Link href="/courses" className="mt-4 inline-block rounded-full bg-primary px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-on-primary hover:bg-primary-hover">
                         Browse Courses
                     </Link>
                 </div>
-            ) : questions.length === 0 ? (
-                <div className="rounded-3xl border border-dashed border-border bg-surface p-10 text-center text-text-secondary">
+            )}
+
+            {questions.length === 0 ? (
+                <div className="rounded-[2rem] border border-dashed border-border bg-surface p-10 text-center text-text-secondary">
                     No questions in your bank yet.
                 </div>
             ) : (
