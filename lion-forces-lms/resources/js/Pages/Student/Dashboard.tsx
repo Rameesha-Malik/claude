@@ -204,10 +204,12 @@ export default function Dashboard({ enrollments, performance, activityTrend, rev
                     <p className="text-sm font-semibold text-text-secondary">{greeting()}</p>
                     <h1 className="text-[28px] font-extrabold tracking-tight text-text">{firstName}</h1>
                 </div>
-                <div className="flex items-center gap-4">
-                    <div className="text-right">
-                        <p className="text-sm font-semibold text-text">{now.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}</p>
-                        <p className="text-xs text-text-muted">{now.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}</p>
+                <div className="flex items-center gap-3">
+                    <div className="hidden items-center gap-2 rounded-full border border-border bg-surface-sunken px-4 py-2.5 text-sm font-semibold text-text-secondary sm:flex">
+                        <Icon d="M8 2v4m8-4v4M3 10h18M5 6h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V8a2 2 0 012-2z" className="h-4 w-4 text-text-muted" />
+                        {now.toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' })}
+                        <span className="text-text-muted">&middot;</span>
+                        {now.toLocaleTimeString(undefined, { hour: 'numeric', minute: '2-digit' })}
                     </div>
                     <Link
                         href="/courses"

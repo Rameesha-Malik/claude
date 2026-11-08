@@ -29,9 +29,9 @@ export default function StudentLayout({ children, header }: PropsWithChildren<{ 
 
     const sidebar = (
         <div className="flex h-full flex-col bg-secondary text-white">
-            <Link href="/" className="flex h-18 items-center gap-2.5 px-6 text-lg font-bold">
+            <Link href="/" className="flex h-18 items-center gap-2.5 px-6 font-bold">
                 <SiteLogo site={site} shape="rounded" />
-                <span className="truncate">{site.name}</span>
+                <span className="truncate text-sm leading-tight">{site.name}</span>
             </Link>
             <nav className="flex-1 space-y-1.5 px-3 py-4">
                 {visibleNav.map((item) => {
@@ -111,6 +111,13 @@ export default function StudentLayout({ children, header }: PropsWithChildren<{ 
                     </button>
                     {header && <h1 className="font-display text-2xl uppercase tracking-wide text-text">{header}</h1>}
                     <div className="ml-auto flex items-center gap-3">
+                        <Link
+                            href="/"
+                            className="hidden items-center gap-1.5 rounded-full border border-border px-4 py-2 text-sm font-semibold text-text-secondary transition-colors duration-fast hover:border-primary hover:text-primary md:flex"
+                        >
+                            <Icon d="M10.5 19.5L3 12m0 0l7.5-7.5M3 12h18" className="h-4 w-4" />
+                            View Site
+                        </Link>
                         <Link
                             href="/portal/notifications"
                             className="relative rounded-full p-2 text-text-secondary transition-all duration-fast hover:scale-110 hover:bg-primary-subtle hover:text-primary"
