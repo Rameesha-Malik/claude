@@ -1,5 +1,6 @@
 import { Head, Link } from '@inertiajs/react';
 import { useState } from 'react';
+import AccordionRow from '@/Components/AccordionRow';
 import CustomQuizTabs from '@/Components/CustomQuizTabs';
 import { LiteMarkdownInline } from '@/Components/LiteMarkdown';
 import RevealOnScroll from '@/Components/RevealOnScroll';
@@ -12,21 +13,36 @@ interface Question {
 }
 interface Props { questions: Question[]; hasAccess: boolean }
 
+// An open-book icon -- this is literally a question-bank browser, not a
+// decorative glyph.
+const BOOK_PATH = 'M4 19.5V6a2 2 0 012-2h4a2 2 0 012 2v13.5M4 19.5a2 2 0 002 2h4a2 2 0 002-2M4 19.5V17m8 2.5V6a2 2 0 012-2h4a2 2 0 012 2v13.5m-8 0a2 2 0 002 2h4a2 2 0 002-2m-8 0V17';
+
 function QuestionCard({ q }: { q: Question }) {
     const [revealed, setRevealed] = useState(false);
 
     return (
-        <div className="rounded-[2rem] border border-border bg-surface p-5">
-            <div className="mb-3 flex flex-wrap gap-2">
-                {q.subject && <span className="rounded-full bg-primary-subtle px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide text-primary">{q.subject.name}</span>}
-                <span className="rounded-full bg-surface-sunken px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide text-text-muted">{q.difficulty}</span>
-            </div>
+        <AccordionRow
+            icon={
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d={BOOK_PATH} />
+                </svg>
+            }
+            iconBg="var(--color-secondary)"
+            title={<LiteMarkdownInline text={q.question_text} />}
+            pill={
+                q.subject && (
+                    <span className="flex-shrink-0 rounded-full bg-primary px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide text-on-primary">
+                        {q.subject.name}
+                    </span>
+                )
+            }
+            subtitle={`${q.difficulty.charAt(0).toUpperCase()}${q.difficulty.slice(1)} difficulty`}
+        >
             {q.image_path && <img src={`/storage/${q.image_path}`} alt="" className="mb-3 max-h-48 rounded-[0.75rem] border border-border" />}
-            <p className="font-semibold text-text"><LiteMarkdownInline text={q.question_text} /></p>
 
             {revealed ? (
                 <>
-                    <div className="mt-3 space-y-2">
+                    <div className="space-y-2">
                         {q.options.map((opt) => (
                             <div key={opt.id} className={`rounded-[1.5rem] border p-3 text-sm ${opt.is_correct ? 'border-success bg-success-bg text-text' : 'border-border text-text-secondary'}`}>
                                 {opt.image_path ? (
@@ -44,16 +60,22 @@ function QuestionCard({ q }: { q: Question }) {
                             <LiteMarkdownInline text={q.explanation} />
                         </div>
                     )}
+                    <button
+                        onClick={() => setRevealed(false)}
+                        className="mt-3 rounded-full border border-border px-4 py-2 text-sm font-bold uppercase tracking-wide text-text transition-colors hover:border-primary hover:text-primary"
+                    >
+                        Hide Answer
+                    </button>
                 </>
             ) : (
                 <button
                     onClick={() => setRevealed(true)}
-                    className="mt-3 rounded-full border border-border px-4 py-2 text-sm font-bold uppercase tracking-wide text-text transition-colors hover:border-primary hover:text-primary"
+                    className="rounded-full border border-border px-4 py-2 text-sm font-bold uppercase tracking-wide text-text transition-colors hover:border-primary hover:text-primary"
                 >
                     Reveal Answer
                 </button>
             )}
-        </div>
+        </AccordionRow>
     );
 }
 
