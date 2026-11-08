@@ -1,6 +1,7 @@
 import { usePage } from '@inertiajs/react';
 import axios from 'axios';
 import { ReactNode, useEffect, useState } from 'react';
+import LiquidButton, { Tone } from '@/Components/LiquidButton';
 import { LiteMarkdownInline } from '@/Components/LiteMarkdown';
 import { PageProps } from '@/types';
 
@@ -359,7 +360,7 @@ export default function QuestionRunner({
 
     if (total === 0) {
         return (
-            <p className="rounded-2xl border border-dashed border-border bg-surface p-10 text-center text-text-secondary">
+            <p className="rounded-[1.5rem] border border-dashed border-border bg-surface p-10 text-center text-text-secondary">
                 {emptyMessage}
             </p>
         );
@@ -373,17 +374,17 @@ export default function QuestionRunner({
         </span>
     );
 
-    const statTiles = [
+    const statTiles: { label: string; value: string | number; icon: ReactNode; tone: Tone }[] = [
         ...(instantFeedback
             ? [
-                  { label: 'Correct', value: correctCount, icon: <CheckCircleIcon />, tone: 'border-success bg-success-bg text-success' },
-                  { label: 'Wrong', value: wrongCount, icon: <XCircleIcon />, tone: 'border-danger bg-danger-bg text-danger' },
+                  { label: 'Correct', value: correctCount, icon: <CheckCircleIcon />, tone: 'success' as Tone },
+                  { label: 'Wrong', value: wrongCount, icon: <XCircleIcon />, tone: 'danger' as Tone },
               ]
             : []),
-        { label: 'Answered', value: answeredCount, icon: <BadgeIcon />, tone: 'border-primary bg-primary-subtle text-primary' },
-        { label: 'Skipped', value: skippedIndexes.length, icon: <FlagIcon />, tone: 'border-warning bg-warning-bg text-warning' },
-        { label: 'Not Visited', value: notVisitedCount, icon: <CircleIcon />, tone: 'border-border bg-surface-sunken text-text-muted' },
-        { label: 'Progress', value: `${progressPercent}%`, icon: <BadgeIcon />, tone: 'border-primary bg-primary-subtle text-primary' },
+        { label: 'Answered', value: answeredCount, icon: <BadgeIcon />, tone: 'dark' },
+        { label: 'Skipped', value: skippedIndexes.length, icon: <FlagIcon />, tone: 'warning' },
+        { label: 'Not Visited', value: notVisitedCount, icon: <CircleIcon />, tone: 'light' },
+        { label: 'Progress', value: `${progressPercent}%`, icon: <BadgeIcon />, tone: 'dark' },
     ];
 
     const currentFeedback = feedback[current.id];
@@ -402,7 +403,7 @@ export default function QuestionRunner({
     // scroll), just laid out side-by-side instead of stacked.
     const compactSidebar = compact && (
         <div className="order-first space-y-3 lg:order-last lg:w-64 lg:flex-shrink-0 lg:sticky lg:top-4 lg:self-start">
-            <div className="rounded-2xl border border-border bg-surface p-4 shadow-sm">
+            <div className="rounded-[1.5rem] border border-border bg-surface p-4 shadow-sm">
                 {headerExtra && <div className="mb-2 text-sm text-text-secondary">{headerExtra}</div>}
                 <div className="flex items-center gap-2">
                     {timerNode}
@@ -418,33 +419,31 @@ export default function QuestionRunner({
                     />
                 </div>
             </div>
-            <div className="rounded-2xl border border-border bg-surface p-3 shadow-sm">
-                <div className="grid grid-cols-2 gap-2">
-                    {instantFeedback && (
-                        <>
-                            <div className="rounded-xl border border-success bg-success-bg p-3 text-center text-success">
-                                <CheckCircleIcon className="mx-auto h-4 w-4" />
-                                <p className="mt-1 text-lg font-bold leading-none">{correctCount}</p>
-                                <p className="text-[0.65rem] font-bold uppercase tracking-wide">Correct</p>
-                            </div>
-                            <div className="rounded-xl border border-danger bg-danger-bg p-3 text-center text-danger">
-                                <XCircleIcon className="mx-auto h-4 w-4" />
-                                <p className="mt-1 text-lg font-bold leading-none">{wrongCount}</p>
-                                <p className="text-[0.65rem] font-bold uppercase tracking-wide">Wrong</p>
-                            </div>
-                        </>
-                    )}
-                    <div className="rounded-xl border border-primary bg-primary-subtle p-3 text-center text-primary">
-                        <BadgeIcon className="mx-auto h-4 w-4" />
-                        <p className="mt-1 text-lg font-bold leading-none">{answeredCount}</p>
-                        <p className="text-[0.65rem] font-bold uppercase tracking-wide">Answered</p>
-                    </div>
-                    <div className="rounded-xl border border-warning bg-warning-bg p-3 text-center text-warning">
-                        <FlagIcon className="mx-auto h-4 w-4" />
-                        <p className="mt-1 text-lg font-bold leading-none">{skippedIndexes.length}</p>
-                        <p className="text-[0.65rem] font-bold uppercase tracking-wide">Skipped</p>
-                    </div>
-                </div>
+            <div className="grid grid-cols-2 gap-2">
+                {instantFeedback && (
+                    <>
+                        <LiquidButton tone="success" shape="tile" className="p-3 text-center">
+                            <CheckCircleIcon className="mx-auto h-4 w-4" />
+                            <p className="mt-1 text-lg font-bold leading-none">{correctCount}</p>
+                            <p className="text-[0.65rem] font-bold uppercase tracking-wide opacity-80">Correct</p>
+                        </LiquidButton>
+                        <LiquidButton tone="danger" shape="tile" className="p-3 text-center">
+                            <XCircleIcon className="mx-auto h-4 w-4" />
+                            <p className="mt-1 text-lg font-bold leading-none">{wrongCount}</p>
+                            <p className="text-[0.65rem] font-bold uppercase tracking-wide opacity-80">Wrong</p>
+                        </LiquidButton>
+                    </>
+                )}
+                <LiquidButton tone="dark" shape="tile" className="p-3 text-center">
+                    <BadgeIcon className="mx-auto h-4 w-4" />
+                    <p className="mt-1 text-lg font-bold leading-none">{answeredCount}</p>
+                    <p className="text-[0.65rem] font-bold uppercase tracking-wide opacity-80">Answered</p>
+                </LiquidButton>
+                <LiquidButton tone="warning" shape="tile" className="p-3 text-center">
+                    <FlagIcon className="mx-auto h-4 w-4" />
+                    <p className="mt-1 text-lg font-bold leading-none">{skippedIndexes.length}</p>
+                    <p className="text-[0.65rem] font-bold uppercase tracking-wide opacity-80">Skipped</p>
+                </LiquidButton>
             </div>
 
             {/* The same question-jump grid the full layout has above the
@@ -453,7 +452,7 @@ export default function QuestionRunner({
                 to host it, there's no reason a multi-question demo/custom
                 quiz shouldn't get the same quick navigation. */}
             {total > 1 && (
-                <div className="rounded-2xl border border-border bg-surface p-3 shadow-sm">
+                <div className="rounded-[1.5rem] border border-border bg-surface p-3 shadow-sm">
                     <p className="mb-2 text-xs font-bold uppercase tracking-wide text-text-muted">Question Navigator</p>
                     <div className="grid grid-cols-6 gap-1.5 lg:grid-cols-5">
                         {questions.map((q, i) => {
@@ -471,7 +470,7 @@ export default function QuestionRunner({
                                     onClick={() => goTo(i)}
                                     aria-current={isCurrent}
                                     aria-label={`Go to question ${i + 1}`}
-                                    className={`flex h-8 items-center justify-center rounded-lg border text-xs font-bold transition-colors ${classes}`}
+                                    className={`flex h-8 items-center justify-center rounded-[0.5rem] border text-xs font-bold transition-colors ${classes}`}
                                 >
                                     {i + 1}
                                 </button>
@@ -486,7 +485,7 @@ export default function QuestionRunner({
     return (
         <div>
             {!compact && (
-                <div className="mb-6 rounded-2xl border border-border bg-surface p-4 shadow-sm">
+                <div className="mb-6 rounded-[1.5rem] border border-border bg-surface p-4 shadow-sm">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                         <div className="text-sm text-text-secondary">{headerExtra}</div>
                         <div className="flex flex-1 items-center gap-3">
@@ -503,7 +502,7 @@ export default function QuestionRunner({
                 {compactSidebar}
                 <div className={compact ? 'min-w-0 flex-1 space-y-3' : 'space-y-6 lg:col-span-2'}>
                     {!compact && (
-                        <div className="rounded-2xl border border-border bg-surface p-5">
+                        <div className="rounded-[1.5rem] border border-border bg-surface p-5">
                             <div className="flex flex-wrap items-center gap-2">
                                 <span className="rounded-full bg-primary-subtle px-3 py-1 text-xs font-bold text-primary">
                                     Q {currentIndex + 1}/{total}
@@ -540,7 +539,7 @@ export default function QuestionRunner({
                                             onClick={() => goTo(i)}
                                             aria-current={isCurrent}
                                             aria-label={`Go to question ${i + 1}`}
-                                            className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg border text-xs font-bold transition-colors ${classes}`}
+                                            className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-[0.5rem] border text-xs font-bold transition-colors ${classes}`}
                                         >
                                             {i + 1}
                                         </button>
@@ -575,7 +574,7 @@ export default function QuestionRunner({
                         </div>
                     )}
 
-                    <div className={`rounded-2xl border border-border bg-surface ${compact ? 'p-4' : 'p-5'}`}>
+                    <div className={`rounded-[1.5rem] border border-border bg-surface ${compact ? 'p-4' : 'p-5'}`}>
                         <div className="mb-3 flex items-start justify-between gap-3">
                             <p className="font-semibold text-text">
                                 <span className="mr-2 text-text-muted">Q{currentIndex + 1}.</span>
@@ -620,16 +619,11 @@ export default function QuestionRunner({
                                     value={noteDrafts[current.id] ?? ''}
                                     onChange={(e) => setNoteDrafts((prev) => ({ ...prev, [current.id]: e.target.value }))}
                                     placeholder="Write a personal note on this question (only you and admins can see it)…"
-                                    className="flex-1 rounded-lg border border-border px-3 py-2 text-sm"
+                                    className="flex-1 rounded-[0.75rem] border border-border bg-input-bg px-3 py-2 text-sm focus:border-primary focus:shadow-glow focus:outline-none"
                                 />
-                                <button
-                                    type="button"
-                                    onClick={() => saveNote(current.id)}
-                                    disabled={noteSaving}
-                                    className="self-start rounded-lg bg-primary px-4 py-2 text-xs font-bold uppercase text-on-primary disabled:opacity-50"
-                                >
+                                <LiquidButton type="button" onClick={() => saveNote(current.id)} disabled={noteSaving} className="self-start px-4 py-2 text-xs uppercase tracking-wide">
                                     Save
-                                </button>
+                                </LiquidButton>
                             </div>
                         )}
                         {reportOpenFor === current.id && (
@@ -639,20 +633,15 @@ export default function QuestionRunner({
                                     value={reportReason}
                                     onChange={(e) => setReportReason(e.target.value)}
                                     placeholder="What's wrong with this question?"
-                                    className="flex-1 rounded-lg border border-border px-3 py-2 text-sm"
+                                    className="flex-1 rounded-[0.75rem] border border-border bg-input-bg px-3 py-2 text-sm focus:border-primary focus:shadow-glow focus:outline-none"
                                 />
-                                <button
-                                    type="button"
-                                    onClick={() => submitReport(current.id)}
-                                    disabled={!reportReason.trim()}
-                                    className="rounded-lg bg-danger px-4 py-2 text-xs font-bold uppercase text-white disabled:opacity-50"
-                                >
+                                <LiquidButton type="button" tone="danger" onClick={() => submitReport(current.id)} disabled={!reportReason.trim()} className="px-4 py-2 text-xs uppercase tracking-wide">
                                     Submit
-                                </button>
+                                </LiquidButton>
                             </div>
                         )}
                         {current.image_path && (
-                            <img src={`/storage/${current.image_path}`} alt="" className="mb-3 max-h-64 rounded-lg border border-border" />
+                            <img src={`/storage/${current.image_path}`} alt="" className="mb-3 max-h-64 rounded-[0.75rem] border border-border" />
                         )}
                         <div className={compact ? 'space-y-1.5' : 'space-y-2'}>
                             {current.options.map((opt) => {
@@ -667,7 +656,7 @@ export default function QuestionRunner({
                                 return (
                                     <label
                                         key={opt.id}
-                                        className={`flex cursor-pointer items-center gap-3 rounded-lg border text-sm transition-colors ${compact ? 'p-2.5' : 'p-3'} ${classes}`}
+                                        className={`flex cursor-pointer items-center gap-3 rounded-[1.5rem] border text-sm transition-colors ${compact ? 'p-2.5' : 'p-3'} ${classes}`}
                                     >
                                         <input
                                             type="radio"
@@ -676,7 +665,7 @@ export default function QuestionRunner({
                                             onChange={() => handleSelect(current.id, opt.id)}
                                         />
                                         {opt.image_path ? (
-                                            <img src={`/storage/${opt.image_path}`} alt="" className="max-h-32 rounded-lg border border-border" />
+                                            <img src={`/storage/${opt.image_path}`} alt="" className="max-h-32 rounded-[0.75rem] border border-border" />
                                         ) : (
                                             <span className="text-text">{opt.option_text}</span>
                                         )}
@@ -693,7 +682,7 @@ export default function QuestionRunner({
                         )}
                         {currentFeedbackReady && hasAnswered && (
                             <div
-                                className={`mt-4 rounded-lg border p-3 text-sm ${
+                                className={`mt-4 rounded-[1.5rem] border p-3 text-sm ${
                                     isCurrentCorrect ? 'border-success bg-success-bg text-success' : 'border-danger bg-danger-bg text-danger'
                                 }`}
                             >
@@ -708,45 +697,47 @@ export default function QuestionRunner({
                     <div className="flex flex-wrap items-center justify-between gap-3">
                         <div className="flex gap-2">
                             {allowBack && (
-                                <button
+                                <LiquidButton
                                     type="button"
+                                    tone="light"
                                     onClick={() => goTo(currentIndex - 1)}
                                     disabled={currentIndex === 0}
-                                    className={`inline-flex items-center gap-1.5 rounded-lg border border-border px-5 text-sm font-bold uppercase tracking-wide text-text transition-colors hover:border-primary hover:text-primary disabled:opacity-40 disabled:hover:border-border disabled:hover:text-text ${compact ? 'py-2' : 'py-3'}`}
+                                    className={`gap-1.5 px-5 text-sm uppercase tracking-wide ${compact ? 'py-2' : 'py-3'}`}
                                 >
                                     <BackIcon /> Previous
-                                </button>
+                                </LiquidButton>
                             )}
                             {!isLast && (
-                                <button
+                                <LiquidButton
                                     type="button"
+                                    tone="light"
                                     onClick={() => goTo(currentIndex + 1)}
-                                    className={`inline-flex items-center gap-1.5 rounded-lg border border-border px-5 text-sm font-bold uppercase tracking-wide text-text-secondary transition-colors hover:border-warning hover:text-warning ${compact ? 'py-2' : 'py-3'}`}
+                                    className={`gap-1.5 px-5 text-sm uppercase tracking-wide ${compact ? 'py-2' : 'py-3'}`}
                                 >
                                     <SkipIcon /> Skip MCQ
-                                </button>
+                                </LiquidButton>
                             )}
                         </div>
 
                         <div className="flex gap-2">
                             {!isLast && (
-                                <button
+                                <LiquidButton
                                     type="button"
                                     onClick={() => goTo(currentIndex + 1)}
-                                    className={`inline-flex items-center gap-1.5 rounded-lg bg-primary px-8 text-sm font-bold uppercase tracking-wide text-on-primary hover:bg-primary-hover ${compact ? 'py-2' : 'py-3'}`}
+                                    className={`gap-1.5 px-8 text-sm uppercase tracking-wide ${compact ? 'py-2' : 'py-3'}`}
                                 >
                                     Submit &amp; Next <ForwardIcon />
-                                </button>
+                                </LiquidButton>
                             )}
                             {isLast && (
-                                <button
+                                <LiquidButton
                                     type="button"
                                     onClick={onSubmit}
                                     disabled={submitting}
-                                    className={`rounded-lg bg-primary px-8 text-sm font-bold uppercase tracking-wide text-on-primary hover:bg-primary-hover disabled:opacity-50 ${compact ? 'py-2' : 'py-3'}`}
+                                    className={`px-8 text-sm uppercase tracking-wide ${compact ? 'py-2' : 'py-3'}`}
                                 >
                                     {submitting ? 'Submitting…' : submitLabel}
-                                </button>
+                                </LiquidButton>
                             )}
                         </div>
                     </div>
@@ -770,11 +761,11 @@ export default function QuestionRunner({
                 {!compact && (
                     <div className="grid grid-cols-2 gap-3 lg:grid-cols-1">
                         {statTiles.map((t) => (
-                            <div key={t.label} className={`rounded-2xl border p-4 ${t.tone}`}>
+                            <LiquidButton key={t.label} tone={t.tone} shape="tile" className="p-4">
                                 {t.icon}
                                 <p className="mt-2 text-xl font-bold">{t.value}</p>
                                 <p className="text-xs font-bold uppercase tracking-wide opacity-80">{t.label}</p>
-                            </div>
+                            </LiquidButton>
                         ))}
                     </div>
                 )}

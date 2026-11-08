@@ -64,7 +64,7 @@ export default function Pagination({ links, className = '' }: Props) {
                             type="button"
                             disabled={!link.url}
                             onClick={() => go(link.url)}
-                            className="inline-flex items-center gap-1 rounded-lg px-3 py-2 text-sm font-semibold text-text-secondary transition-colors hover:text-primary disabled:opacity-40 disabled:hover:text-text-secondary"
+                            className="inline-flex items-center gap-1 rounded-[0.75rem] px-3 py-2 text-sm font-semibold text-text-secondary transition-colors hover:text-primary disabled:opacity-40 disabled:hover:text-text-secondary"
                         >
                             {isPrev && <ChevronLeftIcon />}
                             {isPrev ? 'Previous' : 'Next'}
@@ -80,7 +80,7 @@ export default function Pagination({ links, className = '' }: Props) {
                         disabled={!link.url}
                         onClick={() => go(link.url)}
                         aria-current={link.active ? 'page' : undefined}
-                        className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-lg border text-sm font-semibold transition-colors ${
+                        className={`flex h-9 w-9 flex-shrink-0 items-center justify-center rounded-[0.5rem] border text-sm font-semibold transition-colors ${
                             link.active
                                 ? 'border-primary bg-primary-subtle text-primary'
                                 : 'border-border text-text-secondary hover:border-primary hover:text-primary'

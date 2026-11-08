@@ -12,7 +12,7 @@ interface Props {
     subjects: SubjectOption[]; topics: TopicOption[]; hasAccess: boolean; freeTrialMax: number; course?: CourseInfo | null;
 }
 
-const inputClass = 'w-full rounded-lg border border-border px-3 py-2.5 text-sm focus:border-primary focus:shadow-glow focus:outline-none';
+const inputClass = 'w-full rounded-[0.75rem] border border-border bg-input-bg px-3 py-2.5 text-sm focus:border-primary focus:shadow-glow focus:outline-none';
 
 export default function CreateCustomQuiz({ subjects, topics, hasAccess, freeTrialMax, course = null }: Props) {
     const form = useForm({
@@ -92,7 +92,7 @@ export default function CreateCustomQuiz({ subjects, topics, hasAccess, freeTria
 
             <CustomQuizTabs active="create" />
 
-            <div className="mx-auto max-w-3xl rounded-3xl border border-border bg-surface p-6 sm:p-8">
+            <div className="mx-auto max-w-3xl rounded-[2rem] border border-border bg-surface p-6 sm:p-8">
                 <h1 className="font-display text-2xl text-text">Build Your Own Quiz</h1>
                 <p className="mt-1 text-sm text-text-secondary">
                     {course ? `For "${course.title}": ` : ''}Pick a subject (and optionally a topic within it), difficulty, and how many questions. We'll
@@ -105,7 +105,7 @@ export default function CreateCustomQuiz({ subjects, topics, hasAccess, freeTria
                     they try it and get curious, rather than being told to
                     buy something sight-unseen. */}
                 {!hasAccess && (
-                    <div className="mt-4 rounded-xl border border-dashed border-primary bg-primary-subtle px-4 py-3 text-sm text-text">
+                    <div className="mt-4 rounded-[1rem] border border-dashed border-primary bg-primary-subtle px-4 py-3 text-sm text-text">
                         <span className="font-bold uppercase tracking-wide text-primary">Free Preview</span>: up to {freeTrialMax} questions per
                         quiz. {course ? `Buy "${course.title}"` : 'Buy a course with quiz access'} to build full custom quizzes (up to 50 questions)
                         and save your results.{' '}
@@ -139,9 +139,9 @@ export default function CreateCustomQuiz({ subjects, topics, hasAccess, freeTria
                             <label className="block text-sm font-medium text-text">Subjects</label>
                             <span className="text-xs text-text-muted">{form.data.subject_ids.length === 0 ? 'Any subject' : `${form.data.subject_ids.length} selected`}</span>
                         </div>
-                        <div className="max-h-48 space-y-1 overflow-y-auto rounded-lg border border-border p-2">
+                        <div className="max-h-48 space-y-1 overflow-y-auto rounded-[0.75rem] border border-border p-2">
                             {subjects.map((s) => (
-                                <label key={s.id} className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-surface-sunken">
+                                <label key={s.id} className="flex cursor-pointer items-center gap-2 rounded-[0.5rem] px-2 py-1.5 text-sm hover:bg-surface-sunken">
                                     <input type="checkbox" checked={form.data.subject_ids.includes(s.id)} onChange={() => toggleSubject(s.id)} />
                                     <span className="flex-1 text-text">{s.name}</span>
                                     <span className="text-xs text-text-muted">{s.questions_count}</span>
@@ -157,9 +157,9 @@ export default function CreateCustomQuiz({ subjects, topics, hasAccess, freeTria
                                 <label className="block text-sm font-medium text-text">Topics</label>
                                 <span className="text-xs text-text-muted">{form.data.topic_ids.length === 0 ? 'Any topic' : `${form.data.topic_ids.length} selected`}</span>
                             </div>
-                            <div className="max-h-48 space-y-1 overflow-y-auto rounded-lg border border-border p-2">
+                            <div className="max-h-48 space-y-1 overflow-y-auto rounded-[0.75rem] border border-border p-2">
                                 {availableTopics.map((t) => (
-                                    <label key={t.id} className="flex cursor-pointer items-center gap-2 rounded-md px-2 py-1.5 text-sm hover:bg-surface-sunken">
+                                    <label key={t.id} className="flex cursor-pointer items-center gap-2 rounded-[0.5rem] px-2 py-1.5 text-sm hover:bg-surface-sunken">
                                         <input type="checkbox" checked={form.data.topic_ids.includes(t.id)} onChange={() => toggleTopic(t.id)} />
                                         <span className="text-text">{t.name}</span>
                                     </label>
@@ -193,15 +193,15 @@ export default function CreateCustomQuiz({ subjects, topics, hasAccess, freeTria
                         {countLoading ? 'Checking…' : matchingCount !== null ? `${matchingCount} question${matchingCount === 1 ? '' : 's'} match these filters.` : ''}
                     </p>
 
-                    <div>
+                    <div className="lg:col-span-2">
                         <label className="mb-1 block text-sm font-medium text-text">Mode</label>
-                        <select className={inputClass} value={form.data.mode} onChange={(e) => form.setData('mode', e.target.value as typeof form.data.mode)}>
+                        <select className={`${inputClass} lg:max-w-xs`} value={form.data.mode} onChange={(e) => form.setData('mode', e.target.value as typeof form.data.mode)}>
                             <option value="tutor">Tutor: see the answer after each question</option>
                             <option value="timed">Timed: no feedback until you submit (exam simulation)</option>
                         </select>
                     </div>
 
-                    <div>
+                    <div className="lg:col-span-2">
                         <label className="flex items-center gap-2 text-sm text-text">
                             <input type="checkbox" checked={form.data.timer_enabled} onChange={(e) => form.setData('timer_enabled', e.target.checked)} />
                             Enable timer

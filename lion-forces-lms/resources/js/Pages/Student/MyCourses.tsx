@@ -90,7 +90,7 @@ export default function MyCourses({ enrollments }: { enrollments: Enrollment[] }
             <Head title="My Courses" />
 
             {enrollments.length === 0 ? (
-                <div className="rounded-3xl border border-dashed border-border bg-surface p-10 text-center text-text-secondary">
+                <div className="rounded-[2rem] border border-dashed border-border bg-surface p-10 text-center text-text-secondary">
                     You're not enrolled in any courses yet.{' '}
                     <Link href="/courses" className="font-semibold text-primary hover:underline">Browse courses &rarr;</Link>
                 </div>

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import LiquidButton from '@/Components/LiquidButton';
 import { LiteMarkdownInline } from '@/Components/LiteMarkdown';
 
 interface ReviewOption { id: number; option_text: string; image_path?: string | null; is_correct: boolean }
@@ -76,7 +77,7 @@ export default function AnswerReviewRunner({ answers, resetKey, hideStats = fals
 
     if (total === 0) {
         return (
-            <p className="rounded-2xl border border-dashed border-border bg-surface p-10 text-center text-text-secondary">
+            <p className="rounded-[1.5rem] border border-dashed border-border bg-surface p-10 text-center text-text-secondary">
                 No questions to review.
             </p>
         );
@@ -93,7 +94,7 @@ export default function AnswerReviewRunner({ answers, resetKey, hideStats = fals
     return (
         <div className={hideStats ? 'mx-auto max-w-3xl' : 'grid gap-6 lg:grid-cols-3'}>
             <div className={hideStats ? 'space-y-6' : 'space-y-6 lg:col-span-2'}>
-                <div className="rounded-2xl border border-border bg-surface p-5">
+                <div className="rounded-[1.5rem] border border-border bg-surface p-5">
                     <div className="flex flex-wrap items-center justify-between gap-2">
                         <span className="rounded-full bg-primary-subtle px-3 py-1 text-xs font-bold text-primary">
                             Q {clampedIndex + 1}/{total}
@@ -116,7 +117,7 @@ export default function AnswerReviewRunner({ answers, resetKey, hideStats = fals
                                     onClick={() => goTo(i)}
                                     aria-current={isCurrent}
                                     aria-label={`Go to question ${i + 1}`}
-                                    className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg border text-xs font-bold transition-colors ${classes}`}
+                                    className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-[0.5rem] border text-xs font-bold transition-colors ${classes}`}
                                 >
                                     {i + 1}
                                 </button>
@@ -134,13 +135,13 @@ export default function AnswerReviewRunner({ answers, resetKey, hideStats = fals
                     </div>
                 </div>
 
-                <div className="rounded-2xl border border-border bg-surface p-5">
+                <div className="rounded-[1.5rem] border border-border bg-surface p-5">
                     <p className="font-semibold text-text">
                         <span className="mr-2 text-text-muted">Q{clampedIndex + 1}.</span>
                         <LiteMarkdownInline text={current.question.question_text} />
                     </p>
                     {current.question.image_path && (
-                        <img src={`/storage/${current.question.image_path}`} alt="" className="mb-3 mt-3 max-h-64 rounded-lg border border-border" />
+                        <img src={`/storage/${current.question.image_path}`} alt="" className="mb-3 mt-3 max-h-64 rounded-[0.75rem] border border-border" />
                     )}
 
                     <div className="mt-3 space-y-2">
@@ -150,10 +151,10 @@ export default function AnswerReviewRunner({ answers, resetKey, hideStats = fals
                             if (opt.is_correct) classes = 'border-success bg-success-bg';
                             else if (isSelected) classes = 'border-danger bg-danger-bg';
                             return (
-                                <div key={opt.id} className={`flex items-center justify-between gap-3 rounded-lg border p-3 text-sm ${classes}`}>
+                                <div key={opt.id} className={`flex items-center justify-between gap-3 rounded-[1.5rem] border p-3 text-sm ${classes}`}>
                                     <div className="flex items-center gap-3">
                                         {opt.image_path ? (
-                                            <img src={`/storage/${opt.image_path}`} alt="" className="max-h-32 rounded-lg border border-border" />
+                                            <img src={`/storage/${opt.image_path}`} alt="" className="max-h-32 rounded-[0.75rem] border border-border" />
                                         ) : (
                                             <span className="text-text">{opt.option_text}</span>
                                         )}
@@ -172,7 +173,7 @@ export default function AnswerReviewRunner({ answers, resetKey, hideStats = fals
                     </div>
 
                     {current.question.explanation && (
-                        <div className="mt-4 rounded-lg border p-3 text-sm border-primary bg-primary-subtle text-text">
+                        <div className="mt-4 rounded-[1.5rem] border p-3 text-sm border-primary bg-primary-subtle text-text">
                             <span className="font-bold text-primary">Explanation: </span>
                             <LiteMarkdownInline text={current.question.explanation} />
                         </div>
@@ -183,40 +184,37 @@ export default function AnswerReviewRunner({ answers, resetKey, hideStats = fals
                 </div>
 
                 <div className="flex items-center justify-between gap-3">
-                    <button
+                    <LiquidButton
                         type="button"
+                        tone="light"
                         onClick={() => goTo(clampedIndex - 1)}
                         disabled={clampedIndex === 0}
-                        className="inline-flex items-center gap-1.5 rounded-lg border border-border px-5 py-3 text-sm font-bold uppercase tracking-wide text-text transition-colors hover:border-primary hover:text-primary disabled:opacity-40 disabled:hover:border-border disabled:hover:text-text"
+                        className="gap-1.5 px-5 py-3 text-sm uppercase tracking-wide"
                     >
                         <BackIcon /> Previous
-                    </button>
+                    </LiquidButton>
                     {!isLast && (
-                        <button
-                            type="button"
-                            onClick={() => goTo(clampedIndex + 1)}
-                            className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-8 py-3 text-sm font-bold uppercase tracking-wide text-on-primary hover:bg-primary-hover"
-                        >
+                        <LiquidButton type="button" onClick={() => goTo(clampedIndex + 1)} className="gap-1.5 px-8 py-3 text-sm uppercase tracking-wide">
                             Next <ForwardIcon />
-                        </button>
+                        </LiquidButton>
                     )}
                 </div>
             </div>
 
             {!hideStats && (
                 <div className="grid grid-cols-3 gap-3 lg:grid-cols-1">
-                    <div className="rounded-2xl border border-success bg-success-bg p-4 text-success">
+                    <LiquidButton tone="success" shape="tile" className="p-4">
                         <p className="text-xl font-bold">{correctCount}</p>
                         <p className="text-xs font-bold uppercase tracking-wide opacity-80">Correct</p>
-                    </div>
-                    <div className="rounded-2xl border border-danger bg-danger-bg p-4 text-danger">
+                    </LiquidButton>
+                    <LiquidButton tone="danger" shape="tile" className="p-4">
                         <p className="text-xl font-bold">{wrongCount}</p>
                         <p className="text-xs font-bold uppercase tracking-wide opacity-80">Wrong</p>
-                    </div>
-                    <div className="rounded-2xl border border-border bg-surface-sunken p-4 text-text-muted">
+                    </LiquidButton>
+                    <LiquidButton tone="light" shape="tile" className="p-4">
                         <p className="text-xl font-bold">{skippedCount}</p>
                         <p className="text-xs font-bold uppercase tracking-wide opacity-80">Skipped</p>
-                    </div>
+                    </LiquidButton>
                 </div>
             )}
         </div>

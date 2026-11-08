@@ -5,6 +5,13 @@ export type Tone = 'dark' | 'light' | 'danger' | 'warning' | 'success';
 
 interface Props {
     href?: string;
+    /** Forwarded straight to the underlying <a> -- Inertia's Link only
+     *  intercepts same-tab clicks (see shouldIntercept in @inertiajs/core),
+     *  so target="_blank" here still opens a real new-tab navigation
+     *  instead of an SPA visit. Needed for file downloads/external links
+     *  styled with this button. */
+    target?: string;
+    rel?: string;
     onClick?: () => void;
     type?: 'button' | 'submit';
     tone?: Tone;
@@ -71,7 +78,7 @@ const TONES: Record<Tone, { gradient: string; rim: string; text: string; glow: s
 // Retake, Continue/Complete. Renders as a real <Link> when href is given,
 // a <button> when onClick/type is, or a plain non-interactive <span> for
 // pill-style badges/labels that aren't clickable (e.g. a subject tag).
-export default function LiquidButton({ href, onClick, type, tone = 'dark', shape = 'pill', disabled, title, className, children }: Props) {
+export default function LiquidButton({ href, target, rel, onClick, type, tone = 'dark', shape = 'pill', disabled, title, className, children }: Props) {
     const t = TONES[tone];
     const roundedClass = shape === 'tile' ? 'rounded-[1.5rem]' : 'rounded-full';
     const baseClassName = `group relative overflow-hidden font-bold transition-transform duration-normal ease-spring ${roundedClass} ${
@@ -100,7 +107,7 @@ export default function LiquidButton({ href, onClick, type, tone = 'dark', shape
 
     if (href) {
         return (
-            <Link href={href} title={title} className={baseClassName} style={style}>
+            <Link href={href} target={target} rel={rel} title={title} className={baseClassName} style={style}>
                 {rim}
                 {content}
             </Link>

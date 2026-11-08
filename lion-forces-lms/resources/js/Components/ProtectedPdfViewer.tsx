@@ -1,6 +1,7 @@
 import * as pdfjsLib from 'pdfjs-dist';
 import type { PDFDocumentProxy, RenderTask } from 'pdfjs-dist';
 import { useEffect, useRef, useState } from 'react';
+import LiquidButton from '@/Components/LiquidButton';
 
 pdfjsLib.GlobalWorkerOptions.workerSrc = new URL('pdfjs-dist/build/pdf.worker.min.mjs', import.meta.url).toString();
 
@@ -88,7 +89,7 @@ export default function ProtectedPdfViewer({ src, watermarkLines }: Props) {
 
     if (loading) {
         return (
-            <div className="protected-pdf-viewer rounded-2xl border border-border bg-surface p-10 text-center text-sm text-text-secondary">
+            <div className="protected-pdf-viewer rounded-[1.5rem] border border-border bg-surface p-10 text-center text-sm text-text-secondary">
                 Loading document…
             </div>
         );
@@ -96,7 +97,7 @@ export default function ProtectedPdfViewer({ src, watermarkLines }: Props) {
 
     if (error) {
         return (
-            <div className="protected-pdf-viewer rounded-2xl border border-border bg-surface p-10 text-center text-sm text-danger">
+            <div className="protected-pdf-viewer rounded-[1.5rem] border border-border bg-surface p-10 text-center text-sm text-danger">
                 {error}
             </div>
         );
@@ -105,33 +106,34 @@ export default function ProtectedPdfViewer({ src, watermarkLines }: Props) {
     return (
         <div
             ref={containerRef}
-            className="protected-pdf-viewer select-none rounded-2xl border border-border bg-surface p-4"
+            className="protected-pdf-viewer select-none rounded-[1.5rem] border border-border bg-surface p-4"
             onContextMenu={(e) => e.preventDefault()}
         >
             <div className="flex justify-center overflow-x-auto">
-                <canvas ref={canvasRef} className="rounded-lg border border-border" />
+                <canvas ref={canvasRef} className="rounded-[0.75rem] border border-border" />
             </div>
 
             <div className="mt-4 flex flex-wrap items-center justify-between gap-3">
-                <button
+                <LiquidButton
                     type="button"
+                    tone="light"
                     onClick={() => setPageNum((p) => Math.max(1, p - 1))}
                     disabled={pageNum <= 1}
-                    className="inline-flex items-center gap-1.5 rounded-lg border border-border px-5 py-2 text-sm font-bold uppercase tracking-wide text-text transition-colors hover:border-primary hover:text-primary disabled:opacity-40 disabled:hover:border-border disabled:hover:text-text"
+                    className="px-5 py-2 text-sm uppercase tracking-wide"
                 >
                     Previous
-                </button>
+                </LiquidButton>
                 <span className="text-xs font-bold uppercase tracking-wide text-text-muted">
                     Page {pageNum} of {numPages}
                 </span>
-                <button
+                <LiquidButton
                     type="button"
                     onClick={() => setPageNum((p) => Math.min(numPages, p + 1))}
                     disabled={pageNum >= numPages}
-                    className="inline-flex items-center gap-1.5 rounded-lg bg-primary px-5 py-2 text-sm font-bold uppercase tracking-wide text-on-primary hover:bg-primary-hover disabled:opacity-40"
+                    className="px-5 py-2 text-sm uppercase tracking-wide"
                 >
                     Next
-                </button>
+                </LiquidButton>
             </div>
         </div>
     );

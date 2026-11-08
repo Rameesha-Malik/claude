@@ -113,7 +113,7 @@ function LessonContentTabs({ lesson, notes }: { lesson: Lesson; notes: Note[] })
                 ) : (
                     <div className="space-y-3">
                         {notes.map((note) => (
-                            <div key={note.id} className="rounded-xl border border-border bg-surface-sunken p-4">
+                            <div key={note.id} className="rounded-[1rem] border border-border bg-surface-sunken p-4">
                                 <h4 className="font-semibold text-text">{note.title}</h4>
                                 <LiteMarkdown text={note.content ?? ''} className="mt-1.5 text-sm text-text-secondary" />
                             </div>
@@ -157,49 +157,49 @@ function LessonPlayer({ lesson }: { lesson: Lesson }) {
         case 'video_youtube':
             return fileUrl ? (
                 // eslint-disable-next-line jsx-a11y/media-has-caption
-                <video controls src={fileUrl} className="w-full rounded-xl bg-black" />
+                <video controls src={fileUrl} className="w-full rounded-[1rem] bg-black" />
             ) : (
-                <p className="rounded-xl bg-surface-sunken p-6 text-sm text-text-muted">This video is still being imported. Check back in a few minutes.</p>
+                <p className="rounded-[1rem] bg-surface-sunken p-6 text-sm text-text-muted">This video is still being imported. Check back in a few minutes.</p>
             );
         case 'video_upload':
             return fileUrl ? (
                 // eslint-disable-next-line jsx-a11y/media-has-caption
-                <video controls src={fileUrl} className="w-full rounded-xl bg-black" />
+                <video controls src={fileUrl} className="w-full rounded-[1rem] bg-black" />
             ) : (
-                <p className="rounded-xl bg-surface-sunken p-6 text-sm text-text-muted">Video not uploaded yet.</p>
+                <p className="rounded-[1rem] bg-surface-sunken p-6 text-sm text-text-muted">Video not uploaded yet.</p>
             );
         case 'audio':
             return fileUrl ? (
                 <audio controls src={fileUrl} className="w-full" />
             ) : (
-                <p className="rounded-xl bg-surface-sunken p-6 text-sm text-text-muted">Audio not uploaded yet.</p>
+                <p className="rounded-[1rem] bg-surface-sunken p-6 text-sm text-text-muted">Audio not uploaded yet.</p>
             );
         case 'pdf':
             return fileUrl ? (
                 <div>
-                    <iframe src={fileUrl} className="h-[32rem] w-full rounded-xl border border-border" title={lesson.title} />
+                    <iframe src={fileUrl} className="h-[32rem] w-full rounded-[1rem] border border-border" title={lesson.title} />
                     <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="mt-2 inline-block text-sm font-semibold text-primary hover:underline">
                         Open in new tab &rarr;
                     </a>
                 </div>
             ) : (
-                <p className="rounded-xl bg-surface-sunken p-6 text-sm text-text-muted">Document not uploaded yet.</p>
+                <p className="rounded-[1rem] bg-surface-sunken p-6 text-sm text-text-muted">Document not uploaded yet.</p>
             );
         case 'document':
             return fileUrl ? (
-                <a href={fileUrl} target="_blank" rel="noopener noreferrer" className="inline-block rounded-lg bg-primary px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-on-primary hover:bg-primary-hover">
+                <LiquidButton href={fileUrl} target="_blank" rel="noopener noreferrer" className="px-5 py-2.5 text-sm uppercase tracking-wide">
                     Download Document
-                </a>
+                </LiquidButton>
             ) : (
-                <p className="rounded-xl bg-surface-sunken p-6 text-sm text-text-muted">Document not uploaded yet.</p>
+                <p className="rounded-[1rem] bg-surface-sunken p-6 text-sm text-text-muted">Document not uploaded yet.</p>
             );
         case 'link':
             return lesson.external_url ? (
-                <a href={lesson.external_url} target="_blank" rel="noopener noreferrer" className="inline-block rounded-lg bg-primary px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-on-primary hover:bg-primary-hover">
+                <LiquidButton href={lesson.external_url} target="_blank" rel="noopener noreferrer" className="px-5 py-2.5 text-sm uppercase tracking-wide">
                     Open Link
-                </a>
+                </LiquidButton>
             ) : (
-                <p className="rounded-xl bg-surface-sunken p-6 text-sm text-text-muted">Link not set yet.</p>
+                <p className="rounded-[1rem] bg-surface-sunken p-6 text-sm text-text-muted">Link not set yet.</p>
             );
         default:
             return null;
@@ -230,7 +230,7 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
         return (
             <StudentLayout header={courseProp.title}>
                 <Head title={courseProp.title} />
-                <div className="mx-auto max-w-lg rounded-2xl border border-border bg-surface p-8 text-center">
+                <div className="mx-auto max-w-lg rounded-[1.5rem] border border-border bg-surface p-8 text-center">
                     <h2 className="font-bold text-text">
                         {enrollmentStatus === 'pending'
                             ? 'Enrollment Pending Verification'
@@ -245,12 +245,9 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
                               ? "You haven't enrolled in this course yet."
                               : 'Your access to this course is not currently active. Contact us if you think this is a mistake.'}
                     </p>
-                    <Link
-                        href="/portal/my-courses"
-                        className="mt-6 inline-block rounded-lg bg-primary px-6 py-2.5 text-sm font-bold uppercase tracking-wide text-on-primary hover:bg-primary-hover"
-                    >
+                    <LiquidButton href="/portal/my-courses" className="mt-6 px-6 py-2.5 text-sm uppercase tracking-wide">
                         View My Courses
-                    </Link>
+                    </LiquidButton>
                 </div>
             </StudentLayout>
         );
@@ -318,7 +315,7 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
                                 </button>
                             </div>
                             {course.sections.length === 0 ? (
-                                <div className="space-y-2 rounded-3xl border border-border bg-surface p-2">
+                                <div className="space-y-2 rounded-[2rem] border border-border bg-surface p-2">
                                     {course.lessons.map((lesson, i) => (
                                         <LessonListItem
                                             key={lesson.id}
@@ -336,7 +333,7 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
                             ) : (
                                 <div className="space-y-3">
                                     {course.sections.map((section) => (
-                                        <div key={section.id} className="overflow-hidden rounded-3xl border border-border bg-surface">
+                                        <div key={section.id} className="overflow-hidden rounded-[2rem] border border-border bg-surface">
                                             <div className="border-b border-border bg-surface-sunken px-4 py-2.5 text-sm font-bold text-text">
                                                 {section.title}
                                             </div>
@@ -358,7 +355,7 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
                                         </div>
                                     ))}
                                     {course.lessons.some((l) => l.section_id === null) && (
-                                        <div className="overflow-hidden rounded-3xl border border-border bg-surface">
+                                        <div className="overflow-hidden rounded-[2rem] border border-border bg-surface">
                                             <div className="border-b border-border bg-surface-sunken px-4 py-2.5 text-sm font-bold text-text">
                                                 Other Lessons
                                             </div>
@@ -383,7 +380,7 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
                         <button
                             onClick={() => setSidebarOpen(true)}
                             title="Show Course Content"
-                            className="flex h-fit w-14 flex-col items-center gap-2 rounded-2xl border border-border bg-surface px-2 py-4 text-text-secondary hover:border-primary hover:text-primary"
+                            className="flex h-fit w-14 flex-col items-center gap-2 rounded-[1.5rem] border border-border bg-surface px-2 py-4 text-text-secondary hover:border-primary hover:text-primary"
                         >
                             <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                                 <path strokeLinecap="round" strokeLinejoin="round" d="M9 5l7 7-7 7" />
@@ -395,7 +392,7 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
                     )}
                     <div className={sidebarOpen ? 'lg:col-span-2' : 'lg:col-span-1'}>
                         {activeLesson ? (
-                            <div className="overflow-hidden rounded-3xl border border-border bg-surface shadow-sm">
+                            <div className="overflow-hidden rounded-[2rem] border border-border bg-surface shadow-sm">
                                 <div className="bg-secondary p-3">
                                     <LessonPlayer lesson={activeLesson} />
                                 </div>
@@ -450,7 +447,7 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
                                 </div>
                             </div>
                         ) : (
-                            <div className="flex h-full min-h-[16rem] items-center justify-center rounded-3xl border border-dashed border-border bg-surface p-8 text-center">
+                            <div className="flex h-full min-h-[16rem] items-center justify-center rounded-[2rem] border border-dashed border-border bg-surface p-8 text-center">
                                 <p className="text-sm text-text-secondary">No lectures yet.</p>
                             </div>
                         )}
@@ -467,7 +464,7 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
                         ) : (
                             <RevealOnScroll staggerMs={50} className="space-y-3">
                                 {course.shared_notes.map((note) => (
-                                    <div key={note.id} className="rounded-2xl border border-border bg-surface p-5 transition-shadow duration-normal hover:shadow-md">
+                                    <div key={note.id} className="rounded-[1.5rem] border border-border bg-surface p-5 transition-shadow duration-normal hover:shadow-md">
                                         <h4 className="font-semibold text-text">{note.title}</h4>
                                         <LiteMarkdown text={note.content ?? ''} className="mt-2 text-sm text-text-secondary" />
                                     </div>
@@ -481,7 +478,7 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
                             <h3 className="mb-3 font-bold text-secondary">Your Guaranteed Notes</h3>
                             <RevealOnScroll staggerMs={50} className="space-y-3">
                                 {personalNotes.map((note) => (
-                                    <div key={note.id} className="rounded-2xl border-2 border-primary bg-surface p-5 transition-shadow duration-normal hover:shadow-md">
+                                    <div key={note.id} className="rounded-[1.5rem] border-2 border-primary bg-surface p-5 transition-shadow duration-normal hover:shadow-md">
                                         <h4 className="font-semibold text-text">{note.title}</h4>
                                         <LiteMarkdown text={note.content ?? ''} className="mt-2 text-sm text-text-secondary" />
                                     </div>
@@ -511,7 +508,7 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
                                 />
                             ))}
                             {course.practice_tests.length === 0 && (
-                                <div className="rounded-3xl border border-dashed border-border bg-surface p-8 text-center text-text-secondary">
+                                <div className="rounded-[2rem] border border-dashed border-border bg-surface p-8 text-center text-text-secondary">
                                     No practice tests available for this course yet.
                                 </div>
                             )}
@@ -536,7 +533,7 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
                                 />
                             ))}
                             {course.mock_exams.length === 0 && (
-                                <div className="rounded-3xl border border-dashed border-border bg-surface p-8 text-center text-text-secondary">
+                                <div className="rounded-[2rem] border border-dashed border-border bg-surface p-8 text-center text-text-secondary">
                                     No mock exams available for this course yet.
                                 </div>
                             )}
@@ -557,7 +554,7 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
                                 />
                             ))}
                             {course.staged_tests.length === 0 && (
-                                <div className="rounded-3xl border border-dashed border-border bg-surface p-8 text-center text-text-secondary">
+                                <div className="rounded-[2rem] border border-dashed border-border bg-surface p-8 text-center text-text-secondary">
                                     No staged tests available for this course yet.
                                 </div>
                             )}
@@ -575,7 +572,7 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
                         this exact enrollment. */}
                     <a
                         href={`/portal/custom-quiz?course_id=${course.id}`}
-                        className="flex items-center justify-between rounded-2xl border border-dashed border-primary bg-primary-subtle px-5 py-4 text-sm font-semibold text-primary transition-colors hover:bg-primary/10"
+                        className="flex items-center justify-between rounded-[1.5rem] border border-dashed border-primary bg-primary-subtle px-5 py-4 text-sm font-semibold text-primary transition-colors hover:bg-primary/10"
                     >
                         Build a Custom Quiz from the Question Bank
                         <span aria-hidden>&rarr;</span>
@@ -595,7 +592,7 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
                         />
                     ))}
                     {course.quizzes.length === 0 && (
-                        <div className="rounded-3xl border border-dashed border-border bg-surface p-8 text-center text-text-secondary">
+                        <div className="rounded-[2rem] border border-dashed border-border bg-surface p-8 text-center text-text-secondary">
                             No quizzes available for this course yet.
                         </div>
                     )}
@@ -610,7 +607,7 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
                 <RevealOnScroll staggerMs={50} className="space-y-4">
                     {course.assignments.map((a) => <AssignmentCard key={a.id} assignment={a} />)}
                     {course.assignments.length === 0 && (
-                        <div className="rounded-3xl border border-dashed border-border bg-surface p-8 text-center text-text-secondary">
+                        <div className="rounded-[2rem] border border-dashed border-border bg-surface p-8 text-center text-text-secondary">
                             No assignments for this course yet.
                         </div>
                     )}
@@ -629,7 +626,7 @@ function QuizListItem({ quiz }: { quiz: QuizSummary }) {
     return (
         <Link
             href={`/portal/quizzes/${quiz.id}`}
-            className="flex w-full items-center gap-3 rounded-2xl border border-dashed border-primary px-3 py-3 text-left text-sm transition-all duration-fast hover:bg-primary-subtle"
+            className="flex w-full items-center gap-3 rounded-[1.5rem] border border-dashed border-primary px-3 py-3 text-left text-sm transition-all duration-fast hover:bg-primary-subtle"
         >
             {quiz.latest_attempt_id ? (
                 <span className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full bg-primary-subtle text-primary">
@@ -664,7 +661,7 @@ function LessonListItem({
     return (
         <button
             onClick={onClick}
-            className={`flex w-full items-center gap-3 rounded-2xl px-3 py-3 text-left text-sm transition-all duration-fast ${
+            className={`flex w-full items-center gap-3 rounded-[1.5rem] px-3 py-3 text-left text-sm transition-all duration-fast ${
                 isActive ? 'bg-primary-subtle shadow-sm' : 'hover:bg-surface-sunken'
             }`}
         >
@@ -709,7 +706,7 @@ function CourseMetaBar({
     const validLevel = level && KNOWN_LEVELS.includes(level.trim().toLowerCase()) ? level : null;
 
     return (
-        <div className="mb-4 flex flex-wrap items-center gap-x-5 gap-y-3 rounded-3xl border border-border bg-surface p-5">
+        <div className="mb-4 flex flex-wrap items-center gap-x-5 gap-y-3 rounded-[2rem] border border-border bg-surface p-5">
             <div className="flex flex-wrap items-center gap-x-3 gap-y-2 text-sm">
                 {reviewCount > 0 && (
                     <div className="flex items-center gap-1.5">
@@ -762,9 +759,9 @@ function TestCard({
     thumbnail?: string | null;
 }) {
     return (
-        <div className="group flex flex-wrap items-center justify-between gap-3 rounded-3xl border border-border bg-surface p-5 transition-all duration-normal hover:-translate-y-0.5 hover:border-primary hover:shadow-lg">
+        <div className="group flex flex-wrap items-center justify-between gap-3 rounded-[2rem] border border-border bg-surface p-5 transition-all duration-normal hover:-translate-y-0.5 hover:border-primary hover:shadow-lg">
             <div className="flex items-center gap-4">
-                {thumbnail && <img src={`/storage/${thumbnail}`} alt="" className="h-12 w-20 flex-shrink-0 rounded-lg object-cover" />}
+                {thumbnail && <img src={`/storage/${thumbnail}`} alt="" className="h-12 w-20 flex-shrink-0 rounded-[0.75rem] object-cover" />}
                 <div>
                     <h4 className="font-semibold text-text group-hover:text-primary">{title}</h4>
                     <p className="text-sm text-text-secondary">{meta}</p>
@@ -772,19 +769,13 @@ function TestCard({
             </div>
             <div className="flex flex-wrap gap-2">
                 {latestAttemptId && (
-                    <Link
-                        href={`/portal/attempts/${latestAttemptId}`}
-                        className="rounded-full border border-border px-5 py-2 text-sm font-bold uppercase tracking-wide text-text transition-all duration-fast hover:-translate-y-0.5 hover:border-primary hover:text-primary"
-                    >
+                    <LiquidButton href={`/portal/attempts/${latestAttemptId}`} tone="light" className="px-5 py-2 text-sm uppercase tracking-wide">
                         View Results
-                    </Link>
+                    </LiquidButton>
                 )}
-                <Link
-                    href={href}
-                    className="rounded-full bg-primary px-5 py-2 text-sm font-bold uppercase tracking-wide text-on-primary shadow-sm transition-all duration-fast hover:-translate-y-0.5 hover:bg-primary-hover hover:shadow-md"
-                >
+                <LiquidButton href={href} className="px-5 py-2 text-sm uppercase tracking-wide">
                     {cta}
-                </Link>
+                </LiquidButton>
             </div>
         </div>
     );
@@ -806,7 +797,7 @@ function QuestionBankPanel({ questions }: { questions: QuestionBankItem[] }) {
 
     if (questions.length === 0) {
         return (
-            <div className="rounded-3xl border border-dashed border-border bg-surface p-8 text-center text-text-secondary">
+            <div className="rounded-[2rem] border border-dashed border-border bg-surface p-8 text-center text-text-secondary">
                 No questions in this course's bank yet.
             </div>
         );
@@ -818,45 +809,45 @@ function QuestionBankPanel({ questions }: { questions: QuestionBankItem[] }) {
         <div>
             {subjects.length > 1 && (
                 <div className="mb-6 flex flex-wrap gap-2">
-                    <button
+                    <LiquidButton
+                        type="button"
+                        tone={subject === null ? 'dark' : 'light'}
                         onClick={() => setSubject(null)}
-                        className={`rounded-full px-4 py-2 text-sm font-bold uppercase tracking-wide transition-colors ${
-                            subject === null ? 'bg-primary text-on-primary' : 'bg-surface-sunken text-text-secondary hover:bg-primary-subtle'
-                        }`}
+                        className="px-4 py-2 text-sm uppercase tracking-wide"
                     >
                         All <span className="opacity-70">({questions.length})</span>
-                    </button>
+                    </LiquidButton>
                     {subjects.map((name) => (
-                        <button
+                        <LiquidButton
                             key={name}
+                            type="button"
+                            tone={subject === name ? 'dark' : 'light'}
                             onClick={() => setSubject(name)}
-                            className={`rounded-full px-4 py-2 text-sm font-bold uppercase tracking-wide transition-colors ${
-                                subject === name ? 'bg-primary text-on-primary' : 'bg-surface-sunken text-text-secondary hover:bg-primary-subtle'
-                            }`}
+                            className="px-4 py-2 text-sm uppercase tracking-wide"
                         >
                             {name} <span className="opacity-70">({questions.filter((q) => (q.subject?.name ?? 'General') === name).length})</span>
-                        </button>
+                        </LiquidButton>
                     ))}
                 </div>
             )}
 
             <RevealOnScroll staggerMs={30} className="space-y-3">
                 {filtered.map((q) => (
-                    <div key={q.id} className="rounded-2xl border border-border bg-surface p-5">
+                    <div key={q.id} className="rounded-[1.5rem] border border-border bg-surface p-5">
                         <div className="mb-2 flex flex-wrap gap-2">
                             {q.subject && <span className="rounded-full bg-primary-subtle px-2 py-0.5 text-xs font-bold text-primary">{q.subject.name}</span>}
                             {q.topic && <span className="rounded-full bg-surface-sunken px-2 py-0.5 text-xs font-bold text-text-secondary">{q.topic.name}</span>}
                             <span className="rounded-full bg-surface-sunken px-2 py-0.5 text-xs font-bold uppercase text-text-muted">{q.difficulty}</span>
                         </div>
                         {q.image_path && (
-                            <img src={`/storage/${q.image_path}`} alt="" className="mb-2 max-h-48 rounded-lg border border-border" />
+                            <img src={`/storage/${q.image_path}`} alt="" className="mb-2 max-h-48 rounded-[0.75rem] border border-border" />
                         )}
                         <p className="font-medium text-text">{q.question_text}</p>
                         <ul className="mt-3 space-y-1.5 text-sm">
                             {q.options.map((o) => (
                                 <li
                                     key={o.id}
-                                    className={`rounded-lg px-3 py-1.5 ${o.is_correct ? 'bg-success-bg font-semibold text-success' : 'bg-surface-sunken text-text-secondary'}`}
+                                    className={`rounded-[0.75rem] px-3 py-1.5 ${o.is_correct ? 'bg-success-bg font-semibold text-success' : 'bg-surface-sunken text-text-secondary'}`}
                                 >
                                     {o.is_correct && '✓ '}
                                     {o.image_path ? (
@@ -882,7 +873,7 @@ function FlashcardsPanel({ cards }: { cards: FlashcardItem[] }) {
 
     if (cards.length === 0) {
         return (
-            <div className="rounded-3xl border border-dashed border-border bg-surface p-8 text-center text-text-secondary">
+            <div className="rounded-[2rem] border border-dashed border-border bg-surface p-8 text-center text-text-secondary">
                 No flashcards available for this course yet.
             </div>
         );
@@ -901,15 +892,15 @@ function FlashcardsPanel({ cards }: { cards: FlashcardItem[] }) {
             {categories.length > 1 && (
                 <div className="mb-6 flex flex-wrap gap-2">
                     {categories.map((name) => (
-                        <button
+                        <LiquidButton
                             key={name}
+                            type="button"
+                            tone={category === name ? 'dark' : 'light'}
                             onClick={() => selectCategory(name)}
-                            className={`rounded-full px-4 py-2 text-sm font-bold uppercase tracking-wide transition-colors ${
-                                category === name ? 'bg-primary text-on-primary' : 'bg-surface-sunken text-text-secondary hover:bg-primary-subtle'
-                            }`}
+                            className="px-4 py-2 text-sm uppercase tracking-wide"
                         >
                             {name} <span className="opacity-70">({cards.filter((c) => (c.subject?.name ?? 'General') === name).length})</span>
-                        </button>
+                        </LiquidButton>
                     ))}
                 </div>
             )}
@@ -921,23 +912,26 @@ function FlashcardsPanel({ cards }: { cards: FlashcardItem[] }) {
                     </p>
                     <FlashcardTile key={card.id} card={card} />
                     <div className="mt-5 flex items-center justify-between gap-3">
-                        <button
+                        <LiquidButton
+                            type="button"
+                            tone="light"
                             onClick={() => setIndex((i) => Math.max(0, i - 1))}
                             disabled={index === 0}
-                            className="rounded-full border border-border px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-text transition-all duration-fast hover:-translate-y-0.5 hover:border-primary hover:text-primary disabled:opacity-40 disabled:hover:translate-y-0"
+                            className="px-5 py-2.5 text-sm uppercase tracking-wide"
                         >
                             &larr; Previous
-                        </button>
+                        </LiquidButton>
                         <div className="h-1.5 flex-1 overflow-hidden rounded-full bg-surface-sunken">
                             <div className="h-full rounded-full bg-primary transition-all duration-normal" style={{ width: `${((index + 1) / deck.length) * 100}%` }} />
                         </div>
-                        <button
+                        <LiquidButton
+                            type="button"
                             onClick={() => setIndex((i) => Math.min(deck.length - 1, i + 1))}
                             disabled={index === deck.length - 1}
-                            className="rounded-full bg-primary px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-on-primary shadow-sm transition-all duration-fast hover:-translate-y-0.5 hover:bg-primary-hover disabled:opacity-40 disabled:hover:translate-y-0"
+                            className="px-5 py-2.5 text-sm uppercase tracking-wide"
                         >
                             Next &rarr;
-                        </button>
+                        </LiquidButton>
                     </div>
                 </div>
             )}
@@ -961,7 +955,7 @@ function FlashcardTile({ card }: { card: FlashcardItem }) {
                 style={{ transformStyle: 'preserve-3d', transform: flipped ? 'rotateY(180deg)' : 'none' }}
             >
                 <div
-                    className="absolute inset-0 flex flex-col justify-between rounded-3xl border border-border bg-surface p-6 shadow-sm transition-shadow duration-normal group-hover:shadow-lg"
+                    className="absolute inset-0 flex flex-col justify-between rounded-[2rem] border border-border bg-surface p-6 shadow-sm transition-shadow duration-normal group-hover:shadow-lg"
                     style={{ backfaceVisibility: 'hidden' }}
                 >
                     <span className="text-xs font-bold uppercase tracking-wide text-primary">Question</span>
@@ -969,7 +963,7 @@ function FlashcardTile({ card }: { card: FlashcardItem }) {
                     <span className="text-center text-xs text-text-muted">Tap to flip</span>
                 </div>
                 <div
-                    className="absolute inset-0 flex flex-col justify-between rounded-3xl border border-primary bg-primary-subtle p-6 shadow-sm transition-shadow duration-normal group-hover:shadow-lg"
+                    className="absolute inset-0 flex flex-col justify-between rounded-[2rem] border border-primary bg-primary-subtle p-6 shadow-sm transition-shadow duration-normal group-hover:shadow-lg"
                     style={{ backfaceVisibility: 'hidden', transform: 'rotateY(180deg)' }}
                 >
                     <span className="text-xs font-bold uppercase tracking-wide text-primary">Answer</span>
@@ -1001,7 +995,7 @@ function AssignmentCard({ assignment }: { assignment: AssignmentItem }) {
     const overdue = assignment.due_date && new Date(assignment.due_date) < new Date() && !submission;
 
     return (
-        <div className="rounded-3xl border border-border bg-surface p-5">
+        <div className="rounded-[2rem] border border-border bg-surface p-5">
             <div className="flex flex-wrap items-start justify-between gap-3">
                 <div>
                     <h4 className="font-semibold text-text">{assignment.title}</h4>
@@ -1019,7 +1013,7 @@ function AssignmentCard({ assignment }: { assignment: AssignmentItem }) {
             {assignment.instructions && <LiteMarkdown text={assignment.instructions} className="mt-3 text-sm text-text-secondary" />}
 
             {submission?.status === 'graded' && (
-                <div className="mt-4 rounded-2xl bg-success-bg p-4">
+                <div className="mt-4 rounded-[1.5rem] bg-success-bg p-4">
                     <p className="text-sm font-bold text-success">
                         Score: {submission.marks_awarded ?? 0}{assignment.max_marks ? ` / ${assignment.max_marks}` : ''}
                     </p>
@@ -1046,28 +1040,24 @@ function AssignmentCard({ assignment }: { assignment: AssignmentItem }) {
                     <RichTextArea
                         rows={3}
                         placeholder="Write your answer (optional if attaching a file)"
-                        className="w-full rounded-2xl border border-border p-3 text-sm transition-colors focus:border-primary focus:shadow-glow focus:outline-none"
+                        className="w-full rounded-[1.5rem] border border-border p-3 text-sm transition-colors focus:border-primary focus:shadow-glow focus:outline-none"
                         value={form.data.submission_text}
                         onChange={(v) => form.setData('submission_text', v)}
                     />
                     <input
                         type="file"
                         onChange={(e) => form.setData('file', e.target.files?.[0] ?? null)}
-                        className="w-full text-sm text-text-secondary file:mr-3 file:rounded-lg file:border-0 file:bg-primary file:px-3 file:py-1.5 file:text-xs file:font-bold file:uppercase file:text-on-primary"
+                        className="w-full text-sm text-text-secondary file:mr-3 file:rounded-[0.75rem] file:border-0 file:bg-primary file:px-3 file:py-1.5 file:text-xs file:font-bold file:uppercase file:text-on-primary"
                     />
                     {Object.values(form.errors).map((m, i) => <div key={i} className="text-sm text-danger">{m}</div>)}
                     <div className="flex gap-2">
-                        <button
-                            type="submit"
-                            disabled={form.processing}
-                            className="rounded-full bg-primary px-5 py-2 text-sm font-bold uppercase tracking-wide text-on-primary shadow-sm transition-all duration-fast hover:-translate-y-0.5 hover:bg-primary-hover hover:shadow-md disabled:opacity-50"
-                        >
+                        <LiquidButton type="submit" disabled={form.processing} className="px-5 py-2 text-sm uppercase tracking-wide">
                             {form.processing ? 'Submitting…' : submission ? 'Resubmit' : 'Submit'}
-                        </button>
+                        </LiquidButton>
                         {submission && (
-                            <button type="button" onClick={() => setEditing(false)} className="rounded-full border border-border px-5 py-2 text-sm font-bold uppercase text-text hover:border-primary">
+                            <LiquidButton type="button" tone="light" onClick={() => setEditing(false)} className="px-5 py-2 text-sm uppercase tracking-wide">
                                 Cancel
-                            </button>
+                            </LiquidButton>
                         )}
                     </div>
                 </form>
@@ -1086,36 +1076,32 @@ function QaPanel({ course, questions }: { course: Course; questions: Question[] 
 
     return (
         <div className="grid gap-6 lg:grid-cols-2">
-            <form onSubmit={submit} className="h-fit rounded-3xl border border-border bg-surface p-6">
+            <form onSubmit={submit} className="h-fit rounded-[2rem] border border-border bg-surface p-6">
                 <h3 className="mb-3 font-bold text-text">Ask a Question</h3>
                 <RichTextArea
                     rows={4}
                     value={data.question_text}
                     onChange={(v) => setData('question_text', v)}
                     placeholder="Ask about a lecture, note, or anything course-related..."
-                    className="w-full rounded-2xl border border-border p-3 text-sm transition-colors focus:border-primary focus:shadow-glow focus:outline-none"
+                    className="w-full rounded-[1.5rem] border border-border p-3 text-sm transition-colors focus:border-primary focus:shadow-glow focus:outline-none"
                 />
-                <button
-                    type="submit"
-                    disabled={processing}
-                    className="mt-3 rounded-full bg-primary px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-on-primary shadow-sm transition-all duration-fast hover:-translate-y-0.5 hover:bg-primary-hover hover:shadow-md disabled:opacity-50 disabled:hover:translate-y-0"
-                >
+                <LiquidButton type="submit" disabled={processing} className="mt-3 px-5 py-2.5 text-sm uppercase tracking-wide">
                     Ask
-                </button>
+                </LiquidButton>
                 <p className="mt-2 text-xs text-text-muted">Only you and the admin can see this conversation.</p>
             </form>
 
             <RevealOnScroll staggerMs={50} className="space-y-4">
                 {questions.length === 0 && <p className="text-sm text-text-secondary">You haven't asked anything yet.</p>}
                 {questions.map((q) => (
-                    <div key={q.id} className="rounded-3xl border border-border bg-surface p-5 transition-shadow duration-normal hover:shadow-md">
+                    <div key={q.id} className="rounded-[2rem] border border-border bg-surface p-5 transition-shadow duration-normal hover:shadow-md">
                         <div className="flex items-center justify-between">
                             <span className="text-sm font-semibold text-text">You</span>
                             <StatusDot label={q.status} tone={q.status === 'answered' ? 'positive' : 'warning'} />
                         </div>
                         <p className="mt-1 text-sm text-text-secondary">{q.question_text}</p>
                         {q.replies.map((r) => (
-                            <div key={r.id} className="mt-3 rounded-2xl bg-primary-subtle p-3">
+                            <div key={r.id} className="mt-3 rounded-[1.5rem] bg-primary-subtle p-3">
                                 <span className="text-xs font-bold text-primary">{r.admin?.name ?? 'Admin'}</span>
                                 <p className="mt-1 text-sm text-text">{r.reply_text}</p>
                             </div>
@@ -1147,7 +1133,7 @@ function ReviewWidget({ course, myReview }: { course: Course; myReview: Review |
 
     if (!open) {
         return (
-            <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-3xl border border-border bg-surface p-4 transition-shadow duration-normal hover:shadow-md">
+            <div className="mb-6 flex flex-wrap items-center justify-between gap-3 rounded-[2rem] border border-border bg-surface p-4 transition-shadow duration-normal hover:shadow-md">
                 <div className="text-sm text-text-secondary">
                     {myReview ? (
                         <>Your review: <span className="text-star">{'★'.repeat(myReview.rating)}{'☆'.repeat(5 - myReview.rating)}</span> · {STATUS_LABEL[myReview.status]}</>
@@ -1163,7 +1149,7 @@ function ReviewWidget({ course, myReview }: { course: Course; myReview: Review |
     }
 
     return (
-        <form onSubmit={submit} className="mb-6 space-y-3 rounded-3xl border border-primary bg-surface p-5 shadow-sm">
+        <form onSubmit={submit} className="mb-6 space-y-3 rounded-[2rem] border border-primary bg-surface p-5 shadow-sm">
             <div className="flex items-center gap-1">
                 {[1, 2, 3, 4, 5].map((n) => (
                     <button
@@ -1182,23 +1168,15 @@ function ReviewWidget({ course, myReview }: { course: Course; myReview: Review |
                 value={data.review_text}
                 onChange={(v) => setData('review_text', v)}
                 placeholder="What did you think of this course? (optional)"
-                className="w-full rounded-2xl border border-border p-3 text-sm transition-colors focus:border-primary focus:shadow-glow focus:outline-none"
+                className="w-full rounded-[1.5rem] border border-border p-3 text-sm transition-colors focus:border-primary focus:shadow-glow focus:outline-none"
             />
             <div className="flex gap-3">
-                <button
-                    type="submit"
-                    disabled={processing}
-                    className="rounded-full bg-primary px-5 py-2 text-sm font-bold uppercase tracking-wide text-on-primary shadow-sm transition-all duration-fast hover:-translate-y-0.5 hover:bg-primary-hover hover:shadow-md disabled:opacity-50 disabled:hover:translate-y-0"
-                >
+                <LiquidButton type="submit" disabled={processing} className="px-5 py-2 text-sm uppercase tracking-wide">
                     Submit Review
-                </button>
-                <button
-                    type="button"
-                    onClick={() => setOpen(false)}
-                    className="rounded-full border border-border px-5 py-2 text-sm font-bold uppercase text-text transition-all duration-fast hover:-translate-y-0.5 hover:border-primary hover:text-primary"
-                >
+                </LiquidButton>
+                <LiquidButton type="button" tone="light" onClick={() => setOpen(false)} className="px-5 py-2 text-sm uppercase tracking-wide">
                     Cancel
-                </button>
+                </LiquidButton>
             </div>
         </form>
     );
