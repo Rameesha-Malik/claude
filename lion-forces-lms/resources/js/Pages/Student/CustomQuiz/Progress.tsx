@@ -23,13 +23,23 @@ interface Stats {
 }
 interface Props { hasAccess: boolean; stats: Stats | null }
 
-function StatTile({ label, value, sub, tone }: { label: string; value: string | number; sub?: string; tone: string }) {
+function StatTile({
+    label,
+    value,
+    sub,
+    tone,
+}: {
+    label: string;
+    value: string | number;
+    sub?: string;
+    tone: 'dark' | 'light' | 'danger' | 'warning' | 'success';
+}) {
     return (
-        <div className={`rounded-2xl border p-4 ${tone}`}>
+        <LiquidButton tone={tone} shape="tile" className="p-4">
             <p className="text-xl font-bold">{value}</p>
             <p className="text-xs font-bold uppercase tracking-wide opacity-80">{label}</p>
             {sub && <p className="mt-1 text-xs opacity-70">{sub}</p>}
-        </div>
+        </LiquidButton>
     );
 }
 
@@ -69,7 +79,7 @@ export default function CustomQuizProgress({ hasAccess, stats }: Props) {
             <CustomQuizTabs active="progress" />
 
             {!hasAccess ? (
-                <div className="rounded-3xl border border-dashed border-border bg-surface p-10 text-center text-text-secondary">
+                <div className="rounded-[2rem] border border-dashed border-border bg-surface p-10 text-center text-text-secondary">
                     <p className="font-bold text-text">Progress is part of Quiz access</p>
                     <p className="mt-1 text-sm">Buy a course with Quiz access to track your accuracy and coverage across its question bank.</p>
                     <LiquidButton href="/courses" className="mt-4 px-5 py-2.5 text-sm uppercase tracking-wide">
@@ -77,7 +87,7 @@ export default function CustomQuizProgress({ hasAccess, stats }: Props) {
                     </LiquidButton>
                 </div>
             ) : !stats || stats.usedCount === 0 ? (
-                <div className="rounded-3xl border border-dashed border-border bg-surface p-10 text-center text-text-secondary">
+                <div className="rounded-[2rem] border border-dashed border-border bg-surface p-10 text-center text-text-secondary">
                     No answered questions yet. Take a test or quiz to start building your progress.
                 </div>
             ) : (
@@ -91,33 +101,29 @@ export default function CustomQuizProgress({ hasAccess, stats }: Props) {
                             label="Bank Coverage"
                             value={`${stats.bankCoveragePct}%`}
                             sub={`${stats.usedCount}/${stats.totalQuestions} used`}
-                            tone="border-primary bg-primary-subtle text-primary"
+                            tone="dark"
                         />
-                        <StatTile label="Unique Accuracy" value={`${stats.uniqueAccuracyPct}%`} tone="border-primary bg-primary-subtle text-primary" />
-                        <StatTile label="First Try" value={`${stats.firstTryPct}%`} tone="border-primary bg-primary-subtle text-primary" />
-                        <StatTile label="Avg Retries" value={stats.avgRetries} tone="border-primary bg-primary-subtle text-primary" />
+                        <StatTile label="Unique Accuracy" value={`${stats.uniqueAccuracyPct}%`} tone="dark" />
+                        <StatTile label="First Try" value={`${stats.firstTryPct}%`} tone="dark" />
+                        <StatTile label="Avg Retries" value={stats.avgRetries} tone="dark" />
 
-                        <StatTile label="Correct" value={stats.correctCount} tone="border-success bg-success-bg text-success" />
-                        <StatTile label="Incorrect" value={stats.incorrectCount} tone="border-danger bg-danger-bg text-danger" />
-                        <StatTile label="Skipped" value={stats.skippedCount} tone="border-border bg-surface-sunken text-text-muted" />
+                        <StatTile label="Correct" value={stats.correctCount} tone="success" />
+                        <StatTile label="Incorrect" value={stats.incorrectCount} tone="danger" />
+                        <StatTile label="Skipped" value={stats.skippedCount} tone="light" />
                         <StatTile
                             label="Wrong &rarr; Right"
                             value={stats.wrongToRightCount}
                             sub={`${stats.wrongToRightPct}% of ever-wrong`}
-                            tone="border-success bg-success-bg text-success"
+                            tone="success"
                         />
 
-                        <StatTile
-                            label="Regressions"
-                            value={stats.regressionsCount}
-                            tone={stats.regressionsCount > 0 ? 'border-danger bg-danger-bg text-danger' : 'border-border bg-surface-sunken text-text-muted'}
-                        />
-                        <StatTile label="Tests Taken" value={stats.sessionsCount} tone="border-border bg-surface-sunken text-text" />
-                        <StatTile label="Last Test Score" value={stats.lastTestPercentage !== null ? `${stats.lastTestPercentage}%` : '--'} tone="border-border bg-surface-sunken text-text" />
-                        <StatTile label="Favorites" value={stats.favoritesCount} tone="border-border bg-surface-sunken text-text" />
+                        <StatTile label="Regressions" value={stats.regressionsCount} tone={stats.regressionsCount > 0 ? 'danger' : 'light'} />
+                        <StatTile label="Tests Taken" value={stats.sessionsCount} tone="light" />
+                        <StatTile label="Last Test Score" value={stats.lastTestPercentage !== null ? `${stats.lastTestPercentage}%` : '--'} tone="light" />
+                        <StatTile label="Favorites" value={stats.favoritesCount} tone="light" />
                     </div>
 
-                    <div className="rounded-3xl border border-border bg-surface p-5">
+                    <div className="rounded-[2rem] border border-border bg-surface p-5">
                         <p className="mb-3 text-sm font-bold uppercase tracking-wide text-text-secondary">Actionable Signals</p>
                         <ul className="space-y-2">
                             {signals.map((s, i) => (

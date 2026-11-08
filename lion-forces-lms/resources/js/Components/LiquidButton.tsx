@@ -8,6 +8,11 @@ interface Props {
     onClick?: () => void;
     type?: 'button' | 'submit';
     tone?: Tone;
+    /** 'pill' (default): the usual button/badge shape, row-laid-out
+     *  children. 'tile': a rounded-rect block for stat tiles, whose
+     *  children (label/value/sub stacked as separate lines) need to lay
+     *  out as a block, not a centered row. */
+    shape?: 'pill' | 'tile';
     disabled?: boolean;
     /** Padding/text-size/margin are each caller's own call (sizes differ
      *  across every place this is used) -- deliberately NOT given a
@@ -65,11 +70,12 @@ const TONES: Record<Tone, { gradient: string; rim: string; text: string; glow: s
 // Retake, Continue/Complete. Renders as a real <Link> when href is given,
 // a <button> when onClick/type is, or a plain non-interactive <span> for
 // pill-style badges/labels that aren't clickable (e.g. a subject tag).
-export default function LiquidButton({ href, onClick, type, tone = 'dark', disabled, className, children }: Props) {
+export default function LiquidButton({ href, onClick, type, tone = 'dark', shape = 'pill', disabled, className, children }: Props) {
     const t = TONES[tone];
-    const baseClassName = `group relative inline-flex items-center justify-center gap-1.5 overflow-hidden rounded-full font-bold transition-transform duration-normal ease-spring ${
-        disabled ? 'opacity-50' : 'hover:-translate-y-0.5'
-    } ${t.text} ${className}`;
+    const roundedClass = shape === 'tile' ? 'rounded-[1.5rem]' : 'rounded-full';
+    const baseClassName = `group relative overflow-hidden font-bold transition-transform duration-normal ease-spring ${roundedClass} ${
+        shape === 'tile' ? 'block text-left' : 'inline-flex items-center justify-center gap-1.5'
+    } ${disabled ? 'opacity-50' : 'hover:-translate-y-0.5'} ${t.text} ${className}`;
     const style = {
         background: t.gradient,
         boxShadow: `inset 0 1px 0 rgba(255,255,255,.25), inset 0 -1px 3px rgba(0,0,0,.45), 0 8px 20px ${t.glow}`,
@@ -77,7 +83,7 @@ export default function LiquidButton({ href, onClick, type, tone = 'dark', disab
     const rim = (
         <span
             aria-hidden
-            className="pointer-events-none absolute inset-0 rounded-full opacity-80 transition-opacity duration-normal group-hover:opacity-100"
+            className={`pointer-events-none absolute inset-0 ${roundedClass} opacity-80 transition-opacity duration-normal group-hover:opacity-100`}
             style={{
                 padding: 1,
                 background: t.rim,
@@ -87,7 +93,9 @@ export default function LiquidButton({ href, onClick, type, tone = 'dark', disab
             }}
         />
     );
-    const content = <span className="relative z-10 flex items-center gap-1.5">{children}</span>;
+    const content = (
+        <span className={`relative z-10 ${shape === 'tile' ? 'block' : 'flex items-center gap-1.5'}`}>{children}</span>
+    );
 
     if (href) {
         return (
