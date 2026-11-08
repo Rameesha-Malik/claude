@@ -1,6 +1,7 @@
 import { Head, Link, router, useForm } from '@inertiajs/react';
 import { useState } from 'react';
 import LiteMarkdown from '@/Components/LiteMarkdown';
+import LiquidButton from '@/Components/LiquidButton';
 import RevealOnScroll from '@/Components/RevealOnScroll';
 import RichTextArea from '@/Components/RichTextArea';
 import StatusDot from '@/Components/StatusDot';
@@ -424,7 +425,7 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
                                         >
                                             &larr; Previous
                                         </button>
-                                        <button
+                                        <LiquidButton
                                             onClick={() => {
                                                 const i = course.lessons.findIndex((l) => l.id === activeLesson.id);
                                                 if (!lessonProgress[activeLesson.id]?.is_completed) {
@@ -436,14 +437,14 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
                                                 lessonProgress[activeLesson.id]?.is_completed &&
                                                 course.lessons.findIndex((l) => l.id === activeLesson.id) === course.lessons.length - 1
                                             }
-                                            className="ml-auto rounded-full bg-primary px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-on-primary shadow-sm transition-all duration-fast hover:-translate-y-0.5 hover:bg-primary-hover hover:shadow-md disabled:opacity-50 disabled:hover:translate-y-0"
+                                            className="ml-auto px-5 py-2.5 text-sm uppercase tracking-wide"
                                         >
                                             {lessonProgress[activeLesson.id]?.is_completed
                                                 ? course.lessons.findIndex((l) => l.id === activeLesson.id) === course.lessons.length - 1
                                                     ? 'Completed'
                                                     : 'Next Lesson →'
                                                 : 'Mark Complete & Continue →'}
-                                        </button>
+                                        </LiquidButton>
                                     </div>
                                 </div>
                             </div>

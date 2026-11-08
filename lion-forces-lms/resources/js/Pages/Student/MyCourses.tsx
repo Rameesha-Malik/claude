@@ -1,4 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
+import LiquidButton from '@/Components/LiquidButton';
 import RevealOnScroll from '@/Components/RevealOnScroll';
 import SemiGauge from '@/Components/SemiGauge';
 import StudentLayout from '@/Layouts/StudentLayout';
@@ -74,12 +75,9 @@ function CourseGaugeCard({ e }: { e: Enrollment }) {
             </p>
 
             {isActive ? (
-                <Link
-                    href={`/portal/my-courses/${e.course.slug}`}
-                    className="mt-4 block rounded-full bg-primary py-2.5 text-center text-sm font-bold uppercase tracking-wide text-on-primary transition-all duration-fast hover:bg-primary-hover hover:shadow-md"
-                >
+                <LiquidButton href={`/portal/my-courses/${e.course.slug}`} className="mt-4 w-full py-2.5 text-sm uppercase tracking-wide">
                     Continue
-                </Link>
+                </LiquidButton>
             ) : (
                 <div className="mt-4 rounded-full bg-surface-sunken py-2.5 text-center text-sm text-text-muted">
                     {e.status === 'pending' ? 'Awaiting activation' : 'Unavailable'}

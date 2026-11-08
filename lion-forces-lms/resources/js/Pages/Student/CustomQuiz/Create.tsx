@@ -2,6 +2,7 @@ import { Head, Link, useForm } from '@inertiajs/react';
 import axios from 'axios';
 import { FormEvent, useEffect, useState } from 'react';
 import CustomQuizTabs from '@/Components/CustomQuizTabs';
+import LiquidButton from '@/Components/LiquidButton';
 import StudentLayout from '@/Layouts/StudentLayout';
 
 interface SubjectOption { id: number; name: string; questions_count: number }
@@ -277,13 +278,13 @@ export default function CreateCustomQuiz({ subjects, topics, hasAccess, freeTria
                         CustomQuizController::pickQuestionIds), this just
                         saves the round trip once the live preview above
                         already knows there's nothing to build from. */}
-                    <button
+                    <LiquidButton
                         type="submit"
                         disabled={form.processing || countLoading || matchingCount === 0}
-                        className="w-full rounded-full bg-primary py-3 text-sm font-bold uppercase tracking-wide text-on-primary shadow-sm hover:bg-primary-hover disabled:opacity-50 lg:col-span-2"
+                        className="w-full py-3 text-sm uppercase tracking-wide lg:col-span-2"
                     >
                         {form.processing ? 'Building…' : 'Start Custom Quiz'}
-                    </button>
+                    </LiquidButton>
                 </form>
             </div>
         </StudentLayout>
