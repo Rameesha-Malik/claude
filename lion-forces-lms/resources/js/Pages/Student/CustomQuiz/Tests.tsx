@@ -1,6 +1,7 @@
 import { Head, Link, router } from '@inertiajs/react';
 import Icon from '@/Components/Icon';
 import CustomQuizTabs from '@/Components/CustomQuizTabs';
+import LiquidButton from '@/Components/LiquidButton';
 import StudentLayout from '@/Layouts/StudentLayout';
 
 interface HistoryItem {
@@ -9,10 +10,10 @@ interface HistoryItem {
 }
 interface Props { history: HistoryItem[] }
 
-function scoreTone(pct: number): string {
-    if (pct >= 70) return 'bg-success-bg text-success';
-    if (pct >= 50) return 'bg-warning-bg text-warning';
-    return 'bg-danger-bg text-danger';
+function scoreTone(pct: number): 'success' | 'warning' | 'danger' {
+    if (pct >= 70) return 'success';
+    if (pct >= 50) return 'warning';
+    return 'danger';
 }
 
 // UWorld's own "Tests" tab -- every custom quiz a student has built, with
@@ -32,54 +33,57 @@ export default function CustomQuizTests({ history }: Props) {
 
             <CustomQuizTabs active="tests" />
 
-            <div className="mx-auto max-w-lg">
-                {history.length === 0 ? (
-                    <div className="rounded-3xl border border-dashed border-border bg-surface p-10 text-center text-text-secondary">
-                        No tests yet.{' '}
-                        <Link href="/portal/custom-quiz" className="font-bold text-primary hover:underline">
-                            Build your first custom quiz &rarr;
-                        </Link>
-                    </div>
-                ) : (
-                    <div className="space-y-3">
-                        {history.map((h) => (
-                            <div key={h.id} className="flex items-center justify-between gap-3 rounded-2xl border border-border bg-surface p-4">
+            {history.length === 0 ? (
+                <div className="mx-auto max-w-lg rounded-[2rem] border border-dashed border-border bg-surface p-10 text-center text-text-secondary">
+                    No tests yet.{' '}
+                    <Link href="/portal/custom-quiz" className="font-bold text-primary hover:underline">
+                        Build your first custom quiz &rarr;
+                    </Link>
+                </div>
+            ) : (
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+                    {history.map((h) => (
+                        <div key={h.id} className="flex flex-col gap-3 rounded-[1.5rem] border border-border bg-surface p-4">
+                            <div className="flex items-start justify-between gap-2">
                                 <div className="min-w-0">
                                     <p className="truncate text-sm font-semibold text-text">
                                         {h.name ?? `${h.subject ?? 'Any subject'}${h.topic ? ` / ${h.topic}` : ''}`}
                                     </p>
-                                    <p className="text-xs text-text-muted">
+                                    <p className="mt-0.5 text-xs text-text-muted">
                                         {h.question_count} question{h.question_count === 1 ? '' : 's'}
                                         {h.difficulty ? ` · ${h.difficulty}` : ''}
-                                        {h.mode === 'timed' ? ' · Timed' : ''} · {new Date(h.created_at).toLocaleDateString()}
+                                        {h.mode === 'timed' ? ' · Timed' : ''}
                                     </p>
+                                    <p className="text-xs text-text-muted">{new Date(h.created_at).toLocaleDateString()}</p>
                                 </div>
-                                <div className="flex flex-shrink-0 items-center gap-2">
-                                    {h.percentage !== null ? (
-                                        <Link href={`/portal/attempts/${h.attempt_id}`} className={`rounded-full px-2.5 py-1 text-xs font-bold ${scoreTone(Number(h.percentage))}`}>
-                                            {h.percentage}%
-                                        </Link>
-                                    ) : (
-                                        <Link href={`/portal/custom-quiz/${h.id}`} className="rounded-full bg-primary-subtle px-2.5 py-1 text-xs font-bold text-primary hover:bg-primary/20">
-                                            Resume
-                                        </Link>
-                                    )}
-                                    <button
-                                        onClick={() => router.post(`/portal/custom-quiz/${h.id}/duplicate`)}
-                                        title="Retake with a fresh random pick"
-                                        className="rounded-full border border-border px-2.5 py-1 text-xs font-bold text-text-secondary hover:border-primary hover:text-primary"
-                                    >
-                                        Retake
-                                    </button>
-                                    <button onClick={() => destroy(h.id)} title="Remove" className="text-text-muted hover:text-danger">
-                                        <Icon d="M6 18L18 6M6 6l12 12" className="h-4 w-4" />
-                                    </button>
-                                </div>
+                                <button onClick={() => destroy(h.id)} title="Remove" className="flex-shrink-0 text-text-muted hover:text-danger">
+                                    <Icon d="M6 18L18 6M6 6l12 12" className="h-4 w-4" />
+                                </button>
                             </div>
-                        ))}
-                    </div>
-                )}
-            </div>
+
+                            <div className="mt-auto flex flex-wrap items-center gap-2">
+                                {h.percentage !== null ? (
+                                    <LiquidButton href={`/portal/attempts/${h.attempt_id}`} tone={scoreTone(Number(h.percentage))} className="px-3 py-1.5 text-xs">
+                                        {h.percentage}%
+                                    </LiquidButton>
+                                ) : (
+                                    <LiquidButton href={`/portal/custom-quiz/${h.id}`} tone="dark" className="px-3 py-1.5 text-xs uppercase tracking-wide">
+                                        Resume
+                                    </LiquidButton>
+                                )}
+                                <LiquidButton
+                                    onClick={() => router.post(`/portal/custom-quiz/${h.id}/duplicate`)}
+                                    tone="light"
+                                    title="Retake with a fresh random pick"
+                                    className="px-3 py-1.5 text-xs uppercase tracking-wide"
+                                >
+                                    Retake
+                                </LiquidButton>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
         </StudentLayout>
     );
 }

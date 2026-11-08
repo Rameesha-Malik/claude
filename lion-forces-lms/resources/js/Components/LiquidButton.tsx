@@ -14,6 +14,7 @@ interface Props {
      *  out as a block, not a centered row. */
     shape?: 'pill' | 'tile';
     disabled?: boolean;
+    title?: string;
     /** Padding/text-size/margin are each caller's own call (sizes differ
      *  across every place this is used) -- deliberately NOT given a
      *  default here, since a same-specificity utility clash (e.g. this
@@ -70,7 +71,7 @@ const TONES: Record<Tone, { gradient: string; rim: string; text: string; glow: s
 // Retake, Continue/Complete. Renders as a real <Link> when href is given,
 // a <button> when onClick/type is, or a plain non-interactive <span> for
 // pill-style badges/labels that aren't clickable (e.g. a subject tag).
-export default function LiquidButton({ href, onClick, type, tone = 'dark', shape = 'pill', disabled, className, children }: Props) {
+export default function LiquidButton({ href, onClick, type, tone = 'dark', shape = 'pill', disabled, title, className, children }: Props) {
     const t = TONES[tone];
     const roundedClass = shape === 'tile' ? 'rounded-[1.5rem]' : 'rounded-full';
     const baseClassName = `group relative overflow-hidden font-bold transition-transform duration-normal ease-spring ${roundedClass} ${
@@ -99,7 +100,7 @@ export default function LiquidButton({ href, onClick, type, tone = 'dark', shape
 
     if (href) {
         return (
-            <Link href={href} className={baseClassName} style={style}>
+            <Link href={href} title={title} className={baseClassName} style={style}>
                 {rim}
                 {content}
             </Link>
@@ -108,7 +109,7 @@ export default function LiquidButton({ href, onClick, type, tone = 'dark', shape
 
     if (onClick || type) {
         return (
-            <button type={type ?? 'button'} onClick={onClick} disabled={disabled} className={baseClassName} style={style}>
+            <button type={type ?? 'button'} onClick={onClick} disabled={disabled} title={title} className={baseClassName} style={style}>
                 {rim}
                 {content}
             </button>
