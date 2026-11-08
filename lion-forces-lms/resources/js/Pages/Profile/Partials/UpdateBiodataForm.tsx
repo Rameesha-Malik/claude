@@ -5,7 +5,7 @@ import InputLabel from '@/Components/InputLabel';
 import LiquidButton from '@/Components/LiquidButton';
 import { PageProps } from '@/types';
 
-const inputClass = 'mt-1 w-full rounded-[0.75rem] border border-border px-3 py-2 text-sm focus:border-primary focus:shadow-glow focus:outline-none';
+const inputClass = 'mt-1 w-full rounded-[0.75rem] border border-border bg-input-bg px-3 py-2 text-sm focus:border-primary focus:shadow-glow focus:outline-none';
 
 // Client (WhatsApp): profile pic, test center, course, address, mobile
 // number, FSc/Matric marks %, graduation GPA -- "not compulsory optional."

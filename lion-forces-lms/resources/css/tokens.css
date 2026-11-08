@@ -190,6 +190,11 @@
   --color-surface-sunken:  #e0eaea;
   --color-surface-brand:   #d9eaea;
   --color-surface-inverse: var(--teal-900);
+  /* Form field fill -- genuinely white (not the mint-tinted --color-surface
+     cards sit on), so an input reads as its own distinct well instead of
+     blending into the card around it. Dark theme overrides this below to a
+     darker well instead of staying pure white. */
+  --color-input-bg: var(--neutral-0);
   /* Translucent variant for the sticky header — a literal rgba, not an
      opacity modifier on --color-surface: Tailwind's /NN opacity syntax
      cannot resolve a color that is itself a CSS custom property, and
@@ -299,6 +304,7 @@
     --color-surface-brand:   #06342f;
     --color-surface-inverse: var(--neutral-0);
     --color-surface-translucent: rgba(15, 36, 34, 0.85);
+    --color-input-bg: var(--color-surface-sunken);
 
     --color-text:           #e8f5f3;
     --color-text-secondary: #a3bfbc;
@@ -350,6 +356,7 @@
   --color-surface-sunken:  #071312;
   --color-surface-brand:   #06342f;
   --color-surface-inverse: var(--neutral-0);
+  --color-input-bg: var(--color-surface-sunken);
 
   --color-text:           #e8f5f3;
   --color-text-secondary: #a3bfbc;

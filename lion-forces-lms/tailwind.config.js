@@ -23,6 +23,7 @@ export default {
             // Never hardcode a hex in a component — extend tokens.css instead.
             colors: {
                 canvas: 'var(--color-canvas)',
+                'input-bg': 'var(--color-input-bg)',
                 surface: {
                     DEFAULT: 'var(--color-surface)',
                     raised: 'var(--color-surface-raised)',

@@ -79,7 +79,7 @@ function NoteCard({ item }: { item: NoteItem }) {
                 <div className="space-y-2">
                     <textarea
                         rows={3}
-                        className="w-full rounded-[0.75rem] border border-border px-3 py-2 text-sm focus:border-primary focus:shadow-glow focus:outline-none"
+                        className="w-full rounded-[0.75rem] border border-border bg-input-bg px-3 py-2 text-sm focus:border-primary focus:shadow-glow focus:outline-none"
                         value={text}
                         onChange={(e) => setText(e.target.value)}
                     />
