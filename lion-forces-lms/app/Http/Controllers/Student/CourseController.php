@@ -14,10 +14,40 @@ class CourseController extends Controller
 {
     public function index(Request $request): Response
     {
-        $enrollments = $request->user()->enrollments()
-            ->with(['course.category', 'package'])
+        $user = $request->user();
+
+        // Same per-course lesson-completion math as DashboardController's
+        // enrollment cards -- only meaningful for an active enrollment,
+        // since a pending/expired one has no accessible lessons to count.
+        $enrollments = $user->enrollments()
+            ->with(['course.category', 'course.lessons', 'package'])
             ->orderByDesc('created_at')
-            ->get();
+            ->get()
+            ->map(function ($enrollment) use ($user) {
+                $progress = null;
+                $completedLessons = null;
+                $totalLessons = null;
+
+                if ($enrollment->isActive()) {
+                    $totalLessons = $enrollment->course->lessons->count();
+                    $completedLessons = $totalLessons > 0
+                        ? $user->lessonProgress()
+                            ->whereIn('lesson_id', $enrollment->course->lessons->pluck('id'))
+                            ->where('is_completed', true)
+                            ->count()
+                        : 0;
+                    $progress = $totalLessons > 0 ? round(($completedLessons / $totalLessons) * 100) : 0;
+                }
+
+                return [
+                    ...$enrollment->only('id', 'status'),
+                    'course' => $enrollment->course->only('id', 'title', 'slug') + ['category' => $enrollment->course->category?->only('name')],
+                    'package' => $enrollment->package?->only('name'),
+                    'progress' => $progress,
+                    'completed_lessons' => $completedLessons,
+                    'total_lessons' => $totalLessons,
+                ];
+            });
 
         return Inertia::render('Student/MyCourses', ['enrollments' => $enrollments]);
     }
