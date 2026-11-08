@@ -28,7 +28,6 @@ function QuestionCard({ q }: { q: Question }) {
                     <path strokeLinecap="round" strokeLinejoin="round" d={BOOK_PATH} />
                 </svg>
             }
-            iconBg="var(--color-secondary)"
             title={<LiteMarkdownInline text={q.question_text} />}
             pill={
                 q.subject && (

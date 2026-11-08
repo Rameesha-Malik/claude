@@ -57,7 +57,7 @@ function NoteCard({ item }: { item: NoteItem }) {
                     <button
                         onClick={() => setEditing(true)}
                         title="Edit note"
-                        className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-[0.5rem] text-text-muted hover:bg-primary-subtle hover:text-primary"
+                        className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-text-muted hover:bg-primary-subtle hover:text-primary"
                     >
                         <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
                             <path strokeLinecap="round" strokeLinejoin="round" d={PENCIL_PATH} />
@@ -67,7 +67,7 @@ function NoteCard({ item }: { item: NoteItem }) {
                 <button
                     onClick={remove}
                     title="Delete note"
-                    className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-[0.5rem] text-text-muted hover:bg-danger-bg hover:text-danger"
+                    className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-full text-text-muted hover:bg-danger-bg hover:text-danger"
                 >
                     <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M6 7h12M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2m2 0v13a1 1 0 01-1 1H8a1 1 0 01-1-1V7h10z" />

@@ -235,9 +235,9 @@ export default function Dashboard({ enrollments, performance, activityTrend, rev
                     {recentBroadcasts.map((b, i) => (
                         <div key={i} className="rounded-[1.5rem] border border-border bg-surface p-4 transition-shadow duration-normal hover:shadow-md">
                             <div className="flex items-start gap-2.5">
-                                <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-[1rem] bg-primary-subtle text-primary">
+                                <LiquidButton className="h-8 w-8 flex-shrink-0 p-0">
                                     <Icon d={ICONS.megaphone} className="h-4 w-4" />
-                                </span>
+                                </LiquidButton>
                                 <div className="min-w-0">
                                     <div className="text-sm font-bold text-text">{b.title}</div>
                                     <p className="mt-1 text-sm text-text-secondary">{b.body}</p>

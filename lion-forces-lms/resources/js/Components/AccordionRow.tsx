@@ -1,8 +1,9 @@
 import { ReactNode, useState } from 'react';
+import LiquidButton, { Tone } from '@/Components/LiquidButton';
 
 interface Props {
     icon: ReactNode;
-    iconBg?: string;
+    iconTone?: Tone;
     title: ReactNode;
     pill?: ReactNode;
     subtitle?: ReactNode;
@@ -14,18 +15,15 @@ interface Props {
 // that expands the full content, so a long list of notes/revision items
 // doesn't show every answer-reveal button and note body at once -- only
 // the header line a student needs to recognize which item is which.
-export default function AccordionRow({ icon, iconBg = 'var(--color-primary)', title, pill, subtitle, defaultOpen = false, children }: Props) {
+export default function AccordionRow({ icon, iconTone = 'dark', title, pill, subtitle, defaultOpen = false, children }: Props) {
     const [open, setOpen] = useState(defaultOpen);
 
     return (
         <div className="rounded-[2rem] border border-border bg-surface p-5">
             <button type="button" onClick={() => setOpen((v) => !v)} className="flex w-full items-center gap-4 text-left">
-                <span
-                    className="flex h-11 w-11 flex-shrink-0 items-center justify-center rounded-full text-white"
-                    style={{ backgroundColor: iconBg }}
-                >
+                <LiquidButton tone={iconTone} className="h-11 w-11 flex-shrink-0 p-0">
                     {icon}
-                </span>
+                </LiquidButton>
                 <div className="min-w-0 flex-1">
                     <div className="flex flex-wrap items-center gap-2">
                         <h3 className="truncate font-semibold text-text">{title}</h3>

@@ -28,7 +28,7 @@ function RevisionCard({ item }: { item: RevisionItem }) {
                     <path strokeLinecap="round" strokeLinejoin="round" d={FLAG_PATH} />
                 </svg>
             }
-            iconBg="var(--color-warning)"
+            iconTone="warning"
             title={<LiteMarkdownInline text={item.question.question_text} />}
             pill={
                 <span className="flex-shrink-0 rounded-full bg-warning-bg px-2.5 py-0.5 text-xs font-bold uppercase text-warning">

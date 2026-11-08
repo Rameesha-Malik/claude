@@ -310,7 +310,7 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
                                 <button
                                     onClick={() => setSidebarOpen(false)}
                                     title="Minimize"
-                                    className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-lg border border-border text-text-secondary hover:border-primary hover:text-primary"
+                                    className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-full border border-border text-text-secondary hover:border-primary hover:text-primary"
                                 >
                                     <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={2} viewBox="0 0 24 24">
                                         <path strokeLinecap="round" strokeLinejoin="round" d="M15 19l-7-7 7-7" />

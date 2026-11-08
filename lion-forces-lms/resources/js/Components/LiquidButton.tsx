@@ -1,7 +1,7 @@
 import { Link } from '@inertiajs/react';
 import { ReactNode } from 'react';
 
-type Tone = 'dark' | 'light' | 'danger' | 'warning' | 'success';
+export type Tone = 'dark' | 'light' | 'danger' | 'warning' | 'success';
 
 interface Props {
     href?: string;
