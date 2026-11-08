@@ -8,6 +8,9 @@ import DeleteUserForm from './Partials/DeleteUserForm';
 import UpdateBiodataForm from './Partials/UpdateBiodataForm';
 import UpdatePasswordForm from './Partials/UpdatePasswordForm';
 import UpdateProfileInformationForm from './Partials/UpdateProfileInformationForm';
+import armyCrest from '@/assets/crests/army-crest.png';
+import navyCrest from '@/assets/crests/navy-crest.png';
+import airforceCrest from '@/assets/crests/airforce-crest.png';
 
 // Matches the biodata fields it opens onto -- phone/address/test-center/exam,
 // the kind of thing a physical ID or enrollment card carries -- not picked
@@ -92,7 +95,18 @@ export default function Edit({ mustVerifyEmail, status, userType }: PageProps<{ 
                     </button>
                 </div>
 
-                <div className="flex gap-0.5 overflow-x-auto rounded-full border border-border bg-surface p-1">
+                <div className="relative flex gap-0.5 overflow-hidden rounded-full border border-border bg-surface p-1">
+                    {/* The tab row doesn't fill this bar's full width, leaving a
+                        bare stretch of empty surface to the right -- rather than
+                        pad it out, a faint watermark of the three branches this
+                        site actually prepares students for (the same crest assets
+                        BranchHeroSlider uses, not a decorative stock icon) fills
+                        that space instead. */}
+                    <div aria-hidden className="pointer-events-none absolute inset-y-0 right-4 hidden items-center gap-4 opacity-[0.07] sm:flex">
+                        <img src={armyCrest} alt="" className="h-7 w-7 object-contain grayscale" />
+                        <img src={navyCrest} alt="" className="h-7 w-7 object-contain grayscale" />
+                        <img src={airforceCrest} alt="" className="h-7 w-7 object-contain grayscale" />
+                    </div>
                     {tabs.map((t) => {
                         const TabIcon = t.icon;
                         return (
@@ -100,7 +114,7 @@ export default function Edit({ mustVerifyEmail, status, userType }: PageProps<{ 
                                 key={t.key}
                                 type="button"
                                 onClick={() => setActiveTab(t.key)}
-                                className={`flex flex-shrink-0 items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-wide transition-all duration-fast ${
+                                className={`relative flex flex-shrink-0 items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-wide transition-all duration-fast ${
                                     activeTab === t.key ? 'bg-primary text-on-primary shadow-sm' : 'text-text-secondary hover:bg-surface-sunken hover:text-text'
                                 }`}
                             >

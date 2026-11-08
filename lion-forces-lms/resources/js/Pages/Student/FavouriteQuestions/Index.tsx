@@ -24,11 +24,17 @@ function FavouriteCard({ item }: { item: Favourite }) {
     if (removed) return null;
 
     return (
-        <div className="rounded-3xl border border-border bg-surface p-5">
+        <div className="rounded-[2rem] border border-border bg-surface p-5">
             <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
                 <div>
                     {item.question.subject && (
-                        <span className="mb-1 inline-block rounded-full bg-primary-subtle px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide text-primary">
+                        // Accent (oxblood), not primary-teal -- this is the site's
+                        // established "second brand voice" token, a deliberately
+                        // different color from the plain teal pill MCQ Notes uses
+                        // for the same kind of subject tag, so the two pages don't
+                        // read as the same badge copy-pasted twice.
+                        <span className="mb-1 inline-flex items-center gap-1 rounded-full bg-accent px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide text-on-accent">
+                            <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path d="M10 2.5l2.35 4.76 5.26.77-3.8 3.7.9 5.24L10 14.5l-4.71 2.47.9-5.24-3.8-3.7 5.26-.77L10 2.5z" /></svg>
                             {item.question.subject.name}
                         </span>
                     )}
@@ -49,7 +55,7 @@ function FavouriteCard({ item }: { item: Favourite }) {
                         {item.question.options.map((opt) => (
                             <div
                                 key={opt.id}
-                                className={`rounded-2xl border p-3 text-sm ${opt.is_correct ? 'border-success bg-success-bg text-text' : 'border-border text-text-secondary'}`}
+                                className={`rounded-[1.5rem] border p-3 text-sm ${opt.is_correct ? 'border-success bg-success-bg text-text' : 'border-border text-text-secondary'}`}
                             >
                                 {opt.option_text}
                                 {opt.is_correct && <span className="ml-2 text-xs font-bold uppercase text-success">Correct Answer</span>}
@@ -57,7 +63,7 @@ function FavouriteCard({ item }: { item: Favourite }) {
                         ))}
                     </div>
                     {item.question.explanation && (
-                        <div className="mt-3 rounded-2xl bg-primary-subtle p-3 text-sm text-text">
+                        <div className="mt-3 rounded-[1.5rem] bg-primary-subtle p-3 text-sm text-text">
                             <span className="font-bold text-primary">Explanation: </span>
                             <LiteMarkdownInline text={item.question.explanation} />
                         </div>
@@ -93,7 +99,7 @@ export default function FavouriteQuestionsIndex({ favourites }: Props) {
             </div>
 
             {favourites.length === 0 ? (
-                <div className="rounded-3xl border border-dashed border-border bg-surface p-10 text-center text-text-secondary">
+                <div className="rounded-[2rem] border border-dashed border-border bg-surface p-10 text-center text-text-secondary">
                     No favourites yet. Tap the star on any question while taking a quiz or test to save it here.
                 </div>
             ) : (
