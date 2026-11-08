@@ -76,37 +76,39 @@ export default function UpdatePasswordForm({
                     <InputError message={errors.current_password} className="mt-2" />
                 </div>
 
-                <div>
-                    <InputLabel htmlFor="password" value="New Password" />
+                <div className="grid gap-5 sm:grid-cols-2">
+                    <div>
+                        <InputLabel htmlFor="password" value="New Password" />
 
-                    <IconTextInput
-                        id="password"
-                        ref={passwordInput}
-                        icon={<LockIcon />}
-                        className="mt-1"
-                        value={data.password}
-                        onChange={(e) => setData('password', e.target.value)}
-                        type="password"
-                        autoComplete="new-password"
-                    />
+                        <IconTextInput
+                            id="password"
+                            ref={passwordInput}
+                            icon={<LockIcon />}
+                            className="mt-1"
+                            value={data.password}
+                            onChange={(e) => setData('password', e.target.value)}
+                            type="password"
+                            autoComplete="new-password"
+                        />
 
-                    <InputError message={errors.password} className="mt-2" />
-                </div>
+                        <InputError message={errors.password} className="mt-2" />
+                    </div>
 
-                <div>
-                    <InputLabel htmlFor="password_confirmation" value="Confirm Password" />
+                    <div>
+                        <InputLabel htmlFor="password_confirmation" value="Confirm Password" />
 
-                    <IconTextInput
-                        id="password_confirmation"
-                        icon={<CheckCircleIcon />}
-                        className="mt-1"
-                        value={data.password_confirmation}
-                        onChange={(e) => setData('password_confirmation', e.target.value)}
-                        type="password"
-                        autoComplete="new-password"
-                    />
+                        <IconTextInput
+                            id="password_confirmation"
+                            icon={<CheckCircleIcon />}
+                            className="mt-1"
+                            value={data.password_confirmation}
+                            onChange={(e) => setData('password_confirmation', e.target.value)}
+                            type="password"
+                            autoComplete="new-password"
+                        />
 
-                    <InputError message={errors.password_confirmation} className="mt-2" />
+                        <InputError message={errors.password_confirmation} className="mt-2" />
+                    </div>
                 </div>
 
                 <div className="flex items-center gap-4">
