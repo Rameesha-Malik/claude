@@ -5,7 +5,7 @@ import { CheckCircleIcon, LockIcon } from '@/Components/AuthIcons';
 import IconTextInput from '@/Components/IconTextInput';
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
+import LiquidButton from '@/Components/LiquidButton';
 
 export default function UpdatePasswordForm({
     className = '',
@@ -112,7 +112,7 @@ export default function UpdatePasswordForm({
                 </div>
 
                 <div className="flex items-center gap-4">
-                    <PrimaryButton disabled={processing}>Save</PrimaryButton>
+                    <LiquidButton type="submit" disabled={processing} className="px-5 py-2.5 text-sm uppercase tracking-wide">Save</LiquidButton>
 
                     <Transition
                         show={recentlySuccessful}

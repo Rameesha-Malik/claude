@@ -2,7 +2,7 @@ import { Transition } from '@headlessui/react';
 import { useForm, usePage } from '@inertiajs/react';
 import { FormEventHandler } from 'react';
 import InputLabel from '@/Components/InputLabel';
-import PrimaryButton from '@/Components/PrimaryButton';
+import LiquidButton from '@/Components/LiquidButton';
 import { PageProps } from '@/types';
 
 const inputClass = 'mt-1 w-full rounded-[0.75rem] border border-border px-3 py-2 text-sm focus:border-primary focus:shadow-glow focus:outline-none';
@@ -72,7 +72,7 @@ export default function UpdateBiodataForm({ className = '' }: { className?: stri
                 </div>
 
                 <div className="flex items-center gap-4 sm:col-span-2">
-                    <PrimaryButton disabled={processing}>Save</PrimaryButton>
+                    <LiquidButton type="submit" disabled={processing} className="px-5 py-2.5 text-sm uppercase tracking-wide">Save</LiquidButton>
                     <Transition
                         show={recentlySuccessful}
                         enter="transition ease-in-out"

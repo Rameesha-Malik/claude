@@ -1,10 +1,10 @@
 import { useForm } from '@inertiajs/react';
 import { FormEventHandler, useEffect, useRef } from 'react';
 import { LockIcon } from '@/Components/AuthIcons';
-import DangerButton from '@/Components/DangerButton';
 import IconTextInput from '@/Components/IconTextInput';
 import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
+import LiquidButton from '@/Components/LiquidButton';
 import Modal from '@/Components/Modal';
 import SecondaryButton from '@/Components/SecondaryButton';
 
@@ -82,7 +82,9 @@ export default function DeleteUserForm({ show, onClose }: { show: boolean; onClo
                         Cancel
                     </SecondaryButton>
 
-                    <DangerButton disabled={processing}>Delete Account</DangerButton>
+                    <LiquidButton type="submit" tone="danger" disabled={processing} className="px-5 py-2.5 text-sm uppercase tracking-wide">
+                        Delete Account
+                    </LiquidButton>
                 </div>
             </form>
         </Modal>
