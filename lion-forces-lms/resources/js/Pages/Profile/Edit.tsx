@@ -2,35 +2,19 @@ import { Head, router, usePage } from '@inertiajs/react';
 import { useState, useRef } from 'react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import StudentLayout from '@/Layouts/StudentLayout';
-import { LockIcon, PersonIcon } from '@/Components/AuthIcons';
+import TabBar from '@/Components/TabBar';
 import { PageProps } from '@/types';
 import DeleteUserForm from './Partials/DeleteUserForm';
 import UpdateBiodataForm from './Partials/UpdateBiodataForm';
 import UpdatePasswordForm from './Partials/UpdatePasswordForm';
 import UpdateProfileInformationForm from './Partials/UpdateProfileInformationForm';
-import armyCrest from '@/assets/crests/army-crest.png';
-import navyCrest from '@/assets/crests/navy-crest.png';
-import airforceCrest from '@/assets/crests/airforce-crest.png';
-
-// Matches the biodata fields it opens onto -- phone/address/test-center/exam,
-// the kind of thing a physical ID or enrollment card carries -- not picked
-// decoratively.
-function IdCardIcon({ className = 'h-5 w-5' }: { className?: string }) {
-    return (
-        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.6} className={className}>
-            <rect x="2" y="4" width="16" height="12" rx="2" />
-            <circle cx="7" cy="9.5" r="1.75" />
-            <path strokeLinecap="round" d="M4.5 14c0-1.52 1.12-2.5 2.5-2.5s2.5.98 2.5 2.5M12.5 8h3M12.5 11h3" />
-        </svg>
-    );
-}
 
 type Tab = 'personal' | 'additional' | 'password';
 
 // Independent settings panels, not a sequential setup flow -- a person can
 // jump straight to "Update Password" without ever touching the others, so
-// this is a plain click-to-switch tab bar (like CustomQuizTabs elsewhere in
-// the app), not a linear Step-1-of-3 wizard with Back/Next.
+// this is a plain click-to-switch tab bar, not a linear Step-1-of-3 wizard
+// with Back/Next.
 export default function Edit({ mustVerifyEmail, status, userType }: PageProps<{ mustVerifyEmail: boolean; status?: string; userType: string }>) {
     const { auth } = usePage<PageProps>().props;
     // /profile is reachable by both admin and student accounts -- wrap it in
@@ -41,10 +25,10 @@ export default function Edit({ mustVerifyEmail, status, userType }: PageProps<{ 
     const [activeTab, setActiveTab] = useState<Tab>('personal');
     const [confirmingDeletion, setConfirmingDeletion] = useState(false);
 
-    const tabs: { key: Tab; label: string; icon: typeof PersonIcon }[] = [
-        { key: 'personal', label: 'Personal Info', icon: PersonIcon },
-        ...(userType === 'student' ? [{ key: 'additional' as Tab, label: 'Additional Info', icon: IdCardIcon }] : []),
-        { key: 'password', label: 'Update', icon: LockIcon },
+    const tabs: { key: Tab; label: string }[] = [
+        { key: 'personal', label: 'Personal Info' },
+        ...(userType === 'student' ? [{ key: 'additional' as Tab, label: 'Additional Info' }] : []),
+        { key: 'password', label: 'Update' },
     ];
 
     function pickAvatar(file: File | undefined) {
@@ -95,35 +79,7 @@ export default function Edit({ mustVerifyEmail, status, userType }: PageProps<{ 
                     </button>
                 </div>
 
-                <div className="relative flex gap-0.5 overflow-hidden rounded-full border border-border bg-surface p-1">
-                    {/* The tab row doesn't fill this bar's full width, leaving a
-                        bare stretch of empty surface to the right -- rather than
-                        pad it out, a faint watermark of the three branches this
-                        site actually prepares students for (the same crest assets
-                        BranchHeroSlider uses, not a decorative stock icon) fills
-                        that space instead. */}
-                    <div aria-hidden className="pointer-events-none absolute inset-y-0 right-4 hidden items-center gap-4 opacity-[0.07] sm:flex">
-                        <img src={armyCrest} alt="" className="h-7 w-7 object-contain grayscale" />
-                        <img src={navyCrest} alt="" className="h-7 w-7 object-contain grayscale" />
-                        <img src={airforceCrest} alt="" className="h-7 w-7 object-contain grayscale" />
-                    </div>
-                    {tabs.map((t) => {
-                        const TabIcon = t.icon;
-                        return (
-                            <button
-                                key={t.key}
-                                type="button"
-                                onClick={() => setActiveTab(t.key)}
-                                className={`relative flex flex-shrink-0 items-center gap-1.5 rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-wide transition-all duration-fast ${
-                                    activeTab === t.key ? 'bg-primary text-on-primary shadow-sm' : 'text-text-secondary hover:bg-surface-sunken hover:text-text'
-                                }`}
-                            >
-                                <TabIcon className="h-4 w-4" />
-                                {t.label}
-                            </button>
-                        );
-                    })}
-                </div>
+                <TabBar tabs={tabs} active={activeTab} onChange={setActiveTab} />
 
                 <div className="rounded-[2rem] border border-border bg-surface p-6 sm:p-8">
                     {activeTab === 'personal' && <UpdateProfileInformationForm mustVerifyEmail={mustVerifyEmail} status={status} />}

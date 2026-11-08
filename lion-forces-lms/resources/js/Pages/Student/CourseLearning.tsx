@@ -4,6 +4,7 @@ import LiteMarkdown from '@/Components/LiteMarkdown';
 import RevealOnScroll from '@/Components/RevealOnScroll';
 import RichTextArea from '@/Components/RichTextArea';
 import StatusDot from '@/Components/StatusDot';
+import TabBar from '@/Components/TabBar';
 import StudentLayout from '@/Layouts/StudentLayout';
 
 interface Lesson { id: number; title: string; type: string; external_url: string | null; file_path: string | null; description: string | null; section_id: number | null }
@@ -102,19 +103,7 @@ function LessonContentTabs({ lesson, notes }: { lesson: Lesson; notes: Note[] })
 
     return (
         <div className="mt-4 border-t border-border pt-4">
-            <div className="flex gap-2">
-                {(['Description', 'Materials'] as const).map((t) => (
-                    <button
-                        key={t}
-                        onClick={() => setTab(t)}
-                        className={`rounded-full px-4 py-1.5 text-xs font-bold uppercase tracking-wide transition-colors ${
-                            tab === t ? 'bg-primary text-on-primary' : 'border border-border text-text-secondary hover:border-primary hover:text-primary'
-                        }`}
-                    >
-                        {t}
-                    </button>
-                ))}
-            </div>
+            <TabBar tabs={(['Description', 'Materials'] as const).map((t) => ({ key: t, label: t }))} active={tab} onChange={setTab} />
             <div className="mt-3 text-sm leading-relaxed text-text-secondary">
                 {tab === 'Description' ? (
                     lesson.description || 'No description for this lesson yet.'
@@ -304,19 +293,7 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
                 progressPct={progressPct}
             />
 
-            <div className="mb-6 flex flex-wrap gap-1.5 rounded-full border border-border bg-surface p-1.5">
-                {visibleTabs.map((t) => (
-                    <button
-                        key={t}
-                        onClick={() => setTab(t)}
-                        className={`rounded-full px-4 py-2 text-sm font-bold uppercase tracking-wide transition-all duration-fast ${
-                            tab === t ? 'bg-primary text-on-primary shadow-sm' : 'text-text-secondary hover:bg-surface-sunken hover:text-text'
-                        }`}
-                    >
-                        {t}
-                    </button>
-                ))}
-            </div>
+            <TabBar tabs={visibleTabs.map((t) => ({ key: t, label: t }))} active={tab} onChange={setTab} className="mb-6" />
 
             <ReviewWidget course={course} myReview={myReview} />
 

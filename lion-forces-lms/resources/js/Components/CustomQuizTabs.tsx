@@ -1,4 +1,4 @@
-import { Link } from '@inertiajs/react';
+import TabBar from '@/Components/TabBar';
 
 type Tab = 'create' | 'tests' | 'favorites' | 'browse' | 'progress';
 
@@ -15,23 +15,9 @@ const TABS: { key: Tab; label: string; href: string }[] = [
 // reachable from the outer app's own top-level nav, which also links
 // Favorites separately -- the reference does both at once, so this adds
 // the in-module bar without removing the existing standalone nav entries).
-// Plain full-page <Link> navigation to each tab's own route, not a
+// Each tab navigates as a real page Link to its own route, not a
 // client-side switch -- same pattern this app already uses everywhere
 // else for tabbed areas that are really separate pages (e.g. AdminLayout).
 export default function CustomQuizTabs({ active }: { active: Tab }) {
-    return (
-        <div className="mb-6 flex gap-0.5 overflow-x-auto rounded-full border border-border bg-surface p-1">
-            {TABS.map((t) => (
-                <Link
-                    key={t.key}
-                    href={t.href}
-                    className={`flex-shrink-0 rounded-full px-3.5 py-1.5 text-xs font-bold uppercase tracking-wide transition-all duration-fast ${
-                        active === t.key ? 'bg-primary text-on-primary shadow-sm' : 'text-text-secondary hover:bg-surface-sunken hover:text-text'
-                    }`}
-                >
-                    {t.label}
-                </Link>
-            ))}
-        </div>
-    );
+    return <TabBar tabs={TABS} active={active} className="mb-6" />;
 }
