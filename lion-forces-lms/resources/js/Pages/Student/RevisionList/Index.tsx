@@ -56,6 +56,12 @@ function RevisionCard({ item }: { item: RevisionItem }) {
                             <LiteMarkdownInline text={item.question.explanation} />
                         </div>
                     )}
+                    <button
+                        onClick={() => setRevealed(false)}
+                        className="mt-3 rounded-full border border-border px-4 py-2 text-sm font-bold uppercase tracking-wide text-text transition-colors hover:border-primary hover:text-primary"
+                    >
+                        Hide Answer
+                    </button>
                 </>
             ) : (
                 <button

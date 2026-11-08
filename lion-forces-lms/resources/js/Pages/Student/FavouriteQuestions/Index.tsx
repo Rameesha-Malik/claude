@@ -72,6 +72,12 @@ function FavouriteCard({ item }: { item: Favourite }) {
                             <LiteMarkdownInline text={item.question.explanation} />
                         </div>
                     )}
+                    <button
+                        onClick={() => setRevealed(false)}
+                        className="rounded-full bg-white/15 px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-white transition-colors hover:bg-white/25"
+                    >
+                        Hide Answer
+                    </button>
                 </div>
             ) : (
                 <button
