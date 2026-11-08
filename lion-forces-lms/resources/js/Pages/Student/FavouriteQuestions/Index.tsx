@@ -24,34 +24,38 @@ function FavouriteCard({ item }: { item: Favourite }) {
     if (removed) return null;
 
     return (
-        <div className="rounded-[2rem] border border-border bg-surface p-5">
-            <div className="mb-3 flex flex-wrap items-center justify-between gap-2">
-                <div>
-                    {item.question.subject && (
-                        // Accent (oxblood), not primary-teal -- this is the site's
-                        // established "second brand voice" token, a deliberately
-                        // different color from the plain teal pill MCQ Notes uses
-                        // for the same kind of subject tag, so the two pages don't
-                        // read as the same badge copy-pasted twice.
-                        <span className="mb-1 inline-flex items-center gap-1 rounded-full bg-accent px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide text-on-accent">
-                            <svg className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor"><path d="M10 2.5l2.35 4.76 5.26.77-3.8 3.7.9 5.24L10 14.5l-4.71 2.47.9-5.24-3.8-3.7 5.26-.77L10 2.5z" /></svg>
-                            {item.question.subject.name}
-                        </span>
-                    )}
-                    <p className="font-semibold text-text"><LiteMarkdownInline text={item.question.question_text} /></p>
-                </div>
-                <button
-                    onClick={remove}
-                    title="Remove from favourites"
-                    className="flex-shrink-0 text-xl text-star hover:opacity-70"
-                >
-                    ★
-                </button>
-            </div>
+        <div
+            className="relative overflow-hidden rounded-[2rem] p-6 text-white"
+            style={{ background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))' }}
+        >
+            {/* Bookmark ribbon, not a plain star glyph -- same "remove from
+                favourites" action, styled to hang off the card's top edge like
+                a real paper bookmark tab. */}
+            <button
+                onClick={remove}
+                title="Remove from favourites"
+                className="absolute right-6 top-0 flex h-11 w-9 items-center justify-center bg-surface text-star transition-opacity hover:opacity-80"
+                style={{ clipPath: 'polygon(0 0, 100% 0, 100% 100%, 50% 72%, 0 100%)' }}
+            >
+                <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 2.5l2.35 4.76 5.26.77-3.8 3.7.9 5.24L10 14.5l-4.71 2.47.9-5.24-3.8-3.7 5.26-.77L10 2.5z" />
+                </svg>
+            </button>
+
+            {item.question.subject && (
+                <span className="inline-block rounded-full bg-white/15 px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide text-white">
+                    {item.question.subject.name}
+                </span>
+            )}
+            <p className="mt-2 max-w-[85%] text-lg font-bold leading-snug">
+                <LiteMarkdownInline text={item.question.question_text} />
+            </p>
+
+            <div className="my-5 border-t border-dashed border-white/25" />
 
             {revealed ? (
-                <>
-                    <div className="space-y-2">
+                <div className="space-y-3">
+                    <div className="space-y-2 rounded-[1.5rem] bg-surface p-4">
                         {item.question.options.map((opt) => (
                             <div
                                 key={opt.id}
@@ -63,16 +67,16 @@ function FavouriteCard({ item }: { item: Favourite }) {
                         ))}
                     </div>
                     {item.question.explanation && (
-                        <div className="mt-3 rounded-[1.5rem] bg-primary-subtle p-3 text-sm text-text">
+                        <div className="rounded-[1.5rem] bg-surface p-4 text-sm text-text">
                             <span className="font-bold text-primary">Explanation: </span>
                             <LiteMarkdownInline text={item.question.explanation} />
                         </div>
                     )}
-                </>
+                </div>
             ) : (
                 <button
                     onClick={() => setRevealed(true)}
-                    className="rounded-full border border-border px-4 py-2 text-sm font-bold uppercase tracking-wide text-text transition-colors hover:border-primary hover:text-primary"
+                    className="rounded-full bg-white/15 px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-white transition-colors hover:bg-white/25"
                 >
                     Reveal Answer
                 </button>
