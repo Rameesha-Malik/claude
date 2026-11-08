@@ -57,20 +57,14 @@ function RevisionCard({ item }: { item: RevisionItem }) {
                             <LiteMarkdownInline text={item.question.explanation} />
                         </div>
                     )}
-                    <button
-                        onClick={() => setRevealed(false)}
-                        className="mt-3 rounded-full border border-border px-4 py-2 text-sm font-bold uppercase tracking-wide text-text transition-colors hover:border-primary hover:text-primary"
-                    >
+                    <LiquidButton tone="light" onClick={() => setRevealed(false)} className="mt-3 px-4 py-2 text-sm uppercase tracking-wide">
                         Hide Answer
-                    </button>
+                    </LiquidButton>
                 </>
             ) : (
-                <button
-                    onClick={() => setRevealed(true)}
-                    className="rounded-full border border-border px-4 py-2 text-sm font-bold uppercase tracking-wide text-text transition-colors hover:border-primary hover:text-primary"
-                >
+                <LiquidButton tone="light" onClick={() => setRevealed(true)} className="px-4 py-2 text-sm uppercase tracking-wide">
                     Reveal Answer
-                </button>
+                </LiquidButton>
             )}
 
             <p className="mt-3 text-xs text-text-muted">This stays here until you answer it correctly on a later attempt.</p>

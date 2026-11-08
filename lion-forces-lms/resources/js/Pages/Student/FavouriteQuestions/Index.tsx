@@ -57,9 +57,9 @@ function FavouriteCard({ item }: { item: Favourite }) {
 
             <div className="relative z-10">
             {item.question.subject && (
-                <span className="inline-block rounded-full bg-white/15 px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide text-white">
+                <LiquidButton tone="light" className="px-2.5 py-0.5 text-xs uppercase tracking-wide">
                     {item.question.subject.name}
-                </span>
+                </LiquidButton>
             )}
             <p className="mt-2 max-w-[85%] text-lg font-bold leading-snug">
                 <LiteMarkdownInline text={item.question.question_text} />

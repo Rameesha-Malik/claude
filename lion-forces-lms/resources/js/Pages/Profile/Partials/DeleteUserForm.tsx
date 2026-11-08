@@ -6,7 +6,6 @@ import InputError from '@/Components/InputError';
 import InputLabel from '@/Components/InputLabel';
 import LiquidButton from '@/Components/LiquidButton';
 import Modal from '@/Components/Modal';
-import SecondaryButton from '@/Components/SecondaryButton';
 
 // Controlled from Edit.tsx -- the trigger now lives as a small link in the
 // profile header card (see Edit.tsx) instead of a whole standing "Delete
@@ -78,9 +77,9 @@ export default function DeleteUserForm({ show, onClose }: { show: boolean; onClo
                 </div>
 
                 <div className="mt-6 flex justify-end gap-3">
-                    <SecondaryButton type="button" onClick={onClose}>
+                    <LiquidButton tone="light" onClick={onClose} className="px-5 py-2.5 text-sm uppercase tracking-wide">
                         Cancel
-                    </SecondaryButton>
+                    </LiquidButton>
 
                     <LiquidButton type="submit" tone="danger" disabled={processing} className="px-5 py-2.5 text-sm uppercase tracking-wide">
                         Delete Account

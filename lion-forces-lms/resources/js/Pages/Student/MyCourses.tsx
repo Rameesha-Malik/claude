@@ -1,5 +1,5 @@
 import { Head, Link } from '@inertiajs/react';
-import LiquidButton from '@/Components/LiquidButton';
+import LiquidButton, { Tone } from '@/Components/LiquidButton';
 import RevealOnScroll from '@/Components/RevealOnScroll';
 import SemiGauge from '@/Components/SemiGauge';
 import StudentLayout from '@/Layouts/StudentLayout';
@@ -15,17 +15,19 @@ interface Enrollment {
 // same course-progress % the old linear bar showed, not a fabricated
 // score -- "status" below is just a plain-language bucket of that same
 // number, same idea as the dashboard's existing warning/success tones.
-function progressStatus(progress: number): { label: string; color: string; bg: string } {
-    if (progress >= 100) return { label: 'Completed', color: 'var(--color-success)', bg: 'var(--color-success-bg)' };
-    if (progress >= 50) return { label: 'On Track', color: 'var(--color-primary)', bg: 'var(--color-primary-subtle)' };
-    if (progress > 0) return { label: 'Just Started', color: 'var(--color-warning)', bg: 'var(--color-warning-bg)' };
-    return { label: 'Not Started', color: 'var(--color-text-muted)', bg: 'var(--color-surface-sunken)' };
+// color still feeds the SemiGauge's SVG stroke (a raw CSS color, not a
+// LiquidButton tone); tone drives the status pill's liquid-metal fill.
+function progressStatus(progress: number): { label: string; color: string; tone: Tone } {
+    if (progress >= 100) return { label: 'Completed', color: 'var(--color-success)', tone: 'success' };
+    if (progress >= 50) return { label: 'On Track', color: 'var(--color-primary)', tone: 'dark' };
+    if (progress > 0) return { label: 'Just Started', color: 'var(--color-warning)', tone: 'warning' };
+    return { label: 'Not Started', color: 'var(--color-text-muted)', tone: 'light' };
 }
 
-const NON_ACTIVE_STATUS: Record<string, { label: string; color: string; bg: string }> = {
-    pending: { label: 'Pending', color: 'var(--color-warning)', bg: 'var(--color-warning-bg)' },
-    suspended: { label: 'Suspended', color: 'var(--color-danger)', bg: 'var(--color-danger-bg)' },
-    expired: { label: 'Expired', color: 'var(--color-danger)', bg: 'var(--color-danger-bg)' },
+const NON_ACTIVE_STATUS: Record<string, { label: string; color: string; tone: Tone }> = {
+    pending: { label: 'Pending', color: 'var(--color-warning)', tone: 'warning' },
+    suspended: { label: 'Suspended', color: 'var(--color-danger)', tone: 'danger' },
+    expired: { label: 'Expired', color: 'var(--color-danger)', tone: 'danger' },
 };
 
 function CourseGaugeCard({ e }: { e: Enrollment }) {
@@ -33,22 +35,17 @@ function CourseGaugeCard({ e }: { e: Enrollment }) {
     const progress = e.progress ?? 0;
     const status = isActive
         ? progressStatus(progress)
-        : (NON_ACTIVE_STATUS[e.status] ?? { label: e.status, color: 'var(--color-text-muted)', bg: 'var(--color-surface-sunken)' });
+        : (NON_ACTIVE_STATUS[e.status] ?? { label: e.status, color: 'var(--color-text-muted)', tone: 'light' as Tone });
 
     return (
-        <div className="group flex flex-col rounded-3xl border border-border bg-surface p-6 text-center shadow-xs transition-all duration-normal hover:-translate-y-1 hover:border-primary hover:shadow-lg">
+        <div className="group flex flex-col rounded-[2rem] border border-border bg-surface p-6 text-center shadow-xs transition-all duration-normal hover:-translate-y-1 hover:border-primary hover:shadow-lg">
             <div className="flex items-start justify-between gap-2 text-left">
                 {e.course.category ? (
-                    <span className="inline-block rounded-full bg-surface-sunken px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide text-text-secondary">
-                        {e.course.category.name}
-                    </span>
+                    <LiquidButton className="px-2.5 py-0.5 text-xs uppercase tracking-wide">{e.course.category.name}</LiquidButton>
                 ) : <span />}
-                <span
-                    className="flex-shrink-0 rounded-full px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide"
-                    style={{ color: status.color, backgroundColor: status.bg }}
-                >
+                <LiquidButton tone={status.tone} className="flex-shrink-0 px-2.5 py-0.5 text-xs uppercase tracking-wide">
                     {status.label}
-                </span>
+                </LiquidButton>
             </div>
 
             <h3 className="mt-2 text-left font-bold text-text group-hover:text-primary">{e.course.title}</h3>

@@ -415,16 +415,17 @@ export default function CourseLearning({ course: courseProp, personalNotes = [],
                                     <LessonContentTabs key={activeLesson.id} lesson={activeLesson} notes={course.shared_notes} />
 
                                     <div className="mt-5 flex flex-wrap items-center gap-3 border-t border-border pt-5">
-                                        <button
+                                        <LiquidButton
+                                            tone="light"
                                             onClick={() => {
                                                 const i = course.lessons.findIndex((l) => l.id === activeLesson.id);
                                                 if (i > 0) setActiveLesson(course.lessons[i - 1]);
                                             }}
                                             disabled={course.lessons.findIndex((l) => l.id === activeLesson.id) <= 0}
-                                            className="rounded-full border border-border px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-text transition-all duration-fast hover:-translate-y-0.5 hover:border-primary hover:text-primary disabled:opacity-40 disabled:hover:translate-y-0"
+                                            className="px-5 py-2.5 text-sm uppercase tracking-wide"
                                         >
                                             &larr; Previous
-                                        </button>
+                                        </LiquidButton>
                                         <LiquidButton
                                             onClick={() => {
                                                 const i = course.lessons.findIndex((l) => l.id === activeLesson.id);
