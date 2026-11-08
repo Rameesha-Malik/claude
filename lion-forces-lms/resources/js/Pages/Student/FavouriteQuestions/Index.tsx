@@ -25,16 +25,25 @@ function FavouriteCard({ item }: { item: Favourite }) {
 
     return (
         <div
-            className="relative overflow-hidden rounded-[2rem] p-6 text-white"
+            className="group relative overflow-hidden rounded-[2rem] p-6 text-white"
             style={{ background: 'linear-gradient(135deg, var(--color-primary), var(--color-secondary))' }}
         >
+            {/* Shine sweep on hover -- a skewed light band that travels across
+                the card once, clipped by the card's own overflow-hidden/rounded
+                corners. z-0 so it stays behind the real content (z-10 below)
+                and the ribbon button, not on top of either. */}
+            <div
+                aria-hidden
+                className="pointer-events-none absolute inset-y-0 left-0 z-0 w-1/3 -translate-x-[150%] skew-x-[-20deg] bg-white/20 transition-transform duration-[1100ms] ease-out group-hover:translate-x-[420%]"
+            />
+
             {/* Bookmark ribbon, not a plain star glyph -- same "remove from
                 favourites" action, styled to hang off the card's top edge like
                 a real paper bookmark tab. */}
             <button
                 onClick={remove}
                 title="Remove from favourites"
-                className="absolute right-6 top-0 flex h-11 w-9 items-center justify-center bg-surface text-star transition-opacity hover:opacity-80"
+                className="absolute right-6 top-0 z-20 flex h-11 w-9 items-center justify-center bg-surface text-star transition-opacity hover:opacity-80"
                 style={{ clipPath: 'polygon(0 0, 100% 0, 100% 100%, 50% 72%, 0 100%)' }}
             >
                 <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
@@ -42,6 +51,7 @@ function FavouriteCard({ item }: { item: Favourite }) {
                 </svg>
             </button>
 
+            <div className="relative z-10">
             {item.question.subject && (
                 <span className="inline-block rounded-full bg-white/15 px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide text-white">
                     {item.question.subject.name}
@@ -87,6 +97,7 @@ function FavouriteCard({ item }: { item: Favourite }) {
                     Reveal Answer
                 </button>
             )}
+            </div>
         </div>
     );
 }
