@@ -1,13 +1,16 @@
 import { Head, router } from '@inertiajs/react';
 import { useState } from 'react';
+import AccordionRow from '@/Components/AccordionRow';
 import { LiteMarkdownInline } from '@/Components/LiteMarkdown';
 import RevealOnScroll from '@/Components/RevealOnScroll';
 import StudentLayout from '@/Layouts/StudentLayout';
 
 interface Option { id: number; option_text: string; is_correct: boolean }
 interface Question { id: number; question_text: string; options: Option[]; subject: { name: string } | null }
-interface NoteItem { id: number; note_text: string; question: Question }
+interface NoteItem { id: number; note_text: string; created_at: string; question: Question }
 interface Props { notes: NoteItem[] }
+
+const PENCIL_PATH = 'M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.5-9.5a2.121 2.121 0 013 3L12 16l-4 1 1-4 9.5-9.5z';
 
 function NoteCard({ item }: { item: NoteItem }) {
     const [editing, setEditing] = useState(false);
@@ -32,38 +35,43 @@ function NoteCard({ item }: { item: NoteItem }) {
     if (deleted) return null;
 
     return (
-        <div className="rounded-[2rem] border border-border bg-surface p-5">
-            <div className="mb-3 flex flex-wrap items-start justify-between gap-2">
-                <div>
-                    {item.question.subject && (
-                        <span className="mb-1 inline-block rounded-full bg-primary px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide text-on-primary">
-                            {item.question.subject.name}
-                        </span>
-                    )}
-                    <p className="font-semibold text-text"><LiteMarkdownInline text={item.question.question_text} /></p>
-                </div>
-                <div className="flex flex-shrink-0 gap-1.5">
-                    {!editing && (
-                        <button
-                            onClick={() => setEditing(true)}
-                            title="Edit note"
-                            className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-[0.5rem] text-text-muted hover:bg-primary-subtle hover:text-primary"
-                        >
-                            <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.5-9.5a2.121 2.121 0 013 3L12 16l-4 1 1-4 9.5-9.5z" />
-                            </svg>
-                        </button>
-                    )}
+        <AccordionRow
+            icon={
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d={PENCIL_PATH} />
+                </svg>
+            }
+            title={<LiteMarkdownInline text={item.question.question_text} />}
+            pill={
+                item.question.subject && (
+                    <span className="flex-shrink-0 rounded-full bg-primary px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide text-on-primary">
+                        {item.question.subject.name}
+                    </span>
+                )
+            }
+            subtitle={`Noted on ${new Date(item.created_at).toLocaleDateString()}`}
+        >
+            <div className="mb-3 flex justify-end gap-1.5">
+                {!editing && (
                     <button
-                        onClick={remove}
-                        title="Delete note"
-                        className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-[0.5rem] text-text-muted hover:bg-danger-bg hover:text-danger"
+                        onClick={() => setEditing(true)}
+                        title="Edit note"
+                        className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-[0.5rem] text-text-muted hover:bg-primary-subtle hover:text-primary"
                     >
                         <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" d="M6 7h12M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2m2 0v13a1 1 0 01-1 1H8a1 1 0 01-1-1V7h10z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" d={PENCIL_PATH} />
                         </svg>
                     </button>
-                </div>
+                )}
+                <button
+                    onClick={remove}
+                    title="Delete note"
+                    className="flex h-7 w-7 flex-shrink-0 items-center justify-center rounded-[0.5rem] text-text-muted hover:bg-danger-bg hover:text-danger"
+                >
+                    <svg className="h-4 w-4" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M6 7h12M9 7V5a1 1 0 011-1h4a1 1 0 011 1v2m2 0v13a1 1 0 01-1 1H8a1 1 0 01-1-1V7h10z" />
+                    </svg>
+                </button>
             </div>
 
             {editing ? (
@@ -86,7 +94,7 @@ function NoteCard({ item }: { item: NoteItem }) {
             ) : (
                 <p className="whitespace-pre-line rounded-[1.5rem] bg-primary-subtle p-3 text-sm text-text">{saved}</p>
             )}
-        </div>
+        </AccordionRow>
     );
 }
 

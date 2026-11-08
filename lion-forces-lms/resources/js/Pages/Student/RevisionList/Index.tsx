@@ -1,5 +1,6 @@
 import { Head } from '@inertiajs/react';
 import { useState } from 'react';
+import AccordionRow from '@/Components/AccordionRow';
 import { LiteMarkdownInline } from '@/Components/LiteMarkdown';
 import RevealOnScroll from '@/Components/RevealOnScroll';
 import StudentLayout from '@/Layouts/StudentLayout';
@@ -9,6 +10,10 @@ interface Question { id: number; question_text: string; explanation: string | nu
 interface RevisionItem { id: number; times_wrong: number; last_wrong_at: string; question: Question }
 interface Props { items: RevisionItem[] }
 
+// A flagged-pennant icon -- genuinely what this list is (questions flagged
+// because they were missed), not a decorative glyph.
+const FLAG_PATH = 'M6 3v18M6 4h12l-2.5 3.5L18 11H6';
+
 // Answer stays hidden until the student actively asks for it -- self-testing
 // ("do I actually know this now?") is the point of a revision list, not
 // re-reading the same explanation passively the way the attempt result
@@ -17,21 +22,28 @@ function RevisionCard({ item }: { item: RevisionItem }) {
     const [revealed, setRevealed] = useState(false);
 
     return (
-        <div className="rounded-3xl border border-border bg-surface p-5">
-            <div className="mb-3 flex items-center justify-between gap-2">
-                <p className="font-semibold text-text"><LiteMarkdownInline text={item.question.question_text} /></p>
+        <AccordionRow
+            icon={
+                <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" d={FLAG_PATH} />
+                </svg>
+            }
+            iconBg="var(--color-warning)"
+            title={<LiteMarkdownInline text={item.question.question_text} />}
+            pill={
                 <span className="flex-shrink-0 rounded-full bg-warning-bg px-2.5 py-0.5 text-xs font-bold uppercase text-warning">
                     Missed {item.times_wrong}×
                 </span>
-            </div>
-
+            }
+            subtitle={`Last missed ${new Date(item.last_wrong_at).toLocaleDateString()}`}
+        >
             {revealed ? (
                 <>
                     <div className="space-y-2">
                         {item.question.options.map((opt) => (
                             <div
                                 key={opt.id}
-                                className={`rounded-2xl border p-3 text-sm ${opt.is_correct ? 'border-success bg-success-bg text-text' : 'border-border text-text-secondary'}`}
+                                className={`rounded-[1.5rem] border p-3 text-sm ${opt.is_correct ? 'border-success bg-success-bg text-text' : 'border-border text-text-secondary'}`}
                             >
                                 {opt.option_text}
                                 {opt.is_correct && <span className="ml-2 text-xs font-bold uppercase text-success">Correct Answer</span>}
@@ -39,7 +51,7 @@ function RevisionCard({ item }: { item: RevisionItem }) {
                         ))}
                     </div>
                     {item.question.explanation && (
-                        <div className="mt-3 rounded-2xl bg-primary-subtle p-3 text-sm text-text">
+                        <div className="mt-3 rounded-[1.5rem] bg-primary-subtle p-3 text-sm text-text">
                             <span className="font-bold text-primary">Explanation: </span>
                             <LiteMarkdownInline text={item.question.explanation} />
                         </div>
@@ -54,11 +66,8 @@ function RevisionCard({ item }: { item: RevisionItem }) {
                 </button>
             )}
 
-            <p className="mt-3 text-xs text-text-muted">
-                Last missed {new Date(item.last_wrong_at).toLocaleDateString()}. This stays here until you answer it correctly on a
-                later attempt.
-            </p>
-        </div>
+            <p className="mt-3 text-xs text-text-muted">This stays here until you answer it correctly on a later attempt.</p>
+        </AccordionRow>
     );
 }
 
@@ -90,7 +99,7 @@ export default function RevisionListIndex({ items }: Props) {
             </p>
 
             {items.length === 0 ? (
-                <div className="rounded-3xl border border-dashed border-border bg-surface p-10 text-center text-text-secondary">
+                <div className="rounded-[2rem] border border-dashed border-border bg-surface p-10 text-center text-text-secondary">
                     Nothing to revise right now. Either you haven't taken a test yet, or you're getting everything right. Keep it up!
                 </div>
             ) : (
