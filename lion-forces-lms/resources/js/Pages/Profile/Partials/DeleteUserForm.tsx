@@ -1,5 +1,5 @@
 import { useForm } from '@inertiajs/react';
-import { FormEventHandler, useRef, useState } from 'react';
+import { FormEventHandler, useEffect, useRef } from 'react';
 import { LockIcon } from '@/Components/AuthIcons';
 import DangerButton from '@/Components/DangerButton';
 import IconTextInput from '@/Components/IconTextInput';
@@ -8,12 +8,12 @@ import InputLabel from '@/Components/InputLabel';
 import Modal from '@/Components/Modal';
 import SecondaryButton from '@/Components/SecondaryButton';
 
-export default function DeleteUserForm({
-    className = '',
-}: {
-    className?: string;
-}) {
-    const [confirmingUserDeletion, setConfirmingUserDeletion] = useState(false);
+// Controlled from Edit.tsx -- the trigger now lives as a small link in the
+// profile header card (see Edit.tsx) instead of a whole standing "Delete
+// Account" section stacked at the bottom of the page, so this component is
+// just the confirmation modal itself; the modal's own copy already explains
+// the consequences, so nothing is lost by dropping the outer section.
+export default function DeleteUserForm({ show, onClose }: { show: boolean; onClose: () => void }) {
     const passwordInput = useRef<HTMLInputElement>(null);
 
     const {
@@ -28,80 +28,63 @@ export default function DeleteUserForm({
         password: '',
     });
 
-    const confirmUserDeletion = () => {
-        setConfirmingUserDeletion(true);
-    };
-
     const deleteUser: FormEventHandler = (e) => {
         e.preventDefault();
 
         destroy(route('profile.destroy'), {
             preserveScroll: true,
-            onSuccess: () => closeModal(),
+            onSuccess: () => onClose(),
             onError: () => passwordInput.current?.focus(),
             onFinish: () => reset(),
         });
     };
 
-    const closeModal = () => {
-        setConfirmingUserDeletion(false);
-
-        clearErrors();
-        reset();
-    };
+    useEffect(() => {
+        if (!show) {
+            clearErrors();
+            reset();
+        }
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [show]);
 
     return (
-        <section className={`space-y-4 ${className}`}>
-            <header>
-                <h2 className="text-lg font-bold text-text">Delete Account</h2>
+        <Modal show={show} onClose={onClose}>
+            <form onSubmit={deleteUser} className="p-6">
+                <h2 className="text-lg font-bold text-text">
+                    Are you sure you want to delete your account?
+                </h2>
+
                 <p className="mt-1 text-sm text-text-secondary">
-                    Once your account is deleted, all of its resources and data will be permanently deleted. Before
-                    deleting your account, please download any data or information that you wish to retain.
+                    Once your account is deleted, all of its resources and data will be permanently deleted.
+                    Please enter your password to confirm you would like to permanently delete your account.
                 </p>
-            </header>
 
-            <DangerButton onClick={confirmUserDeletion}>
-                Delete Account
-            </DangerButton>
+                <div className="mt-6">
+                    <InputLabel htmlFor="password" value="Password" className="sr-only" />
 
-            <Modal show={confirmingUserDeletion} onClose={closeModal}>
-                <form onSubmit={deleteUser} className="p-6">
-                    <h2 className="text-lg font-bold text-text">
-                        Are you sure you want to delete your account?
-                    </h2>
+                    <IconTextInput
+                        id="password"
+                        type="password"
+                        icon={<LockIcon />}
+                        ref={passwordInput}
+                        value={data.password}
+                        onChange={(e) => setData('password', e.target.value)}
+                        className="w-full"
+                        isFocused
+                        placeholder="Password"
+                    />
 
-                    <p className="mt-1 text-sm text-text-secondary">
-                        Once your account is deleted, all of its resources and data will be permanently deleted.
-                        Please enter your password to confirm you would like to permanently delete your account.
-                    </p>
+                    <InputError message={errors.password} className="mt-2" />
+                </div>
 
-                    <div className="mt-6">
-                        <InputLabel htmlFor="password" value="Password" className="sr-only" />
+                <div className="mt-6 flex justify-end gap-3">
+                    <SecondaryButton type="button" onClick={onClose}>
+                        Cancel
+                    </SecondaryButton>
 
-                        <IconTextInput
-                            id="password"
-                            type="password"
-                            icon={<LockIcon />}
-                            ref={passwordInput}
-                            value={data.password}
-                            onChange={(e) => setData('password', e.target.value)}
-                            className="w-full"
-                            isFocused
-                            placeholder="Password"
-                        />
-
-                        <InputError message={errors.password} className="mt-2" />
-                    </div>
-
-                    <div className="mt-6 flex justify-end gap-3">
-                        <SecondaryButton onClick={closeModal}>
-                            Cancel
-                        </SecondaryButton>
-
-                        <DangerButton disabled={processing}>Delete Account</DangerButton>
-                    </div>
-                </form>
-            </Modal>
-        </section>
+                    <DangerButton disabled={processing}>Delete Account</DangerButton>
+                </div>
+            </form>
+        </Modal>
     );
 }
