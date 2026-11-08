@@ -3,6 +3,7 @@ import { useState, useRef } from 'react';
 import AdminLayout from '@/Layouts/AdminLayout';
 import StudentLayout from '@/Layouts/StudentLayout';
 import TabBar from '@/Components/TabBar';
+import LiquidButton from '@/Components/LiquidButton';
 import { PageProps } from '@/types';
 import DeleteUserForm from './Partials/DeleteUserForm';
 import UpdateBiodataForm from './Partials/UpdateBiodataForm';
@@ -70,21 +71,34 @@ export default function Edit({ mustVerifyEmail, status, userType }: PageProps<{ 
                         <h1 className="truncate text-xl font-bold">{auth.user?.name}</h1>
                         <p className="truncate text-sm text-teal-200">{auth.user?.email}</p>
                     </div>
-                    <button
-                        type="button"
-                        onClick={() => setConfirmingDeletion(true)}
-                        className="flex-shrink-0 text-xs font-bold uppercase tracking-wide text-white/60 transition-colors hover:text-danger"
-                    >
+                    <LiquidButton tone="danger" onClick={() => setConfirmingDeletion(true)} className="flex-shrink-0 px-3 py-1.5 text-xs uppercase tracking-wide">
                         Delete Account
-                    </button>
+                    </LiquidButton>
                 </div>
 
                 <TabBar tabs={tabs} active={activeTab} onChange={setActiveTab} />
 
-                <div className="rounded-[2rem] border border-border bg-surface p-6 sm:p-8">
-                    {activeTab === 'personal' && <UpdateProfileInformationForm mustVerifyEmail={mustVerifyEmail} status={status} />}
-                    {activeTab === 'additional' && userType === 'student' && <UpdateBiodataForm />}
-                    {activeTab === 'password' && <UpdatePasswordForm />}
+                {/* "Glass" rim-light border (the same 1px mask-gradient trick
+                    LiquidButton uses for its own rim), not a plain flat border --
+                    so this card's edge reads as the same material as the
+                    liquid-metal buttons around it instead of a flat line. */}
+                <div className="relative overflow-hidden rounded-[2rem] bg-surface p-6 sm:p-8">
+                    <span
+                        aria-hidden
+                        className="pointer-events-none absolute inset-0 rounded-[2rem]"
+                        style={{
+                            padding: 1,
+                            background: 'linear-gradient(135deg, rgba(255,255,255,.9), rgba(255,255,255,0) 30%, rgba(255,255,255,0) 65%, var(--teal-600))',
+                            WebkitMask: 'linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0)',
+                            WebkitMaskComposite: 'xor',
+                            maskComposite: 'exclude',
+                        }}
+                    />
+                    <div className="relative z-10">
+                        {activeTab === 'personal' && <UpdateProfileInformationForm mustVerifyEmail={mustVerifyEmail} status={status} />}
+                        {activeTab === 'additional' && userType === 'student' && <UpdateBiodataForm />}
+                        {activeTab === 'password' && <UpdatePasswordForm />}
+                    </div>
                 </div>
             </div>
 
