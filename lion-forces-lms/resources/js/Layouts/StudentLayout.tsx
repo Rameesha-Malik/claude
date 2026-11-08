@@ -33,22 +33,43 @@ export default function StudentLayout({ children, header }: PropsWithChildren<{ 
                 <SiteLogo site={site} shape="rounded" />
                 <span className="truncate text-sm leading-tight">{site.name}</span>
             </Link>
+            {/* Client's "tree nav" reference (a docs-style vertical line + dot
+                per item) kept alongside the existing icons rather than
+                replacing them -- each row draws its own half-segment of the
+                line (top half for every row but the first, bottom half for
+                every row but the last) so the segments join into one
+                continuous line regardless of how many items `features`
+                leaves visible. */}
             <nav className="flex-1 space-y-1.5 px-3 py-4">
-                {visibleNav.map((item) => {
+                {visibleNav.map((item, i) => {
                     const active = url === item.href || (item.href !== '/portal' && url.startsWith(item.href));
                     return (
-                        <Link
-                            key={item.href}
-                            href={item.href}
-                            className={`group flex items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-medium transition-all duration-normal ${
-                                active
-                                    ? 'bg-primary text-on-primary shadow-md'
-                                    : 'text-teal-200 hover:translate-x-0.5 hover:bg-white/10 hover:text-white'
-                            }`}
-                        >
-                            <span className={`transition-transform duration-normal ${active ? '' : 'group-hover:scale-110'}`}>{item.icon}</span>
-                            {item.label}
-                        </Link>
+                        <div key={item.href} className="flex gap-2.5">
+                            <div className="relative flex w-4 flex-shrink-0 items-center justify-center">
+                                <span
+                                    aria-hidden
+                                    className="absolute left-1/2 w-px -translate-x-1/2 bg-white/15"
+                                    style={{ top: i === 0 ? '50%' : 0, bottom: i === visibleNav.length - 1 ? '50%' : 0 }}
+                                />
+                                <span
+                                    aria-hidden
+                                    className={`relative z-10 h-1.5 w-1.5 rounded-full transition-all duration-normal ${
+                                        active ? 'bg-gold-400 ring-4 ring-gold-400/25' : 'bg-white/25'
+                                    }`}
+                                />
+                            </div>
+                            <Link
+                                href={item.href}
+                                className={`group flex flex-1 items-center gap-3 rounded-2xl px-3.5 py-2.5 text-sm font-medium transition-all duration-normal ${
+                                    active
+                                        ? 'bg-primary text-on-primary shadow-md'
+                                        : 'text-teal-200 hover:translate-x-0.5 hover:bg-white/10 hover:text-white'
+                                }`}
+                            >
+                                <span className={`transition-transform duration-normal ${active ? '' : 'group-hover:scale-110'}`}>{item.icon}</span>
+                                {item.label}
+                            </Link>
+                        </div>
                     );
                 })}
             </nav>
