@@ -1,6 +1,7 @@
 import { Head } from '@inertiajs/react';
 import { useState } from 'react';
 import AccordionRow from '@/Components/AccordionRow';
+import LiquidButton from '@/Components/LiquidButton';
 import { LiteMarkdownInline } from '@/Components/LiteMarkdown';
 import RevealOnScroll from '@/Components/RevealOnScroll';
 import StudentLayout from '@/Layouts/StudentLayout';
@@ -31,9 +32,9 @@ function RevisionCard({ item }: { item: RevisionItem }) {
             iconTone="warning"
             title={<LiteMarkdownInline text={item.question.question_text} />}
             pill={
-                <span className="flex-shrink-0 rounded-full bg-warning-bg px-2.5 py-0.5 text-xs font-bold uppercase text-warning">
+                <LiquidButton tone="warning" className="px-2.5 py-0.5 text-xs uppercase">
                     Missed {item.times_wrong}×
-                </span>
+                </LiquidButton>
             }
             subtitle={`Last missed ${new Date(item.last_wrong_at).toLocaleDateString()}`}
         >

@@ -105,9 +105,9 @@ function NeedsAttention({ revisionItems, nextExam }: { revisionItems: RevisionIt
                         {revisionItems.map((item) => (
                             <div key={item.id} className="flex items-start justify-between gap-3 rounded-[1rem] bg-surface-sunken px-3.5 py-2.5 text-sm">
                                 <span className="min-w-0 flex-1 truncate text-text">{item.question_text}</span>
-                                <span className="flex-shrink-0 rounded-full bg-warning-bg px-2.5 py-0.5 text-xs font-bold text-warning">
+                                <LiquidButton tone="warning" className="flex-shrink-0 px-2.5 py-0.5 text-xs">
                                     Missed {item.times_wrong}&times;
-                                </span>
+                                </LiquidButton>
                             </div>
                         ))}
                     </div>
