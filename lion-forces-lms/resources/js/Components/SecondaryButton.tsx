@@ -12,7 +12,7 @@ export default function SecondaryButton({
             {...props}
             type={type}
             className={
-                `inline-flex items-center justify-center rounded-lg border border-border bg-surface px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-text shadow-xs transition-all duration-fast hover:border-primary hover:text-primary focus:outline-none focus:shadow-glow disabled:opacity-50 ${
+                `inline-flex items-center justify-center rounded-[0.75rem] border border-border bg-surface px-5 py-2.5 text-sm font-bold uppercase tracking-wide text-text shadow-xs transition-all duration-fast hover:border-primary hover:text-primary focus:outline-none focus:shadow-glow disabled:opacity-50 ${
                     disabled && 'opacity-50'
                 } ` + className
             }

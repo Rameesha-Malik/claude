@@ -41,42 +41,44 @@ export default function UpdateProfileInformation({
             </header>
 
             <form onSubmit={submit} className="mt-6 space-y-5">
-                <div>
-                    <InputLabel htmlFor="name" value="Name" />
+                <div className="grid gap-5 sm:grid-cols-2">
+                    <div>
+                        <InputLabel htmlFor="name" value="Name" />
 
-                    <IconTextInput
-                        id="name"
-                        icon={<PersonIcon />}
-                        className="mt-1"
-                        value={data.name}
-                        onChange={(e) => setData('name', e.target.value)}
-                        required
-                        isFocused
-                        autoComplete="name"
-                    />
+                        <IconTextInput
+                            id="name"
+                            icon={<PersonIcon />}
+                            className="mt-1"
+                            value={data.name}
+                            onChange={(e) => setData('name', e.target.value)}
+                            required
+                            isFocused
+                            autoComplete="name"
+                        />
 
-                    <InputError className="mt-2" message={errors.name} />
-                </div>
+                        <InputError className="mt-2" message={errors.name} />
+                    </div>
 
-                <div>
-                    <InputLabel htmlFor="email" value="Email" />
+                    <div>
+                        <InputLabel htmlFor="email" value="Email" />
 
-                    <IconTextInput
-                        id="email"
-                        type="email"
-                        icon={<MailIcon />}
-                        className="mt-1"
-                        value={data.email}
-                        onChange={(e) => setData('email', e.target.value)}
-                        required
-                        autoComplete="username"
-                    />
+                        <IconTextInput
+                            id="email"
+                            type="email"
+                            icon={<MailIcon />}
+                            className="mt-1"
+                            value={data.email}
+                            onChange={(e) => setData('email', e.target.value)}
+                            required
+                            autoComplete="username"
+                        />
 
-                    <InputError className="mt-2" message={errors.email} />
+                        <InputError className="mt-2" message={errors.email} />
+                    </div>
                 </div>
 
                 {mustVerifyEmail && user.email_verified_at === null && (
-                    <div className="rounded-xl bg-warning-bg p-3">
+                    <div className="rounded-[1rem] bg-warning-bg p-3">
                         <p className="text-sm text-warning">
                             Your email address is unverified.{' '}
                             <Link

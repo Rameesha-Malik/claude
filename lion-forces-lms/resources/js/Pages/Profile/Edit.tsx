@@ -25,8 +25,8 @@ export default function Edit({ mustVerifyEmail, status, userType }: PageProps<{ 
         <Layout header="Profile">
             <Head title="Profile" />
 
-            <div className="mx-auto max-w-2xl space-y-6">
-                <div className="flex items-center gap-4 rounded-3xl border border-border bg-gradient-to-br from-secondary to-teal-950 p-6 text-white">
+            <div className="mx-auto max-w-3xl space-y-6">
+                <div className="flex items-center gap-4 rounded-[2rem] border border-border bg-gradient-to-br from-secondary to-teal-950 p-6 text-white">
                     <button
                         type="button"
                         onClick={() => avatarInput.current?.click()}
@@ -57,21 +57,21 @@ export default function Edit({ mustVerifyEmail, status, userType }: PageProps<{ 
                     </div>
                 </div>
 
-                <div className="rounded-3xl border border-border bg-surface p-6 sm:p-8">
+                <div className="rounded-[2rem] border border-border bg-surface p-6 sm:p-8">
                     <UpdateProfileInformationForm mustVerifyEmail={mustVerifyEmail} status={status} />
                 </div>
 
                 {userType === 'student' && (
-                    <div className="rounded-3xl border border-border bg-surface p-6 sm:p-8">
+                    <div className="rounded-[2rem] border border-border bg-surface p-6 sm:p-8">
                         <UpdateBiodataForm />
                     </div>
                 )}
 
-                <div className="rounded-3xl border border-border bg-surface p-6 sm:p-8">
+                <div className="rounded-[2rem] border border-border bg-surface p-6 sm:p-8">
                     <UpdatePasswordForm />
                 </div>
 
-                <div className="rounded-3xl border bg-surface p-6 sm:p-8" style={{ borderColor: 'rgba(220, 38, 38, 0.3)' }}>
+                <div className="rounded-[2rem] border bg-surface p-6 sm:p-8" style={{ borderColor: 'rgba(220, 38, 38, 0.3)' }}>
                     <DeleteUserForm />
                 </div>
             </div>
