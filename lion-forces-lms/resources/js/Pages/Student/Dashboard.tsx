@@ -80,49 +80,6 @@ function useCountdown(targetDate: string | null) {
     return remaining;
 }
 
-// Icon only where the course actually names a specific service (Navy ->
-// anchor, Air Force -> wings, ISSB -> compass) -- a real match, not a
-// decorative glyph picked at random. Every other course gets its own
-// initial letter instead of an arbitrary shield/flag/book icon that had
-// no connection to that course's content; a flat brand color, not a
-// gradient + glossy highlight overlay, which is the "glossy 3D dashboard
-// tile" look the client flagged as reading AI-generated.
-const COURSE_GLYPHS = {
-    compass: 'M12 21a9 9 0 100-18 9 9 0 000 18zM12 8l2 4-2 4-2-4z',
-    anchor: 'M12 3v4m0 0a2 2 0 100 4 2 2 0 000-4zm0 4v11m-7-6a7 7 0 0014 0M5 12H3m18 0h-2',
-    wings: 'M3 12l9-7 9 7M3 12l9 7 9-7',
-};
-const BADGE_COLORS = ['var(--color-primary)', 'var(--color-secondary)', 'var(--oxblood-500)'];
-
-function courseGlyph(course: EnrollmentCard): keyof typeof COURSE_GLYPHS | null {
-    const text = `${course.category ?? ''} ${course.title}`.toLowerCase();
-    if (text.includes('navy')) return 'anchor';
-    if (text.includes('air force')) return 'wings';
-    if (text.includes('issb')) return 'compass';
-    return null;
-}
-
-function CourseIconBadge({ course, index }: { course: EnrollmentCard; index: number }) {
-    const glyph = courseGlyph(course);
-    return (
-        <div
-            className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-[1rem] text-white"
-            style={{ backgroundColor: BADGE_COLORS[index % BADGE_COLORS.length] }}
-        >
-            {glyph ? <Icon d={COURSE_GLYPHS[glyph]} className="h-6 w-6" /> : <span className="font-display text-lg">{course.title.charAt(0).toUpperCase()}</span>}
-        </div>
-    );
-}
-
-function CourseCountdown({ course }: { course: EnrollmentCard }) {
-    const remaining = useCountdown(course.target_exam_date);
-    if (!remaining) return null;
-    return (
-        <div className="mt-2 inline-flex items-center rounded-full bg-warning-bg px-2.5 py-1 text-xs font-semibold text-warning">
-            {course.target_exam_name ?? 'Target exam'}: {remaining.days}d {remaining.hours}h left
-        </div>
-    );
-}
 
 /** Real "what needs attention" items -- the actual flagged questions and
  * the nearest upcoming exam, not decorative stat tiles. Inspired by the
@@ -267,112 +224,27 @@ export default function Dashboard({ enrollments, performance, activityTrend, rev
                 </div>
             </div>
 
-            <div className="mt-6 grid gap-6 lg:grid-cols-3">
-                <div className="lg:col-span-2">
-                    <h2 className="mb-4 text-lg font-bold text-text">My Courses</h2>
-                    {enrollments.length === 0 ? (
-                        <div className="rounded-[1.5rem] border border-dashed border-border bg-surface p-10 text-center text-text-secondary">
-                            You're not enrolled in any courses yet.{' '}
-                            <Link href="/courses" className="font-semibold text-primary hover:underline">Browse courses &rarr;</Link>
+            <div className="mt-6">
+                <h2 className="mb-4 text-lg font-bold text-text">Announcements</h2>
+                <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+                    {recentBroadcasts.length === 0 && (
+                        <div className="rounded-[1.5rem] border border-dashed border-border bg-surface p-6 text-center text-sm text-text-secondary sm:col-span-2 lg:col-span-3">
+                            Nothing new right now.
                         </div>
-                    ) : (
-                        /* The decorative icon was dropped earlier this session (one
-                           identical icon repeated on every card, no information of its
-                           own, just wasted space) and is now reintroduced as a varied
-                           per-course glyph via CourseIconBadge -- padding/gaps stay
-                           tight, which is what was actually wasteful before. */
-                        <RevealOnScroll staggerMs={80} className="space-y-3">
-                            {enrollments.map((course, i) => (
-                                <Link
-                                    key={course.id}
-                                    href={`/portal/my-courses/${course.slug}`}
-                                    className={`group block rounded-[1.5rem] p-4 transition-colors duration-fast ${
-                                        course.is_current ? 'bg-secondary text-white' : 'border border-border bg-surface hover:border-primary'
-                                    }`}
-                                >
-                                    <div className="flex items-center gap-3">
-                                        <CourseIconBadge course={course} index={i} />
-                                        <div className="min-w-0 flex-1">
-                                            <div className="flex flex-wrap items-center justify-between gap-2">
-                                                <div className="flex min-w-0 items-center gap-2">
-                                                    {course.category && (
-                                                        <span
-                                                            className={`flex-shrink-0 rounded-full px-2.5 py-0.5 text-xs font-bold uppercase tracking-wide ${
-                                                                course.is_current ? 'bg-white/15 text-white' : 'bg-primary-subtle text-primary'
-                                                            }`}
-                                                        >
-                                                            {course.category}
-                                                        </span>
-                                                    )}
-                                                    <h3 className={`truncate font-bold ${course.is_current ? 'text-white' : 'text-text group-hover:text-primary'}`}>
-                                                        {course.title}
-                                                    </h3>
-                                                </div>
-                                                <span className={`flex-shrink-0 font-display text-xl ${course.is_current ? 'text-white' : 'text-primary'}`}>
-                                                    <AnimatedCounter value={`${course.progress}%`} />
-                                                </span>
-                                            </div>
-                                            {course.instructor_name && (
-                                                <p className={`truncate text-xs ${course.is_current ? 'text-teal-200' : 'text-text-muted'}`}>
-                                                    Prof. {course.instructor_name}
-                                                </p>
-                                            )}
-                                        </div>
-                                    </div>
-                                    <div className={`mt-3 h-2 overflow-hidden rounded-full ${course.is_current ? 'bg-white/15' : 'bg-surface-sunken'}`}>
-                                        <div
-                                            className={`h-full rounded-full transition-all duration-slow ${course.is_current ? 'bg-gold-400' : 'bg-primary'}`}
-                                            style={{ width: `${course.progress}%` }}
-                                        />
-                                    </div>
-                                    <div className="mt-2.5 flex flex-wrap items-center justify-between gap-2">
-                                        {course.total_lessons > 0 ? (
-                                            <span className={`text-xs ${course.is_current ? 'text-teal-200' : 'text-text-muted'}`}>
-                                                Lessons left: {course.total_lessons - course.completed_lessons} &middot; Completed: {course.progress}%
-                                            </span>
-                                        ) : <span />}
-                                        {/* Visual affordance only, not a real link -- the whole card above is
-                                            already the click target, and nesting an <a> inside one is invalid
-                                            HTML. */}
-                                        <span
-                                            className={`rounded-full px-3 py-1 text-xs font-bold uppercase tracking-wide transition-colors ${
-                                                course.is_current
-                                                    ? 'bg-gold-400 text-secondary group-hover:bg-gold-300'
-                                                    : 'bg-primary-subtle text-primary group-hover:bg-primary group-hover:text-on-primary'
-                                            }`}
-                                        >
-                                            Continue
-                                        </span>
-                                    </div>
-                                    <CourseCountdown course={course} />
-                                </Link>
-                            ))}
-                        </RevealOnScroll>
                     )}
-                </div>
-
-                <div>
-                    <h2 className="mb-4 text-lg font-bold text-text">Announcements</h2>
-                    <div className="space-y-3">
-                        {recentBroadcasts.length === 0 && (
-                            <div className="rounded-[1.5rem] border border-dashed border-border bg-surface p-6 text-center text-sm text-text-secondary">
-                                Nothing new right now.
-                            </div>
-                        )}
-                        {recentBroadcasts.map((b, i) => (
-                            <div key={i} className="rounded-[1.5rem] border border-border bg-surface p-4 transition-shadow duration-normal hover:shadow-md">
-                                <div className="flex items-start gap-2.5">
-                                    <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-[1rem] bg-primary-subtle text-primary">
-                                        <Icon d={ICONS.megaphone} className="h-4 w-4" />
-                                    </span>
-                                    <div className="min-w-0">
-                                        <div className="text-sm font-bold text-text">{b.title}</div>
-                                        <p className="mt-1 text-sm text-text-secondary">{b.body}</p>
-                                    </div>
+                    {recentBroadcasts.map((b, i) => (
+                        <div key={i} className="rounded-[1.5rem] border border-border bg-surface p-4 transition-shadow duration-normal hover:shadow-md">
+                            <div className="flex items-start gap-2.5">
+                                <span className="flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-[1rem] bg-primary-subtle text-primary">
+                                    <Icon d={ICONS.megaphone} className="h-4 w-4" />
+                                </span>
+                                <div className="min-w-0">
+                                    <div className="text-sm font-bold text-text">{b.title}</div>
+                                    <p className="mt-1 text-sm text-text-secondary">{b.body}</p>
                                 </div>
                             </div>
-                        ))}
-                    </div>
+                        </div>
+                    ))}
                 </div>
             </div>
         </StudentLayout>
