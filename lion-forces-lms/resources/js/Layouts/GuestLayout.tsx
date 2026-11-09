@@ -77,7 +77,7 @@ export default function Guest({ children, title, description }: PropsWithChildre
                 <div className="w-full px-6 py-10 sm:px-10 lg:px-12">
                     <div className="mx-auto max-w-sm">
                         <Link href="/" className="flex flex-col items-center gap-2 text-center">
-                            <SiteLogo site={site} size="footer" />
+                            <SiteLogo site={site} size="nav" dimsClassName="h-14 w-14" />
                             <span className="text-xs font-bold uppercase tracking-[0.2em] text-primary">{site.name}</span>
                         </Link>
                         <h1 className="mt-4 text-center text-2xl font-bold text-text sm:text-3xl">{title}</h1>

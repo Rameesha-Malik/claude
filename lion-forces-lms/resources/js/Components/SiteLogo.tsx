@@ -9,20 +9,27 @@ import { PageProps } from '@/types';
  * `size="footer"` (the public site footer only) uses the Header/Footer
  * logo slots from Admin -> Settings -> General when set, so a site can use
  * a simpler mark in the footer than in the header; every other spot
- * (header nav, both sidebars) uses the header slot. Both slots fall back
- * to the single generic logo from Admin -> Website -> Settings when unset,
- * which is all most sites ever need.
+ * (header nav, both sidebars, the guest auth pages) uses the header slot.
+ * Both slots fall back to the single generic logo from Admin -> Website ->
+ * Settings when unset, which is all most sites ever need.
+ *
+ * `size` picks which slot to read AND the default pixel size together --
+ * `dimsClassName` overrides just the size (e.g. a caller that wants the
+ * header slot's logo but rendered bigger than the header nav itself shows
+ * it) without changing which slot gets read.
  */
 export default function SiteLogo({
     site,
     size = 'nav',
     shape = 'circle',
+    dimsClassName,
 }: {
     site: PageProps['site'];
     size?: 'nav' | 'footer';
     shape?: 'circle' | 'rounded';
+    dimsClassName?: string;
 }) {
-    const dims = size === 'footer' ? 'h-12 w-12' : 'h-9 w-9';
+    const dims = dimsClassName ?? (size === 'footer' ? 'h-12 w-12' : 'h-9 w-9');
     const rounding = shape === 'circle' ? 'rounded-full' : 'rounded-2xl';
     const path = size === 'footer' ? site.footerLogoPath : site.headerLogoPath;
 
