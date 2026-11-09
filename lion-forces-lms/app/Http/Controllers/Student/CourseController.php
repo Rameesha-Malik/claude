@@ -1,0 +1,290 @@
+<?php
+
+namespace App\Http\Controllers\Student;
+
+use App\Http\Controllers\Controller;
+use App\Models\Course;
+use App\Models\CourseReview;
+use App\Models\Enrollment;
+use Illuminate\Http\Request;
+use Inertia\Inertia;
+use Inertia\Response;
+
+class CourseController extends Controller
+{
+    public function index(Request $request): Response
+    {
+        $user = $request->user();
+
+        // Same per-course lesson-completion math as DashboardController's
+        // enrollment cards -- only meaningful for an active enrollment,
+        // since a pending/expired one has no accessible lessons to count.
+        $enrollments = $user->enrollments()
+            ->with(['course.category', 'course.lessons', 'package'])
+            ->orderByDesc('created_at')
+            ->get()
+            ->map(function ($enrollment) use ($user) {
+                $progress = null;
+                $completedLessons = null;
+                $totalLessons = null;
+
+                if ($enrollment->isActive()) {
+                    $totalLessons = $enrollment->course->lessons->count();
+                    $completedLessons = $totalLessons > 0
+                        ? $user->lessonProgress()
+                            ->whereIn('lesson_id', $enrollment->course->lessons->pluck('id'))
+                            ->where('is_completed', true)
+                            ->count()
+                        : 0;
+                    $progress = $totalLessons > 0 ? round(($completedLessons / $totalLessons) * 100) : 0;
+                }
+
+                return [
+                    ...$enrollment->only('id', 'status'),
+                    'course' => $enrollment->course->only('id', 'title', 'slug') + ['category' => $enrollment->course->category?->only('name')],
+                    'package' => $enrollment->package?->only('name'),
+                    'progress' => $progress,
+                    'completed_lessons' => $completedLessons,
+                    'total_lessons' => $totalLessons,
+                ];
+            });
+
+        return Inertia::render('Student/MyCourses', ['enrollments' => $enrollments]);
+    }
+
+    public function show(Request $request, Course $course): Response
+    {
+        $enrollment = Enrollment::where('user_id', $request->user()->id)
+            ->where('course_id', $course->id)
+            ->first();
+
+        // A pending/suspended/expired enrollment is a real, expected state
+        // (e.g. just submitted payment, awaiting verification) -- distinct
+        // from a 404, which should stay reserved for "not enrolled at all".
+        // isActive() (not the raw status column) is what actually gates
+        // access here -- an enrollment can still say status: active in the
+        // database past its package's validity_days if nothing has flipped
+        // it to 'expired' yet, and content access must not outlive that.
+        if (! $enrollment || ! $enrollment->isActive()) {
+            return Inertia::render('Student/CourseLearning', [
+                'course' => $course->only('title'),
+                'enrollmentStatus' => $enrollment && ! $enrollment->isActive() && $enrollment->status === 'active'
+                    ? 'expired'
+                    : $enrollment?->status ?? null,
+            ]);
+        }
+
+        $user = $request->user();
+
+        $course->load([
+            'lessons' => fn ($q) => $q->orderBy('order'),
+            'sections' => fn ($q) => $q->orderBy('order')->with(['lessons' => fn ($q2) => $q2->orderBy('order')]),
+            'sharedNotes',
+            'instructor',
+            'practiceTests' => fn ($q) => $q->where('is_active', true)->withCount('questions'),
+            'quizzes' => fn ($q) => $q->where('is_active', true)->withCount('questions'),
+            'mockExams' => fn ($q) => $q->where('is_active', true)->withCount('sections'),
+            'stagedTests' => fn ($q) => $q->where('is_active', true)->withCount('stages'),
+            'flashcards' => fn ($q) => $q->where('status', 'approved')->with('subject:id,name'),
+            'assignments' => fn ($q) => $q->where('is_active', true)->with(['submissions' => fn ($q2) => $q2->where('user_id', $user->id)]),
+            'approvedReviews',
+            'questionBank' => fn ($q) => $q->with(['options', 'subject:id,name', 'topic:id,name'])->orderBy('subject_id'),
+        ]);
+        $course->loadCount(['enrollments' => fn ($q) => $q->where('status', 'active')]);
+        $this->attachLatestAttempts($course, $user->id);
+        $this->redactLessonSources($course);
+
+        // Personal/Guaranteed notes: assigned directly to this student, or
+        // to the package they're enrolled under.
+        $personalNotes = \App\Models\NoteAssignment::where(function ($q) use ($user, $enrollment) {
+            $q->where('assignable_type', \App\Models\User::class)->where('assignable_id', $user->id);
+            if ($enrollment->package_id) {
+                $q->orWhere(function ($q2) use ($enrollment) {
+                    $q2->where('assignable_type', \App\Models\CoursePackage::class)->where('assignable_id', $enrollment->package_id);
+                });
+            }
+        })->with('note')->get()->pluck('note');
+
+        $lessonProgress = $user->lessonProgress()
+            ->whereIn('lesson_id', $course->lessons->pluck('id'))
+            ->get()
+            ->keyBy('lesson_id');
+
+        $questions = \App\Models\CourseQuestion::where('course_id', $course->id)
+            ->where('user_id', $user->id) // private 1:1 — only this student's own thread
+            ->with('replies.admin:id,name')
+            ->latest()
+            ->get();
+
+        $myReview = CourseReview::where('course_id', $course->id)->where('user_id', $user->id)->first();
+
+        // Settings > Features global toggles are a master switch on top of
+        // this course's own flashcards_enabled/tests_enabled checkboxes --
+        // a course can only show a tab when BOTH are on. Module-scoped
+        // enrollments layer a third gate on top: a purchase only unlocks
+        // the tabs for whatever combination of modules it actually grants
+        // (Enrollment::ALL_MODULES: lectures, quiz, tests, assignments).
+        // Flashcards isn't its own purchasable module -- it's study
+        // material for lecture content, so it rides along with "lectures"
+        // the same way Notes always has.
+        $course->flashcards_enabled = $course->flashcards_enabled && \App\Support\FeatureFlags::enabled('flashcards') && $enrollment->grantsModule('lectures');
+        $course->tests_enabled = $course->tests_enabled && \App\Support\FeatureFlags::enabled('full_test') && $enrollment->grantsModule('tests');
+        $course->quizzes_enabled = $course->quizzes_enabled && $enrollment->grantsModule('quiz');
+        $course->assignments_enabled = $course->assignments_enabled && $enrollment->grantsModule('assignments');
+        $course->lectures_enabled = $enrollment->grantsModule('lectures');
+
+        // The Lectures tab is hidden client-side when lectures_enabled is
+        // false, but that alone doesn't stop the lesson data itself from
+        // shipping in this page's JSON -- Inertia sends the whole prop
+        // regardless of what the UI renders, readable via View Source.
+        // An enrollment scoped to e.g. Quiz Only shouldn't receive actual
+        // watchable video links/files for lecture content it was never
+        // sold, even if the lesson titles stay visible for context.
+        if (! $course->lectures_enabled) {
+            $stripSource = function ($lesson): void {
+                $lesson->external_url = null;
+                $lesson->file_path = null;
+            };
+            $course->lessons->each($stripSource);
+            $course->sections->each(fn ($section) => $section->lessons->each($stripSource));
+        }
+
+        return Inertia::render('Student/CourseLearning', [
+            'course' => $course,
+            'enrollment' => $enrollment,
+            'personalNotes' => $personalNotes,
+            'lessonProgress' => $lessonProgress,
+            'questions' => $questions,
+            'myReview' => $myReview,
+        ]);
+    }
+
+    // Attaches each test/quiz's most recent *submitted* attempt id (or null)
+    // so the frontend can offer a "View Results" link alongside "Start" --
+    // previously a finished attempt's result page was only reachable once,
+    // right after submission, with no way to come back and review it later.
+    private function attachLatestAttempts(Course $course, int $userId): void
+    {
+        $groups = [
+            \App\Models\PracticeTest::class => $course->practiceTests,
+            \App\Models\Quiz::class => $course->quizzes,
+            \App\Models\MockExam::class => $course->mockExams,
+            \App\Models\StagedTest::class => $course->stagedTests,
+        ];
+
+        foreach ($groups as $type => $items) {
+            if ($items->isEmpty()) {
+                continue;
+            }
+
+            $latestByAttemptable = \App\Models\TestAttempt::where('user_id', $userId)
+                ->where('attemptable_type', $type)
+                ->whereIn('attemptable_id', $items->pluck('id'))
+                ->where('status', 'submitted')
+                ->orderByDesc('submitted_at')
+                ->get(['id', 'attemptable_id'])
+                ->unique('attemptable_id')
+                ->keyBy('attemptable_id');
+
+            $items->each(function ($item) use ($latestByAttemptable) {
+                $item->latest_attempt_id = $latestByAttemptable->get($item->id)?->id;
+            });
+        }
+    }
+
+    // Client requirement: a video lesson's source must never be
+    // discoverable by a student, full stop -- not just unclickable in the
+    // UI. Inertia ships this whole Course (lessons included) as plain JSON
+    // in the page, readable via View Source with no DevTools needed, so
+    // CourseLearning.tsx not rendering external_url for video_youtube
+    // lessons was never enough on its own -- the raw link was still
+    // sitting right there in the payload. This strips it from every
+    // lesson except 'link' (an intentional external-resource lesson,
+    // where showing/opening the URL is the whole point) before the
+    // response is built, so there is nothing to find regardless of what
+    // the frontend does or doesn't render.
+    private function redactLessonSources(Course $course): void
+    {
+        $redact = function ($lesson): void {
+            if ($lesson->type !== 'link') {
+                $lesson->external_url = null;
+            }
+        };
+
+        $course->lessons->each($redact);
+        $course->sections->each(fn ($section) => $section->lessons->each($redact));
+    }
+
+    public function submitReview(Request $request, Course $course)
+    {
+        Enrollment::where('user_id', $request->user()->id)->where('course_id', $course->id)->active()->firstOrFail();
+
+        $data = $request->validate([
+            'rating' => 'required|integer|min:1|max:5',
+            'review_text' => 'nullable|string|max:2000',
+        ]);
+
+        // Editing an existing review sends it back to pending -- moderation
+        // applies to the current content, not just the first submission.
+        CourseReview::updateOrCreate(
+            ['course_id' => $course->id, 'user_id' => $request->user()->id],
+            ['rating' => $data['rating'], 'review_text' => $data['review_text'] ?? null, 'status' => 'pending'],
+        );
+
+        if (\App\Support\NotificationSettings::enabled('new_review')) {
+            \App\Models\User::notifyAdmins(
+                'New review submitted',
+                "{$request->user()->name} left a {$data['rating']}-star review on \"{$course->title}\".",
+                '/admin/reviews',
+            );
+        }
+
+        return back()->with('success', 'Thanks! Your review will appear once approved.');
+    }
+
+    public function markLessonComplete(Request $request, \App\Models\Lesson $lesson)
+    {
+        $enrolled = Enrollment::where('user_id', $request->user()->id)
+            ->where('course_id', $lesson->course_id)
+            ->active()
+            ->grantingModule('lectures')
+            ->exists();
+        abort_unless($enrolled, 403);
+
+        \App\Models\LessonProgress::updateOrCreate(
+            ['user_id' => $request->user()->id, 'lesson_id' => $lesson->id],
+            ['is_completed' => true, 'completed_at' => now()],
+        );
+
+        return back();
+    }
+
+    public function askQuestion(Request $request, Course $course)
+    {
+        $data = $request->validate([
+            'lesson_id' => 'nullable|exists:lessons,id',
+            'question_text' => 'required|string|max:2000',
+        ]);
+
+        \App\Models\CourseQuestion::create([
+            'course_id' => $course->id,
+            'user_id' => $request->user()->id,
+            'lesson_id' => $data['lesson_id'] ?? null,
+            'question_text' => $data['question_text'],
+        ]);
+
+        // "Lecture Q&A" (tied to a lesson) vs "Course Q&A" (general) are the
+        // same CourseQuestion table/page (see CourseQuestion's own comment)
+        // -- just two separate notification toggles for the same event.
+        $event = ($data['lesson_id'] ?? null) ? 'new_lecture_question' : 'course_qa_question';
+        if (\App\Support\NotificationSettings::enabled($event)) {
+            \App\Models\User::notifyAdmins(
+                'New question asked',
+                "{$request->user()->name} asked a question on \"{$course->title}\".",
+                '/admin/qa',
+            );
+        }
+
+        return back()->with('success', 'Your question has been sent.');
+    }
+}
