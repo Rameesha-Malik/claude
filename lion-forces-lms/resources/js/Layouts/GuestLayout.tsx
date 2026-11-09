@@ -1,6 +1,6 @@
 import { Link, usePage } from '@inertiajs/react';
 import { PropsWithChildren } from 'react';
-import ShieldMark from '@/Components/ShieldMark';
+import SiteLogo from '@/Components/SiteLogo';
 import { PageProps } from '@/types';
 import authParade from '@/assets/hero/auth-parade.jpg';
 
@@ -77,7 +77,7 @@ export default function Guest({ children, title, description }: PropsWithChildre
                 <div className="w-full px-6 py-10 sm:px-10 lg:px-12">
                     <div className="mx-auto max-w-sm">
                         <Link href="/" className="flex flex-col items-center gap-2 text-center">
-                            <ShieldMark className="h-10 w-10 text-primary" />
+                            <SiteLogo site={site} size="footer" />
                             <span className="text-xs font-bold uppercase tracking-[0.2em] text-primary">{site.name}</span>
                         </Link>
                         <h1 className="mt-4 text-center text-2xl font-bold text-text sm:text-3xl">{title}</h1>
