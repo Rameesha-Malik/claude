@@ -24,15 +24,31 @@ class CourseController extends Controller
         $isContentManager = $request->user()->hasRole('content_manager');
         $perPage = (int) ($request->per_page ?? 15);
 
+        // 'order' is the default (matches the drag-order the public site
+        // uses) -- 'title'/'date' are the two sortable columns the admin
+        // list header offers, each toggling asc/desc on repeat clicks.
+        $sort = in_array($request->sort, ['title', 'date'], true) ? $request->sort : 'order';
+        $direction = $request->direction === 'desc' ? 'desc' : 'asc';
+        $sortColumn = $sort === 'title' ? 'title' : ($sort === 'date' ? 'created_at' : 'order');
+
         $courses = Course::with(['category', 'instructor'])
-            ->withCount(['enrollments as enrollments_count' => fn ($q) => $q->where('status', 'active'), 'sections'])
+            ->withCount([
+                'enrollments as enrollments_count' => fn ($q) => $q->where('status', 'active'),
+                'sections', 'lessons', 'quizzes', 'assignments',
+            ])
+            // Cheapest currently-active package price, so the list can show
+            // a real "from Rs X" figure without loading every package --
+            // falls back to the course's own base_price (see courses
+            // migration) when it has no packages at all.
+            ->withMin(['packages as cheapest_package_price' => fn ($q) => $q->where('is_active', true)], 'price')
             // A content manager only ever sees the courses they're
             // assigned to -- everyone else (owner/staff) sees all of them.
             ->when($isContentManager, fn ($q) => $q->whereIn('id', $request->user()->managedCourses()->pluck('courses.id')))
             ->when($request->search, fn ($q, $s) => $q->where('title', 'like', "%{$s}%"))
             ->when($request->status === 'active', fn ($q) => $q->where('status', 'published'))
             ->when($request->status === 'inactive', fn ($q) => $q->whereIn('status', ['draft', 'hidden']))
-            ->orderBy('order')
+            ->when($request->category_id, fn ($q, $id) => $q->where('category_id', $id))
+            ->orderBy($sortColumn, $direction)
             ->paginate($perPage)
             ->withQueryString();
 
@@ -40,7 +56,8 @@ class CourseController extends Controller
 
         return Inertia::render('Admin/Courses/Index', [
             'courses' => $courses,
-            'filters' => $request->only(['search', 'status', 'per_page']),
+            'categories' => CourseCategory::orderBy('order')->get(['id', 'name']),
+            'filters' => $request->only(['search', 'status', 'per_page', 'category_id']) + ['sort' => $sort, 'direction' => $direction],
             'stats' => [
                 'total' => (clone $baseline)->count(),
                 'active' => (clone $baseline)->where('status', 'published')->count(),
@@ -49,17 +66,62 @@ class CourseController extends Controller
         ]);
     }
 
-    // Quick single-click Active <-> Inactive toggle from the course list --
-    // "draft" courses activate straight to "published" (there's no
-    // separate "reopen as draft" gesture here, just publish/unpublish).
-    public function toggleStatus(Request $request, Course $course)
+    // The course list's own status dropdown -- sets any of the three real
+    // states directly, unlike the old two-way toggle it replaces (which
+    // could only flip published <-> hidden and had no way to pick "draft"
+    // from the list at all).
+    public function updateStatus(Request $request, Course $course)
     {
         abort_unless($request->user()->canManageCourse($course), 403);
 
-        $course->update(['status' => $course->status === 'published' ? 'hidden' : 'published']);
-        ActivityLog::record('edited', 'Course', $course->id, 'Course "'.$course->title.'" was '.($course->status === 'published' ? 'activated' : 'deactivated').'.', $course->id);
+        $data = $request->validate(['status' => 'required|in:draft,published,hidden']);
+        $course->update($data);
+        ActivityLog::record('edited', 'Course', $course->id, 'Course "'.$course->title.'" status set to '.$data['status'].'.', $course->id);
 
-        return back()->with('success', $course->status === 'published' ? 'Course activated.' : 'Course deactivated.');
+        return back()->with('success', 'Status updated.');
+    }
+
+    // The course list's bulk-action bar (select rows, pick an action,
+    // Apply) -- same per-course rules as the single-course endpoints
+    // (content managers can't delete, a course with an active enrollment
+    // can't be deleted), just applied to a whole selection in one request
+    // instead of firing one network call per row.
+    public function bulkAction(Request $request)
+    {
+        $data = $request->validate([
+            'ids' => 'required|array|min:1',
+            'ids.*' => 'integer|exists:courses,id',
+            'action' => 'required|in:publish,draft,hidden,delete',
+        ]);
+
+        $isContentManager = $request->user()->hasRole('content_manager');
+        abort_if($isContentManager && $data['action'] === 'delete', 403);
+
+        $courses = Course::whereIn('id', $data['ids'])
+            ->when($isContentManager, fn ($q) => $q->whereIn('id', $request->user()->managedCourses()->pluck('courses.id')))
+            ->get();
+
+        if ($data['action'] === 'delete') {
+            $skipped = 0;
+            foreach ($courses as $course) {
+                if ($course->enrollments()->where('status', 'active')->exists()) {
+                    $skipped++;
+
+                    continue;
+                }
+                $course->delete();
+            }
+            $message = $skipped > 0
+                ? 'Removed '.($courses->count() - $skipped)." course(s). {$skipped} skipped -- still has active students enrolled."
+                : 'Removed '.$courses->count().' course(s).';
+
+            return back()->with($skipped > 0 ? 'error' : 'success', $message);
+        }
+
+        $status = $data['action'] === 'publish' ? 'published' : $data['action'];
+        $courses->each->update(['status' => $status]);
+
+        return back()->with('success', 'Updated '.$courses->count().' course(s).');
     }
 
     // Swaps this course's `order` with whichever course sits immediately
