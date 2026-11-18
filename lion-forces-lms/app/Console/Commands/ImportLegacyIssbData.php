@@ -110,21 +110,22 @@ class ImportLegacyIssbData extends Command
         $this->output->progressStart(count($users));
 
         foreach ($users as $u) {
-            $user = User::updateOrCreate(
-                ['email' => $u['email']],
-                [
-                    'name' => $u['name'],
-                    'phone' => $u['phone'],
-                    'user_type' => 'student',
-                    'is_active' => ! $u['is_blocked'],
-                    'email_verified_at' => $u['email_verified_at'],
-                ],
-            );
-            // Legacy hashes are bcrypt ($2y$...), same algorithm this app's
-            // 'hashed' cast expects -- Laravel detects an already-hashed
-            // value and stores it unchanged, so existing passwords keep
-            // working without a reset.
+            // firstOrNew + forceFill (one save) rather than updateOrCreate --
+            // `password` isn't in User's mass-assignable list, so passing it
+            // alongside the other fields would've been silently dropped
+            // from the INSERT, and the column has no DB-level default to
+            // fall back on.
+            $user = User::firstOrNew(['email' => $u['email']]);
             $user->forceFill([
+                'name' => $u['name'],
+                'phone' => $u['phone'],
+                'user_type' => 'student',
+                'is_active' => ! $u['is_blocked'],
+                'email_verified_at' => $u['email_verified_at'],
+                // Legacy hashes are bcrypt ($2y$...), same algorithm this
+                // app's 'hashed' cast expects -- Laravel detects an
+                // already-hashed value and stores it unchanged, so existing
+                // passwords keep working without a reset.
                 'password' => $u['password_hash'],
                 'created_at' => $u['created_at'],
                 'updated_at' => $u['updated_at'],
