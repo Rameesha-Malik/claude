@@ -242,6 +242,42 @@ class CourseController extends Controller
         return back()->with('success', 'Thanks! Your review will appear once approved.');
     }
 
+    // The actual lecture file never sits on the public disk (see
+    // Admin\CourseController::handleLessonFile() and
+    // ImportYoutubeLessonVideo) -- this is the only way a student ever
+    // reaches it, so access control lives here instead of relying on a
+    // static file URL simply not being guessable. response()->file()
+    // (not Storage::get()) specifically so large video files stream with
+    // proper Range support (seeking/scrubbing) instead of loading the
+    // whole file into memory per request.
+    public function lessonFile(Request $request, \App\Models\Lesson $lesson)
+    {
+        abort_unless($lesson->file_path, 404);
+
+        $allowed = $lesson->is_free_preview || Enrollment::where('user_id', $request->user()->id)
+            ->where('course_id', $lesson->course_id)
+            ->active()
+            ->grantingModule('lectures')
+            ->exists();
+        abort_unless($allowed, 403);
+
+        abort_unless(\Illuminate\Support\Facades\Storage::disk('local')->exists($lesson->file_path), 404);
+
+        $contentType = match ($lesson->type) {
+            'video_youtube', 'video_upload' => 'video/mp4',
+            'audio' => 'audio/mpeg',
+            'pdf' => 'application/pdf',
+            default => 'application/octet-stream',
+        };
+
+        return response()->file(\Illuminate\Support\Facades\Storage::disk('local')->path($lesson->file_path), [
+            'Content-Type' => $contentType,
+            'Content-Disposition' => $lesson->type === 'document' ? 'attachment' : 'inline',
+            'Cache-Control' => 'no-store, no-cache, must-revalidate, private',
+            'X-Frame-Options' => 'SAMEORIGIN',
+        ]);
+    }
+
     public function markLessonComplete(Request $request, \App\Models\Lesson $lesson)
     {
         $enrolled = Enrollment::where('user_id', $request->user()->id)

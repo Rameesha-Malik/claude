@@ -143,7 +143,10 @@ function LessonTypeIcon({ type }: { type: string }) {
 }
 
 function LessonPlayer({ lesson }: { lesson: Lesson }) {
-    const fileUrl = lesson.file_path ? `/storage/${lesson.file_path}` : null;
+    // Served through an authenticated, enrollment-checked route -- not a
+    // plain /storage/ URL, which would work for anyone who has the link
+    // regardless of whether they ever paid for the course.
+    const fileUrl = lesson.file_path ? `/portal/lessons/${lesson.id}/file` : null;
 
     switch (lesson.type) {
         // A lesson pasted as a YouTube link is imported server-side into

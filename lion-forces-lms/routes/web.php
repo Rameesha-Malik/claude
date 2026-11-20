@@ -128,6 +128,7 @@ Route::middleware(['auth', 'verified', 'user_type:student', 'check.active'])->pr
     Route::post('/bundles/{bundle:slug}/checkout', [StudentBundleCheckoutController::class, 'store'])->name('student.bundle-checkout.store');
     Route::get('/notes/{note}/purchase', [StudentNotePurchaseController::class, 'create'])->name('student.notes.purchase.create');
     Route::post('/notes/{note}/purchase', [StudentNotePurchaseController::class, 'store'])->name('student.notes.purchase.store');
+    Route::get('/lessons/{lesson}/file', [StudentCourseController::class, 'lessonFile'])->name('student.lessons.file');
     Route::post('/lessons/{lesson}/complete', [StudentCourseController::class, 'markLessonComplete'])->name('student.lessons.complete');
     Route::post('/courses/{course:slug}/questions', [StudentCourseController::class, 'askQuestion'])->name('student.questions.store');
     Route::post('/courses/{course:slug}/review', [StudentCourseController::class, 'submitReview'])->name('student.reviews.store');

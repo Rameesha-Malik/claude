@@ -455,7 +455,7 @@ class CourseController extends Controller
 
         if ($newPath = $this->handleLessonFile($request)) {
             if ($lesson->file_path) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete($lesson->file_path);
+                \Illuminate\Support\Facades\Storage::disk('local')->delete($lesson->file_path);
             }
             $data['file_path'] = $newPath;
         }
@@ -495,7 +495,7 @@ class CourseController extends Controller
         abort_unless($request->user()->canManageCourse($lesson->course), 403);
 
         if ($lesson->file_path) {
-            \Illuminate\Support\Facades\Storage::disk('public')->delete($lesson->file_path);
+            \Illuminate\Support\Facades\Storage::disk('local')->delete($lesson->file_path);
         }
         $lesson->delete();
 
@@ -566,8 +566,13 @@ class CourseController extends Controller
         ];
     }
 
+    // Stored on the 'local' (private) disk, not 'public' -- lesson content
+    // is often paid, and the public disk is a plain symlinked static
+    // folder with no access control at all. Students reach these files
+    // exclusively through Student\CourseController::lessonFile(), which
+    // checks enrollment before streaming anything.
     private function handleLessonFile(Request $request): ?string
     {
-        return $request->hasFile('file') ? $request->file('file')->store('lessons', 'public') : null;
+        return $request->hasFile('file') ? $request->file('file')->store('lessons', 'local') : null;
     }
 }

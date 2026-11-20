@@ -100,8 +100,14 @@ class ImportYoutubeLessonVideo implements ShouldQueue
             return;
         }
 
+        // 'local' (private) disk, not 'public' -- see
+        // Student\CourseController::lessonFile() for the authenticated
+        // route students actually stream this through. A plain public
+        // disk file would defeat the whole point of this job: hiding that
+        // the source was YouTube means nothing if the re-hosted copy is
+        // just as freely downloadable/shareable as the original link.
         $storedPath = 'lessons/'.basename($downloaded);
-        Storage::disk('public')->put($storedPath, File::get($downloaded));
+        Storage::disk('local')->put($storedPath, File::get($downloaded));
         File::delete($downloaded);
 
         $previousFile = $lesson->file_path;
@@ -116,7 +122,7 @@ class ImportYoutubeLessonVideo implements ShouldQueue
         // the lesson -- never leave a lesson with neither if something
         // between the two update() calls above had failed instead.
         if ($previousFile && $previousFile !== $storedPath) {
-            Storage::disk('public')->delete($previousFile);
+            Storage::disk('local')->delete($previousFile);
         }
     }
 
