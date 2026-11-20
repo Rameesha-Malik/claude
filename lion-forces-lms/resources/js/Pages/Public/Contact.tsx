@@ -39,7 +39,7 @@ function PinIcon({ className = 'h-5 w-5' }: { className?: string }) {
 // inside the immersive dark hero/content canvas, not a light card.
 function OrbitDecoration() {
     return (
-        <div aria-hidden className="relative mx-auto mt-10 hidden h-48 w-48 items-center justify-center lg:flex">
+        <div aria-hidden className="relative mx-auto mt-6 hidden h-32 w-32 items-center justify-center lg:flex">
             <style>{`
                 @keyframes orbit-spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
                 @keyframes orbit-spin-reverse { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
@@ -50,14 +50,14 @@ function OrbitDecoration() {
                 }
             `}</style>
             <span className="orbit-ring-outer absolute inset-0 rounded-full border border-dashed border-white/20">
-                <span className="absolute -top-1.5 left-1/2 h-3 w-3 -translate-x-1/2 rounded-full bg-gold-400 shadow-md" />
+                <span className="absolute -top-1 left-1/2 h-2.5 w-2.5 -translate-x-1/2 rounded-full bg-gold-400 shadow-md" />
             </span>
-            <span className="orbit-ring-inner absolute inset-8 rounded-full border border-dashed border-teal-300/40">
-                <span className="absolute -left-1.5 top-1/2 h-2.5 w-2.5 -translate-y-1/2 rounded-full bg-teal-300 shadow-md" />
+            <span className="orbit-ring-inner absolute inset-5 rounded-full border border-dashed border-teal-300/40">
+                <span className="absolute -left-1 top-1/2 h-2 w-2 -translate-y-1/2 rounded-full bg-teal-300 shadow-md" />
             </span>
-            <span className="absolute inset-16 rounded-full bg-white/10" />
-            <span className="relative flex h-14 w-14 items-center justify-center rounded-full bg-gold-400 text-secondary shadow-lg">
-                <MailIcon className="h-6 w-6" />
+            <span className="absolute inset-10 rounded-full bg-white/10" />
+            <span className="relative flex h-10 w-10 items-center justify-center rounded-full bg-gold-400 text-secondary shadow-lg">
+                <MailIcon className="h-5 w-5" />
             </span>
         </div>
     );
