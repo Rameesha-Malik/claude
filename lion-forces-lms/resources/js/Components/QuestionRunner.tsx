@@ -94,9 +94,9 @@ function FlagIcon({ className = 'h-5 w-5' }: { className?: string }) {
         </svg>
     );
 }
-function CircleIcon() {
+function CircleIcon({ className = 'h-5 w-5' }: { className?: string }) {
     return (
-        <svg className="h-5 w-5" fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
+        <svg className={className} fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
             <circle cx="12" cy="12" r="9" />
         </svg>
     );
@@ -377,14 +377,14 @@ export default function QuestionRunner({
     const statTiles: { label: string; value: string | number; icon: ReactNode; tone: Tone }[] = [
         ...(instantFeedback
             ? [
-                  { label: 'Correct', value: correctCount, icon: <CheckCircleIcon />, tone: 'success' as Tone },
-                  { label: 'Wrong', value: wrongCount, icon: <XCircleIcon />, tone: 'danger' as Tone },
+                  { label: 'Correct', value: correctCount, icon: <CheckCircleIcon className="h-4 w-4" />, tone: 'success' as Tone },
+                  { label: 'Wrong', value: wrongCount, icon: <XCircleIcon className="h-4 w-4" />, tone: 'danger' as Tone },
               ]
             : []),
-        { label: 'Answered', value: answeredCount, icon: <BadgeIcon />, tone: 'dark' },
-        { label: 'Skipped', value: skippedIndexes.length, icon: <FlagIcon />, tone: 'warning' },
-        { label: 'Not Visited', value: notVisitedCount, icon: <CircleIcon />, tone: 'light' },
-        { label: 'Progress', value: `${progressPercent}%`, icon: <BadgeIcon />, tone: 'dark' },
+        { label: 'Answered', value: answeredCount, icon: <BadgeIcon className="h-4 w-4" />, tone: 'dark' },
+        { label: 'Skipped', value: skippedIndexes.length, icon: <FlagIcon className="h-4 w-4" />, tone: 'warning' },
+        { label: 'Not Visited', value: notVisitedCount, icon: <CircleIcon className="h-4 w-4" />, tone: 'light' },
+        { label: 'Progress', value: `${progressPercent}%`, icon: <BadgeIcon className="h-4 w-4" />, tone: 'dark' },
     ];
 
     const currentFeedback = feedback[current.id];
@@ -485,7 +485,7 @@ export default function QuestionRunner({
     return (
         <div>
             {!compact && (
-                <div className="mb-4 rounded-[1.5rem] border border-border bg-surface p-4 shadow-sm">
+                <div className="mb-3 rounded-[1.5rem] border border-border bg-surface p-3 shadow-sm">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                         <div className="text-sm text-text-secondary">{headerExtra}</div>
                         <div className="flex flex-1 items-center gap-3">
@@ -500,7 +500,7 @@ export default function QuestionRunner({
 
             <div className={compact ? 'flex flex-col gap-4 lg:flex-row' : 'grid gap-4 lg:grid-cols-3'}>
                 {compactSidebar}
-                <div className={compact ? 'min-w-0 flex-1 space-y-3' : 'space-y-4 lg:col-span-2'}>
+                <div className={compact ? 'min-w-0 flex-1 space-y-3' : 'space-y-3 lg:col-span-2'}>
                     {!compact && (
                         <div className="rounded-[1.5rem] border border-border bg-surface p-4">
                             <div className="flex flex-wrap items-center gap-2">
@@ -552,7 +552,7 @@ export default function QuestionRunner({
                                 })}
                             </div>
 
-                            <div className="mt-3 flex flex-wrap gap-x-4 gap-y-1.5 border-t border-border pt-3 text-xs text-text-muted">
+                            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1.5 border-t border-border pt-2 text-xs text-text-muted">
                                 {LEGEND.map((l) => (
                                     <span key={l.label} className="inline-flex items-center gap-1.5">
                                         <span className={`h-2.5 w-2.5 rounded-full ${l.className}`} />
@@ -770,12 +770,12 @@ export default function QuestionRunner({
                     // question card next to it. Two columns always (never
                     // collapsing to one on large screens) keeps the same
                     // tiles in roughly half the vertical space.
-                    <div className="grid grid-cols-2 gap-3">
+                    <div className="grid grid-cols-2 gap-2">
                         {statTiles.map((t) => (
-                            <LiquidButton key={t.label} tone={t.tone} shape="tile" className="p-4">
+                            <LiquidButton key={t.label} tone={t.tone} shape="tile" className="p-2.5">
                                 {t.icon}
-                                <p className="mt-2 text-xl font-bold">{t.value}</p>
-                                <p className="text-xs font-bold uppercase tracking-wide opacity-80">{t.label}</p>
+                                <p className="mt-0.5 text-base font-bold leading-tight">{t.value}</p>
+                                <p className="text-[0.65rem] font-bold uppercase leading-tight tracking-wide opacity-80">{t.label}</p>
                             </LiquidButton>
                         ))}
                     </div>
