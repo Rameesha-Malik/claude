@@ -485,7 +485,7 @@ export default function QuestionRunner({
     return (
         <div>
             {!compact && (
-                <div className="mb-6 rounded-[1.5rem] border border-border bg-surface p-4 shadow-sm">
+                <div className="mb-4 rounded-[1.5rem] border border-border bg-surface p-4 shadow-sm">
                     <div className="flex flex-wrap items-center justify-between gap-3">
                         <div className="text-sm text-text-secondary">{headerExtra}</div>
                         <div className="flex flex-1 items-center gap-3">
@@ -498,11 +498,11 @@ export default function QuestionRunner({
                 </div>
             )}
 
-            <div className={compact ? 'flex flex-col gap-4 lg:flex-row' : 'grid gap-6 lg:grid-cols-3'}>
+            <div className={compact ? 'flex flex-col gap-4 lg:flex-row' : 'grid gap-4 lg:grid-cols-3'}>
                 {compactSidebar}
-                <div className={compact ? 'min-w-0 flex-1 space-y-3' : 'space-y-6 lg:col-span-2'}>
+                <div className={compact ? 'min-w-0 flex-1 space-y-3' : 'space-y-4 lg:col-span-2'}>
                     {!compact && (
-                        <div className="rounded-[1.5rem] border border-border bg-surface p-5">
+                        <div className="rounded-[1.5rem] border border-border bg-surface p-4">
                             <div className="flex flex-wrap items-center gap-2">
                                 <span className="rounded-full bg-primary-subtle px-3 py-1 text-xs font-bold text-primary">
                                     Q {currentIndex + 1}/{total}
@@ -511,19 +511,24 @@ export default function QuestionRunner({
                                 {perQuestionTimerNode}
                             </div>
 
-                            <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-surface-sunken">
+                            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-surface-sunken">
                                 <div
                                     className="h-full rounded-full bg-gradient-to-r from-secondary to-primary transition-all duration-normal"
                                     style={{ width: `${progressPercent}%` }}
                                 />
                             </div>
 
-                            <div className="mt-5 flex items-center justify-between">
+                            <div className="mt-3 flex items-center justify-between">
                                 <p className="text-xs font-bold uppercase tracking-wide text-text-muted">Question Navigator</p>
                                 <span className="text-xs text-text-muted">{total} Total</span>
                             </div>
 
-                            <div className="mt-2 flex flex-wrap gap-1.5">
+                            {/* Capped height + its own scrollbar -- for a long
+                                test (50+ questions) this grid would otherwise
+                                wrap into many rows and push the whole page
+                                into a scroll on its own, defeating the
+                                one-screen layout for every short test too. */}
+                            <div className="mt-2 flex max-h-28 flex-wrap gap-1.5 overflow-y-auto pr-1">
                                 {questions.map((q, i) => {
                                     const isCurrent = i === currentIndex;
                                     const isAnswered = answers[q.id] !== null && answers[q.id] !== undefined;
@@ -574,7 +579,7 @@ export default function QuestionRunner({
                         </div>
                     )}
 
-                    <div className={`rounded-[1.5rem] border border-border bg-surface ${compact ? 'p-4' : 'p-5'}`}>
+                    <div className="rounded-[1.5rem] border border-border bg-surface p-4">
                         <div className="mb-3 flex items-start justify-between gap-3">
                             <p className="font-semibold text-text">
                                 <span className="mr-2 text-text-muted">Q{currentIndex + 1}.</span>
@@ -759,7 +764,13 @@ export default function QuestionRunner({
                 </div>
 
                 {!compact && (
-                    <div className="grid grid-cols-2 gap-3 lg:grid-cols-1">
+                    // Client: this stat column was forcing the whole page to
+                    // scroll on a normal laptop screen -- stacking 5-6 tiles
+                    // one per row (lg:grid-cols-1) made it taller than the
+                    // question card next to it. Two columns always (never
+                    // collapsing to one on large screens) keeps the same
+                    // tiles in roughly half the vertical space.
+                    <div className="grid grid-cols-2 gap-3">
                         {statTiles.map((t) => (
                             <LiquidButton key={t.label} tone={t.tone} shape="tile" className="p-4">
                                 {t.icon}
