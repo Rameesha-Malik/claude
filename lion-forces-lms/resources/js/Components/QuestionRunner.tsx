@@ -1,7 +1,7 @@
 import { usePage } from '@inertiajs/react';
 import axios from 'axios';
 import { ReactNode, useEffect, useState } from 'react';
-import LiquidButton, { Tone } from '@/Components/LiquidButton';
+import LiquidButton from '@/Components/LiquidButton';
 import { LiteMarkdownInline } from '@/Components/LiteMarkdown';
 import { PageProps } from '@/types';
 
@@ -94,13 +94,6 @@ function FlagIcon({ className = 'h-5 w-5' }: { className?: string }) {
         </svg>
     );
 }
-function CircleIcon({ className = 'h-5 w-5' }: { className?: string }) {
-    return (
-        <svg className={className} fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
-            <circle cx="12" cy="12" r="9" />
-        </svg>
-    );
-}
 function BadgeIcon({ className = 'h-5 w-5' }: { className?: string }) {
     return (
         <svg className={className} fill="none" stroke="currentColor" strokeWidth={1.8} viewBox="0 0 24 24">
@@ -143,13 +136,6 @@ function formatSeconds(totalSeconds: number): string {
     const s = Math.floor(totalSeconds % 60).toString().padStart(2, '0');
     return `${m}:${s}`;
 }
-
-const LEGEND = [
-    { label: 'Current', className: 'bg-primary' },
-    { label: 'Answered', className: 'bg-success' },
-    { label: 'Skipped', className: 'bg-warning' },
-    { label: 'Not visited', className: 'bg-border' },
-];
 
 /**
  * One-question-at-a-time MCQ runner shared by every place in the app that
@@ -299,7 +285,6 @@ export default function QuestionRunner({
 
     const total = questions.length;
     const answeredCount = questions.reduce((n, q) => n + (answers[q.id] !== null && answers[q.id] !== undefined ? 1 : 0), 0);
-    const notVisitedCount = total - visited.size;
     const isLast = currentIndex === total - 1;
     const progressPercent = total > 0 ? Math.round((answeredCount / total) * 100) : 0;
 
@@ -374,19 +359,6 @@ export default function QuestionRunner({
         </span>
     );
 
-    const statTiles: { label: string; value: string | number; icon: ReactNode; tone: Tone }[] = [
-        ...(instantFeedback
-            ? [
-                  { label: 'Correct', value: correctCount, icon: <CheckCircleIcon className="h-4 w-4" />, tone: 'success' as Tone },
-                  { label: 'Wrong', value: wrongCount, icon: <XCircleIcon className="h-4 w-4" />, tone: 'danger' as Tone },
-              ]
-            : []),
-        { label: 'Answered', value: answeredCount, icon: <BadgeIcon className="h-4 w-4" />, tone: 'dark' },
-        { label: 'Skipped', value: skippedIndexes.length, icon: <FlagIcon className="h-4 w-4" />, tone: 'warning' },
-        { label: 'Not Visited', value: notVisitedCount, icon: <CircleIcon className="h-4 w-4" />, tone: 'light' },
-        { label: 'Progress', value: `${progressPercent}%`, icon: <BadgeIcon className="h-4 w-4" />, tone: 'dark' },
-    ];
-
     const currentFeedback = feedback[current.id];
     const currentFeedbackReady = currentFeedback && currentFeedback !== 'loading' ? currentFeedback : null;
     const selectedOptionId = answers[current.id];
@@ -401,7 +373,15 @@ export default function QuestionRunner({
     // layout actually has -- same information, no navigator grid or
     // skipped-list added back (still the one thing cut to kill the
     // scroll), just laid out side-by-side instead of stacked.
-    const compactSidebar = compact && (
+    // Client reference image: every test type (not just the demo quiz)
+    // should use this sidebar layout -- a fixed-width card next to the
+    // question instead of the old full-exam layout's separate "navigator
+    // card above the question" + "stacked stat-tile column" (which,
+    // together, were simply too tall to fit one screen no matter how much
+    // their individual padding got trimmed). This is now the only layout;
+    // `compact` only still adjusts a couple of minor option-row paddings
+    // below.
+    const sidebar = (
         <div className="order-first space-y-3 lg:order-last lg:w-64 lg:flex-shrink-0 lg:sticky lg:top-4 lg:self-start">
             <div className="rounded-[1.5rem] border border-border bg-surface p-4 shadow-sm">
                 {headerExtra && <div className="mb-2 text-sm text-text-secondary">{headerExtra}</div>}
@@ -484,101 +464,9 @@ export default function QuestionRunner({
 
     return (
         <div>
-            {!compact && (
-                <div className="mb-3 rounded-[1.5rem] border border-border bg-surface p-3 shadow-sm">
-                    <div className="flex flex-wrap items-center justify-between gap-3">
-                        <div className="text-sm text-text-secondary">{headerExtra}</div>
-                        <div className="flex flex-1 items-center gap-3">
-                            {timerNode}
-                            <span className="text-sm font-semibold text-text-secondary">
-                                Question <span className="font-bold text-text">{currentIndex + 1}</span> of {total}
-                            </span>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-            <div className={compact ? 'flex flex-col gap-4 lg:flex-row' : 'grid gap-4 lg:grid-cols-3'}>
-                {compactSidebar}
-                <div className={compact ? 'min-w-0 flex-1 space-y-3' : 'space-y-3 lg:col-span-2'}>
-                    {!compact && (
-                        <div className="rounded-[1.5rem] border border-border bg-surface p-4">
-                            <div className="flex flex-wrap items-center gap-2">
-                                <span className="rounded-full bg-primary-subtle px-3 py-1 text-xs font-bold text-primary">
-                                    Q {currentIndex + 1}/{total}
-                                </span>
-                                <span className="rounded-full bg-surface-sunken px-3 py-1 text-xs font-bold text-text-muted">ID: {current.id}</span>
-                                {perQuestionTimerNode}
-                            </div>
-
-                            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-surface-sunken">
-                                <div
-                                    className="h-full rounded-full bg-gradient-to-r from-secondary to-primary transition-all duration-normal"
-                                    style={{ width: `${progressPercent}%` }}
-                                />
-                            </div>
-
-                            <div className="mt-3 flex items-center justify-between">
-                                <p className="text-xs font-bold uppercase tracking-wide text-text-muted">Question Navigator</p>
-                                <span className="text-xs text-text-muted">{total} Total</span>
-                            </div>
-
-                            {/* Capped height + its own scrollbar -- for a long
-                                test (50+ questions) this grid would otherwise
-                                wrap into many rows and push the whole page
-                                into a scroll on its own, defeating the
-                                one-screen layout for every short test too. */}
-                            <div className="mt-2 flex max-h-28 flex-wrap gap-1.5 overflow-y-auto pr-1">
-                                {questions.map((q, i) => {
-                                    const isCurrent = i === currentIndex;
-                                    const isAnswered = answers[q.id] !== null && answers[q.id] !== undefined;
-                                    const isSkipped = !isAnswered && visited.has(i) && !isCurrent;
-                                    let classes = 'border-border bg-surface text-text-muted hover:border-primary';
-                                    if (isCurrent) classes = 'border-primary bg-primary text-on-primary shadow-sm';
-                                    else if (isAnswered) classes = 'border-success bg-success-bg text-success';
-                                    else if (isSkipped) classes = 'border-warning bg-warning-bg text-warning';
-                                    return (
-                                        <button
-                                            key={q.id}
-                                            type="button"
-                                            onClick={() => goTo(i)}
-                                            aria-current={isCurrent}
-                                            aria-label={`Go to question ${i + 1}`}
-                                            className={`flex h-8 w-8 flex-shrink-0 items-center justify-center rounded-[0.5rem] border text-xs font-bold transition-colors ${classes}`}
-                                        >
-                                            {i + 1}
-                                        </button>
-                                    );
-                                })}
-                            </div>
-
-                            <div className="mt-2 flex flex-wrap gap-x-4 gap-y-1.5 border-t border-border pt-2 text-xs text-text-muted">
-                                {LEGEND.map((l) => (
-                                    <span key={l.label} className="inline-flex items-center gap-1.5">
-                                        <span className={`h-2.5 w-2.5 rounded-full ${l.className}`} />
-                                        {l.label}
-                                    </span>
-                                ))}
-                            </div>
-
-                            {skippedIndexes.length > 0 && (
-                                <div className="mt-3 flex flex-wrap items-center gap-1.5 text-sm">
-                                    <span className="text-text-secondary">Skipped:</span>
-                                    {skippedIndexes.map((i) => (
-                                        <button
-                                            key={i}
-                                            type="button"
-                                            onClick={() => goTo(i)}
-                                            className="rounded-full border border-warning bg-warning-bg px-2.5 py-0.5 text-xs font-bold text-warning transition-transform hover:-translate-y-0.5"
-                                        >
-                                            Q{i + 1}
-                                        </button>
-                                    ))}
-                                </div>
-                            )}
-                        </div>
-                    )}
-
+            <div className="flex flex-col gap-4 lg:flex-row">
+                {sidebar}
+                <div className="min-w-0 flex-1 space-y-3">
                     <div className="rounded-[1.5rem] border border-border bg-surface p-4">
                         <div className="mb-3 flex items-start justify-between gap-3">
                             <p className="font-semibold text-text">
@@ -648,7 +536,7 @@ export default function QuestionRunner({
                         {current.image_path && (
                             <img src={`/storage/${current.image_path}`} alt="" className="mb-3 max-h-64 rounded-[0.75rem] border border-border" />
                         )}
-                        <div className={compact ? 'space-y-1.5' : 'space-y-2'}>
+                        <div className="space-y-1.5">
                             {current.options.map((opt) => {
                                 const isSelected = selectedOptionId === opt.id;
                                 const isRevealedCorrect = currentFeedbackReady !== null && opt.id === currentFeedbackReady.correctOptionId;
@@ -661,7 +549,7 @@ export default function QuestionRunner({
                                 return (
                                     <label
                                         key={opt.id}
-                                        className={`flex cursor-pointer items-center gap-3 rounded-[1.5rem] border text-sm transition-colors ${compact ? 'p-2.5' : 'p-3'} ${classes}`}
+                                        className={`flex cursor-pointer items-center gap-3 rounded-[1.5rem] border p-2.5 text-sm transition-colors ${classes}`}
                                     >
                                         <input
                                             type="radio"
@@ -707,7 +595,7 @@ export default function QuestionRunner({
                                     tone="light"
                                     onClick={() => goTo(currentIndex - 1)}
                                     disabled={currentIndex === 0}
-                                    className={`gap-1.5 px-5 text-sm uppercase tracking-wide ${compact ? 'py-2' : 'py-3'}`}
+                                    className={`gap-1.5 px-5 text-sm uppercase tracking-wide py-2`}
                                 >
                                     <BackIcon /> Previous
                                 </LiquidButton>
@@ -717,7 +605,7 @@ export default function QuestionRunner({
                                     type="button"
                                     tone="light"
                                     onClick={() => goTo(currentIndex + 1)}
-                                    className={`gap-1.5 px-5 text-sm uppercase tracking-wide ${compact ? 'py-2' : 'py-3'}`}
+                                    className={`gap-1.5 px-5 text-sm uppercase tracking-wide py-2`}
                                 >
                                     <SkipIcon /> Skip MCQ
                                 </LiquidButton>
@@ -729,7 +617,7 @@ export default function QuestionRunner({
                                 <LiquidButton
                                     type="button"
                                     onClick={() => goTo(currentIndex + 1)}
-                                    className={`gap-1.5 px-8 text-sm uppercase tracking-wide ${compact ? 'py-2' : 'py-3'}`}
+                                    className={`gap-1.5 px-8 text-sm uppercase tracking-wide py-2`}
                                 >
                                     Submit &amp; Next <ForwardIcon />
                                 </LiquidButton>
@@ -739,7 +627,7 @@ export default function QuestionRunner({
                                     type="button"
                                     onClick={onSubmit}
                                     disabled={submitting}
-                                    className={`px-8 text-sm uppercase tracking-wide ${compact ? 'py-2' : 'py-3'}`}
+                                    className={`px-8 text-sm uppercase tracking-wide py-2`}
                                 >
                                     {submitting ? 'Submitting…' : submitLabel}
                                 </LiquidButton>
@@ -762,24 +650,6 @@ export default function QuestionRunner({
                         </div>
                     )}
                 </div>
-
-                {!compact && (
-                    // Client: this stat column was forcing the whole page to
-                    // scroll on a normal laptop screen -- stacking 5-6 tiles
-                    // one per row (lg:grid-cols-1) made it taller than the
-                    // question card next to it. Two columns always (never
-                    // collapsing to one on large screens) keeps the same
-                    // tiles in roughly half the vertical space.
-                    <div className="grid grid-cols-2 gap-2">
-                        {statTiles.map((t) => (
-                            <LiquidButton key={t.label} tone={t.tone} shape="tile" className="p-2.5">
-                                {t.icon}
-                                <p className="mt-0.5 text-base font-bold leading-tight">{t.value}</p>
-                                <p className="text-[0.65rem] font-bold uppercase leading-tight tracking-wide opacity-80">{t.label}</p>
-                            </LiquidButton>
-                        ))}
-                    </div>
-                )}
             </div>
         </div>
     );
