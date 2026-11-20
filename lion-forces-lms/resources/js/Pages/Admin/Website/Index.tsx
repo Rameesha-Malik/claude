@@ -1,0 +1,729 @@
+import { Head, router, useForm } from '@inertiajs/react';
+import { ChangeEvent, FormEvent, useState } from 'react';
+import RichTextArea from '@/Components/RichTextArea';
+import AdminLayout from '@/Layouts/AdminLayout';
+
+interface Settings {
+    site_name: string; tagline: string | null; support_email: string | null;
+    office_location: string | null; office_hours: string | null;
+    whatsapp_number: string | null; whatsapp_enabled: boolean;
+    social_facebook: string | null; social_instagram: string | null; social_youtube: string | null;
+}
+interface Announcement { id?: number; message: string; link_url: string | null; is_active: boolean; expires_at: string | null }
+interface HomeSection { id: number; title: string; content: Record<string, any> }
+interface HeroSlide {
+    id: number;
+    branch_key: string;
+    branch: string;
+    title: string;
+    motto: string | null;
+    motto_translation: string | null;
+    description: string;
+    cta_href: string;
+    image_path: string | null;
+    crest_path: string | null;
+}
+interface StatsItem { id: number; icon: string | null; number: string; label: string }
+interface ServiceCard { id: number; icon: string | null; title: string; description: string | null }
+interface PaymentMethod { id: number; icon: string | null; name: string; description: string | null }
+interface Faq { id: number; page: string; question: string; answer: string; is_active: boolean }
+interface Testimonial { id: number; student_name: string; testimonial_text: string; rating: number | null; is_featured: boolean }
+interface Props {
+    settings: Settings;
+    logoPath: string | null;
+    announcement: Announcement | null;
+    ctaSection: HomeSection;
+    howToBuyHeroSection: HomeSection;
+    heroSlides: HeroSlide[];
+    statsItems: StatsItem[];
+    serviceCards: ServiceCard[];
+    paymentMethods: PaymentMethod[];
+    faqs: Faq[];
+    testimonials: Testimonial[];
+}
+
+const TABS = ['Settings', 'Home Page', 'Hero Slides', 'How to Buy', 'Stats', 'Services', 'FAQs', 'Testimonials'] as const;
+type Tab = (typeof TABS)[number];
+
+const inputClass = 'w-full rounded-lg border border-border px-3 py-2 text-sm focus:border-primary focus:shadow-glow focus:outline-none';
+const labelClass = 'mb-1 block text-sm font-medium text-text';
+const btnClass = 'rounded-lg bg-primary px-4 py-2 text-sm font-bold uppercase tracking-wide text-on-primary hover:bg-primary-hover disabled:opacity-50';
+const btnDangerClass = 'rounded-lg border border-danger px-3 py-1.5 text-xs font-bold uppercase text-danger hover:bg-danger-bg';
+
+export default function WebsiteIndex(props: Props) {
+    const [tab, setTab] = useState<Tab>('Settings');
+
+    return (
+        <AdminLayout header="Website Management">
+            <Head title="Website Management" />
+
+            <div className="mb-6 flex flex-wrap gap-2 border-b border-border">
+                {TABS.map((t) => (
+                    <button
+                        key={t}
+                        onClick={() => setTab(t)}
+                        className={`border-b-2 px-4 py-3 text-sm font-bold uppercase tracking-wide transition-colors ${
+                            tab === t ? 'border-primary text-primary' : 'border-transparent text-text-secondary hover:text-text'
+                        }`}
+                    >
+                        {t}
+                    </button>
+                ))}
+            </div>
+
+            {tab === 'Settings' && <SettingsPanel settings={props.settings} logoPath={props.logoPath} announcement={props.announcement} />}
+            {tab === 'Home Page' && <HomePagePanel cta={props.ctaSection} />}
+            {tab === 'Hero Slides' && <HeroSlidesPanel items={props.heroSlides} />}
+            {tab === 'How to Buy' && <HowToBuyPanel hero={props.howToBuyHeroSection} paymentMethods={props.paymentMethods} />}
+            {tab === 'Stats' && <StatsPanel items={props.statsItems} />}
+            {tab === 'Services' && <ServicesPanel items={props.serviceCards} />}
+            {tab === 'FAQs' && <FaqsPanel items={props.faqs} />}
+            {tab === 'Testimonials' && <TestimonialsPanel items={props.testimonials} />}
+        </AdminLayout>
+    );
+}
+
+// Was capped at max-w-3xl regardless of the page's actual width, which left
+// a large dead gap on anything wider than a laptop screen -- every panel on
+// this page used that same fixed cap. Panels now fill whatever column the
+// caller gives them (a 2-up grid for short panels, full width for long
+// forms and list-management panels), so the page uses the space it has.
+function Panel({ children, className = '' }: { children: React.ReactNode; className?: string }) {
+    return <div className={`rounded-2xl border border-border bg-surface p-6 ${className}`}>{children}</div>;
+}
+
+// A failed add/edit submission (validation error, network issue) must never
+// fail silently — this is what surfaces it under the form that submitted.
+function FormErrors({ errors }: { errors: Record<string, string> }) {
+    const messages = Object.values(errors);
+    if (messages.length === 0) return null;
+    return (
+        <div className="w-full text-sm text-danger">
+            {messages.map((msg, i) => <div key={i}>{msg}</div>)}
+        </div>
+    );
+}
+
+function LogoPanel({ logoPath }: { logoPath: string | null }) {
+    const [preview, setPreview] = useState<string | null>(null);
+    const form = useForm<{ logo: File | null }>({ logo: null });
+
+    function submit(e: FormEvent) {
+        e.preventDefault();
+        if (!form.data.logo) return;
+        form.post('/admin/website/logo', {
+            forceFormData: true,
+            onSuccess: () => {
+                form.setData('logo', null);
+                setPreview(null);
+            },
+        });
+    }
+
+    function pickFile(e: ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0] ?? null;
+        form.setData('logo', file);
+        setPreview(file ? URL.createObjectURL(file) : null);
+    }
+
+    return (
+        <Panel>
+            <h2 className="mb-1 font-bold text-text">Site Logo</h2>
+            <p className="mb-4 text-sm text-text-secondary">
+                Shown in the header and footer of the public site. Square or wide logos both work, it's scaled to fit each spot automatically.
+            </p>
+            <div className="mb-4 flex items-center gap-4">
+                <div className="flex h-20 w-20 flex-shrink-0 items-center justify-center rounded-2xl border border-dashed border-border bg-surface-sunken">
+                    {preview || logoPath ? (
+                        // eslint-disable-next-line jsx-a11y/alt-text
+                        <img src={preview ?? `/storage/${logoPath}`} className="h-full w-full rounded-2xl object-contain p-1" />
+                    ) : (
+                        <span className="text-xs text-text-muted">No logo</span>
+                    )}
+                </div>
+                <form onSubmit={submit} className="flex flex-wrap items-center gap-3">
+                    <input type="file" accept="image/*" onChange={pickFile} className="text-sm text-text-secondary" />
+                    <button type="submit" disabled={!form.data.logo || form.processing} className={btnClass}>
+                        {form.processing ? 'Uploading…' : 'Upload Logo'}
+                    </button>
+                    {logoPath && (
+                        <button
+                            type="button"
+                            onClick={() => confirm('Remove the current logo?') && router.delete('/admin/website/logo')}
+                            className={btnDangerClass}
+                        >
+                            Remove
+                        </button>
+                    )}
+                </form>
+            </div>
+            <FormErrors errors={form.errors as Record<string, string>} />
+        </Panel>
+    );
+}
+
+function SettingsPanel({ settings, logoPath, announcement }: { settings: Settings; logoPath: string | null; announcement: Announcement | null }) {
+    const settingsForm = useForm({ ...settings });
+    const announcementForm = useForm({
+        message: announcement?.message ?? '',
+        link_url: announcement?.link_url ?? '',
+        is_active: announcement?.is_active ?? false,
+        expires_at: announcement?.expires_at ?? '',
+    });
+
+    function submitSettings(e: FormEvent) {
+        e.preventDefault();
+        settingsForm.put('/admin/website/settings');
+    }
+
+    function submitAnnouncement(e: FormEvent) {
+        e.preventDefault();
+        announcementForm.put('/admin/website/announcement');
+    }
+
+    return (
+        <div className="grid gap-6 lg:grid-cols-2">
+            <LogoPanel logoPath={logoPath} />
+
+            <Panel>
+                <h2 className="mb-1 font-bold text-text">Announcement Bar</h2>
+                <p className="mb-4 text-sm text-text-secondary">Shown at the top of every public page when active.</p>
+                <form onSubmit={submitAnnouncement} className="space-y-4">
+                    <div>
+                        <label className={labelClass}>Message</label>
+                        <input className={inputClass} value={announcementForm.data.message} onChange={(e) => announcementForm.setData('message', e.target.value)} />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className={labelClass}>Link URL (optional)</label>
+                            <input className={inputClass} value={announcementForm.data.link_url ?? ''} onChange={(e) => announcementForm.setData('link_url', e.target.value)} />
+                        </div>
+                        <div>
+                            <label className={labelClass}>Expires At (optional)</label>
+                            <input type="date" className={inputClass} value={announcementForm.data.expires_at ?? ''} onChange={(e) => announcementForm.setData('expires_at', e.target.value)} />
+                        </div>
+                    </div>
+                    <label className="flex items-center gap-2 text-sm text-text">
+                        <input type="checkbox" checked={announcementForm.data.is_active} onChange={(e) => announcementForm.setData('is_active', e.target.checked)} />
+                        Show announcement bar
+                    </label>
+                    <button type="submit" disabled={announcementForm.processing} className={btnClass}>Save Announcement</button>
+                </form>
+            </Panel>
+
+            <Panel className="lg:col-span-2">
+                <h2 className="mb-4 font-bold text-text">Site Settings</h2>
+                <form onSubmit={submitSettings} className="space-y-4">
+                    <div>
+                        <label className={labelClass}>Site Name</label>
+                        <input className={inputClass} value={settingsForm.data.site_name} onChange={(e) => settingsForm.setData('site_name', e.target.value)} />
+                    </div>
+                    <div>
+                        <label className={labelClass}>Tagline</label>
+                        <input className={inputClass} value={settingsForm.data.tagline ?? ''} onChange={(e) => settingsForm.setData('tagline', e.target.value)} />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className={labelClass}>Support Email</label>
+                            <input className={inputClass} value={settingsForm.data.support_email ?? ''} onChange={(e) => settingsForm.setData('support_email', e.target.value)} />
+                        </div>
+                        <div>
+                            <label className={labelClass}>WhatsApp Number</label>
+                            <input className={inputClass} value={settingsForm.data.whatsapp_number ?? ''} onChange={(e) => settingsForm.setData('whatsapp_number', e.target.value)} />
+                        </div>
+                        <div>
+                            <label className={labelClass}>Office Location</label>
+                            <input className={inputClass} value={settingsForm.data.office_location ?? ''} onChange={(e) => settingsForm.setData('office_location', e.target.value)} />
+                        </div>
+                        <div>
+                            <label className={labelClass}>Office Hours</label>
+                            <input className={inputClass} value={settingsForm.data.office_hours ?? ''} onChange={(e) => settingsForm.setData('office_hours', e.target.value)} />
+                        </div>
+                    </div>
+                    <label className="flex items-center gap-2 text-sm text-text">
+                        <input type="checkbox" checked={settingsForm.data.whatsapp_enabled} onChange={(e) => settingsForm.setData('whatsapp_enabled', e.target.checked)} />
+                        Show WhatsApp floating button
+                    </label>
+
+                    <div>
+                        <h3 className="mb-2 mt-2 text-sm font-bold uppercase tracking-wide text-text-secondary">Social Media Links</h3>
+                        <div className="grid grid-cols-2 gap-4">
+                            <div>
+                                <label className={labelClass}>Facebook URL</label>
+                                <input
+                                    className={inputClass}
+                                    placeholder="https://facebook.com/..."
+                                    value={settingsForm.data.social_facebook ?? ''}
+                                    onChange={(e) => settingsForm.setData('social_facebook', e.target.value)}
+                                />
+                            </div>
+                            <div>
+                                <label className={labelClass}>Instagram URL</label>
+                                <input
+                                    className={inputClass}
+                                    placeholder="https://instagram.com/..."
+                                    value={settingsForm.data.social_instagram ?? ''}
+                                    onChange={(e) => settingsForm.setData('social_instagram', e.target.value)}
+                                />
+                            </div>
+                            <div>
+                                <label className={labelClass}>YouTube URL</label>
+                                <input
+                                    className={inputClass}
+                                    placeholder="https://youtube.com/@..."
+                                    value={settingsForm.data.social_youtube ?? ''}
+                                    onChange={(e) => settingsForm.setData('social_youtube', e.target.value)}
+                                />
+                            </div>
+                        </div>
+                        <p className="mt-1.5 text-xs text-text-muted">Leave blank to hide that icon from the site header/footer.</p>
+                    </div>
+
+                    <FormErrors errors={settingsForm.errors} />
+                    <button type="submit" disabled={settingsForm.processing} className={btnClass}>Save Settings</button>
+                </form>
+            </Panel>
+        </div>
+    );
+}
+
+function HomePagePanel({ cta }: { cta: HomeSection }) {
+    const ctaForm = useForm({ ...cta.content });
+
+    return (
+        <div className="grid gap-6 lg:grid-cols-2">
+            <Panel>
+                <h2 className="mb-4 font-bold text-text">CTA Footer Banner</h2>
+                <form
+                    onSubmit={(e) => { e.preventDefault(); router.put(`/admin/website/home-sections/${cta.id}`, { content: ctaForm.data }); }}
+                    className="space-y-4"
+                >
+                    <div>
+                        <label className={labelClass}>Heading</label>
+                        <input className={inputClass} value={ctaForm.data.heading ?? ''} onChange={(e) => ctaForm.setData('heading', e.target.value)} />
+                    </div>
+                    <div>
+                        <label className={labelClass}>Subheading</label>
+                        <input className={inputClass} value={ctaForm.data.subheading ?? ''} onChange={(e) => ctaForm.setData('subheading', e.target.value)} />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className={labelClass}>Button Text</label>
+                            <input className={inputClass} value={ctaForm.data.button_text ?? ''} onChange={(e) => ctaForm.setData('button_text', e.target.value)} />
+                        </div>
+                        <div>
+                            <label className={labelClass}>Button Link</label>
+                            <input className={inputClass} value={ctaForm.data.button_link ?? ''} onChange={(e) => ctaForm.setData('button_link', e.target.value)} />
+                        </div>
+                    </div>
+                    <button type="submit" disabled={ctaForm.processing} className={btnClass}>Save CTA Banner</button>
+                </form>
+            </Panel>
+        </div>
+    );
+}
+
+// One card per branch slide (Army/Navy/Air Force) on the homepage hero
+// slider. There's no add/delete here -- the three branches are fixed in
+// the frontend component, this only edits each one's content and photo.
+function HeroSlidesPanel({ items }: { items: HeroSlide[] }) {
+    return (
+        <div className="space-y-6">
+            <p className="text-sm text-text-secondary">
+                Content for the homepage hero slider. Each slide keeps its photo until you upload a new one or reset it back to the default.
+            </p>
+            {items.map((slide) => (
+                <HeroSlideCard key={slide.id} slide={slide} />
+            ))}
+        </div>
+    );
+}
+
+function HeroSlideCard({ slide }: { slide: HeroSlide }) {
+    const [preview, setPreview] = useState<string | null>(null);
+    const [crestPreview, setCrestPreview] = useState<string | null>(null);
+    const form = useForm<{
+        title: string; motto: string; motto_translation: string; description: string; cta_href: string; image: File | null; crest: File | null;
+    }>({
+        title: slide.title,
+        motto: slide.motto ?? '',
+        motto_translation: slide.motto_translation ?? '',
+        description: slide.description,
+        cta_href: slide.cta_href,
+        image: null,
+        crest: null,
+    });
+
+    function submit(e: FormEvent) {
+        e.preventDefault();
+        form.put(`/admin/website/hero-slides/${slide.id}`, {
+            onSuccess: () => {
+                form.setData('image', null);
+                form.setData('crest', null);
+                setPreview(null);
+                setCrestPreview(null);
+            },
+        });
+    }
+
+    function pickFile(e: ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0] ?? null;
+        form.setData('image', file);
+        setPreview(file ? URL.createObjectURL(file) : null);
+    }
+
+    function pickCrest(e: ChangeEvent<HTMLInputElement>) {
+        const file = e.target.files?.[0] ?? null;
+        form.setData('crest', file);
+        setCrestPreview(file ? URL.createObjectURL(file) : null);
+    }
+
+    return (
+        <Panel>
+            <h2 className="mb-4 font-bold text-text">{slide.branch}</h2>
+            <form onSubmit={submit} className="grid gap-4 lg:grid-cols-[160px_1fr]">
+                <div className="space-y-4">
+                    <div>
+                        <div className="mb-2 flex h-40 w-32 items-center justify-center overflow-hidden rounded-2xl border border-dashed border-border bg-surface-sunken">
+                            {preview || slide.image_path ? (
+                                // eslint-disable-next-line jsx-a11y/alt-text
+                                <img src={preview ?? `/storage/${slide.image_path}`} className="h-full w-full object-cover" />
+                            ) : (
+                                <span className="px-2 text-center text-xs text-text-muted">Default photo</span>
+                            )}
+                        </div>
+                        <label className="mb-1 block text-xs font-medium text-text-secondary">Photo</label>
+                        <input type="file" accept="image/*" onChange={pickFile} className="w-32 text-xs text-text-secondary" />
+                        {slide.image_path && !preview && (
+                            <button
+                                type="button"
+                                onClick={() => confirm('Reset to the default photo?') && router.delete(`/admin/website/hero-slides/${slide.id}/image`)}
+                                className={`${btnDangerClass} mt-2`}
+                            >
+                                Reset Photo
+                            </button>
+                        )}
+                    </div>
+
+                    <div>
+                        <div className="mb-2 flex h-16 w-16 items-center justify-center overflow-hidden rounded-full border border-dashed border-border bg-surface-sunken p-2">
+                            {crestPreview || slide.crest_path ? (
+                                // eslint-disable-next-line jsx-a11y/alt-text
+                                <img src={crestPreview ?? `/storage/${slide.crest_path}`} className="h-full w-full object-contain" />
+                            ) : (
+                                <span className="text-center text-[0.6rem] text-text-muted">Default crest</span>
+                            )}
+                        </div>
+                        <label className="mb-1 block text-xs font-medium text-text-secondary">Crest / Logo</label>
+                        <input type="file" accept="image/*" onChange={pickCrest} className="w-32 text-xs text-text-secondary" />
+                        {slide.crest_path && !crestPreview && (
+                            <button
+                                type="button"
+                                onClick={() => confirm('Reset to the default crest?') && router.delete(`/admin/website/hero-slides/${slide.id}/crest`)}
+                                className={`${btnDangerClass} mt-2`}
+                            >
+                                Reset Crest
+                            </button>
+                        )}
+                    </div>
+                </div>
+
+                <div className="space-y-4">
+                    <div>
+                        <label className={labelClass}>Title</label>
+                        <input className={inputClass} value={form.data.title} onChange={(e) => form.setData('title', e.target.value)} />
+                    </div>
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className={labelClass}>Motto (optional)</label>
+                            <input className={inputClass} value={form.data.motto} onChange={(e) => form.setData('motto', e.target.value)} />
+                        </div>
+                        <div>
+                            <label className={labelClass}>Motto Translation (optional)</label>
+                            <input className={inputClass} value={form.data.motto_translation} onChange={(e) => form.setData('motto_translation', e.target.value)} />
+                        </div>
+                    </div>
+                    <div>
+                        <label className={labelClass}>Description</label>
+                        <RichTextArea rows={2} className={inputClass} value={form.data.description} onChange={(v) => form.setData('description', v)} />
+                    </div>
+                    <div>
+                        <label className={labelClass}>Browse Courses Link</label>
+                        <input className={inputClass} value={form.data.cta_href} onChange={(e) => form.setData('cta_href', e.target.value)} />
+                    </div>
+                    <FormErrors errors={form.errors as Record<string, string>} />
+                    <button type="submit" disabled={form.processing} className={btnClass}>
+                        {form.processing ? 'Saving…' : 'Save Slide'}
+                    </button>
+                </div>
+            </form>
+        </Panel>
+    );
+}
+
+function HowToBuyPanel({ hero, paymentMethods }: { hero: HomeSection; paymentMethods: PaymentMethod[] }) {
+    const heroForm = useForm({ ...hero.content });
+    const addForm = useForm({ icon: '', name: '', description: '' });
+
+    return (
+        <div className="grid gap-6 lg:grid-cols-2">
+            <Panel>
+                <h2 className="mb-4 font-bold text-text">How to Buy: Hero</h2>
+                <form
+                    onSubmit={(e) => { e.preventDefault(); router.put(`/admin/website/home-sections/${hero.id}`, { content: heroForm.data }); }}
+                    className="space-y-4"
+                >
+                    <div>
+                        <label className={labelClass}>Headline</label>
+                        <input className={inputClass} value={heroForm.data.headline ?? ''} onChange={(e) => heroForm.setData('headline', e.target.value)} />
+                    </div>
+                    <div>
+                        <label className={labelClass}>Subheading</label>
+                        <RichTextArea rows={2} className={inputClass} value={heroForm.data.subheading ?? ''} onChange={(v) => heroForm.setData('subheading', v)} />
+                    </div>
+                    <button type="submit" disabled={heroForm.processing} className={btnClass}>Save Hero</button>
+                </form>
+            </Panel>
+
+            <Panel>
+                <h2 className="mb-4 font-bold text-text">Payment Methods</h2>
+                <div className="mb-6 space-y-2">
+                    {paymentMethods.map((item) => (
+                        <EditableRow key={item.id} onDelete={() => router.delete(`/admin/website/payment-methods/${item.id}`)}>
+                            <InlineEditFields
+                                initial={{ name: item.name, description: item.description ?? '', icon: item.icon ?? '' }}
+                                onSave={(data) => router.put(`/admin/website/payment-methods/${item.id}`, data)}
+                                fields={[{ key: 'name', placeholder: 'Name' }, { key: 'description', placeholder: 'Description' }]}
+                            />
+                        </EditableRow>
+                    ))}
+                </div>
+                <h3 className="mb-2 text-xs font-bold uppercase tracking-wide text-text-muted">Add New</h3>
+                <form
+                    onSubmit={(e) => { e.preventDefault(); addForm.post('/admin/website/payment-methods', { onSuccess: () => addForm.reset() }); }}
+                    className="flex flex-wrap gap-2"
+                >
+                    <input className={inputClass} placeholder="Name (e.g. Easypaisa)" value={addForm.data.name} onChange={(e) => addForm.setData('name', e.target.value)} />
+                    <input className={inputClass} placeholder="Description" value={addForm.data.description} onChange={(e) => addForm.setData('description', e.target.value)} />
+                    <button type="submit" disabled={addForm.processing} className={btnClass}>Add</button>
+                    <FormErrors errors={addForm.errors} />
+                </form>
+            </Panel>
+        </div>
+    );
+}
+
+function StatsPanel({ items }: { items: StatsItem[] }) {
+    const addForm = useForm({ icon: '', number: '', label: '' });
+
+    return (
+        <Panel>
+            <h2 className="mb-4 font-bold text-text">Stats Bar</h2>
+            <div className="mb-6 space-y-2">
+                {items.map((item) => (
+                    <EditableRow key={item.id} onDelete={() => router.delete(`/admin/website/stats/${item.id}`)}>
+                        <InlineEditFields
+                            initial={{ icon: item.icon ?? '', number: item.number, label: item.label }}
+                            onSave={(data) => router.put(`/admin/website/stats/${item.id}`, data)}
+                            fields={[{ key: 'number', placeholder: 'Number' }, { key: 'label', placeholder: 'Label' }, { key: 'icon', placeholder: 'Icon' }]}
+                        />
+                    </EditableRow>
+                ))}
+            </div>
+            <h3 className="mb-2 text-xs font-bold uppercase tracking-wide text-text-muted">Add New</h3>
+            <form
+                onSubmit={(e) => { e.preventDefault(); addForm.post('/admin/website/stats', { onSuccess: () => addForm.reset() }); }}
+                className="flex flex-wrap gap-2"
+            >
+                <input className={inputClass} placeholder="Number (e.g. 20+)" value={addForm.data.number} onChange={(e) => addForm.setData('number', e.target.value)} />
+                <input className={inputClass} placeholder="Label" value={addForm.data.label} onChange={(e) => addForm.setData('label', e.target.value)} />
+                <button type="submit" disabled={addForm.processing} className={btnClass}>Add</button>
+                <FormErrors errors={addForm.errors} />
+            </form>
+        </Panel>
+    );
+}
+
+function ServicesPanel({ items }: { items: ServiceCard[] }) {
+    const addForm = useForm({ icon: '', title: '', description: '' });
+
+    return (
+        <Panel>
+            <h2 className="mb-4 font-bold text-text">Services</h2>
+            <div className="mb-6 space-y-2">
+                {items.map((item) => (
+                    <EditableRow key={item.id} onDelete={() => router.delete(`/admin/website/services/${item.id}`)}>
+                        <InlineEditFields
+                            initial={{ title: item.title, description: item.description ?? '', icon: item.icon ?? '' }}
+                            onSave={(data) => router.put(`/admin/website/services/${item.id}`, data)}
+                            fields={[{ key: 'title', placeholder: 'Title' }, { key: 'description', placeholder: 'Description', richText: true }]}
+                        />
+                    </EditableRow>
+                ))}
+            </div>
+            <h3 className="mb-2 text-xs font-bold uppercase tracking-wide text-text-muted">Add New</h3>
+            <form
+                onSubmit={(e) => { e.preventDefault(); addForm.post('/admin/website/services', { onSuccess: () => addForm.reset() }); }}
+                className="flex flex-wrap gap-2"
+            >
+                <input className={inputClass} placeholder="Title" value={addForm.data.title} onChange={(e) => addForm.setData('title', e.target.value)} />
+                <div className="w-full">
+                    <RichTextArea rows={2} className={inputClass} placeholder="Description" value={addForm.data.description} onChange={(v) => addForm.setData('description', v)} />
+                </div>
+                <button type="submit" disabled={addForm.processing} className={btnClass}>Add</button>
+                <FormErrors errors={addForm.errors} />
+            </form>
+        </Panel>
+    );
+}
+
+function FaqsPanel({ items }: { items: Faq[] }) {
+    const addForm = useForm({ page: 'home', question: '', answer: '' });
+    const grouped = items.reduce<Record<string, Faq[]>>((acc, f) => {
+        (acc[f.page] ??= []).push(f);
+        return acc;
+    }, {});
+
+    return (
+        <Panel>
+            <h2 className="mb-4 font-bold text-text">FAQs</h2>
+            {Object.entries(grouped).map(([page, faqs]) => (
+                <div key={page} className="mb-6">
+                    <h3 className="mb-2 text-xs font-bold uppercase tracking-wide text-text-muted">{page.replace('_', ' ')}</h3>
+                    <div className="space-y-2">
+                        {faqs.map((faq) => (
+                            <EditableRow
+                                key={faq.id}
+                                onDelete={() => router.delete(`/admin/website/faqs/${faq.id}`)}
+                                extraAction={
+                                    <button
+                                        onClick={() => router.put(`/admin/website/faqs/${faq.id}`, { page: faq.page, question: faq.question, answer: faq.answer, is_active: !faq.is_active }, { preserveScroll: true })}
+                                        className="whitespace-nowrap text-xs font-bold uppercase text-primary hover:underline"
+                                    >
+                                        {faq.is_active ? 'Hide' : 'Show'}
+                                    </button>
+                                }
+                            >
+                                <InlineEditFields
+                                    initial={{ page: faq.page, question: faq.question, answer: faq.answer }}
+                                    onSave={(data) => router.put(`/admin/website/faqs/${faq.id}`, data)}
+                                    fields={[{ key: 'question', placeholder: 'Question' }, { key: 'answer', placeholder: 'Answer', richText: true }]}
+                                />
+                                {!faq.is_active && <p className="mt-1 text-xs text-text-muted">Hidden from the public site.</p>}
+                            </EditableRow>
+                        ))}
+                    </div>
+                </div>
+            ))}
+            <h3 className="mb-2 text-xs font-bold uppercase tracking-wide text-text-muted">Add New</h3>
+            <form
+                onSubmit={(e) => { e.preventDefault(); addForm.post('/admin/website/faqs', { onSuccess: () => addForm.reset() }); }}
+                className="flex flex-wrap gap-2"
+            >
+                <select className={inputClass} style={{ width: 140 }} value={addForm.data.page} onChange={(e) => addForm.setData('page', e.target.value)}>
+                    {['home', 'contact', 'how_to_buy'].map((p) => <option key={p} value={p}>{p}</option>)}
+                </select>
+                <input className={inputClass} placeholder="Question" value={addForm.data.question} onChange={(e) => addForm.setData('question', e.target.value)} />
+                <div className="w-full">
+                    <RichTextArea rows={2} className={inputClass} placeholder="Answer" value={addForm.data.answer} onChange={(v) => addForm.setData('answer', v)} />
+                </div>
+                <button type="submit" disabled={addForm.processing} className={btnClass}>Add</button>
+                <FormErrors errors={addForm.errors} />
+            </form>
+        </Panel>
+    );
+}
+
+function TestimonialsPanel({ items }: { items: Testimonial[] }) {
+    const addForm = useForm({ student_name: '', testimonial_text: '', rating: 5 });
+
+    return (
+        <Panel>
+            <h2 className="mb-1 font-bold text-text">Testimonials</h2>
+            <p className="mb-4 text-sm text-text-secondary">Admin-created real stories only; no student self-submission.</p>
+            <div className="mb-6 space-y-2">
+                {items.map((item) => (
+                    <EditableRow key={item.id} onDelete={() => router.delete(`/admin/website/testimonials/${item.id}`)}>
+                        <InlineEditFields
+                            initial={{ student_name: item.student_name, testimonial_text: item.testimonial_text }}
+                            onSave={(data) => router.put(`/admin/website/testimonials/${item.id}`, data)}
+                            fields={[{ key: 'student_name', placeholder: 'Student Name' }, { key: 'testimonial_text', placeholder: 'Testimonial', richText: true }]}
+                        />
+                    </EditableRow>
+                ))}
+            </div>
+            <h3 className="mb-2 text-xs font-bold uppercase tracking-wide text-text-muted">Add New</h3>
+            <form
+                onSubmit={(e) => { e.preventDefault(); addForm.post('/admin/website/testimonials', { onSuccess: () => addForm.reset() }); }}
+                className="flex flex-wrap gap-2"
+            >
+                <input className={inputClass} placeholder="Student Name" value={addForm.data.student_name} onChange={(e) => addForm.setData('student_name', e.target.value)} />
+                <div className="w-full">
+                    <RichTextArea rows={2} className={inputClass} placeholder="Testimonial" value={addForm.data.testimonial_text} onChange={(v) => addForm.setData('testimonial_text', v)} />
+                </div>
+                <button type="submit" disabled={addForm.processing} className={btnClass}>Add</button>
+                <FormErrors errors={addForm.errors} />
+            </form>
+        </Panel>
+    );
+}
+
+function EditableRow({ children, onDelete, extraAction }: { children: React.ReactNode; onDelete: () => void; extraAction?: React.ReactNode }) {
+    return (
+        <div className="flex items-center gap-2 rounded-lg border border-border p-2">
+            <div className="flex-1">{children}</div>
+            {extraAction}
+            <button onClick={onDelete} className={btnDangerClass}>Delete</button>
+        </div>
+    );
+}
+
+// `richText` fields (FAQ answers, testimonial text -- real prose shown on
+// the live site) get the same RichTextArea toolbar every other content
+// field in the app has; they're wrapped `w-full` so the toolbar+textarea
+// block drops to its own line instead of squeezing into this row's
+// otherwise-compact fixed-width inputs.
+function InlineEditFields({
+    initial,
+    fields,
+    onSave,
+}: {
+    initial: Record<string, string>;
+    fields: { key: string; placeholder: string; richText?: boolean }[];
+    onSave: (data: Record<string, string>) => void;
+}) {
+    const [data, setData] = useState(initial);
+    const [dirty, setDirty] = useState(false);
+
+    return (
+        <div className="flex flex-wrap items-center gap-2">
+            {fields.map((f) =>
+                f.richText ? (
+                    <div key={f.key} className="w-full">
+                        <RichTextArea
+                            rows={2}
+                            className={inputClass}
+                            placeholder={f.placeholder}
+                            value={data[f.key] ?? ''}
+                            onChange={(v) => { setData({ ...data, [f.key]: v }); setDirty(true); }}
+                        />
+                    </div>
+                ) : (
+                    <input
+                        key={f.key}
+                        className={inputClass}
+                        style={{ maxWidth: 220 }}
+                        placeholder={f.placeholder}
+                        value={data[f.key] ?? ''}
+                        onChange={(e) => { setData({ ...data, [f.key]: e.target.value }); setDirty(true); }}
+                    />
+                ),
+            )}
+            {dirty && (
+                <button onClick={() => { onSave(data); setDirty(false); }} className="text-xs font-bold uppercase text-primary hover:underline">
+                    Save
+                </button>
+            )}
+        </div>
+    );
+}

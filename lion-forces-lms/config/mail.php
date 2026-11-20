@@ -115,4 +115,26 @@ return [
         'name' => env('MAIL_FROM_NAME', env('APP_NAME', 'Laravel')),
     ],
 
+    /*
+    |--------------------------------------------------------------------------
+    | Markdown Mail Settings
+    |--------------------------------------------------------------------------
+    |
+    | Points every markdown-based mail (notifications using MailMessage,
+    | including Laravel's own password-reset email) at our branded
+    | resources/views/vendor/mail templates instead of the framework's
+    | generic black-and-white defaults. Only header.blade.php, footer.
+    | blade.php, and themes/default.css are overridden there -- everything
+    | else (layout, button, panel, table) falls through to the framework's
+    | own views automatically, since both paths are searched in order.
+    |
+    */
+
+    'markdown' => [
+        'theme' => 'default',
+        'paths' => [
+            resource_path('views/vendor/mail'),
+        ],
+    ],
+
 ];

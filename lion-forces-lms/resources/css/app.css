@@ -1,9 +1,41 @@
-@import 'tailwindcss';
+@import './tokens.css';
 
-@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
-@source '../../storage/framework/views/*.php';
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
-@theme {
-    --font-sans: 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
-        'Segoe UI Symbol', 'Noto Color Emoji';
+@layer base {
+  body {
+    background-color: var(--color-canvas);
+    color: var(--color-text);
+    font-family: var(--font-sans);
+  }
 }
+
+/* Blocks the "Ctrl+P -> Save as PDF" bypass on the protected note viewer --
+   canvas content would otherwise print/save fine, so just hide it. */
+@media print {
+  .protected-pdf-viewer {
+    display: none !important;
+  }
+}
+
+/* Thin, rounded, low-contrast scrollbars everywhere instead of each
+   browser's bulky default -- applied globally so every scrollable table,
+   panel and nav gets it automatically, with one override for the dark
+   admin sidebar (a stock light-gray thumb looks wrong on a dark teal
+   background, so it needs a pale thumb instead). */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-border-strong) transparent;
+}
+*::-webkit-scrollbar { width: 6px; height: 6px; }
+*::-webkit-scrollbar-track { background: transparent; }
+*::-webkit-scrollbar-thumb { background-color: var(--color-border-strong); border-radius: 999px; }
+*::-webkit-scrollbar-thumb:hover { background-color: var(--color-text-muted); }
+
+.scrollbar-thin-dark {
+  scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+}
+.scrollbar-thin-dark::-webkit-scrollbar-thumb { background-color: rgba(255, 255, 255, 0.2); }
+.scrollbar-thin-dark::-webkit-scrollbar-thumb:hover { background-color: rgba(255, 255, 255, 0.35); }

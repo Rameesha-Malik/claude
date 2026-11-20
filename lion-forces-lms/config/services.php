@@ -35,4 +35,14 @@ return [
         ],
     ],
 
+    // Used by ImportYoutubeLessonVideo to download a pasted YouTube link
+    // into a self-hosted file server-side (see that job's own comment for
+    // why). Defaults assume both are on PATH; override with an absolute
+    // path if the server only has them installed somewhere specific (e.g.
+    // a portable binary placed outside PATH on shared hosting).
+    'youtube_import' => [
+        'yt_dlp_binary' => env('YT_DLP_BINARY', 'yt-dlp'),
+        'ffmpeg_binary' => env('FFMPEG_BINARY', 'ffmpeg'),
+    ],
+
 ];
